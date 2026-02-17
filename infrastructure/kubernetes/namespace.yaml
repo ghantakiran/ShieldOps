@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: shieldops
+  labels:
+    app: shieldops
+    managed-by: shieldops

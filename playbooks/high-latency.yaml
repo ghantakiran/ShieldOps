@@ -1,0 +1,86 @@
+# ShieldOps Remediation Playbook: High Latency
+# Triggered when: Service P99 latency exceeds threshold
+
+name: high-latency
+version: "1.0"
+description: "Investigate and remediate high latency in services"
+trigger:
+  alert_type: "HighLatency"
+  severity: ["critical", "warning"]
+  threshold: "P99 > 2x baseline for 5 minutes"
+
+investigation:
+  steps:
+    - name: identify_slow_endpoints
+      action: query_metrics
+      queries:
+        - "histogram_quantile(0.99, rate(http_request_duration_seconds_bucket{service='{service}'}[5m]))"
+      group_by: ["endpoint", "method"]
+
+    - name: check_upstream_dependencies
+      action: query_traces
+      query: "traces for service {service} with duration > {threshold}"
+      extract:
+        - slowest_span_service
+        - slowest_span_operation
+        - error_spans
+
+    - name: check_resource_saturation
+      action: query_metrics
+      queries:
+        - "cpu_utilization{service='{service}'}"
+        - "memory_utilization{service='{service}'}"
+        - "connection_pool_usage{service='{service}'}"
+        - "thread_pool_active{service='{service}'}"
+
+    - name: check_database_performance
+      action: query_metrics
+      queries:
+        - "db_query_duration_seconds{service='{service}'}"
+        - "db_connection_pool_active{service='{service}'}"
+        - "db_slow_queries{service='{service}'}"
+
+    - name: check_external_dependencies
+      action: query_health
+      targets:
+        - "third-party API response times"
+        - "cache hit rates"
+        - "CDN performance"
+
+remediation:
+  decision_tree:
+    - condition: "cpu_utilization > 85%"
+      action: scale_horizontal
+      risk_level: medium
+      params:
+        replicas_increase: 2
+        max_replicas: 20
+
+    - condition: "connection_pool_exhausted"
+      action: increase_connection_pool
+      risk_level: medium
+      params:
+        increase_factor: 1.5
+
+    - condition: "database_slow_queries"
+      action: notify_and_suggest
+      risk_level: low
+      params:
+        suggestion: "Database query optimization needed"
+        notify_channel: "#backend-team"
+
+    - condition: "recent_deployment_correlated"
+      action: rollback_deployment
+      risk_level: high
+
+validation:
+  checks:
+    - name: latency_improved
+      query: "P99 latency for {service}"
+      expected: "< 1.5x baseline"
+      timeout_seconds: 300
+
+    - name: error_rate_stable
+      query: "error_rate for {service}"
+      expected: "< 1%"
+      timeout_seconds: 300

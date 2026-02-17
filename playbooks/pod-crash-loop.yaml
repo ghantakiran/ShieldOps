@@ -1,0 +1,91 @@
+# ShieldOps Remediation Playbook: Pod CrashLoopBackOff
+# Triggered when: Kubernetes pod enters CrashLoopBackOff state
+
+name: pod-crash-loop
+version: "1.0"
+description: "Investigate and remediate pods in CrashLoopBackOff state"
+trigger:
+  alert_type: "KubePodCrashLooping"
+  severity: ["critical", "warning"]
+
+investigation:
+  steps:
+    - name: check_pod_status
+      action: query_k8s
+      query: "kubectl get pod {pod_name} -n {namespace} -o yaml"
+      extract:
+        - restart_count
+        - last_termination_reason
+        - last_termination_exit_code
+
+    - name: check_pod_logs
+      action: query_logs
+      query: "kubectl logs {pod_name} -n {namespace} --previous --tail=100"
+      patterns:
+        - "OOMKilled"
+        - "Error"
+        - "Fatal"
+        - "Connection refused"
+        - "timeout"
+
+    - name: check_recent_deployments
+      action: query_k8s
+      query: "kubectl rollout history deployment/{deployment_name} -n {namespace}"
+      time_range: "1h"
+
+    - name: check_resource_usage
+      action: query_metrics
+      queries:
+        - "container_memory_usage_bytes{pod='{pod_name}'}"
+        - "container_cpu_usage_seconds_total{pod='{pod_name}'}"
+
+    - name: check_dependencies
+      action: query_health
+      targets:
+        - "database connectivity"
+        - "upstream service health"
+        - "config map / secret availability"
+
+remediation:
+  decision_tree:
+    - condition: "last_termination_reason == 'OOMKilled'"
+      action: increase_memory_limit
+      risk_level: medium
+      params:
+        increase_factor: 1.5
+        max_memory: "4Gi"
+
+    - condition: "recent_deployment_within_1h"
+      action: rollback_deployment
+      risk_level: high
+      params:
+        revision: "previous"
+
+    - condition: "dependency_unhealthy"
+      action: restart_pod_with_backoff
+      risk_level: low
+      params:
+        max_restarts: 3
+        backoff_seconds: 30
+
+    - condition: "default"
+      action: restart_pod
+      risk_level: low
+      params:
+        grace_period: 30
+
+validation:
+  checks:
+    - name: pod_running
+      query: "kubectl get pod {pod_name} -n {namespace} -o jsonpath='{.status.phase}'"
+      expected: "Running"
+      timeout_seconds: 120
+
+    - name: no_recent_restarts
+      query: "restart_count after remediation"
+      expected: "0 new restarts in 5 minutes"
+      timeout_seconds: 300
+
+  on_failure:
+    action: rollback_and_escalate
+    escalation_channel: "#sre-oncall"

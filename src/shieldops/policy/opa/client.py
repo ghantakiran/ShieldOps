@@ -1,0 +1,133 @@
+"""OPA policy evaluation client."""
+
+from typing import Any
+
+import httpx
+import structlog
+
+from shieldops.config import settings
+from shieldops.models.base import Environment, RemediationAction, RiskLevel
+
+logger = structlog.get_logger()
+
+
+class PolicyDecision:
+    """Result of a policy evaluation."""
+
+    def __init__(self, allowed: bool, reasons: list[str] | None = None) -> None:
+        self.allowed = allowed
+        self.reasons = reasons or []
+
+    @property
+    def denied(self) -> bool:
+        return not self.allowed
+
+
+class PolicyEngine:
+    """Evaluates agent actions against OPA policies before execution.
+
+    Every agent action must pass through this engine. No exceptions.
+    """
+
+    def __init__(self, opa_url: str | None = None) -> None:
+        self._opa_url = opa_url or settings.opa_endpoint
+        self._client = httpx.AsyncClient(timeout=5.0)
+
+    async def evaluate(
+        self,
+        action: RemediationAction,
+        agent_id: str,
+        context: dict[str, Any] | None = None,
+    ) -> PolicyDecision:
+        """Evaluate an action against OPA policies.
+
+        Args:
+            action: The remediation action to evaluate.
+            agent_id: ID of the agent requesting the action.
+            context: Additional context (time of day, recent actions, etc.).
+
+        Returns:
+            PolicyDecision indicating whether the action is allowed.
+        """
+        input_data = {
+            "action": action.action_type,
+            "target_resource": action.target_resource,
+            "environment": action.environment.value,
+            "risk_level": action.risk_level.value,
+            "parameters": action.parameters,
+            "agent_id": agent_id,
+            "context": context or {},
+        }
+
+        try:
+            response = await self._client.post(
+                f"{self._opa_url}/v1/data/shieldops/allow",
+                json={"input": input_data},
+            )
+            response.raise_for_status()
+            result = response.json()
+
+            allowed = result.get("result", False)
+            reasons = result.get("reasons", [])
+
+            logger.info(
+                "policy_evaluation",
+                action=action.action_type,
+                target=action.target_resource,
+                environment=action.environment.value,
+                allowed=allowed,
+                reasons=reasons,
+            )
+
+            return PolicyDecision(allowed=allowed, reasons=reasons)
+
+        except httpx.HTTPError as e:
+            logger.error("policy_evaluation_failed", error=str(e))
+            # Fail closed: if we can't evaluate policy, deny the action
+            return PolicyDecision(
+                allowed=False,
+                reasons=[f"Policy evaluation failed: {e}. Defaulting to deny."],
+            )
+
+    def classify_risk(
+        self,
+        action_type: str,
+        environment: Environment,
+    ) -> RiskLevel:
+        """Classify the risk level of an action in a given environment.
+
+        Default risk classification (overridable via OPA policies):
+        - Dev environments: most actions are low risk
+        - Staging: medium risk
+        - Production: high/critical risk for destructive operations
+        """
+        destructive_actions = {
+            "drain_node",
+            "delete_namespace",
+            "modify_network_policy",
+            "modify_iam_policy",
+        }
+        high_impact_actions = {
+            "rollback_deployment",
+            "rotate_credentials",
+            "scale_down",
+        }
+
+        if action_type in destructive_actions:
+            return RiskLevel.CRITICAL
+
+        if environment == Environment.PRODUCTION:
+            if action_type in high_impact_actions:
+                return RiskLevel.HIGH
+            return RiskLevel.MEDIUM
+
+        if environment == Environment.STAGING:
+            if action_type in high_impact_actions:
+                return RiskLevel.MEDIUM
+            return RiskLevel.LOW
+
+        return RiskLevel.LOW
+
+    async def close(self) -> None:
+        """Close the HTTP client."""
+        await self._client.aclose()

@@ -1,0 +1,114 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shieldops-api
+  namespace: shieldops
+  labels:
+    app: shieldops
+    component: api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: shieldops
+      component: api
+  template:
+    metadata:
+      labels:
+        app: shieldops
+        component: api
+    spec:
+      serviceAccountName: shieldops-agent
+      containers:
+        - name: api
+          image: shieldops/api:latest
+          ports:
+            - containerPort: 8000
+              protocol: TCP
+          envFrom:
+            - secretRef:
+                name: shieldops-secrets
+            - configMapRef:
+                name: shieldops-config
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          securityContext:
+            runAsNonRoot: true
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: shieldops-api
+  namespace: shieldops
+spec:
+  selector:
+    app: shieldops
+    component: api
+  ports:
+    - port: 80
+      targetPort: 8000
+      protocol: TCP
+  type: ClusterIP
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: shieldops-agent
+  namespace: shieldops
+  annotations:
+    description: "Service account for ShieldOps agents with RBAC permissions"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: shieldops-agent
+rules:
+  # Read access to most resources (investigation)
+  - apiGroups: [""]
+    resources: ["pods", "services", "events", "configmaps", "nodes"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["deployments", "replicasets", "statefulsets", "daemonsets"]
+    verbs: ["get", "list", "watch"]
+  # Write access for remediation (controlled by OPA policies)
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["delete"]  # For pod restarts
+  - apiGroups: ["apps"]
+    resources: ["deployments/scale"]
+    verbs: ["patch"]  # For horizontal scaling
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["patch"]  # For rollbacks
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: shieldops-agent
+subjects:
+  - kind: ServiceAccount
+    name: shieldops-agent
+    namespace: shieldops
+roleRef:
+  kind: ClusterRole
+  name: shieldops-agent
+  apiGroup: rbac.authorization.k8s.io
