@@ -1,11 +1,17 @@
 """Human-in-the-loop approval workflow for high-risk agent actions."""
 
+from __future__ import annotations
+
 import asyncio
 from datetime import datetime, timezone
+from typing import TYPE_CHECKING
 
 import structlog
 
 from shieldops.models.base import ApprovalStatus, RemediationAction, RiskLevel
+
+if TYPE_CHECKING:
+    from shieldops.policy.approval.notifier import ApprovalNotifier
 
 logger = structlog.get_logger()
 
@@ -51,9 +57,13 @@ class ApprovalWorkflow:
         self,
         timeout_seconds: int = 300,
         escalation_timeout_seconds: int = 600,
+        escalation_targets: list[str] | None = None,
+        notifier: ApprovalNotifier | None = None,
     ) -> None:
         self._timeout = timeout_seconds
         self._escalation_timeout = escalation_timeout_seconds
+        self._escalation_targets = escalation_targets or []
+        self._notifier = notifier
         self._pending: dict[str, ApprovalRequest] = {}
 
     def requires_approval(self, risk_level: RiskLevel) -> bool:
@@ -82,23 +92,69 @@ class ApprovalWorkflow:
             required_approvals=request.required_approvals,
         )
 
-        # TODO: Send Slack/Teams notification with approve/deny buttons
+        # Notify via Slack if notifier is configured
+        if self._notifier:
+            await self._notifier.send_request(request)
 
-        # Wait for response with timeout
+        # Wait for primary response with timeout
         try:
             result = await asyncio.wait_for(
                 self._wait_for_decision(request),
                 timeout=self._timeout,
             )
+            if self._notifier:
+                await self._notifier.send_resolution(request, result)
             return result
         except asyncio.TimeoutError:
             logger.warning(
-                "approval_timeout",
+                "approval_primary_timeout",
                 request_id=request.request_id,
             )
-            request.status = ApprovalStatus.TIMEOUT
-            # TODO: Escalate to next responder
-            return ApprovalStatus.ESCALATED
+
+        # Primary timed out — try escalation chain
+        if self._escalation_targets:
+            result = await self._run_escalation_chain(request)
+            if self._notifier:
+                await self._notifier.send_resolution(request, result)
+            return result
+
+        # No escalation targets — mark as escalated
+        request.status = ApprovalStatus.ESCALATED
+        if self._notifier:
+            await self._notifier.send_resolution(request, ApprovalStatus.ESCALATED)
+        return ApprovalStatus.ESCALATED
+
+    async def _run_escalation_chain(
+        self, request: ApprovalRequest
+    ) -> ApprovalStatus:
+        """Walk the escalation chain, notifying each target in sequence."""
+        for target in self._escalation_targets:
+            logger.info(
+                "approval_escalating",
+                request_id=request.request_id,
+                target=target,
+            )
+
+            if self._notifier:
+                await self._notifier.send_escalation(request, target)
+
+            try:
+                result = await asyncio.wait_for(
+                    self._wait_for_decision(request),
+                    timeout=self._escalation_timeout,
+                )
+                return result
+            except asyncio.TimeoutError:
+                logger.warning(
+                    "approval_escalation_timeout",
+                    request_id=request.request_id,
+                    target=target,
+                )
+                continue
+
+        # All escalation targets exhausted
+        request.status = ApprovalStatus.ESCALATED
+        return ApprovalStatus.ESCALATED
 
     async def _wait_for_decision(self, request: ApprovalRequest) -> ApprovalStatus:
         """Poll for approval decision."""

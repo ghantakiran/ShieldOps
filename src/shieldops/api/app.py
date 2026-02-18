@@ -144,10 +144,6 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     cost_runner = CostRunner(connector_router=router)
     cost.set_runner(cost_runner)
 
-    # Learning runner — stores left empty until DB layer is wired
-    learn_runner = LearningRunner()
-    learning.set_runner(learn_runner)
-
     # ── Playbook loader ─────────────────────────────────────────
     playbook_loader = None
     try:
@@ -158,6 +154,13 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         logger.info("playbooks_loaded", count=len(playbook_loader.all()))
     except Exception as e:
         logger.warning("playbook_load_failed", error=str(e))
+
+    # Learning runner — wired to DB + playbook stores
+    learn_runner = LearningRunner(
+        repository=repository,
+        playbook_loader=playbook_loader,
+    )
+    learning.set_runner(learn_runner)
 
     # Supervisor — orchestrates all specialist agents
     sup_runner = SupervisorRunner(agent_runners={
