@@ -1,6 +1,7 @@
 """Tests for Alembic migrations — verify revision chain and upgrade/downgrade."""
 
 import pytest
+
 from alembic.config import Config
 from alembic.script import ScriptDirectory
 

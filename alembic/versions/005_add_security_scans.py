@@ -37,12 +37,8 @@ def upgrade() -> None:
         sa.Column("reasoning_chain", sa.dialects.postgresql.JSONB, server_default="[]"),
         sa.Column("error", sa.Text, nullable=True),
         sa.Column("duration_ms", sa.Integer, server_default="0"),
-        sa.Column(
-            "created_at", sa.DateTime(timezone=True), server_default=sa.func.now()
-        ),
-        sa.Column(
-            "updated_at", sa.DateTime(timezone=True), server_default=sa.func.now()
-        ),
+        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now()),
+        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.func.now()),
     )
     op.create_index(
         "ix_security_scans_env_created",
