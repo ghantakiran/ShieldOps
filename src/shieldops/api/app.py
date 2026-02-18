@@ -7,7 +7,7 @@ import structlog
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from shieldops.api.routes import agents, analytics, investigations, remediations, security
+from shieldops.api.routes import agents, analytics, cost, investigations, remediations, security
 from shieldops.config import settings
 
 logger = structlog.get_logger()
@@ -53,6 +53,7 @@ def create_app() -> FastAPI:
     )
     app.include_router(analytics.router, prefix=settings.api_prefix, tags=["Analytics"])
     app.include_router(security.router, prefix=settings.api_prefix, tags=["Security"])
+    app.include_router(cost.router, prefix=settings.api_prefix, tags=["Cost"])
 
     @app.get("/health")
     async def health_check() -> dict[str, str]:
