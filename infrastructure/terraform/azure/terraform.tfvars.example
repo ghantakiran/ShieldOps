@@ -1,0 +1,31 @@
+# =============================================================================
+# ShieldOps — Terraform Variable Values (Example)
+# Copy this file to terraform.tfvars and fill in your values.
+# NEVER commit terraform.tfvars — it may contain sensitive values.
+# =============================================================================
+
+# -- General ------------------------------------------------------------------
+azure_location = "eastus"
+environment    = "production"   # production | staging | development
+project_name   = "shieldops"
+
+# -- Container Apps / Application ---------------------------------------------
+app_cpu          = 1.0          # Fractional CPU cores (0.25, 0.5, 1.0, 2.0)
+app_memory       = "2Gi"        # Memory (0.5Gi, 1Gi, 2Gi, 4Gi)
+app_min_replicas = 2            # Minimum number of replicas
+app_max_replicas = 10           # Maximum number of replicas
+container_image  = "shieldopsproductionacr.azurecr.io/shieldops:latest"
+
+# -- PostgreSQL Flexible Server -----------------------------------------------
+db_sku_name   = "GP_Standard_D2s_v3"
+db_storage_mb = 51200           # 50 GB in MB
+
+# -- Azure Cache for Redis ----------------------------------------------------
+redis_sku_name = "Standard"
+redis_capacity = 1              # C1 (1 GB)
+
+# -- TLS / Domain (optional) -------------------------------------------------
+domain_name = ""                # e.g. "api.shieldops.io"
+
+# -- Monitoring (optional) ---------------------------------------------------
+alarm_email = ""                # e.g. "ops@shieldops.io"

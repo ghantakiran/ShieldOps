@@ -116,3 +116,29 @@ variable "secrets_arn" {
   description = "ARN of the existing Secrets Manager secret containing application secrets (ANTHROPIC_API_KEY, JWT_SECRET, etc.)"
   type        = string
 }
+
+# ---------------------------------------------------------------------------
+# Monitoring
+# ---------------------------------------------------------------------------
+
+variable "alarm_email" {
+  description = "Email address for CloudWatch alarm notifications (leave empty to skip)"
+  type        = string
+  default     = ""
+}
+
+# ---------------------------------------------------------------------------
+# Auto-Scaling
+# ---------------------------------------------------------------------------
+
+variable "autoscaling_min_capacity" {
+  description = "Minimum number of ECS tasks for auto-scaling"
+  type        = number
+  default     = 2
+}
+
+variable "autoscaling_max_capacity" {
+  description = "Maximum number of ECS tasks for auto-scaling"
+  type        = number
+  default     = 10
+}

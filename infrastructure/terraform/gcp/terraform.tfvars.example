@@ -1,0 +1,31 @@
+# =============================================================================
+# ShieldOps — Terraform Variable Values (Example)
+# Copy this file to terraform.tfvars and fill in your values.
+# NEVER commit terraform.tfvars — it may contain sensitive project IDs.
+# =============================================================================
+
+# -- General ------------------------------------------------------------------
+gcp_project  = "my-shieldops-project"       # Your GCP project ID
+gcp_region   = "us-central1"
+environment  = "production"                  # production | staging | development
+project_name = "shieldops"
+
+# -- Cloud Run / Application -------------------------------------------------
+app_cpu           = "1000m"                  # CPU in millicores (1000m = 1 vCPU)
+app_memory        = "1Gi"                    # Memory allocation
+app_min_instances = 2                        # Minimum Cloud Run instances
+app_max_instances = 10                       # Maximum Cloud Run instances
+container_image   = "us-central1-docker.pkg.dev/my-shieldops-project/shieldops-production/shieldops:latest"
+
+# -- Cloud SQL (PostgreSQL) --------------------------------------------------
+db_tier      = "db-custom-2-7680"            # 2 vCPU, 7.5 GB RAM
+db_disk_size = 50                            # GB
+
+# -- Memorystore (Redis) -----------------------------------------------------
+redis_memory_size_gb = 1                     # GB
+
+# -- TLS / Domain (optional) -------------------------------------------------
+domain_name = ""                             # e.g. "api.shieldops.io"
+
+# -- Monitoring (optional) ---------------------------------------------------
+alarm_email = ""                             # e.g. "sre-team@shieldops.io"

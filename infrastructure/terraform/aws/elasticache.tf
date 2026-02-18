@@ -24,11 +24,11 @@ resource "aws_elasticache_replication_group" "main" {
   replication_group_id = "${var.project_name}-${var.environment}-redis"
   description          = "ShieldOps Redis cluster for caching and real-time coordination"
 
-  engine               = "redis"
-  engine_version       = "7.1"
-  node_type            = var.redis_node_type
-  num_cache_clusters   = 2
-  port                 = 6379
+  engine             = "redis"
+  engine_version     = "7.1"
+  node_type          = var.redis_node_type
+  num_cache_clusters = 2
+  port               = 6379
 
   multi_az_enabled           = true
   automatic_failover_enabled = true
