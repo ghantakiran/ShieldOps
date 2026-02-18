@@ -67,7 +67,8 @@ dev = [
     "faker>=33.0.0",
 ]
 dashboard = [
-    # Dashboard dependencies managed via package.json in src/shieldops/dashboard/
+    "streamlit>=1.41.0",
+    "plotly>=5.24.0",
 ]
 
 [project.scripts]
