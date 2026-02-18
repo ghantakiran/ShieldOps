@@ -92,5 +92,8 @@ class TestLearningRunnerWiring:
 
             app = create_app()
             async with app.router.lifespan_context(app):
-                mock_learn_cls.assert_called_once_with()
+                mock_learn_cls.assert_called_once()
+                call_kwargs = mock_learn_cls.call_args[1]
+                assert "repository" in call_kwargs
+                assert "playbook_loader" in call_kwargs
                 assert learning._runner is mock_learn_cls.return_value
