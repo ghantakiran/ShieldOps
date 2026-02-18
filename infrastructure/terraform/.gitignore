@@ -1,0 +1,26 @@
+# Provider plugins and caches
+.terraform/
+.terraform.lock.hcl
+
+# State files
+*.tfstate
+*.tfstate.backup
+*.tfstate.*.backup
+
+# Variable files (may contain secrets)
+*.tfvars
+!*.tfvars.example
+
+# Crash logs
+crash.log
+crash.*.log
+
+# Plan files
+*.tfplan
+out.plan
+
+# Override files
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
