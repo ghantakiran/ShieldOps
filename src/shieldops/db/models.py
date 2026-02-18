@@ -1,0 +1,117 @@
+"""SQLAlchemy 2.x ORM models for ShieldOps persistence."""
+
+from datetime import datetime, timezone
+from uuid import uuid4
+
+from sqlalchemy import DateTime, Index, String, Text, func
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+
+
+class Base(DeclarativeBase):
+    """Base class for all ORM models."""
+    pass
+
+
+class InvestigationRecord(Base):
+    """Persisted investigation result."""
+
+    __tablename__ = "investigations"
+
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    alert_id: Mapped[str] = mapped_column(String(128), index=True)
+    alert_name: Mapped[str] = mapped_column(String(256), default="")
+    severity: Mapped[str] = mapped_column(String(32), default="warning")
+    status: Mapped[str] = mapped_column(String(32), default="init", index=True)
+    confidence: Mapped[float] = mapped_column(default=0.0)
+    hypotheses: Mapped[dict] = mapped_column(JSONB, default=list)
+    reasoning_chain: Mapped[dict] = mapped_column(JSONB, default=list)
+    alert_context: Mapped[dict] = mapped_column(JSONB, default=dict)
+    log_findings: Mapped[dict] = mapped_column(JSONB, default=list)
+    metric_anomalies: Mapped[dict] = mapped_column(JSONB, default=list)
+    recommended_action: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    duration_ms: Mapped[int] = mapped_column(default=0)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+
+class RemediationRecord(Base):
+    """Persisted remediation result."""
+
+    __tablename__ = "remediations"
+
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    action_type: Mapped[str] = mapped_column(String(128), index=True)
+    target_resource: Mapped[str] = mapped_column(String(256))
+    environment: Mapped[str] = mapped_column(String(32), index=True)
+    risk_level: Mapped[str] = mapped_column(String(32))
+    status: Mapped[str] = mapped_column(String(32), default="init", index=True)
+    validation_passed: Mapped[bool | None] = mapped_column(nullable=True)
+    reasoning_chain: Mapped[dict] = mapped_column(JSONB, default=list)
+    action_data: Mapped[dict] = mapped_column(JSONB, default=dict)
+    execution_result: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    snapshot_data: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    investigation_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    duration_ms: Mapped[int] = mapped_column(default=0)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+
+class AuditLog(Base):
+    """Immutable audit trail — append-only, never UPDATE."""
+
+    __tablename__ = "audit_log"
+
+    id: Mapped[str] = mapped_column(
+        String(64), primary_key=True, default=lambda: f"aud-{uuid4().hex[:12]}"
+    )
+    timestamp: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), index=True
+    )
+    agent_type: Mapped[str] = mapped_column(String(64))
+    action: Mapped[str] = mapped_column(String(128), index=True)
+    target_resource: Mapped[str] = mapped_column(String(256))
+    environment: Mapped[str] = mapped_column(String(32), index=True)
+    risk_level: Mapped[str] = mapped_column(String(32))
+    policy_evaluation: Mapped[str] = mapped_column(String(32))
+    approval_status: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    outcome: Mapped[str] = mapped_column(String(32))
+    reasoning: Mapped[str] = mapped_column(Text, default="")
+    actor: Mapped[str] = mapped_column(String(128))
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+
+    __table_args__ = (
+        Index("ix_audit_log_env_ts", "environment", "timestamp"),
+    )
+
+
+class AgentSession(Base):
+    """Tracks agent execution sessions for observability."""
+
+    __tablename__ = "agent_sessions"
+
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    agent_type: Mapped[str] = mapped_column(String(64), index=True)
+    event_type: Mapped[str] = mapped_column(String(64))
+    status: Mapped[str] = mapped_column(String(32), default="started", index=True)
+    input_data: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    result_data: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    duration_ms: Mapped[int] = mapped_column(default=0)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )

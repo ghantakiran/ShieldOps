@@ -4,7 +4,10 @@ Provides REST endpoints for triggering, tracking, and managing
 investigation agent workflows.
 """
 
+from __future__ import annotations
+
 from datetime import datetime, timezone
+from typing import TYPE_CHECKING
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException
 from pydantic import BaseModel, Field
@@ -12,10 +15,14 @@ from pydantic import BaseModel, Field
 from shieldops.agents.investigation.runner import InvestigationRunner
 from shieldops.models.base import AlertContext
 
+if TYPE_CHECKING:
+    from shieldops.db.repository import Repository
+
 router = APIRouter()
 
 # Application-level runner instance (initialized on first use or at startup)
 _runner: InvestigationRunner | None = None
+_repository: Repository | None = None
 
 
 def get_runner() -> InvestigationRunner:
@@ -30,6 +37,12 @@ def set_runner(runner: InvestigationRunner) -> None:
     """Override the runner instance (used for testing and dependency injection)."""
     global _runner
     _runner = runner
+
+
+def set_repository(repo: Repository | None) -> None:
+    """Set the persistence repository for read queries."""
+    global _repository
+    _repository = repo
 
 
 # --- Request/Response models ---
@@ -130,19 +143,31 @@ async def list_investigations(
     limit: int = 50,
     offset: int = 0,
 ) -> dict:
-    """List active and recent investigations."""
+    """List active and recent investigations.
+
+    Queries from PostgreSQL when available, falls back to in-memory.
+    """
+    if _repository:
+        items = await _repository.list_investigations(
+            status=status, limit=limit, offset=offset
+        )
+        total = await _repository.count_investigations(status=status)
+        return {
+            "investigations": items,
+            "total": total,
+            "limit": limit,
+            "offset": offset,
+        }
+
+    # Fallback to in-memory
     runner = get_runner()
     all_investigations = runner.list_investigations()
-
-    # Filter by status if provided
     if status:
         all_investigations = [
             inv for inv in all_investigations if inv["status"] == status
         ]
-
     total = len(all_investigations)
     paginated = all_investigations[offset : offset + limit]
-
     return {
         "investigations": paginated,
         "total": total,
@@ -154,6 +179,11 @@ async def list_investigations(
 @router.get("/investigations/{investigation_id}")
 async def get_investigation(investigation_id: str) -> dict:
     """Get full investigation detail including reasoning chain and evidence."""
+    if _repository:
+        result = await _repository.get_investigation(investigation_id)
+        if result is not None:
+            return result
+
     runner = get_runner()
     result = runner.get_investigation(investigation_id)
     if result is None:

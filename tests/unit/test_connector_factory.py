@@ -82,12 +82,12 @@ class TestLifespanConnectorWiring:
                 mock_router_factory.assert_called_once()
 
                 # Runner was constructed with connector_router + sources
-                mock_runner_cls.assert_called_once_with(
-                    connector_router=mock_router,
-                    log_sources=mock_sources.log_sources,
-                    metric_sources=mock_sources.metric_sources,
-                    trace_sources=mock_sources.trace_sources,
-                )
+                mock_runner_cls.assert_called_once()
+                call_kwargs = mock_runner_cls.call_args.kwargs
+                assert call_kwargs["connector_router"] is mock_router
+                assert call_kwargs["log_sources"] is mock_sources.log_sources
+                assert call_kwargs["metric_sources"] is mock_sources.metric_sources
+                assert call_kwargs["trace_sources"] is mock_sources.trace_sources
 
                 # Runner was injected via set_runner
                 assert investigations._runner is mock_runner_cls.return_value

@@ -71,6 +71,17 @@ class Settings(BaseSettings):
     slack_signing_secret: str = ""
     slack_approval_channel: str = "#shieldops-approvals"
 
+    # AWS
+    aws_region: str = ""
+    aws_access_key_id: str = ""
+    aws_secret_access_key: str = ""
+    cloudwatch_log_group: str = ""
+
+    # Linux SSH
+    linux_host: str = ""
+    linux_username: str = ""
+    linux_private_key_path: str = ""
+
     # Security
     jwt_secret_key: str = "change-me-in-production"
     jwt_algorithm: str = "HS256"

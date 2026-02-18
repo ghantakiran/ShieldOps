@@ -1,0 +1,63 @@
+# ShieldOps Remediation Playbook: Node Disk Pressure
+# Triggered when: Kubernetes node reports DiskPressure condition
+
+name: disk-pressure
+version: "1.0"
+description: "Remediate Kubernetes nodes under disk pressure"
+trigger:
+  alert_type: "KubeNodeDiskPressure"
+  severity: ["critical", "warning"]
+
+investigation:
+  steps:
+    - name: check_node_conditions
+      action: query_k8s
+      query: "kubectl describe node {node_name}"
+      extract:
+        - disk_pressure_condition
+        - allocatable_ephemeral_storage
+        - capacity_ephemeral_storage
+
+    - name: check_disk_usage
+      action: query_metrics
+      queries:
+        - "node_filesystem_avail_bytes{instance='{node_name}'}"
+        - "node_filesystem_size_bytes{instance='{node_name}'}"
+        - "kubelet_volume_stats_used_bytes{node='{node_name}'}"
+
+    - name: identify_large_pods
+      action: query_k8s
+      query: "kubectl top pods --all-namespaces --sort-by=storage"
+
+remediation:
+  decision_tree:
+    - condition: "ephemeral_storage_full"
+      action: cordon_and_drain
+      risk_level: high
+      params:
+        drain_non_critical: true
+        delete_local_data: true
+
+    - condition: "log_volume_full"
+      action: clean_old_logs
+      risk_level: low
+      params:
+        retention_days: 3
+
+    - condition: "default"
+      action: cordon_and_drain
+      risk_level: high
+      params:
+        drain_non_critical: true
+
+validation:
+  checks:
+    - name: disk_pressure_cleared
+      action: query_k8s
+      query: "kubectl get node {node_name} -o jsonpath='{.status.conditions[?(@.type==\"DiskPressure\")].status}'"
+      expected: "False"
+      timeout_seconds: 300
+
+  on_failure:
+    action: escalate
+    escalation_channel: "#infra-oncall"

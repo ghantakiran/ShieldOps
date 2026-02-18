@@ -1,0 +1,85 @@
+# ShieldOps Remediation Playbook: Service Unavailable
+# Triggered when: A service becomes unreachable or unresponsive
+
+name: service-unavailable
+version: "1.0"
+description: "Investigate and remediate service unavailability across K8s and Linux"
+trigger:
+  alert_type: "ServiceDown"
+  severity: ["critical", "warning"]
+
+investigation:
+  steps:
+    - name: check_service_status
+      action: query_health
+      targets:
+        - "service endpoint health"
+        - "service process status"
+
+    - name: check_dependencies
+      action: query_health
+      targets:
+        - "database connectivity"
+        - "upstream service health"
+        - "DNS resolution"
+
+    - name: check_recent_logs
+      action: query_logs
+      query: "service={service_name} level=error"
+      patterns:
+        - "Connection refused"
+        - "timeout"
+        - "ECONNREFUSED"
+        - "bind: address already in use"
+      time_range: "15m"
+
+    - name: check_resource_usage
+      action: query_metrics
+      queries:
+        - "process_cpu_seconds_total{service='{service_name}'}"
+        - "process_resident_memory_bytes{service='{service_name}'}"
+
+remediation:
+  decision_tree:
+    - condition: "process_not_running"
+      action: restart_service
+      risk_level: low
+      params:
+        grace_period: 10
+
+    - condition: "dependency_down"
+      action: restart_service
+      risk_level: low
+      params:
+        wait_for_deps: true
+        max_wait_seconds: 60
+
+    - condition: "port_conflict"
+      action: restart_service
+      risk_level: medium
+      params:
+        kill_port_holder: false
+
+    - condition: "default"
+      action: restart_service
+      risk_level: low
+      params:
+        grace_period: 30
+
+validation:
+  checks:
+    - name: service_responding
+      action: query_health
+      query: "HTTP GET {service_endpoint}/health"
+      expected: "200 OK"
+      timeout_seconds: 60
+
+    - name: stable_for_5m
+      action: query_health
+      query: "no restarts in 5 minutes"
+      expected: "stable"
+      timeout_seconds: 300
+
+  on_failure:
+    action: rollback_and_escalate
+    escalation_channel: "#sre-oncall"

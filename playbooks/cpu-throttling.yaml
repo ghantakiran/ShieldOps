@@ -1,0 +1,63 @@
+# ShieldOps Remediation Playbook: CPU Throttling
+# Triggered when: Container CPU throttling exceeds threshold
+
+name: cpu-throttling
+version: "1.0"
+description: "Remediate high CPU throttling by scaling or increasing CPU limits"
+trigger:
+  alert_type: "CPUThrottlingHigh"
+  severity: ["warning", "critical"]
+
+investigation:
+  steps:
+    - name: check_cpu_throttling
+      action: query_metrics
+      queries:
+        - "container_cpu_cfs_throttled_seconds_total{pod='{pod_name}'}"
+        - "container_cpu_usage_seconds_total{pod='{pod_name}'}"
+        - "container_spec_cpu_quota{pod='{pod_name}'}"
+
+    - name: check_current_replicas
+      action: query_k8s
+      query: "kubectl get deployment {deployment_name} -n {namespace} -o jsonpath='{.spec.replicas}'"
+
+    - name: check_hpa_status
+      action: query_k8s
+      query: "kubectl get hpa -n {namespace}"
+      extract:
+        - current_replicas
+        - max_replicas
+        - cpu_utilization
+
+remediation:
+  decision_tree:
+    - condition: "replicas_below_max_and_hpa_exists"
+      action: scale_horizontal
+      risk_level: low
+      params:
+        increase_by: 2
+
+    - condition: "no_hpa_or_at_max"
+      action: increase_cpu_limit
+      risk_level: medium
+      params:
+        increase_factor: 1.5
+        max_cpu: "4000m"
+
+    - condition: "default"
+      action: scale_horizontal
+      risk_level: low
+      params:
+        increase_by: 1
+
+validation:
+  checks:
+    - name: throttling_decreased
+      action: query_metrics
+      query: "container_cpu_cfs_throttled_seconds_total rate < 0.1"
+      expected: "throttling below threshold"
+      timeout_seconds: 300
+
+  on_failure:
+    action: escalate
+    escalation_channel: "#sre-oncall"

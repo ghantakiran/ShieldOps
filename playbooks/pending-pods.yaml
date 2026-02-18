@@ -1,0 +1,73 @@
+# ShieldOps Remediation Playbook: Pending / Unschedulable Pods
+# Triggered when: Pods remain in Pending state due to scheduling failures
+
+name: pending-pods
+version: "1.0"
+description: "Investigate and remediate pods stuck in Pending state"
+trigger:
+  alert_type: "KubePodNotScheduled"
+  severity: ["warning", "critical"]
+
+investigation:
+  steps:
+    - name: check_pod_events
+      action: query_k8s
+      query: "kubectl describe pod {pod_name} -n {namespace}"
+      extract:
+        - scheduling_error
+        - node_affinity
+        - resource_requests
+
+    - name: check_node_capacity
+      action: query_k8s
+      query: "kubectl describe nodes"
+      extract:
+        - allocatable_cpu
+        - allocatable_memory
+        - allocated_cpu
+        - allocated_memory
+
+    - name: check_node_taints
+      action: query_k8s
+      query: "kubectl get nodes -o json"
+      extract:
+        - taints
+        - conditions
+
+remediation:
+  decision_tree:
+    - condition: "insufficient_cpu_or_memory"
+      action: scale_node_group
+      risk_level: medium
+      params:
+        increase_by: 1
+
+    - condition: "taint_mismatch"
+      action: add_toleration_or_remove_taint
+      risk_level: medium
+      params:
+        prefer_toleration: true
+
+    - condition: "pvc_not_bound"
+      action: escalate
+      risk_level: high
+      params:
+        channel: "#storage-oncall"
+
+    - condition: "default"
+      action: scale_node_group
+      risk_level: medium
+      params:
+        increase_by: 1
+
+validation:
+  checks:
+    - name: pod_scheduled
+      action: query_k8s
+      query: "kubectl get pod {pod_name} -n {namespace} -o jsonpath='{.status.phase}'"
+      expected: "Running"
+      timeout_seconds: 300
+
+  on_failure:
+    action: escalate
+    escalation_channel: "#infra-oncall"

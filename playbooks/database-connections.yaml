@@ -1,0 +1,80 @@
+# ShieldOps Remediation Playbook: Database Connection Exhaustion
+# Triggered when: PostgreSQL connection pool is exhausted
+
+name: database-connections
+version: "1.0"
+description: "Remediate PostgreSQL connection exhaustion by restarting pooler and notifying DBA"
+trigger:
+  alert_type: "PostgreSQLConnectionsExhausted"
+  severity: ["critical", "warning"]
+
+investigation:
+  steps:
+    - name: check_connection_count
+      action: query_metrics
+      queries:
+        - "pg_stat_activity_count"
+        - "pg_settings_max_connections"
+        - "pgbouncer_pools_server_active"
+
+    - name: check_long_running_queries
+      action: query_metrics
+      queries:
+        - "pg_stat_activity{state='active', duration > 60s}"
+
+    - name: check_pooler_status
+      action: query_health
+      targets:
+        - "pgbouncer health"
+        - "connection pool utilization"
+
+    - name: check_application_logs
+      action: query_logs
+      query: "service=api level=error connection"
+      patterns:
+        - "connection refused"
+        - "too many connections"
+        - "connection pool exhausted"
+        - "FATAL:  sorry, too many clients"
+      time_range: "15m"
+
+remediation:
+  decision_tree:
+    - condition: "pooler_unhealthy"
+      action: restart_service
+      risk_level: medium
+      params:
+        service: "pgbouncer"
+        grace_period: 5
+
+    - condition: "long_running_queries"
+      action: terminate_idle_connections
+      risk_level: medium
+      params:
+        idle_timeout_seconds: 300
+        max_terminate: 20
+
+    - condition: "default"
+      action: restart_service
+      risk_level: medium
+      params:
+        service: "pgbouncer"
+        grace_period: 10
+
+validation:
+  checks:
+    - name: connections_below_threshold
+      action: query_metrics
+      query: "pg_stat_activity_count < max_connections * 0.8"
+      expected: "connection count below 80%"
+      timeout_seconds: 120
+
+    - name: application_connecting
+      action: query_health
+      query: "API health check returns 200"
+      expected: "healthy"
+      timeout_seconds: 60
+
+  on_failure:
+    action: escalate
+    escalation_channel: "#dba-oncall"

@@ -4,7 +4,10 @@ Provides REST endpoints for triggering, tracking, approving/denying,
 and rolling back remediation agent workflows.
 """
 
+from __future__ import annotations
+
 from datetime import datetime, timezone
+from typing import TYPE_CHECKING
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException
 from pydantic import BaseModel, Field
@@ -12,10 +15,14 @@ from pydantic import BaseModel, Field
 from shieldops.agents.remediation.runner import RemediationRunner
 from shieldops.models.base import Environment, RemediationAction, RiskLevel
 
+if TYPE_CHECKING:
+    from shieldops.db.repository import Repository
+
 router = APIRouter()
 
 # Application-level runner instance
 _runner: RemediationRunner | None = None
+_repository: Repository | None = None
 
 
 def get_runner() -> RemediationRunner:
@@ -30,6 +37,12 @@ def set_runner(runner: RemediationRunner) -> None:
     """Override the runner instance (used for testing and dependency injection)."""
     global _runner
     _runner = runner
+
+
+def set_repository(repo: Repository | None) -> None:
+    """Set the persistence repository for read queries."""
+    global _repository
+    _repository = repo
 
 
 # --- Request/Response models ---
@@ -123,10 +136,27 @@ async def list_remediations(
     limit: int = 50,
     offset: int = 0,
 ) -> dict:
-    """List remediation timeline (newest first)."""
+    """List remediation timeline (newest first).
+
+    Queries from PostgreSQL when available, falls back to in-memory.
+    """
+    if _repository:
+        items = await _repository.list_remediations(
+            environment=environment, status=status, limit=limit, offset=offset
+        )
+        total = await _repository.count_remediations(
+            environment=environment, status=status
+        )
+        return {
+            "remediations": items,
+            "total": total,
+            "limit": limit,
+            "offset": offset,
+        }
+
+    # Fallback to in-memory
     runner = get_runner()
     all_remediations = runner.list_remediations()
-
     if environment:
         all_remediations = [
             r for r in all_remediations if r["environment"] == environment
@@ -135,10 +165,8 @@ async def list_remediations(
         all_remediations = [
             r for r in all_remediations if r["status"] == status
         ]
-
     total = len(all_remediations)
     paginated = all_remediations[offset : offset + limit]
-
     return {
         "remediations": paginated,
         "total": total,
@@ -150,6 +178,11 @@ async def list_remediations(
 @router.get("/remediations/{remediation_id}")
 async def get_remediation(remediation_id: str) -> dict:
     """Get remediation detail with execution results and audit trail."""
+    if _repository:
+        result = await _repository.get_remediation(remediation_id)
+        if result is not None:
+            return result
+
     runner = get_runner()
     result = runner.get_remediation(remediation_id)
     if result is None:

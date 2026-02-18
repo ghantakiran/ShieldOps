@@ -18,6 +18,9 @@ from shieldops.connectors.base import ConnectorRouter
 from shieldops.models.base import AlertContext
 from shieldops.observability.base import LogSource, MetricSource, TraceSource
 
+if __import__("typing").TYPE_CHECKING:
+    from shieldops.db.repository import Repository
+
 logger = structlog.get_logger()
 
 
@@ -39,6 +42,7 @@ class InvestigationRunner:
         log_sources: list[LogSource] | None = None,
         metric_sources: list[MetricSource] | None = None,
         trace_sources: list[TraceSource] | None = None,
+        repository: "Repository | None" = None,
     ) -> None:
         self._toolkit = InvestigationToolkit(
             connector_router=connector_router,
@@ -53,8 +57,9 @@ class InvestigationRunner:
         graph = create_investigation_graph()
         self._app = graph.compile()
 
-        # In-memory store of completed investigations
+        # In-memory store of completed investigations (fallback when no DB)
         self._investigations: dict[str, InvestigationState] = {}
+        self._repository = repository
 
     async def investigate(self, alert: AlertContext) -> InvestigationState:
         """Run a full investigation for an alert.
@@ -113,6 +118,7 @@ class InvestigationRunner:
 
             # Store result
             self._investigations[investigation_id] = final_state
+            await self._persist(investigation_id, final_state)
             return final_state
 
         except Exception as e:
@@ -130,7 +136,17 @@ class InvestigationRunner:
                 current_step="failed",
             )
             self._investigations[investigation_id] = error_state
+            await self._persist(investigation_id, error_state)
             return error_state
+
+    async def _persist(self, investigation_id: str, state: InvestigationState) -> None:
+        """Persist to DB if repository is available."""
+        if self._repository is None:
+            return
+        try:
+            await self._repository.save_investigation(investigation_id, state)
+        except Exception as e:
+            logger.error("investigation_persist_failed", id=investigation_id, error=str(e))
 
     def get_investigation(self, investigation_id: str) -> InvestigationState | None:
         """Retrieve a completed investigation by ID."""

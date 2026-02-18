@@ -29,9 +29,14 @@ class PolicyEngine:
     Every agent action must pass through this engine. No exceptions.
     """
 
-    def __init__(self, opa_url: str | None = None) -> None:
+    def __init__(
+        self,
+        opa_url: str | None = None,
+        rate_limiter: Any = None,
+    ) -> None:
         self._opa_url = opa_url or settings.opa_endpoint
         self._client = httpx.AsyncClient(timeout=5.0)
+        self._rate_limiter = rate_limiter
 
     async def evaluate(
         self,
@@ -49,6 +54,18 @@ class PolicyEngine:
         Returns:
             PolicyDecision indicating whether the action is allowed.
         """
+        ctx = dict(context or {})
+
+        # Enrich context with rate limiter data
+        if self._rate_limiter:
+            try:
+                actions_this_hour = await self._rate_limiter.count_recent_actions(
+                    action.environment.value
+                )
+                ctx.setdefault("actions_this_hour", actions_this_hour)
+            except Exception as e:
+                logger.warning("rate_limiter_enrichment_failed", error=str(e))
+
         input_data = {
             "action": action.action_type,
             "target_resource": action.target_resource,
@@ -56,7 +73,7 @@ class PolicyEngine:
             "risk_level": action.risk_level.value,
             "parameters": action.parameters,
             "agent_id": agent_id,
-            "context": context or {},
+            "context": ctx,
         }
 
         try:
@@ -78,6 +95,13 @@ class PolicyEngine:
                 allowed=allowed,
                 reasons=reasons,
             )
+
+            # Increment rate limiter on allowed actions
+            if allowed and self._rate_limiter:
+                try:
+                    await self._rate_limiter.increment(action.environment.value)
+                except Exception as e:
+                    logger.warning("rate_limiter_increment_failed", error=str(e))
 
             return PolicyDecision(allowed=allowed, reasons=reasons)
 
@@ -129,5 +153,10 @@ class PolicyEngine:
         return RiskLevel.LOW
 
     async def close(self) -> None:
-        """Close the HTTP client."""
+        """Close the HTTP client and rate limiter."""
         await self._client.aclose()
+        if self._rate_limiter:
+            try:
+                await self._rate_limiter.close()
+            except Exception:
+                pass

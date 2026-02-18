@@ -68,7 +68,7 @@ services:
     image: openpolicyagent/opa:latest
     ports:
       - "8181:8181"
-    command: ["run", "--server", "--addr", "0.0.0.0:8181"]
+    command: ["run", "--server", "--addr", "0.0.0.0:8181", "/policies"]
     volumes:
       - ../../playbooks/policies:/policies
 

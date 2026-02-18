@@ -74,6 +74,18 @@ def create_observability_sources(settings: Settings) -> ObservabilitySources:
         )
         logger.info("observability_source_initialized", source="datadog")
 
+    # CloudWatch Logs — requires log group name and AWS region
+    if settings.cloudwatch_log_group and settings.aws_region:
+        from shieldops.observability.cloudwatch.client import CloudWatchLogsSource
+
+        sources.log_sources.append(
+            CloudWatchLogsSource(
+                log_group=settings.cloudwatch_log_group,
+                region=settings.aws_region,
+            )
+        )
+        logger.info("observability_source_initialized", source="cloudwatch")
+
     # Jaeger — requires URL
     if settings.jaeger_url:
         sources.trace_sources.append(JaegerSource(url=settings.jaeger_url))

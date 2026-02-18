@@ -13,7 +13,16 @@ from shieldops.agents.learning.runner import LearningRunner
 from shieldops.agents.remediation.runner import RemediationRunner
 from shieldops.agents.security.runner import SecurityRunner
 from shieldops.agents.supervisor.runner import SupervisorRunner
-from shieldops.api.routes import agents, analytics, cost, investigations, learning, remediations, security, supervisor
+from shieldops.api.routes import (
+    agents,
+    analytics,
+    cost,
+    investigations,
+    learning,
+    remediations,
+    security,
+    supervisor,
+)
 from shieldops.config import settings
 from shieldops.connectors.factory import create_connector_router
 from shieldops.observability.factory import create_observability_sources
@@ -28,7 +37,25 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     """Application startup and shutdown lifecycle."""
     logger.info("shieldops_starting", environment=settings.environment)
 
-    # Infrastructure layer
+    # ── Database layer ──────────────────────────────────────────
+    repository = None
+    engine = None
+    try:
+        from shieldops.db.models import Base
+        from shieldops.db.repository import Repository
+        from shieldops.db.session import create_async_engine, get_session_factory
+
+        engine = create_async_engine(
+            settings.database_url, pool_size=settings.database_pool_size
+        )
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        repository = Repository(get_session_factory())
+        logger.info("database_initialized")
+    except Exception as e:
+        logger.warning("database_init_failed", error=str(e), detail="falling back to in-memory")
+
+    # ── Infrastructure layer ────────────────────────────────────
     obs_sources = create_observability_sources(settings)
     router = create_connector_router(settings)
 
@@ -38,11 +65,21 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         log_sources=obs_sources.log_sources,
         metric_sources=obs_sources.metric_sources,
         trace_sources=obs_sources.trace_sources,
+        repository=repository,
     )
     investigations.set_runner(inv_runner)
+    investigations.set_repository(repository)
 
-    # Policy layer
-    policy_engine = PolicyEngine(opa_url=settings.opa_endpoint)
+    # Policy layer with rate limiting
+    rate_limiter = None
+    try:
+        from shieldops.policy.opa.rate_limiter import ActionRateLimiter
+
+        rate_limiter = ActionRateLimiter(redis_url=settings.redis_url)
+    except Exception as e:
+        logger.warning("rate_limiter_init_failed", error=str(e))
+
+    policy_engine = PolicyEngine(opa_url=settings.opa_endpoint, rate_limiter=rate_limiter)
     approval_workflow = ApprovalWorkflow()
 
     # Remediation runner
@@ -50,8 +87,10 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         connector_router=router,
         policy_engine=policy_engine,
         approval_workflow=approval_workflow,
+        repository=repository,
     )
     remediations.set_runner(rem_runner)
+    remediations.set_repository(repository)
 
     # Security runner — cve_sources/credential_stores left empty until integrations land
     sec_runner = SecurityRunner(connector_router=router)
@@ -65,6 +104,17 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     learn_runner = LearningRunner()
     learning.set_runner(learn_runner)
 
+    # ── Playbook loader ─────────────────────────────────────────
+    playbook_loader = None
+    try:
+        from shieldops.playbooks.loader import PlaybookLoader
+
+        playbook_loader = PlaybookLoader()
+        playbook_loader.load_all()
+        logger.info("playbooks_loaded", count=len(playbook_loader.all()))
+    except Exception as e:
+        logger.warning("playbook_load_failed", error=str(e))
+
     # Supervisor — orchestrates all specialist agents
     sup_runner = SupervisorRunner(agent_runners={
         "investigation": inv_runner,
@@ -72,14 +122,26 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         "security": sec_runner,
         "cost": cost_runner,
         "learning": learn_runner,
-    })
+    }, playbook_loader=playbook_loader)
     supervisor.set_runner(sup_runner)
 
-    # TODO: Initialize database connections, Kafka consumers, agent registry
+    # Register playbooks router
+    try:
+        from shieldops.api.routes import playbooks
+        playbooks.set_loader(playbook_loader)
+        app.include_router(
+            playbooks.router, prefix=settings.api_prefix, tags=["Playbooks"]
+        )
+    except Exception as e:
+        logger.warning("playbooks_router_failed", error=str(e))
+
     yield
+
     logger.info("shieldops_shutting_down")
     await obs_sources.close_all()
     await policy_engine.close()
+    if engine:
+        await engine.dispose()
 
 
 def create_app() -> FastAPI:

@@ -30,6 +30,40 @@ allow if {
     input.risk_level == "medium"
 }
 
+# Allow medium-risk actions in staging without approval
+allow if {
+    input.environment == "staging"
+    input.risk_level == "medium"
+}
+
+# Allow low-risk actions in production for safe operations
+allow if {
+    input.environment == "production"
+    input.risk_level == "low"
+    input.action in production_safe_actions
+}
+
+# Allow medium-risk production actions for safe operations
+allow if {
+    input.environment == "production"
+    input.risk_level == "medium"
+    input.action in production_safe_actions
+}
+
+# Allow high-risk production actions only with explicit approval
+allow if {
+    input.environment == "production"
+    input.risk_level == "high"
+    input.context.approval_status == "approved"
+}
+
+# Allow critical production actions only with explicit approval
+allow if {
+    input.environment == "production"
+    input.risk_level == "critical"
+    input.context.approval_status == "approved"
+}
+
 # Read-only actions that are always allowed
 read_only_actions := {
     "query_logs",
@@ -39,6 +73,17 @@ read_only_actions := {
     "list_resources",
     "get_events",
     "check_compliance",
+}
+
+# Actions allowed in production without approval (low/medium risk)
+production_safe_actions := {
+    "restart_pod",
+    "restart_service",
+    "reboot_instance",
+    "scale_horizontal",
+    "force_new_deployment",
+    "update_desired_count",
+    "trigger_renewal",
 }
 
 # Actions that are NEVER allowed (hard deny)
@@ -54,6 +99,7 @@ forbidden_actions := {
     "modify_iam_root",
     "disable_logging",
     "disable_monitoring",
+    "stop_instance",
 }
 
 # Blast radius check
@@ -94,8 +140,13 @@ max_actions_per_hour := {
     "production": 20,
 }
 
-# Helper: check if current time is in a freeze window
-# TODO: Make configurable per customer
+# Helper: freeze window is Saturday/Sunday (UTC)
 is_freeze_window if {
-    false  # Placeholder — implement with actual freeze window logic
+    day := time.weekday(time.now_ns())
+    day == "Saturday"
+}
+
+is_freeze_window if {
+    day := time.weekday(time.now_ns())
+    day == "Sunday"
 }

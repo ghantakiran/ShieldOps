@@ -53,12 +53,12 @@ class TestRemediationWiring:
                 # ApprovalWorkflow created with defaults
                 mock_aw_cls.assert_called_once_with()
 
-                # RemediationRunner receives all 3 deps
-                mock_rem_cls.assert_called_once_with(
-                    connector_router=mock_router,
-                    policy_engine=mock_policy,
-                    approval_workflow=mock_approval,
-                )
+                # RemediationRunner receives all core deps
+                mock_rem_cls.assert_called_once()
+                rem_kwargs = mock_rem_cls.call_args.kwargs
+                assert rem_kwargs["connector_router"] is mock_router
+                assert rem_kwargs["policy_engine"] is mock_policy
+                assert rem_kwargs["approval_workflow"] is mock_approval
 
                 # Runner injected into route module
                 assert remediations._runner is mock_rem_cls.return_value

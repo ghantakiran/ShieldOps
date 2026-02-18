@@ -30,17 +30,26 @@ class SupervisorToolkit:
         self,
         agent_runners: dict[str, AgentRunner] | None = None,
         notification_channels: dict[str, Any] | None = None,
+        playbook_loader: Any = None,
     ) -> None:
         self._runners = agent_runners or {}
         self._channels = notification_channels or {}
+        self._playbook_loader = playbook_loader
 
     def classify_event_rules(self, event: dict[str, Any]) -> dict[str, Any]:
         """Rule-based event classification as a baseline before LLM.
 
+        Enriches classification with matching playbook metadata when available.
         Returns a preliminary classification that the LLM can refine.
         """
         event_type = event.get("type", "")
         severity = event.get("severity", "medium")
+        alert_name = event.get("alert_name", "")
+
+        # Check for matching playbook
+        playbook_match = None
+        if self._playbook_loader and alert_name:
+            playbook_match = self._playbook_loader.match(alert_name, severity)
 
         # Rule-based mapping
         type_map: dict[str, tuple[str, str]] = {
@@ -65,12 +74,23 @@ class SupervisorToolkit:
             task_type = "investigate"
             priority = severity
 
-        return {
+        result = {
             "task_type": task_type,
             "priority": priority,
             "confidence": 1.0 if event_type in type_map else 0.6,
             "reasoning": f"Rule-based classification for event type '{event_type}'",
         }
+
+        # Enrich with playbook metadata if matched
+        if playbook_match:
+            result["playbook"] = {
+                "name": playbook_match.name,
+                "description": playbook_match.description,
+                "decision_tree": [c.model_dump() for c in playbook_match.decision_tree],
+            }
+            result["reasoning"] += f" | Matched playbook: {playbook_match.name}"
+
+        return result
 
     async def dispatch_task(
         self,

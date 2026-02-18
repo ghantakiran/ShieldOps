@@ -1,0 +1,75 @@
+# ShieldOps Remediation Playbook: Deployment Rollout Failed
+# Triggered when: Kubernetes deployment rollout fails or stalls
+
+name: deployment-failed
+version: "1.0"
+description: "Rollback failed Kubernetes deployments to the previous stable revision"
+trigger:
+  alert_type: "KubeDeploymentRolloutFailed"
+  severity: ["critical", "warning"]
+
+investigation:
+  steps:
+    - name: check_rollout_status
+      action: query_k8s
+      query: "kubectl rollout status deployment/{deployment_name} -n {namespace}"
+      extract:
+        - rollout_status
+        - available_replicas
+        - updated_replicas
+
+    - name: check_recent_changes
+      action: query_k8s
+      query: "kubectl rollout history deployment/{deployment_name} -n {namespace}"
+      time_range: "1h"
+
+    - name: check_pod_errors
+      action: query_logs
+      query: "kubectl logs -l app={deployment_name} -n {namespace} --tail=100"
+      patterns:
+        - "Error"
+        - "CrashLoopBackOff"
+        - "ImagePullBackOff"
+        - "OOMKilled"
+
+    - name: check_events
+      action: query_k8s
+      query: "kubectl get events -n {namespace} --field-selector involvedObject.name={deployment_name}"
+
+remediation:
+  decision_tree:
+    - condition: "image_pull_error"
+      action: rollback_deployment
+      risk_level: high
+      params:
+        revision: "previous"
+
+    - condition: "config_error"
+      action: rollback_deployment
+      risk_level: high
+      params:
+        revision: "previous"
+
+    - condition: "default"
+      action: rollback_deployment
+      risk_level: high
+      params:
+        revision: "previous"
+
+validation:
+  checks:
+    - name: rollout_successful
+      action: query_k8s
+      query: "kubectl rollout status deployment/{deployment_name} -n {namespace}"
+      expected: "successfully rolled out"
+      timeout_seconds: 300
+
+    - name: pods_running
+      action: query_k8s
+      query: "kubectl get pods -l app={deployment_name} -n {namespace} -o jsonpath='{.items[*].status.phase}'"
+      expected: "Running"
+      timeout_seconds: 120
+
+  on_failure:
+    action: escalate
+    escalation_channel: "#sre-oncall"

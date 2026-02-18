@@ -14,9 +14,17 @@ from shieldops.agents.remediation.models import RemediationState
 from shieldops.agents.remediation.nodes import set_toolkit
 from shieldops.agents.remediation.tools import RemediationToolkit
 from shieldops.connectors.base import ConnectorRouter
-from shieldops.models.base import AlertContext, RemediationAction
+from shieldops.models.base import (
+    AlertContext,
+    AuditEntry,
+    ExecutionStatus,
+    RemediationAction,
+)
 from shieldops.policy.approval.workflow import ApprovalWorkflow
 from shieldops.policy.opa.client import PolicyEngine
+
+if __import__("typing").TYPE_CHECKING:
+    from shieldops.db.repository import Repository
 
 logger = structlog.get_logger()
 
@@ -38,6 +46,7 @@ class RemediationRunner:
         connector_router: ConnectorRouter | None = None,
         policy_engine: PolicyEngine | None = None,
         approval_workflow: ApprovalWorkflow | None = None,
+        repository: "Repository | None" = None,
     ) -> None:
         self._toolkit = RemediationToolkit(
             connector_router=connector_router,
@@ -51,8 +60,9 @@ class RemediationRunner:
         graph = create_remediation_graph()
         self._app = graph.compile()
 
-        # In-memory store of completed remediations
+        # In-memory store of completed remediations (fallback when no DB)
         self._remediations: dict[str, RemediationState] = {}
+        self._repository = repository
 
     async def remediate(
         self,
@@ -121,6 +131,8 @@ class RemediationRunner:
 
             # Store result
             self._remediations[remediation_id] = final_state
+            await self._persist(remediation_id, final_state)
+            await self._write_audit(remediation_id, final_state)
             return final_state
 
         except Exception as e:
@@ -140,7 +152,48 @@ class RemediationRunner:
                 current_step="failed",
             )
             self._remediations[remediation_id] = error_state
+            await self._persist(remediation_id, error_state)
+            await self._write_audit(remediation_id, error_state)
             return error_state
+
+    async def _persist(self, remediation_id: str, state: RemediationState) -> None:
+        """Persist to DB if repository is available."""
+        if self._repository is None:
+            return
+        try:
+            await self._repository.save_remediation(remediation_id, state)
+        except Exception as e:
+            logger.error("remediation_persist_failed", id=remediation_id, error=str(e))
+
+    async def _write_audit(self, remediation_id: str, state: RemediationState) -> None:
+        """Write an audit log entry for a completed remediation."""
+        if self._repository is None:
+            return
+        try:
+            outcome = ExecutionStatus.FAILED if state.error else ExecutionStatus.SUCCESS
+            if state.execution_result:
+                outcome = state.execution_result.status
+            policy_eval = "allowed"
+            if state.policy_result and not state.policy_result.allowed:
+                policy_eval = "denied"
+
+            entry = AuditEntry(
+                id=f"aud-{remediation_id}",
+                timestamp=datetime.now(timezone.utc),
+                agent_type="remediation",
+                action=state.action.action_type,
+                target_resource=state.action.target_resource,
+                environment=state.action.environment,
+                risk_level=state.assessed_risk or state.action.risk_level,
+                policy_evaluation=policy_eval,
+                approval_status=state.approval_status,
+                outcome=outcome,
+                reasoning=state.reasoning_chain[-1].output_summary if state.reasoning_chain else "",
+                actor=f"agent:{remediation_id}",
+            )
+            await self._repository.append_audit_log(entry)
+        except Exception as e:
+            logger.error("audit_log_write_failed", id=remediation_id, error=str(e))
 
     def get_remediation(self, remediation_id: str) -> RemediationState | None:
         """Retrieve a completed remediation by ID."""

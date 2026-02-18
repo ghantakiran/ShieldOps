@@ -32,10 +32,12 @@ class SupervisorRunner:
         self,
         agent_runners: dict[str, Any] | None = None,
         notification_channels: dict[str, Any] | None = None,
+        playbook_loader: Any = None,
     ) -> None:
         self._toolkit = SupervisorToolkit(
             agent_runners=agent_runners or {},
             notification_channels=notification_channels or {},
+            playbook_loader=playbook_loader,
         )
         set_toolkit(self._toolkit)
 

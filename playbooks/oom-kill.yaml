@@ -1,0 +1,72 @@
+# ShieldOps Remediation Playbook: Container OOM Killed
+# Triggered when: Container is terminated due to memory limits
+
+name: oom-kill
+version: "1.0"
+description: "Remediate containers killed by OOM (Out of Memory)"
+trigger:
+  alert_type: "ContainerOOMKilled"
+  severity: ["critical", "warning"]
+
+investigation:
+  steps:
+    - name: check_memory_usage
+      action: query_metrics
+      queries:
+        - "container_memory_usage_bytes{pod='{pod_name}'}"
+        - "container_memory_working_set_bytes{pod='{pod_name}'}"
+        - "container_spec_memory_limit_bytes{pod='{pod_name}'}"
+
+    - name: check_pod_events
+      action: query_k8s
+      query: "kubectl describe pod {pod_name} -n {namespace}"
+      extract:
+        - last_termination_reason
+        - memory_limit
+        - memory_request
+
+    - name: check_memory_trend
+      action: query_metrics
+      queries:
+        - "container_memory_usage_bytes{pod='{pod_name}'}[1h]"
+      time_range: "1h"
+
+remediation:
+  decision_tree:
+    - condition: "memory_usage_near_limit"
+      action: increase_memory_limit
+      risk_level: medium
+      params:
+        increase_factor: 1.5
+        max_memory: "4Gi"
+
+    - condition: "memory_leak_detected"
+      action: restart_pod
+      risk_level: low
+      params:
+        grace_period: 30
+
+    - condition: "default"
+      action: increase_memory_limit
+      risk_level: medium
+      params:
+        increase_factor: 1.5
+        max_memory: "4Gi"
+
+validation:
+  checks:
+    - name: pod_running
+      action: query_k8s
+      query: "kubectl get pod {pod_name} -n {namespace} -o jsonpath='{.status.phase}'"
+      expected: "Running"
+      timeout_seconds: 120
+
+    - name: no_oom_events
+      action: query_k8s
+      query: "OOM events in last 5 minutes"
+      expected: "0 OOM events"
+      timeout_seconds: 300
+
+  on_failure:
+    action: rollback_and_escalate
+    escalation_channel: "#sre-oncall"

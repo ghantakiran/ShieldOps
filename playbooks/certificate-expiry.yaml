@@ -1,0 +1,66 @@
+# ShieldOps Remediation Playbook: Certificate Expiry
+# Triggered when: TLS certificate is expiring within threshold window
+
+name: certificate-expiry
+version: "1.0"
+description: "Trigger certificate renewal and notify teams before expiry"
+trigger:
+  alert_type: "CertificateExpiringSoon"
+  severity: ["warning", "critical"]
+
+investigation:
+  steps:
+    - name: check_cert_details
+      action: query_k8s
+      query: "kubectl get certificate {cert_name} -n {namespace} -o yaml"
+      extract:
+        - expiry_date
+        - issuer
+        - domains
+        - renewal_status
+
+    - name: check_cert_manager_logs
+      action: query_logs
+      query: "namespace=cert-manager level=error"
+      patterns:
+        - "failed to renew"
+        - "ACME challenge failed"
+        - "rate limited"
+      time_range: "24h"
+
+    - name: check_secret_exists
+      action: query_k8s
+      query: "kubectl get secret {cert_secret} -n {namespace}"
+
+remediation:
+  decision_tree:
+    - condition: "cert_manager_installed"
+      action: trigger_renewal
+      risk_level: low
+      params:
+        force_renew: true
+
+    - condition: "acme_challenge_failing"
+      action: escalate
+      risk_level: medium
+      params:
+        channel: "#security-oncall"
+        include_logs: true
+
+    - condition: "default"
+      action: trigger_renewal
+      risk_level: low
+      params:
+        force_renew: true
+
+validation:
+  checks:
+    - name: cert_renewed
+      action: query_k8s
+      query: "kubectl get certificate {cert_name} -n {namespace} -o jsonpath='{.status.conditions[?(@.type==\"Ready\")].status}'"
+      expected: "True"
+      timeout_seconds: 600
+
+  on_failure:
+    action: escalate
+    escalation_channel: "#security-oncall"

@@ -28,7 +28,26 @@ def create_connector_router(settings: Settings) -> ConnectorRouter:
     router.register(k8s)
     logger.info("connector_registered", provider="kubernetes")
 
-    # TODO: Register AWS connector when settings.aws_region is configured
+    # AWS — registered when aws_region is configured
+    if settings.aws_region:
+        from shieldops.connectors.aws.connector import AWSConnector
+
+        aws = AWSConnector(region=settings.aws_region)
+        router.register(aws)
+        logger.info("connector_registered", provider="aws")
+
+    # Linux SSH — registered when linux_host is configured
+    if settings.linux_host:
+        from shieldops.connectors.linux.connector import LinuxConnector
+
+        linux = LinuxConnector(
+            host=settings.linux_host,
+            username=settings.linux_username,
+            private_key_path=settings.linux_private_key_path or None,
+        )
+        router.register(linux)
+        logger.info("connector_registered", provider="linux")
+
     # TODO: Register GCP connector when settings.gcp_project_id is configured
     # TODO: Register Azure connector when settings.azure_subscription_id is configured
 
