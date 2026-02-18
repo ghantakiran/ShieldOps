@@ -6,7 +6,6 @@ and rolling back remediation agent workflows.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
@@ -68,6 +67,12 @@ class ApprovalActionRequest(BaseModel):
     """Request body for approve/deny actions."""
 
     approver: str
+    reason: str = ""
+
+
+class RollbackRequest(BaseModel):
+    """Request body for rollback actions."""
+
     reason: str = ""
 
 
@@ -209,6 +214,15 @@ async def approve_remediation(
     if state is None:
         raise HTTPException(status_code=404, detail="Remediation not found")
 
+    if not state.approval_request_id:
+        raise HTTPException(status_code=400, detail="No pending approval request")
+
+    workflow = runner.get_approval_workflow()
+    if workflow is None:
+        raise HTTPException(status_code=400, detail="Approval workflow not configured")
+
+    workflow.approve(state.approval_request_id, request.approver)
+
     return {
         "remediation_id": remediation_id,
         "action": "approved",
@@ -228,6 +242,15 @@ async def deny_remediation(
     if state is None:
         raise HTTPException(status_code=404, detail="Remediation not found")
 
+    if not state.approval_request_id:
+        raise HTTPException(status_code=400, detail="No pending approval request")
+
+    workflow = runner.get_approval_workflow()
+    if workflow is None:
+        raise HTTPException(status_code=400, detail="Approval workflow not configured")
+
+    workflow.deny(state.approval_request_id, request.approver, request.reason)
+
     return {
         "remediation_id": remediation_id,
         "action": "denied",
@@ -239,6 +262,7 @@ async def deny_remediation(
 @router.post("/remediations/{remediation_id}/rollback")
 async def rollback_remediation(
     remediation_id: str,
+    request: RollbackRequest | None = None,
     _user: UserResponse = Depends(require_role(UserRole.ADMIN, UserRole.OPERATOR)),
 ) -> dict:
     """Rollback a completed remediation to pre-action state."""
@@ -250,8 +274,13 @@ async def rollback_remediation(
     if not state.snapshot:
         raise HTTPException(status_code=400, detail="No snapshot available for rollback")
 
+    reason = request.reason if request else ""
+    result = await runner.rollback(remediation_id, reason)
+
     return {
         "remediation_id": remediation_id,
         "action": "rollback_initiated",
         "snapshot_id": state.snapshot.id,
+        "status": result.status.value,
+        "message": result.message,
     }

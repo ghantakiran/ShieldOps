@@ -15,6 +15,7 @@ from shieldops.agents.remediation.nodes import set_toolkit
 from shieldops.agents.remediation.tools import RemediationToolkit
 from shieldops.connectors.base import ConnectorRouter
 from shieldops.models.base import (
+    ActionResult,
     AlertContext,
     AuditEntry,
     ExecutionStatus,
@@ -22,6 +23,7 @@ from shieldops.models.base import (
 )
 from shieldops.policy.approval.workflow import ApprovalWorkflow
 from shieldops.policy.opa.client import PolicyEngine
+from shieldops.policy.rollback.manager import RollbackManager
 
 if __import__("typing").TYPE_CHECKING:
     from shieldops.db.repository import Repository
@@ -65,6 +67,10 @@ class RemediationRunner:
         self._remediations: dict[str, RemediationState] = {}
         self._repository = repository
         self._ws_manager = ws_manager
+
+        # Expose workflow and rollback manager for API routes
+        self._approval_workflow = approval_workflow
+        self._rollback_manager = RollbackManager(connector_router, repository)
 
     async def remediate(
         self,
@@ -235,3 +241,43 @@ class RemediationRunner:
             }
             for rem_id, state in self._remediations.items()
         ]
+
+    def get_approval_workflow(self) -> ApprovalWorkflow | None:
+        """Return the approval workflow so API routes can call approve()/deny()."""
+        return self._approval_workflow
+
+    async def rollback(self, remediation_id: str, reason: str = "") -> ActionResult:
+        """Rollback a completed remediation to its pre-action snapshot.
+
+        Returns ActionResult with FAILED status if the remediation is not found
+        or has no snapshot.
+        """
+        now = datetime.now(timezone.utc)
+        state = self._remediations.get(remediation_id)
+
+        if state is None:
+            return ActionResult(
+                action_id=f"rollback-{remediation_id}",
+                status=ExecutionStatus.FAILED,
+                message="Remediation not found",
+                started_at=now,
+            )
+
+        if state.snapshot is None:
+            return ActionResult(
+                action_id=f"rollback-{remediation_id}",
+                status=ExecutionStatus.FAILED,
+                message="No snapshot available for rollback",
+                started_at=now,
+            )
+
+        result = await self._rollback_manager.execute_rollback(
+            snapshot=state.snapshot,
+            reason=reason,
+        )
+
+        # Update stored state with rollback result
+        state.rollback_result = result
+        if result.status == ExecutionStatus.SUCCESS:
+            state.current_step = "rolled_back"
+        return result

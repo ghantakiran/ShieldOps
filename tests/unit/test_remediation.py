@@ -812,6 +812,7 @@ class TestRemediationAPI:
             action=action,
             current_step="validate_health",
             validation_passed=True,
+            approval_request_id="req-abc123",
             snapshot=Snapshot(
                 id="snap-001",
                 resource_id="default/api-server",
@@ -822,6 +823,23 @@ class TestRemediationAPI:
         )
         runner.get_remediation.return_value = state
         runner.remediate = AsyncMock(return_value=state)
+
+        # Provide a real workflow so approve/deny endpoints work
+        from shieldops.policy.approval.workflow import ApprovalRequest, ApprovalWorkflow
+
+        workflow = ApprovalWorkflow()
+        workflow._pending["req-abc123"] = ApprovalRequest(
+            "req-abc123", action, "agent-1", "needs approval"
+        )
+        runner.get_approval_workflow.return_value = workflow
+
+        # Provide a rollback mock
+        runner.rollback = AsyncMock(return_value=ActionResult(
+            action_id="rollback-snap-001",
+            status=ExecutionStatus.SUCCESS,
+            message="Rolled back",
+            started_at=datetime.now(timezone.utc),
+        ))
         return runner
 
     @pytest.fixture
