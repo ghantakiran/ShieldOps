@@ -114,9 +114,9 @@ with col_acc:
             "axis": {"range": [0, 100]},
             "bar": {"color": "#3B82F6"},
             "steps": [
-                {"range": [0, 50], "color": "#EF444430"},
-                {"range": [50, 80], "color": "#F59E0B30"},
-                {"range": [80, 100], "color": "#10B98130"},
+                {"range": [0, 50], "color": "rgba(239,68,68,0.19)"},
+                {"range": [50, 80], "color": "rgba(245,158,11,0.19)"},
+                {"range": [80, 100], "color": "rgba(16,185,129,0.19)"},
             ],
         },
     ))
