@@ -6,7 +6,7 @@ Covers:
 - Lifespan integration — runner receives sources via set_runner()
 """
 
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -169,6 +169,7 @@ class TestLifespanWiring:
             metric_sources=[AsyncMock()],
             trace_sources=[AsyncMock()],
         )
+        mock_router = MagicMock()
 
         with (
             patch(
@@ -176,20 +177,22 @@ class TestLifespanWiring:
                 return_value=mock_sources,
             ) as mock_factory,
             patch(
+                "shieldops.api.app.create_connector_router",
+                return_value=mock_router,
+            ),
+            patch(
                 "shieldops.api.app.InvestigationRunner",
             ) as mock_runner_cls,
         ):
             app = create_app()
 
-            # Simulate lifespan
-            from contextlib import asynccontextmanager
-
             async with app.router.lifespan_context(app):
                 # Factory was called with settings
                 mock_factory.assert_called_once()
 
-                # Runner was constructed with the sources
+                # Runner was constructed with connector_router + sources
                 mock_runner_cls.assert_called_once_with(
+                    connector_router=mock_router,
                     log_sources=mock_sources.log_sources,
                     metric_sources=mock_sources.metric_sources,
                     trace_sources=mock_sources.trace_sources,
