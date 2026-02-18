@@ -49,6 +49,23 @@ class Settings(BaseSettings):
     langsmith_project: str = "shieldops"
     otel_exporter_endpoint: str = "http://localhost:4317"
 
+    # Observability — Prometheus
+    prometheus_url: str = "http://localhost:9090"
+
+    # Observability — Splunk
+    splunk_url: str = ""
+    splunk_token: str = ""
+    splunk_index: str = "main"
+    splunk_verify_ssl: bool = True
+
+    # Observability — Datadog
+    datadog_api_key: str = ""
+    datadog_app_key: str = ""
+    datadog_site: str = "datadoghq.com"
+
+    # Observability — Jaeger
+    jaeger_url: str = ""
+
     # Slack Integration
     slack_bot_token: str = ""
     slack_signing_secret: str = ""
