@@ -7,14 +7,13 @@ Each node is an async function that:
 4. Records its reasoning step in the audit trail
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import uuid4
 
 import structlog
 
 from shieldops.agents.supervisor.models import (
     ChainedWorkflow,
-    DelegatedTask,
     EscalationRecord,
     EventClassification,
     SupervisorState,
@@ -24,10 +23,8 @@ from shieldops.agents.supervisor.models import (
 )
 from shieldops.agents.supervisor.prompts import (
     SYSTEM_CHAIN_DECISION,
-    SYSTEM_ESCALATION_DECISION,
     SYSTEM_EVENT_CLASSIFICATION,
     ChainDecisionResult,
-    EscalationDecisionResult,
     EventClassificationResult,
 )
 from shieldops.agents.supervisor.tools import SupervisorToolkit
@@ -52,12 +49,12 @@ def _get_toolkit() -> SupervisorToolkit:
 
 
 def _elapsed_ms(start: datetime) -> int:
-    return int((datetime.now(timezone.utc) - start).total_seconds() * 1000)
+    return int((datetime.now(UTC) - start).total_seconds() * 1000)
 
 
 async def classify_event(state: SupervisorState) -> dict:
     """Classify the incoming event and determine which agent should handle it."""
-    start = datetime.now(timezone.utc)
+    start = datetime.now(UTC)
     toolkit = _get_toolkit()
 
     logger.info(
@@ -86,10 +83,15 @@ async def classify_event(state: SupervisorState) -> dict:
             context_lines.append(f"Description: {state.event['description']}")
         if state.event.get("resource_id"):
             context_lines.append(f"Resource: {state.event['resource_id']}")
-        context_lines.extend([
-            "",
-            f"Rule-based suggestion: {rules_result['task_type']} (confidence: {confidence:.0%})",
-        ])
+        context_lines.extend(
+            [
+                "",
+                (
+                    f"Rule-based suggestion: {rules_result['task_type']} "
+                    f"(confidence: {confidence:.0%})"
+                ),
+            ]
+        )
 
         try:
             assessment: EventClassificationResult = await llm_structured(
@@ -131,7 +133,7 @@ async def classify_event(state: SupervisorState) -> dict:
 
 async def dispatch_to_agent(state: SupervisorState) -> dict:
     """Dispatch the classified task to the appropriate specialist agent."""
-    start = datetime.now(timezone.utc)
+    start = datetime.now(UTC)
     toolkit = _get_toolkit()
 
     if not state.classification:
@@ -169,7 +171,7 @@ async def dispatch_to_agent(state: SupervisorState) -> dict:
 
 async def evaluate_result(state: SupervisorState) -> dict:
     """Evaluate the completed task result and decide on chaining and escalation."""
-    start = datetime.now(timezone.utc)
+    start = datetime.now(UTC)
     toolkit = _get_toolkit()
 
     if not state.active_task:
@@ -208,10 +210,16 @@ async def evaluate_result(state: SupervisorState) -> dict:
         ]
         for key, value in (task.result or {}).items():
             context_lines.append(f"- {key}: {value}")
-        context_lines.extend([
-            "",
-            f"Rule-based chain suggestion: {chain_result['chain_task_type']} ({chain_result['reasoning']})",
-        ])
+        context_lines.extend(
+            [
+                "",
+                (
+                    f"Rule-based chain suggestion: "
+                    f"{chain_result['chain_task_type']} "
+                    f"({chain_result['reasoning']})"
+                ),
+            ]
+        )
 
         try:
             assessment: ChainDecisionResult = await llm_structured(
@@ -259,7 +267,7 @@ async def evaluate_result(state: SupervisorState) -> dict:
 
 async def chain_followup(state: SupervisorState) -> dict:
     """Chain a follow-up task to another specialist agent."""
-    start = datetime.now(timezone.utc)
+    start = datetime.now(UTC)
     toolkit = _get_toolkit()
 
     if not state.chain_task_type or not state.active_task:
@@ -312,7 +320,7 @@ async def chain_followup(state: SupervisorState) -> dict:
 
 async def escalate(state: SupervisorState) -> dict:
     """Escalate the situation to a human operator."""
-    start = datetime.now(timezone.utc)
+    start = datetime.now(UTC)
     toolkit = _get_toolkit()
 
     logger.info(
@@ -329,9 +337,14 @@ async def escalate(state: SupervisorState) -> dict:
 
     if task and task.status == TaskStatus.FAILED:
         reason = f"Agent {task.agent_name} failed: {task.error}"
-        channel = "pagerduty" if (classification and classification.priority == "critical") else "slack"
+        channel = (
+            "pagerduty" if (classification and classification.priority == "critical") else "slack"
+        )
     elif classification and classification.confidence < 0.5:
-        reason = f"Low confidence ({classification.confidence:.0%}) classification for {classification.event_type}"
+        reason = (
+            f"Low confidence ({classification.confidence:.0%}) "
+            f"classification for {classification.event_type}"
+        )
 
     message = (
         f"ShieldOps Escalation: {reason}\n"
@@ -351,7 +364,7 @@ async def escalate(state: SupervisorState) -> dict:
         task_id=task.task_id if task else None,
         task_type=task.task_type if task else None,
         channel=channel,
-        notified_at=datetime.now(timezone.utc),
+        notified_at=datetime.now(UTC),
     )
 
     step = SupervisorStep(
@@ -372,7 +385,7 @@ async def escalate(state: SupervisorState) -> dict:
 
 async def finalize(state: SupervisorState) -> dict:
     """Finalize the supervisor session with summary."""
-    start = datetime.now(timezone.utc)
+    start = datetime.now(UTC)
 
     logger.info(
         "supervisor_finalizing",
@@ -400,7 +413,7 @@ async def finalize(state: SupervisorState) -> dict:
     return {
         "reasoning_chain": [*state.reasoning_chain, step],
         "current_step": "complete",
-        "session_duration_ms": int(
-            (datetime.now(timezone.utc) - state.session_start).total_seconds() * 1000
-        ) if state.session_start else 0,
+        "session_duration_ms": int((datetime.now(UTC) - state.session_start).total_seconds() * 1000)
+        if state.session_start
+        else 0,
     }

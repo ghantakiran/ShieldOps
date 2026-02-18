@@ -73,14 +73,10 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         if self._client is None:
             import redis.asyncio as aioredis
 
-            self._client = aioredis.from_url(
-                settings.redis_url, decode_responses=True
-            )
+            self._client = aioredis.from_url(settings.redis_url, decode_responses=True)
         return self._client
 
-    async def dispatch(
-        self, request: Request, call_next: RequestResponseEndpoint
-    ) -> Response:
+    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
         if not settings.rate_limit_enabled:
             return await call_next(request)
 
@@ -143,9 +139,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         response.headers["X-RateLimit-Reset"] = str(reset_at)
         return response
 
-    def _resolve_limit_and_key(
-        self, request: Request, path: str
-    ) -> tuple[int, str]:
+    def _resolve_limit_and_key(self, request: Request, path: str) -> tuple[int, str]:
         """Return (limit, identity_key) based on path and auth status."""
         ip = _get_client_ip(request)
 

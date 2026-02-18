@@ -54,9 +54,7 @@ async def client(mock_redis):
         "shieldops.api.middleware.rate_limiter.RateLimitMiddleware._ensure_client",
         _fake_ensure,
     ):
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as ac:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
             yield ac
 
 
@@ -216,9 +214,7 @@ class TestGracefulDegradation:
         app = _make_app()
 
         failing_client = AsyncMock()
-        failing_client.incr = AsyncMock(
-            side_effect=ConnectionError("Redis down")
-        )
+        failing_client.incr = AsyncMock(side_effect=ConnectionError("Redis down"))
 
         async def _failing_ensure(self):
             return failing_client
@@ -227,12 +223,8 @@ class TestGracefulDegradation:
             "shieldops.api.middleware.rate_limiter.RateLimitMiddleware._ensure_client",
             _failing_ensure,
         ):
-            async with AsyncClient(
-                transport=ASGITransport(app=app), base_url="http://test"
-            ) as ac:
-                response = await ac.get(
-                    "/api/v1/agents", headers=_auth_header()
-                )
+            async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+                response = await ac.get("/api/v1/agents", headers=_auth_header())
                 assert response.status_code != 429
                 assert "x-ratelimit-limit" not in response.headers
 
@@ -241,21 +233,15 @@ class TestRateLimitDisabled:
     @pytest.mark.asyncio
     async def test_no_headers_when_disabled(self):
         """rate_limit_enabled=False skips all rate limiting."""
-        with patch(
-            "shieldops.api.middleware.rate_limiter.settings"
-        ) as mock_settings:
+        with patch("shieldops.api.middleware.rate_limiter.settings") as mock_settings:
             mock_settings.rate_limit_enabled = False
             mock_settings.api_prefix = "/api/v1"
             mock_settings.redis_url = "redis://localhost:6379/0"
 
             app = _make_app()
 
-            async with AsyncClient(
-                transport=ASGITransport(app=app), base_url="http://test"
-            ) as ac:
-                response = await ac.get(
-                    "/api/v1/agents", headers=_auth_header()
-                )
+            async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+                response = await ac.get("/api/v1/agents", headers=_auth_header())
                 assert "x-ratelimit-limit" not in response.headers
 
 

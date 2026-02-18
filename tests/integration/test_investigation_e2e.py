@@ -158,7 +158,7 @@ async def test_investigation_stores_result_in_memory(
             metric_sources=[mock_metric_source],
             trace_sources=[mock_trace_source],
         )
-        result = await runner.investigate(crash_loop_alert)
+        await runner.investigate(crash_loop_alert)
 
     listed = runner.list_investigations()
     assert len(listed) == 1

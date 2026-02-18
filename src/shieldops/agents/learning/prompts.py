@@ -2,7 +2,6 @@
 
 from pydantic import BaseModel, Field
 
-
 # --- Response schemas for structured LLM output ---
 
 
@@ -10,12 +9,8 @@ class PatternAnalysisResult(BaseModel):
     """Structured output from LLM pattern analysis."""
 
     summary: str = Field(description="Brief summary of patterns found in incident data")
-    recurring_patterns: list[str] = Field(
-        description="Descriptions of recurring incident patterns"
-    )
-    common_root_causes: list[str] = Field(
-        description="Most frequent root causes across incidents"
-    )
+    recurring_patterns: list[str] = Field(description="Descriptions of recurring incident patterns")
+    common_root_causes: list[str] = Field(description="Most frequent root causes across incidents")
     automation_gaps: list[str] = Field(
         description="Areas where automation could improve but currently doesn't"
     )
@@ -28,9 +23,7 @@ class PlaybookRecommendationResult(BaseModel):
     new_playbooks: list[str] = Field(
         description="New playbooks to create, each as 'alert_type: description'"
     )
-    playbook_improvements: list[str] = Field(
-        description="Improvements to existing playbooks"
-    )
+    playbook_improvements: list[str] = Field(description="Improvements to existing playbooks")
     deprecated_steps: list[str] = Field(
         description="Playbook steps that should be removed or updated"
     )
@@ -41,11 +34,11 @@ class ThresholdRecommendationResult(BaseModel):
 
     summary: str = Field(description="Brief summary of threshold recommendations")
     adjustments: list[str] = Field(
-        description="Recommended threshold changes, each as 'metric: current → recommended (reason)'"
+        description="Recommended threshold changes, each as "
+        "'metric: current → recommended (reason)'"
     )
     estimated_noise_reduction: float = Field(
-        ge=0.0, le=100.0,
-        description="Estimated percentage reduction in alert noise"
+        ge=0.0, le=100.0, description="Estimated percentage reduction in alert noise"
     )
 
 
@@ -53,21 +46,18 @@ class ImprovementSynthesisResult(BaseModel):
     """Structured output for overall improvement synthesis."""
 
     improvement_score: float = Field(
-        ge=0.0, le=100.0,
-        description="Overall improvement score (0-100)"
+        ge=0.0, le=100.0, description="Overall improvement score (0-100)"
     )
     summary: str = Field(description="Executive summary of learning cycle findings")
-    key_improvements: list[str] = Field(
-        description="Top improvements identified in priority order"
-    )
-    risks: list[str] = Field(
-        description="Risks if recommendations are not implemented"
-    )
+    key_improvements: list[str] = Field(description="Top improvements identified in priority order")
+    risks: list[str] = Field(description="Risks if recommendations are not implemented")
 
 
 # --- Prompt templates ---
 
-SYSTEM_PATTERN_ANALYSIS = """You are an expert SRE analyzing incident patterns to identify systemic issues.
+SYSTEM_PATTERN_ANALYSIS = """\
+You are an expert SRE analyzing incident patterns \
+to identify systemic issues.
 
 Analyze the incident outcome data and identify:
 1. Recurring incident patterns (same alert type, same root cause, similar symptoms)
@@ -83,7 +73,9 @@ Look for:
 
 Be specific about which incidents support each pattern you identify."""
 
-SYSTEM_PLAYBOOK_RECOMMENDATION = """You are an expert SRE creating operational playbook recommendations.
+SYSTEM_PLAYBOOK_RECOMMENDATION = """\
+You are an expert SRE creating operational playbook \
+recommendations.
 
 Based on the incident patterns and outcomes, recommend:
 1. New playbooks for recurring incident types that lack automated responses
@@ -98,7 +90,9 @@ For each recommendation:
 
 Focus on actionable improvements, not theoretical best practices."""
 
-SYSTEM_THRESHOLD_RECOMMENDATION = """You are an expert SRE analyzing alerting thresholds to reduce noise and improve signal quality.
+SYSTEM_THRESHOLD_RECOMMENDATION = """\
+You are an expert SRE analyzing alerting thresholds to \
+reduce noise and improve signal quality.
 
 Based on the incident data, recommend threshold adjustments:
 1. Thresholds that are too sensitive (causing false positives)
@@ -113,7 +107,9 @@ For each recommendation:
 
 Be conservative — it's better to catch real incidents with some noise than to miss them."""
 
-SYSTEM_IMPROVEMENT_SYNTHESIS = """You are an SRE leader synthesizing learning cycle findings into an improvement plan.
+SYSTEM_IMPROVEMENT_SYNTHESIS = """\
+You are an SRE leader synthesizing learning cycle \
+findings into an improvement plan.
 
 Given pattern analysis, playbook recommendations, and threshold adjustments, provide:
 1. An overall improvement score (0-100)

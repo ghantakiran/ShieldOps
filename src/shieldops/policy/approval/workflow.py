@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import asyncio
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
 import structlog
@@ -35,7 +35,7 @@ class ApprovalRequest:
         self.status = ApprovalStatus.PENDING
         self.approvals: list[str] = []
         self.denials: list[str] = []
-        self.created_at = datetime.now(timezone.utc)
+        self.created_at = datetime.now(UTC)
 
     @property
     def is_approved(self) -> bool:
@@ -105,7 +105,7 @@ class ApprovalWorkflow:
             if self._notifier:
                 await self._notifier.send_resolution(request, result)
             return result
-        except asyncio.TimeoutError:
+        except TimeoutError:
             logger.warning(
                 "approval_primary_timeout",
                 request_id=request.request_id,
@@ -124,9 +124,7 @@ class ApprovalWorkflow:
             await self._notifier.send_resolution(request, ApprovalStatus.ESCALATED)
         return ApprovalStatus.ESCALATED
 
-    async def _run_escalation_chain(
-        self, request: ApprovalRequest
-    ) -> ApprovalStatus:
+    async def _run_escalation_chain(self, request: ApprovalRequest) -> ApprovalStatus:
         """Walk the escalation chain, notifying each target in sequence."""
         for target in self._escalation_targets:
             logger.info(
@@ -144,7 +142,7 @@ class ApprovalWorkflow:
                     timeout=self._escalation_timeout,
                 )
                 return result
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 logger.warning(
                     "approval_escalation_timeout",
                     request_id=request.request_id,

@@ -1,10 +1,10 @@
 """Agent registry — manages agent registrations, status, and heartbeats."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import uuid4
 
 import structlog
-from sqlalchemy import select, update
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from shieldops.db.models import AgentRegistration
@@ -42,12 +42,12 @@ class AgentRegistry:
                     environment=environment,
                     status="idle",
                     config=config or {},
-                    last_heartbeat=datetime.now(timezone.utc),
+                    last_heartbeat=datetime.now(UTC),
                 )
                 session.add(record)
             else:
                 record.config = config or record.config
-                record.last_heartbeat = datetime.now(timezone.utc)
+                record.last_heartbeat = datetime.now(UTC)
 
             await session.commit()
             await session.refresh(record)
@@ -100,7 +100,7 @@ class AgentRegistry:
             record = await session.get(AgentRegistration, agent_id)
             if record is None:
                 return None
-            record.last_heartbeat = datetime.now(timezone.utc)
+            record.last_heartbeat = datetime.now(UTC)
             await session.commit()
             await session.refresh(record)
             return self._to_dict(record)

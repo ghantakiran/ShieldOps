@@ -4,7 +4,7 @@ Takes incoming events, constructs the LangGraph, runs the supervisor
 workflow end-to-end, and returns the completed orchestration state.
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 from uuid import uuid4
 
@@ -86,8 +86,7 @@ class SupervisorRunner:
 
             if final_state.session_start:
                 final_state.session_duration_ms = int(
-                    (datetime.now(timezone.utc) - final_state.session_start).total_seconds()
-                    * 1000
+                    (datetime.now(UTC) - final_state.session_start).total_seconds() * 1000
                 )
 
             logger.info(
@@ -129,7 +128,9 @@ class SupervisorRunner:
                 "session_id": session_id,
                 "event_type": state.event.get("type", "unknown"),
                 "status": state.current_step,
-                "classification": state.classification.task_type.value if state.classification else None,
+                "classification": state.classification.task_type.value
+                if state.classification
+                else None,
                 "priority": state.classification.priority if state.classification else None,
                 "tasks_delegated": len(state.delegated_tasks),
                 "chains": len(state.chained_workflows),

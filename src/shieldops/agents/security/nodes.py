@@ -76,16 +76,18 @@ async def scan_vulnerabilities(state: SecurityScanState) -> dict:
 
     findings: list[CVEFinding] = []
     for raw in scan_data.get("findings", [])[:100]:
-        findings.append(CVEFinding(
-            cve_id=raw.get("cve_id", "UNKNOWN"),
-            severity=raw.get("severity", "medium"),
-            cvss_score=raw.get("cvss_score", 0.0),
-            package_name=raw.get("package_name", "unknown"),
-            installed_version=raw.get("installed_version", "unknown"),
-            fixed_version=raw.get("fixed_version"),
-            affected_resource=raw.get("affected_resource", "unknown"),
-            description=raw.get("description", ""),
-        ))
+        findings.append(
+            CVEFinding(
+                cve_id=raw.get("cve_id", "UNKNOWN"),
+                severity=raw.get("severity", "medium"),
+                cvss_score=raw.get("cvss_score", 0.0),
+                package_name=raw.get("package_name", "unknown"),
+                installed_version=raw.get("installed_version", "unknown"),
+                fixed_version=raw.get("fixed_version"),
+                affected_resource=raw.get("affected_resource", "unknown"),
+                description=raw.get("description", ""),
+            )
+        )
 
     step = SecurityStep(
         step_number=1,
@@ -189,16 +191,18 @@ async def check_credentials(state: SecurityScanState) -> dict:
         if expires_at:
             days_left = max(0, (expires_at - now).days)
 
-        statuses.append(CredentialStatus(
-            credential_id=raw.get("credential_id", "unknown"),
-            credential_type=raw.get("credential_type", "unknown"),
-            service=raw.get("service", "unknown"),
-            environment=state.target_environment,
-            expires_at=expires_at,
-            days_until_expiry=days_left,
-            last_rotated=raw.get("last_rotated"),
-            needs_rotation=True,
-        ))
+        statuses.append(
+            CredentialStatus(
+                credential_id=raw.get("credential_id", "unknown"),
+                credential_type=raw.get("credential_type", "unknown"),
+                service=raw.get("service", "unknown"),
+                environment=state.target_environment,
+                expires_at=expires_at,
+                days_until_expiry=days_left,
+                last_rotated=raw.get("last_rotated"),
+                needs_rotation=True,
+            )
+        )
 
     # LLM assessment
     output_summary = (
@@ -230,8 +234,7 @@ async def check_credentials(state: SecurityScanState) -> dict:
                 schema=CredentialAssessmentResult,
             )
             output_summary = (
-                f"{assessment.summary}. "
-                f"Urgent rotations: {len(assessment.urgent_rotations)}"
+                f"{assessment.summary}. Urgent rotations: {len(assessment.urgent_rotations)}"
             )
         except Exception as e:
             logger.error("llm_credential_assessment_failed", error=str(e))
@@ -274,14 +277,16 @@ async def evaluate_compliance(state: SecurityScanState) -> dict:
         compliance_data = await toolkit.check_compliance(framework)
 
         for raw in compliance_data.get("controls", []):
-            all_controls.append(ComplianceControl(
-                control_id=raw.get("control_id", ""),
-                framework=framework,
-                title=raw.get("title", ""),
-                status=raw.get("status", "not_applicable"),
-                severity=raw.get("severity", "medium"),
-                evidence=raw.get("evidence", []),
-            ))
+            all_controls.append(
+                ComplianceControl(
+                    control_id=raw.get("control_id", ""),
+                    framework=framework,
+                    title=raw.get("title", ""),
+                    status=raw.get("status", "not_applicable"),
+                    severity=raw.get("severity", "medium"),
+                    evidence=raw.get("evidence", []),
+                )
+            )
 
         total_passing += compliance_data.get("passing", 0)
         total_checked += compliance_data.get("controls_checked", 0)
@@ -387,8 +392,7 @@ async def synthesize_posture(state: SecurityScanState) -> dict:
         pending_patches=state.patches_available,
         credentials_expiring_soon=state.credentials_needing_rotation,
         compliance_scores={
-            fw: state.compliance_score
-            for fw in (state.compliance_frameworks or ["soc2"])
+            fw: state.compliance_score for fw in (state.compliance_frameworks or ["soc2"])
         },
     )
 
@@ -402,10 +406,7 @@ async def synthesize_posture(state: SecurityScanState) -> dict:
         )
         posture.overall_score = assessment.overall_score
         posture.top_risks = assessment.top_risks[:5]
-        output_summary = (
-            f"Score: {assessment.overall_score:.1f}/100. "
-            f"{assessment.summary[:200]}"
-        )
+        output_summary = f"Score: {assessment.overall_score:.1f}/100. {assessment.summary[:200]}"
     except Exception as e:
         logger.error("llm_posture_synthesis_failed", error=str(e))
 
@@ -422,9 +423,9 @@ async def synthesize_posture(state: SecurityScanState) -> dict:
         "posture": posture,
         "reasoning_chain": [*state.reasoning_chain, step],
         "current_step": "complete",
-        "scan_duration_ms": int(
-            (datetime.now(UTC) - state.scan_start).total_seconds() * 1000
-        ) if state.scan_start else 0,
+        "scan_duration_ms": int((datetime.now(UTC) - state.scan_start).total_seconds() * 1000)
+        if state.scan_start
+        else 0,
     }
 
 
@@ -500,14 +501,16 @@ async def execute_patches(state: SecurityScanState) -> dict:
             package_name=cve.package_name,
             target_version=cve.fixed_version,  # type: ignore[arg-type]
         )
-        results.append(PatchResult(
-            cve_id=cve.cve_id,
-            package_name=cve.package_name,
-            target_resource=cve.affected_resource,
-            success=patch_data.get("success", False),
-            message=patch_data.get("message", ""),
-            applied_version=patch_data.get("applied_version"),
-        ))
+        results.append(
+            PatchResult(
+                cve_id=cve.cve_id,
+                package_name=cve.package_name,
+                target_resource=cve.affected_resource,
+                success=patch_data.get("success", False),
+                message=patch_data.get("message", ""),
+                applied_version=patch_data.get("applied_version"),
+            )
+        )
 
     applied = sum(1 for r in results if r.success)
 
@@ -548,14 +551,16 @@ async def rotate_credentials(state: SecurityScanState) -> dict:
             credential_type=cred.credential_type,
             service=cred.service,
         )
-        results.append(RotationResult(
-            credential_id=cred.credential_id,
-            credential_type=cred.credential_type,
-            service=cred.service,
-            success=rot_data.get("success", False),
-            message=rot_data.get("message", ""),
-            new_expiry=rot_data.get("new_expiry"),
-        ))
+        results.append(
+            RotationResult(
+                credential_id=cred.credential_id,
+                credential_type=cred.credential_type,
+                service=cred.service,
+                success=rot_data.get("success", False),
+                message=rot_data.get("message", ""),
+                new_expiry=rot_data.get("new_expiry"),
+            )
+        )
 
     rotated = sum(1 for r in results if r.success)
 

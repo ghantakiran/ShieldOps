@@ -154,9 +154,7 @@ async def list_remediations(
         items = await _repository.list_remediations(
             environment=environment, status=status, limit=limit, offset=offset
         )
-        total = await _repository.count_remediations(
-            environment=environment, status=status
-        )
+        total = await _repository.count_remediations(environment=environment, status=status)
         return {
             "remediations": items,
             "total": total,
@@ -168,13 +166,9 @@ async def list_remediations(
     runner = get_runner()
     all_remediations = runner.list_remediations()
     if environment:
-        all_remediations = [
-            r for r in all_remediations if r["environment"] == environment
-        ]
+        all_remediations = [r for r in all_remediations if r["environment"] == environment]
     if status:
-        all_remediations = [
-            r for r in all_remediations if r["status"] == status
-        ]
+        all_remediations = [r for r in all_remediations if r["status"] == status]
     total = len(all_remediations)
     paginated = all_remediations[offset : offset + limit]
     return {

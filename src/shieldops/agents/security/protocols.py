@@ -17,9 +17,7 @@ class CVESource(ABC):
     source_name: str
 
     @abstractmethod
-    async def scan(
-        self, resource_id: str, severity_threshold: str = "medium"
-    ) -> list[dict]:
+    async def scan(self, resource_id: str, severity_threshold: str = "medium") -> list[dict]:
         """Scan a resource for known CVEs at or above *severity_threshold*.
 
         Returns a list of finding dicts with keys:
@@ -38,9 +36,7 @@ class CredentialStore(ABC):
     store_name: str
 
     @abstractmethod
-    async def list_credentials(
-        self, environment: str | None = None
-    ) -> list[dict]:
+    async def list_credentials(self, environment: str | None = None) -> list[dict]:
         """List tracked credentials, optionally filtered by environment.
 
         Returns a list of credential dicts with keys:
@@ -49,9 +45,7 @@ class CredentialStore(ABC):
         """
 
     @abstractmethod
-    async def rotate_credential(
-        self, credential_id: str, credential_type: str
-    ) -> dict:
+    async def rotate_credential(self, credential_id: str, credential_type: str) -> dict:
         """Rotate a single credential and return the result.
 
         Returns a dict with keys:

@@ -104,9 +104,7 @@ async def list_sessions(
 
 
 @router.get("/supervisor/sessions/{session_id}")
-async def get_session(
-    session_id: str, _user: UserResponse = Depends(get_current_user)
-) -> dict:
+async def get_session(session_id: str, _user: UserResponse = Depends(get_current_user)) -> dict:
     """Get full supervisor session detail."""
     runner = get_runner()
     result = runner.get_session(session_id)

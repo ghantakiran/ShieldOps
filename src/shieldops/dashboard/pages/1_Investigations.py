@@ -11,7 +11,6 @@ from shieldops.dashboard.components import (
     render_json_expander,
     render_page_header,
     render_reasoning_chain,
-    render_severity_badge,
     render_status_badge,
 )
 
@@ -145,10 +144,7 @@ else:
                 inv_id = inv.get("investigation_id", "")
                 col1, col2, col3, col4 = st.columns([3, 2, 1, 1])
                 with col1:
-                    st.markdown(
-                        f"**{inv.get('alert_name', inv_id)}**  \n"
-                        f"`{inv_id}`"
-                    )
+                    st.markdown(f"**{inv.get('alert_name', inv_id)}**  \n`{inv_id}`")
                 with col2:
                     st.markdown(
                         render_status_badge(inv.get("status", "unknown")),

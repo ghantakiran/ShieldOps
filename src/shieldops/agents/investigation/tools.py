@@ -5,7 +5,7 @@ agent's LangGraph nodes. Each tool is a self-contained async function that
 queries external systems and returns structured data.
 """
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import structlog
@@ -47,7 +47,7 @@ class InvestigationToolkit:
         Returns aggregated log entries and pattern matches.
         """
         if time_range is None:
-            now = datetime.now(timezone.utc)
+            now = datetime.now(UTC)
             time_range = TimeRange(start=now - timedelta(hours=1), end=now)
 
         all_entries: list[dict[str, Any]] = []
@@ -59,9 +59,7 @@ class InvestigationToolkit:
                 all_entries.extend(entries)
 
                 if patterns:
-                    matches = await source.search_patterns(
-                        resource_id, patterns, time_range
-                    )
+                    matches = await source.search_patterns(resource_id, patterns, time_range)
                     for pattern, hits in matches.items():
                         pattern_matches.setdefault(pattern, []).extend(hits)
             except Exception as e:
@@ -99,7 +97,7 @@ class InvestigationToolkit:
         CPU, memory, error rate, latency, restarts.
         """
         if time_range is None:
-            now = datetime.now(timezone.utc)
+            now = datetime.now(UTC)
             time_range = TimeRange(start=now - timedelta(hours=1), end=now)
 
         baseline_range = TimeRange(
@@ -157,7 +155,7 @@ class InvestigationToolkit:
     ) -> dict[str, Any]:
         """Query distributed traces for a service to find bottlenecks."""
         if time_range is None:
-            now = datetime.now(timezone.utc)
+            now = datetime.now(UTC)
             time_range = TimeRange(start=now - timedelta(hours=1), end=now)
 
         results: dict[str, Any] = {
@@ -213,7 +211,7 @@ class InvestigationToolkit:
             return []
 
         if time_range is None:
-            now = datetime.now(timezone.utc)
+            now = datetime.now(UTC)
             time_range = TimeRange(start=now - timedelta(hours=1), end=now)
 
         try:

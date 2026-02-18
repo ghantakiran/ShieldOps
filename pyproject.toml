@@ -86,6 +86,10 @@ target-version = "py312"
 select = ["E", "F", "I", "N", "W", "UP", "B", "SIM", "S"]
 ignore = ["S101"]  # Allow assert in tests
 
+[tool.ruff.lint.per-file-ignores]
+"src/shieldops/api/**/*.py" = ["B008"]  # Depends(), Query(), Body() in FastAPI signatures
+"tests/**/*.py" = ["S106"]  # Hardcoded test tokens/passwords are expected in tests
+
 [tool.ruff.lint.isort]
 known-first-party = ["shieldops"]
 

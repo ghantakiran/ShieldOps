@@ -16,7 +16,6 @@ from shieldops.dashboard.config import (
     confidence_color,
 )
 
-
 # ------------------------------------------------------------------
 # Badges
 # ------------------------------------------------------------------
@@ -68,7 +67,7 @@ def render_metric_row(metrics: list[tuple[str, Any, str | None]]) -> None:
     Each tuple is (label, value, delta_or_None).
     """
     cols = st.columns(len(metrics))
-    for col, (label, value, delta) in zip(cols, metrics):
+    for col, (label, value, delta) in zip(cols, metrics, strict=False):
         with col:
             st.metric(label=label, value=value, delta=delta)
 

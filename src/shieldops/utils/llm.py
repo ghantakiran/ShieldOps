@@ -57,9 +57,7 @@ async def llm_analyze(
     if response_schema is not None:
         parser = JsonOutputParser(pydantic_object=response_schema)
         format_instructions = parser.get_format_instructions()
-        messages[0] = SystemMessage(
-            content=f"{system_prompt}\n\n{format_instructions}"
-        )
+        messages[0] = SystemMessage(content=f"{system_prompt}\n\n{format_instructions}")
         response = await llm.ainvoke(messages)
         return parser.parse(response.content)
 

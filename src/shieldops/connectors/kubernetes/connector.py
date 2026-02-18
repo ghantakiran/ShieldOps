@@ -1,6 +1,6 @@
 """Kubernetes connector implementation."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 from uuid import uuid4
 
@@ -39,9 +39,7 @@ class KubernetesConnector(InfraConnector):
         if self._core_api is not None:
             return
         if self._kubeconfig_path:
-            await config.load_kube_config(
-                config_file=self._kubeconfig_path, context=self._context
-            )
+            await config.load_kube_config(config_file=self._kubeconfig_path, context=self._context)
         else:
             config.load_incluster_config()
         self._core_api = client.CoreV1Api()
@@ -61,16 +59,14 @@ class KubernetesConnector(InfraConnector):
 
             container_restarts = 0
             if pod.status and pod.status.container_statuses:
-                container_restarts = sum(
-                    cs.restart_count for cs in pod.status.container_statuses
-                )
+                container_restarts = sum(cs.restart_count for cs in pod.status.container_statuses)
 
             return HealthStatus(
                 resource_id=resource_id,
                 healthy=healthy and container_restarts < 5,
                 status=phase,
                 message=f"Restarts: {container_restarts}" if container_restarts > 0 else None,
-                last_checked=datetime.now(timezone.utc),
+                last_checked=datetime.now(UTC),
                 metrics={"restart_count": float(container_restarts)},
             )
         except client.ApiException as e:
@@ -80,7 +76,7 @@ class KubernetesConnector(InfraConnector):
                 healthy=False,
                 status="error",
                 message=str(e),
-                last_checked=datetime.now(timezone.utc),
+                last_checked=datetime.now(UTC),
             )
 
     async def list_resources(
@@ -117,9 +113,7 @@ class KubernetesConnector(InfraConnector):
 
         return resources
 
-    async def get_events(
-        self, resource_id: str, time_range: TimeRange
-    ) -> list[dict[str, Any]]:
+    async def get_events(self, resource_id: str, time_range: TimeRange) -> list[dict[str, Any]]:
         """Get Kubernetes events for a resource."""
         await self._ensure_client()
         assert self._core_api is not None
@@ -140,8 +134,7 @@ class KubernetesConnector(InfraConnector):
                 "count": event.count,
             }
             for event in events.items
-            if event.last_timestamp
-            and time_range.start <= event.last_timestamp <= time_range.end
+            if event.last_timestamp and time_range.start <= event.last_timestamp <= time_range.end
         ]
 
     async def execute_action(self, action: RemediationAction) -> ActionResult:
@@ -149,7 +142,7 @@ class KubernetesConnector(InfraConnector):
         await self._ensure_client()
         assert self._apps_api is not None
 
-        started_at = datetime.now(timezone.utc)
+        started_at = datetime.now(UTC)
         logger.info(
             "k8s_execute_action",
             action_type=action.action_type,
@@ -169,7 +162,7 @@ class KubernetesConnector(InfraConnector):
                     status=ExecutionStatus.FAILED,
                     message=f"Unsupported action type: {action.action_type}",
                     started_at=started_at,
-                    completed_at=datetime.now(timezone.utc),
+                    completed_at=datetime.now(UTC),
                 )
         except client.ApiException as e:
             logger.error("k8s_action_failed", action=action.id, error=str(e))
@@ -178,7 +171,7 @@ class KubernetesConnector(InfraConnector):
                 status=ExecutionStatus.FAILED,
                 message=f"Kubernetes API error: {e.reason}",
                 started_at=started_at,
-                completed_at=datetime.now(timezone.utc),
+                completed_at=datetime.now(UTC),
                 error=str(e),
             )
 
@@ -201,14 +194,14 @@ class KubernetesConnector(InfraConnector):
             resource_id=resource_id,
             snapshot_type="k8s_resource",
             state=state,
-            created_at=datetime.now(timezone.utc),
+            created_at=datetime.now(UTC),
         )
         self._snapshots[snapshot_id] = state
         return snapshot
 
     async def rollback(self, snapshot_id: str) -> ActionResult:
         """Rollback to a captured snapshot state."""
-        started_at = datetime.now(timezone.utc)
+        started_at = datetime.now(UTC)
 
         if snapshot_id not in self._snapshots:
             return ActionResult(
@@ -216,7 +209,7 @@ class KubernetesConnector(InfraConnector):
                 status=ExecutionStatus.FAILED,
                 message=f"Snapshot {snapshot_id} not found",
                 started_at=started_at,
-                completed_at=datetime.now(timezone.utc),
+                completed_at=datetime.now(UTC),
             )
 
         # Implementation: re-apply the captured resource state
@@ -226,7 +219,7 @@ class KubernetesConnector(InfraConnector):
             status=ExecutionStatus.SUCCESS,
             message=f"Rolled back to snapshot {snapshot_id}",
             started_at=started_at,
-            completed_at=datetime.now(timezone.utc),
+            completed_at=datetime.now(UTC),
             snapshot_id=snapshot_id,
         )
 
@@ -234,8 +227,8 @@ class KubernetesConnector(InfraConnector):
         """Validate resource is healthy after an action."""
         import asyncio
 
-        deadline = datetime.now(timezone.utc).timestamp() + timeout_seconds
-        while datetime.now(timezone.utc).timestamp() < deadline:
+        deadline = datetime.now(UTC).timestamp() + timeout_seconds
+        while datetime.now(UTC).timestamp() < deadline:
             health = await self.get_health(resource_id)
             if health.healthy:
                 return True
@@ -252,9 +245,7 @@ class KubernetesConnector(InfraConnector):
             return parts[0], parts[1]
         return "default", parts[0]
 
-    async def _restart_pod(
-        self, action: RemediationAction, started_at: datetime
-    ) -> ActionResult:
+    async def _restart_pod(self, action: RemediationAction, started_at: datetime) -> ActionResult:
         """Delete a pod to trigger restart via controller."""
         assert self._core_api is not None
         namespace, name = self._parse_resource_id(action.target_resource)
@@ -264,7 +255,7 @@ class KubernetesConnector(InfraConnector):
             status=ExecutionStatus.SUCCESS,
             message=f"Pod {namespace}/{name} deleted (will be recreated by controller)",
             started_at=started_at,
-            completed_at=datetime.now(timezone.utc),
+            completed_at=datetime.now(UTC),
         )
 
     async def _scale_deployment(
@@ -284,7 +275,7 @@ class KubernetesConnector(InfraConnector):
             status=ExecutionStatus.SUCCESS,
             message=f"Deployment {namespace}/{name} scaled to {replicas} replicas",
             started_at=started_at,
-            completed_at=datetime.now(timezone.utc),
+            completed_at=datetime.now(UTC),
         )
 
     async def _rollback_deployment(
@@ -300,21 +291,17 @@ class KubernetesConnector(InfraConnector):
                 "template": {
                     "metadata": {
                         "annotations": {
-                            "shieldops.io/rollback-trigger": datetime.now(
-                                timezone.utc
-                            ).isoformat()
+                            "shieldops.io/rollback-trigger": datetime.now(UTC).isoformat()
                         }
                     }
                 }
             }
         }
-        await self._apps_api.patch_namespaced_deployment(
-            name=name, namespace=namespace, body=body
-        )
+        await self._apps_api.patch_namespaced_deployment(name=name, namespace=namespace, body=body)
         return ActionResult(
             action_id=action.id,
             status=ExecutionStatus.SUCCESS,
             message=f"Deployment {namespace}/{name} rollback triggered",
             started_at=started_at,
-            completed_at=datetime.now(timezone.utc),
+            completed_at=datetime.now(UTC),
         )

@@ -32,7 +32,11 @@ def should_recommend_optimizations(state: CostAnalysisState) -> str:
 def should_detect_anomalies(state: CostAnalysisState) -> str:
     """Skip anomaly detection if scan type is optimization_only or savings_only."""
     if state.analysis_type in ("optimization_only", "savings_only"):
-        return "recommend_optimizations" if state.analysis_type == "optimization_only" else "synthesize_savings"
+        return (
+            "recommend_optimizations"
+            if state.analysis_type == "optimization_only"
+            else "synthesize_savings"
+        )
     if state.error:
         return "synthesize_savings"
     return "detect_anomalies"

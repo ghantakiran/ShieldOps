@@ -2,70 +2,45 @@
 
 from pydantic import BaseModel, Field
 
-
 # --- Response schemas for structured LLM output ---
 
 
 class RiskAssessmentResult(BaseModel):
     """Structured output from LLM risk assessment."""
 
-    risk_level: str = Field(
-        description="Assessed risk level: low, medium, high, critical"
-    )
-    reasoning: list[str] = Field(
-        description="Step-by-step reasoning for the risk assessment"
-    )
+    risk_level: str = Field(description="Assessed risk level: low, medium, high, critical")
+    reasoning: list[str] = Field(description="Step-by-step reasoning for the risk assessment")
     blast_radius: str = Field(
         description="Estimated blast radius: single_pod, deployment, namespace, cluster"
     )
-    reversible: bool = Field(
-        description="Whether this action is easily reversible"
-    )
-    precautions: list[str] = Field(
-        description="Precautions to take before executing this action"
-    )
+    reversible: bool = Field(description="Whether this action is easily reversible")
+    precautions: list[str] = Field(description="Precautions to take before executing this action")
 
 
 class ExecutionPlanResult(BaseModel):
     """Structured output for the execution plan."""
 
-    steps: list[str] = Field(
-        description="Ordered list of execution steps"
-    )
-    pre_checks: list[str] = Field(
-        description="Health checks to perform before executing"
-    )
-    post_checks: list[str] = Field(
-        description="Health checks to validate after execution"
-    )
-    rollback_strategy: str = Field(
-        description="Strategy for rolling back if something goes wrong"
-    )
-    estimated_duration_seconds: int = Field(
-        description="Total estimated execution time in seconds"
-    )
+    steps: list[str] = Field(description="Ordered list of execution steps")
+    pre_checks: list[str] = Field(description="Health checks to perform before executing")
+    post_checks: list[str] = Field(description="Health checks to validate after execution")
+    rollback_strategy: str = Field(description="Strategy for rolling back if something goes wrong")
+    estimated_duration_seconds: int = Field(description="Total estimated execution time in seconds")
 
 
 class ValidationAssessmentResult(BaseModel):
     """Structured output from LLM validation assessment."""
 
-    overall_healthy: bool = Field(
-        description="Whether the system is healthy after the remediation"
-    )
-    summary: str = Field(
-        description="Brief summary of the validation results"
-    )
-    concerns: list[str] = Field(
-        description="Any concerns or issues detected post-remediation"
-    )
-    recommendation: str = Field(
-        description="Recommendation: proceed, monitor, or rollback"
-    )
+    overall_healthy: bool = Field(description="Whether the system is healthy after the remediation")
+    summary: str = Field(description="Brief summary of the validation results")
+    concerns: list[str] = Field(description="Any concerns or issues detected post-remediation")
+    recommendation: str = Field(description="Recommendation: proceed, monitor, or rollback")
 
 
 # --- Prompt templates ---
 
-SYSTEM_RISK_ASSESSMENT = """You are an expert SRE assessing the risk of a remediation action on infrastructure.
+SYSTEM_RISK_ASSESSMENT = """\
+You are an expert SRE assessing the risk of a \
+remediation action on infrastructure.
 
 Analyze the proposed action and determine:
 1. The appropriate risk level (low, medium, high, critical)
@@ -92,7 +67,9 @@ Given the action details and risk assessment, create a detailed execution plan:
 
 Be specific and actionable. Focus on safety and observability at each step."""
 
-SYSTEM_VALIDATION_ASSESSMENT = """You are an expert SRE validating whether a remediation action was successful.
+SYSTEM_VALIDATION_ASSESSMENT = """\
+You are an expert SRE validating whether a remediation \
+action was successful.
 
 Given the pre-action state and post-action health checks, determine:
 1. Is the system healthy after the remediation?

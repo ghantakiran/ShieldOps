@@ -1,6 +1,7 @@
 """Analytics engine — computes KPIs from investigation and remediation data."""
 
-from datetime import datetime, timedelta, timezone
+import contextlib
+from datetime import UTC, datetime, timedelta
 
 import structlog
 from sqlalchemy import func, select, text
@@ -16,11 +17,9 @@ def _parse_period(period: str) -> datetime:
     days = 30
     stripped = period.strip().lower()
     if stripped.endswith("d"):
-        try:
+        with contextlib.suppress(ValueError):
             days = int(stripped[:-1])
-        except ValueError:
-            pass
-    return datetime.now(timezone.utc) - timedelta(days=days)
+    return datetime.now(UTC) - timedelta(days=days)
 
 
 class AnalyticsEngine:
@@ -29,9 +28,7 @@ class AnalyticsEngine:
     def __init__(self, session_factory: async_sessionmaker[AsyncSession]) -> None:
         self._sf = session_factory
 
-    async def mttr_trends(
-        self, period: str = "30d", environment: str | None = None
-    ) -> dict:
+    async def mttr_trends(self, period: str = "30d", environment: str | None = None) -> dict:
         """Compute Mean Time to Resolution trends.
 
         Returns daily average duration_ms from completed remediations.
@@ -81,9 +78,8 @@ class AnalyticsEngine:
         cutoff = _parse_period(period)
         async with self._sf() as session:
             # Total investigations in period
-            total_stmt = (
-                select(func.count(InvestigationRecord.id))
-                .where(InvestigationRecord.created_at >= cutoff)
+            total_stmt = select(func.count(InvestigationRecord.id)).where(
+                InvestigationRecord.created_at >= cutoff
             )
             total = (await session.execute(total_stmt)).scalar_one()
 
@@ -137,9 +133,7 @@ class AnalyticsEngine:
                 "total_investigations": total,
             }
 
-    async def cost_savings(
-        self, period: str = "30d", hourly_rate: float = 75.0
-    ) -> dict:
+    async def cost_savings(self, period: str = "30d", hourly_rate: float = 75.0) -> dict:
         """Estimate cost savings from automated operations.
 
         Assumes each auto-resolved remediation saves ~0.5 hours of engineer time.

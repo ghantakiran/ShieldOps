@@ -1,6 +1,6 @@
 """Unit tests for core data models."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from shieldops.models.base import (
     AlertContext,
@@ -47,7 +47,7 @@ class TestHealthStatus:
             resource_id="default/api-server",
             healthy=True,
             status="Running",
-            last_checked=datetime.now(timezone.utc),
+            last_checked=datetime.now(UTC),
         )
         assert status.healthy is True
 
@@ -57,7 +57,7 @@ class TestHealthStatus:
             healthy=False,
             status="CrashLoopBackOff",
             message="Container restarting repeatedly",
-            last_checked=datetime.now(timezone.utc),
+            last_checked=datetime.now(UTC),
             metrics={"restart_count": 15.0},
         )
         assert status.healthy is False
@@ -100,7 +100,7 @@ class TestAlertContext:
             severity="critical",
             source="prometheus",
             resource_id="default/api-server",
-            triggered_at=datetime.now(timezone.utc),
+            triggered_at=datetime.now(UTC),
             description="Pod has restarted 15 times in the last hour",
         )
         assert alert.severity == "critical"

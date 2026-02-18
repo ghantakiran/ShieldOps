@@ -2,17 +2,16 @@
 
 import pytest
 from httpx import ASGITransport, AsyncClient
-from unittest.mock import AsyncMock, patch
 
+from shieldops.api.app import app
+from shieldops.api.auth.dependencies import get_current_user
+from shieldops.api.auth.models import UserRole
 from shieldops.api.auth.service import (
     create_access_token,
     decode_token,
     hash_password,
     verify_password,
 )
-from shieldops.api.auth.models import UserRole
-from shieldops.api.auth.dependencies import get_current_user
-from shieldops.api.app import app
 
 
 class TestPasswordHashing:
@@ -51,6 +50,7 @@ class TestJWTTokens:
 
     def test_expired_token_rejected(self):
         from datetime import timedelta
+
         token = create_access_token(
             subject="user-1", role="admin", expires_delta=timedelta(seconds=-1)
         )
@@ -68,17 +68,13 @@ class TestAuthEndpoints:
         # Remove auth override for these tests
         original = app.dependency_overrides.copy()
         app.dependency_overrides.pop(get_current_user, None)
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as ac:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
             yield ac
         app.dependency_overrides = original
 
     @pytest.fixture
     async def authenticated_client(self):
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as ac:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
             yield ac
 
     @pytest.mark.asyncio
@@ -133,9 +129,7 @@ class TestRBAC:
 
         original = app.dependency_overrides.copy()
         app.dependency_overrides[get_current_user] = _mock_viewer
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as ac:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
             yield ac
         app.dependency_overrides = original
 

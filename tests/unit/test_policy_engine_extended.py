@@ -27,6 +27,7 @@ from shieldops.policy.rollback.manager import RollbackManager
 # Helpers
 # ────────────────────────────────────────────────────────────────────
 
+
 def _make_snapshot(sid: str = "snap-1", resource_id: str = "pod/api") -> Snapshot:
     return Snapshot(
         id=sid,
@@ -256,7 +257,10 @@ class TestApprovalWorkflowUnit:
         wf = ApprovalWorkflow(timeout_seconds=5)
         action = _make_action(risk=RiskLevel.CRITICAL)
         req = ApprovalRequest(
-            "req-1", action, "agent-1", "critical change",
+            "req-1",
+            action,
+            "agent-1",
+            "critical change",
             required_approvals=wf.required_approvals(RiskLevel.CRITICAL),
         )
 
@@ -418,9 +422,7 @@ class TestWiredApproveAPI:
         runner, workflow = _runner_with_state
         rem_module.set_runner(runner)
 
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             resp = await client.post(
                 "/api/v1/remediations/rem-api-test/approve",
                 json={"approver": "alice"},
@@ -450,9 +452,7 @@ class TestWiredApproveAPI:
         runner._remediations["rem-noapproval"] = state
         rem_module.set_runner(runner)
 
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             resp = await client.post(
                 "/api/v1/remediations/rem-noapproval/approve",
                 json={"approver": "alice"},
@@ -467,9 +467,7 @@ class TestWiredApproveAPI:
         runner = RemediationRunner(connector_router=_make_router())
         rem_module.set_runner(runner)
 
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             resp = await client.post(
                 "/api/v1/remediations/nonexistent/approve",
                 json={"approver": "alice"},
@@ -482,9 +480,7 @@ class TestWiredApproveAPI:
         runner, workflow = _runner_with_state
         rem_module.set_runner(runner)
 
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             resp = await client.post(
                 "/api/v1/remediations/rem-api-test/deny",
                 json={"approver": "bob", "reason": "too risky"},
@@ -512,9 +508,7 @@ class TestWiredApproveAPI:
         runner._remediations["rem-nodeny"] = state
         rem_module.set_runner(runner)
 
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             resp = await client.post(
                 "/api/v1/remediations/rem-nodeny/deny",
                 json={"approver": "bob"},
@@ -527,9 +521,7 @@ class TestWiredApproveAPI:
         runner, _ = _runner_with_state
         rem_module.set_runner(runner)
 
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             resp = await client.post(
                 "/api/v1/remediations/rem-api-test/rollback",
                 json={"reason": "bad deploy"},
@@ -554,9 +546,7 @@ class TestWiredApproveAPI:
         runner._remediations["rem-nosnap"] = state
         rem_module.set_runner(runner)
 
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             resp = await client.post(
                 "/api/v1/remediations/rem-nosnap/rollback",
                 json={"reason": "test"},
@@ -571,9 +561,7 @@ class TestWiredApproveAPI:
         runner = RemediationRunner(connector_router=_make_router())
         rem_module.set_runner(runner)
 
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             resp = await client.post(
                 "/api/v1/remediations/nonexistent/rollback",
                 json={"reason": "test"},

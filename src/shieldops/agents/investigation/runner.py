@@ -4,7 +4,7 @@ Takes an AlertContext, constructs the LangGraph, runs it end-to-end,
 and returns the completed investigation state.
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import uuid4
 
 import structlog
@@ -13,7 +13,6 @@ from shieldops.agents.investigation.graph import create_investigation_graph
 from shieldops.agents.investigation.models import InvestigationState
 from shieldops.agents.investigation.nodes import set_toolkit
 from shieldops.agents.investigation.tools import InvestigationToolkit
-from shieldops.config import settings
 from shieldops.connectors.base import ConnectorRouter
 from shieldops.models.base import AlertContext
 from shieldops.observability.base import LogSource, MetricSource, TraceSource
@@ -104,8 +103,7 @@ class InvestigationRunner:
             # Calculate total duration
             if final_state.investigation_start:
                 final_state.investigation_duration_ms = int(
-                    (datetime.now(timezone.utc) - final_state.investigation_start).total_seconds()
-                    * 1000
+                    (datetime.now(UTC) - final_state.investigation_start).total_seconds() * 1000
                 )
 
             logger.info(

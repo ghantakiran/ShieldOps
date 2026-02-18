@@ -8,9 +8,7 @@ from shieldops.api.app import app
 
 @pytest.fixture
 async def client():
-    async with AsyncClient(
-        transport=ASGITransport(app=app), base_url="http://test"
-    ) as ac:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
         yield ac
 
 
@@ -23,9 +21,7 @@ class TestRequestIDMiddleware:
     @pytest.mark.asyncio
     async def test_propagates_incoming_request_id(self, client):
         custom_id = "my-custom-request-id"
-        response = await client.get(
-            "/health", headers={"X-Request-ID": custom_id}
-        )
+        response = await client.get("/health", headers={"X-Request-ID": custom_id})
         assert response.headers["x-request-id"] == custom_id
 
     @pytest.mark.asyncio

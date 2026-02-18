@@ -8,7 +8,7 @@ Tests cover:
 - API endpoints (routes/remediations.py)
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -37,7 +37,6 @@ from shieldops.models.base import (
 )
 from shieldops.policy.approval.workflow import ApprovalWorkflow
 from shieldops.policy.opa.client import PolicyDecision, PolicyEngine
-
 
 # --- Fixtures ---
 
@@ -76,7 +75,7 @@ def alert_context():
         severity="critical",
         source="prometheus",
         resource_id="default/api-server",
-        triggered_at=datetime.now(timezone.utc),
+        triggered_at=datetime.now(UTC),
     )
 
 
@@ -85,7 +84,7 @@ def remediation_state(action):
     return RemediationState(
         remediation_id="rem-test-001",
         action=action,
-        remediation_start=datetime.now(timezone.utc),
+        remediation_start=datetime.now(UTC),
     )
 
 
@@ -95,13 +94,16 @@ def state_after_policy(remediation_state):
     remediation_state.policy_result = PolicyResult(
         allowed=True,
         reasons=["Action allowed by default policy"],
-        evaluated_at=datetime.now(timezone.utc),
+        evaluated_at=datetime.now(UTC),
     )
     remediation_state.reasoning_chain = [
         RemediationStep(
-            step_number=1, action="evaluate_policy",
-            input_summary="restart_pod", output_summary="ALLOWED",
-            duration_ms=10, tool_used="opa",
+            step_number=1,
+            action="evaluate_policy",
+            input_summary="restart_pod",
+            output_summary="ALLOWED",
+            duration_ms=10,
+            tool_used="opa",
         ),
     ]
     return remediation_state
@@ -113,9 +115,12 @@ def state_after_risk(state_after_policy):
     state_after_policy.assessed_risk = RiskLevel.MEDIUM
     state_after_policy.reasoning_chain.append(
         RemediationStep(
-            step_number=2, action="assess_risk",
-            input_summary="Assessing risk", output_summary="Risk: medium",
-            duration_ms=100, tool_used="policy_engine + llm",
+            step_number=2,
+            action="assess_risk",
+            input_summary="Assessing risk",
+            output_summary="Risk: medium",
+            duration_ms=100,
+            tool_used="policy_engine + llm",
         ),
     )
     return state_after_policy
@@ -129,13 +134,16 @@ def state_after_snapshot(state_after_risk):
         resource_id="default/api-server",
         snapshot_type="k8s_resource",
         state={"kind": "Pod", "metadata": {"name": "api-server"}},
-        created_at=datetime.now(timezone.utc),
+        created_at=datetime.now(UTC),
     )
     state_after_risk.reasoning_chain.append(
         RemediationStep(
-            step_number=3, action="create_snapshot",
-            input_summary="Capturing state", output_summary="Snapshot created",
-            duration_ms=50, tool_used="infra_connector",
+            step_number=3,
+            action="create_snapshot",
+            input_summary="Capturing state",
+            output_summary="Snapshot created",
+            duration_ms=50,
+            tool_used="infra_connector",
         ),
     )
     return state_after_risk
@@ -148,15 +156,17 @@ def state_after_execution(state_after_snapshot):
         action_id="act-test-001",
         status=ExecutionStatus.SUCCESS,
         message="Pod restarted successfully",
-        started_at=datetime.now(timezone.utc),
-        completed_at=datetime.now(timezone.utc),
+        started_at=datetime.now(UTC),
+        completed_at=datetime.now(UTC),
     )
     state_after_snapshot.reasoning_chain.append(
         RemediationStep(
-            step_number=4, action="execute_action",
+            step_number=4,
+            action="execute_action",
             input_summary="Executing restart_pod",
             output_summary="Action succeeded",
-            duration_ms=200, tool_used="infra_connector",
+            duration_ms=200,
+            tool_used="infra_connector",
         ),
     )
     return state_after_snapshot
@@ -185,33 +195,41 @@ def mock_approval_workflow():
 def mock_connector_router():
     router = MagicMock()
     connector = AsyncMock()
-    connector.create_snapshot = AsyncMock(return_value=Snapshot(
-        id="snap-mock-001",
-        resource_id="default/api-server",
-        snapshot_type="k8s_resource",
-        state={"kind": "Pod"},
-        created_at=datetime.now(timezone.utc),
-    ))
-    connector.execute_action = AsyncMock(return_value=ActionResult(
-        action_id="act-test-001",
-        status=ExecutionStatus.SUCCESS,
-        message="Pod restarted",
-        started_at=datetime.now(timezone.utc),
-        completed_at=datetime.now(timezone.utc),
-    ))
-    connector.get_health = AsyncMock(return_value=HealthStatus(
-        resource_id="default/api-server",
-        healthy=True,
-        status="Running",
-        last_checked=datetime.now(timezone.utc),
-    ))
-    connector.rollback = AsyncMock(return_value=ActionResult(
-        action_id="rollback-snap-mock-001",
-        status=ExecutionStatus.SUCCESS,
-        message="Rolled back",
-        started_at=datetime.now(timezone.utc),
-        completed_at=datetime.now(timezone.utc),
-    ))
+    connector.create_snapshot = AsyncMock(
+        return_value=Snapshot(
+            id="snap-mock-001",
+            resource_id="default/api-server",
+            snapshot_type="k8s_resource",
+            state={"kind": "Pod"},
+            created_at=datetime.now(UTC),
+        )
+    )
+    connector.execute_action = AsyncMock(
+        return_value=ActionResult(
+            action_id="act-test-001",
+            status=ExecutionStatus.SUCCESS,
+            message="Pod restarted",
+            started_at=datetime.now(UTC),
+            completed_at=datetime.now(UTC),
+        )
+    )
+    connector.get_health = AsyncMock(
+        return_value=HealthStatus(
+            resource_id="default/api-server",
+            healthy=True,
+            status="Running",
+            last_checked=datetime.now(UTC),
+        )
+    )
+    connector.rollback = AsyncMock(
+        return_value=ActionResult(
+            action_id="rollback-snap-mock-001",
+            status=ExecutionStatus.SUCCESS,
+            message="Rolled back",
+            started_at=datetime.now(UTC),
+            completed_at=datetime.now(UTC),
+        )
+    )
     router.get = MagicMock(return_value=connector)
     return router
 
@@ -452,9 +470,7 @@ class TestRequestApprovalNode:
     async def test_approval_granted(self, state_after_risk, mock_approval_workflow):
         from shieldops.agents.remediation.nodes import request_approval, set_toolkit
 
-        mock_approval_workflow.request_approval = AsyncMock(
-            return_value=ApprovalStatus.APPROVED
-        )
+        mock_approval_workflow.request_approval = AsyncMock(return_value=ApprovalStatus.APPROVED)
         toolkit = RemediationToolkit(approval_workflow=mock_approval_workflow)
         set_toolkit(toolkit)
 
@@ -575,13 +591,15 @@ class TestValidateHealthNode:
 
         router = MagicMock()
         connector = AsyncMock()
-        connector.get_health = AsyncMock(return_value=HealthStatus(
-            resource_id="default/api-server",
-            healthy=False,
-            status="CrashLoopBackOff",
-            message="Still crashing",
-            last_checked=datetime.now(timezone.utc),
-        ))
+        connector.get_health = AsyncMock(
+            return_value=HealthStatus(
+                resource_id="default/api-server",
+                healthy=False,
+                status="CrashLoopBackOff",
+                message="Still crashing",
+                last_checked=datetime.now(UTC),
+            )
+        )
         router.get = MagicMock(return_value=connector)
 
         toolkit = RemediationToolkit(connector_router=router)
@@ -690,7 +708,7 @@ class TestGraphRouting:
             action_id="test",
             status=ExecutionStatus.FAILED,
             message="Failed",
-            started_at=datetime.now(timezone.utc),
+            started_at=datetime.now(UTC),
         )
         assert execution_gate(state_after_snapshot) == "perform_rollback"
 
@@ -746,7 +764,7 @@ class TestRemediationRunner:
             alert_context=alert_context,
             current_step="validate_health",
             validation_passed=True,
-            remediation_start=datetime.now(timezone.utc),
+            remediation_start=datetime.now(UTC),
         )
         runner._app = AsyncMock()
         runner._app.ainvoke = AsyncMock(return_value=mock_state.model_dump())
@@ -818,7 +836,7 @@ class TestRemediationAPI:
                 resource_id="default/api-server",
                 snapshot_type="k8s_resource",
                 state={},
-                created_at=datetime.now(timezone.utc),
+                created_at=datetime.now(UTC),
             ),
         )
         runner.get_remediation.return_value = state
@@ -834,12 +852,14 @@ class TestRemediationAPI:
         runner.get_approval_workflow.return_value = workflow
 
         # Provide a rollback mock
-        runner.rollback = AsyncMock(return_value=ActionResult(
-            action_id="rollback-snap-001",
-            status=ExecutionStatus.SUCCESS,
-            message="Rolled back",
-            started_at=datetime.now(timezone.utc),
-        ))
+        runner.rollback = AsyncMock(
+            return_value=ActionResult(
+                action_id="rollback-snap-001",
+                status=ExecutionStatus.SUCCESS,
+                message="Rolled back",
+                started_at=datetime.now(UTC),
+            )
+        )
         return runner
 
     @pytest.fixture
@@ -857,15 +877,16 @@ class TestRemediationAPI:
 
         def _mock_admin_user():
             return UserResponse(
-                id="test-admin", email="admin@test.com", name="Test Admin",
-                role=UserRole.ADMIN, is_active=True,
+                id="test-admin",
+                email="admin@test.com",
+                name="Test Admin",
+                role=UserRole.ADMIN,
+                is_active=True,
             )
 
         app.dependency_overrides[get_current_user] = _mock_admin_user
 
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as ac:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
             yield ac
 
         set_runner(None)
@@ -962,7 +983,8 @@ class TestRemediationAPI:
         state = RemediationState(
             remediation_id="rem-no-snap",
             action=RemediationAction(
-                id="act-1", action_type="restart_pod",
+                id="act-1",
+                action_type="restart_pod",
                 target_resource="default/pod",
                 environment=Environment.PRODUCTION,
                 risk_level=RiskLevel.LOW,

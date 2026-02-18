@@ -2,7 +2,6 @@
 
 from pydantic import BaseModel, Field
 
-
 # --- Response schemas for structured LLM output ---
 
 
@@ -10,12 +9,8 @@ class CostAnomalyAssessmentResult(BaseModel):
     """Structured output from LLM cost anomaly assessment."""
 
     summary: str = Field(description="Brief summary of cost anomalies detected")
-    critical_anomalies: list[str] = Field(
-        description="Resource IDs with critical cost anomalies"
-    )
-    root_causes: list[str] = Field(
-        description="Likely root causes for the biggest cost anomalies"
-    )
+    critical_anomalies: list[str] = Field(description="Resource IDs with critical cost anomalies")
+    root_causes: list[str] = Field(description="Likely root causes for the biggest cost anomalies")
     immediate_actions: list[str] = Field(
         description="Actions to take immediately to reduce anomalous spending"
     )
@@ -32,8 +27,7 @@ class OptimizationAssessmentResult(BaseModel):
         description="Optimizations that can be implemented with low effort"
     )
     estimated_total_monthly_savings: float = Field(
-        ge=0.0,
-        description="Total estimated monthly savings across all recommendations"
+        ge=0.0, description="Total estimated monthly savings across all recommendations"
     )
 
 
@@ -41,17 +35,13 @@ class CostForecastResult(BaseModel):
     """Structured output for cost forecasting and savings synthesis."""
 
     overall_health_score: float = Field(
-        ge=0.0, le=100.0,
-        description="Overall cost health score (0-100, higher is better)"
+        ge=0.0, le=100.0, description="Overall cost health score (0-100, higher is better)"
     )
     summary: str = Field(description="Executive summary of cost posture")
     monthly_forecast: float = Field(
-        ge=0.0,
-        description="Projected monthly spend at current trajectory"
+        ge=0.0, description="Projected monthly spend at current trajectory"
     )
-    top_cost_risks: list[str] = Field(
-        description="Top cost risks in priority order"
-    )
+    top_cost_risks: list[str] = Field(description="Top cost risks in priority order")
     recommended_actions: list[str] = Field(
         description="Prioritized list of cost optimization actions"
     )
@@ -59,7 +49,9 @@ class CostForecastResult(BaseModel):
 
 # --- Prompt templates ---
 
-SYSTEM_COST_ANOMALY_ASSESSMENT = """You are an expert FinOps engineer analyzing cloud cost anomalies.
+SYSTEM_COST_ANOMALY_ASSESSMENT = """\
+You are an expert FinOps engineer analyzing cloud \
+cost anomalies.
 
 Analyze the cost anomaly data and determine:
 1. Which anomalies are most critical and need immediate attention
@@ -74,7 +66,9 @@ Prioritize by:
 
 Be specific about which resources need attention and what actions to take."""
 
-SYSTEM_OPTIMIZATION_ASSESSMENT = """You are an expert FinOps engineer identifying cloud cost optimization opportunities.
+SYSTEM_OPTIMIZATION_ASSESSMENT = """\
+You are an expert FinOps engineer identifying cloud cost \
+optimization opportunities.
 
 Analyze the resource utilization and cost data to identify:
 1. Unused or underutilized resources that can be downsized or terminated
@@ -91,7 +85,9 @@ For each recommendation, consider:
 
 Prioritize quick wins (high savings, low effort) first."""
 
-SYSTEM_COST_FORECAST = """You are a FinOps leader synthesizing cloud cost analysis into an executive summary.
+SYSTEM_COST_FORECAST = """\
+You are a FinOps leader synthesizing cloud cost analysis \
+into an executive summary.
 
 Given resource costs, anomalies, and optimization opportunities, provide:
 1. A cost health score (0-100, where 100 = fully optimized)

@@ -159,4 +159,4 @@ class PolicyEngine:
             try:
                 await self._rate_limiter.close()
             except Exception:
-                pass
+                logger.debug("rate_limiter_close_failed")

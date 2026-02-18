@@ -1,6 +1,6 @@
 """LangGraph workflow definition for the Investigation Agent."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import uuid4
 
 import structlog
@@ -12,8 +12,8 @@ from shieldops.agents.investigation.nodes import (
     analyze_metrics,
     analyze_traces,
     correlate_findings,
-    generate_hypotheses,
     gather_context,
+    generate_hypotheses,
 )
 from shieldops.agents.investigation.prompts import (
     SYSTEM_RECOMMEND_ACTION,
@@ -32,8 +32,7 @@ def should_analyze_traces(state: InvestigationState) -> str:
         return "generate_hypotheses"
     # Analyze traces if we found errors suggesting distributed issues
     has_distributed_errors = any(
-        f.severity == "error" and "timeout" in f.summary.lower()
-        for f in state.log_findings
+        f.severity == "error" and "timeout" in f.summary.lower() for f in state.log_findings
     )
     if has_distributed_errors:
         return "analyze_traces"
@@ -49,7 +48,7 @@ def should_recommend_action(state: InvestigationState) -> str:
 
 async def recommend_action(state: InvestigationState) -> dict:
     """Generate a remediation recommendation for high-confidence hypotheses using the LLM."""
-    start = datetime.now(timezone.utc)
+    start = datetime.now(UTC)
     top_hypothesis = state.hypotheses[0] if state.hypotheses else None
 
     logger.info(
@@ -121,9 +120,11 @@ async def recommend_action(state: InvestigationState) -> dict:
     step = ReasoningStep(
         step_number=len(state.reasoning_chain) + 1,
         action="recommend_action",
-        input_summary=f"Top hypothesis: {top_hypothesis.description[:100] if top_hypothesis else 'None'}",
+        input_summary=(
+            f"Top hypothesis: {top_hypothesis.description[:100] if top_hypothesis else 'None'}"
+        ),
         output_summary=output_summary,
-        duration_ms=int((datetime.now(timezone.utc) - start).total_seconds() * 1000),
+        duration_ms=int((datetime.now(UTC) - start).total_seconds() * 1000),
         tool_used="llm",
     )
 
@@ -132,7 +133,7 @@ async def recommend_action(state: InvestigationState) -> dict:
         "reasoning_chain": [*state.reasoning_chain, step],
         "current_step": "complete",
         "investigation_duration_ms": int(
-            (datetime.now(timezone.utc) - state.investigation_start).total_seconds() * 1000
+            (datetime.now(UTC) - state.investigation_start).total_seconds() * 1000
         )
         if state.investigation_start
         else 0,

@@ -103,9 +103,7 @@ async def list_cycles(
 
 
 @router.get("/learning/cycles/{learning_id}")
-async def get_cycle(
-    learning_id: str, _user: UserResponse = Depends(get_current_user)
-) -> dict:
+async def get_cycle(learning_id: str, _user: UserResponse = Depends(get_current_user)) -> dict:
     """Get full learning cycle detail."""
     runner = get_runner()
     result = runner.get_cycle(learning_id)

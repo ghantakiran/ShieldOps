@@ -1,7 +1,6 @@
 """CloudWatch Logs observability source."""
 
 import asyncio
-import time
 from functools import partial
 from typing import Any
 
@@ -54,9 +53,7 @@ class CloudWatchLogsSource(LogSource):
 
         # Poll for results
         for _ in range(60):
-            resp = await self._run_sync(
-                self._client.get_query_results, queryId=query_id
-            )
+            resp = await self._run_sync(self._client.get_query_results, queryId=query_id)
             if resp["status"] == "Complete":
                 return [
                     {field["field"]: field["value"] for field in row}

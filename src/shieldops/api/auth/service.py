@@ -1,12 +1,11 @@
 """Password hashing and JWT token management."""
 
-from datetime import datetime, timedelta, timezone
-
+import base64
 import hashlib
 import hmac
 import json
-import base64
 import secrets
+from datetime import UTC, datetime, timedelta
 
 from shieldops.config import settings
 
@@ -45,15 +44,13 @@ def create_access_token(
     expires_delta: timedelta | None = None,
 ) -> str:
     """Create a JWT access token using HMAC-SHA256."""
-    expire = datetime.now(timezone.utc) + (
-        expires_delta or timedelta(minutes=settings.jwt_expire_minutes)
-    )
+    expire = datetime.now(UTC) + (expires_delta or timedelta(minutes=settings.jwt_expire_minutes))
     header = {"alg": "HS256", "typ": "JWT"}
     payload = {
         "sub": subject,
         "role": role,
         "exp": int(expire.timestamp()),
-        "iat": int(datetime.now(timezone.utc).timestamp()),
+        "iat": int(datetime.now(UTC).timestamp()),
     }
     header_b64 = _b64url_encode(json.dumps(header).encode())
     payload_b64 = _b64url_encode(json.dumps(payload).encode())
@@ -86,7 +83,7 @@ def decode_token(token: str) -> dict | None:
 
         # Check expiration
         exp = payload.get("exp")
-        if exp and datetime.now(timezone.utc).timestamp() > exp:
+        if exp and datetime.now(UTC).timestamp() > exp:
             return None
 
         return payload

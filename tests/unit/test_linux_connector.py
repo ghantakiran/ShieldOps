@@ -1,7 +1,6 @@
 """Unit tests for the Linux SSH Connector."""
 
-from datetime import datetime, timezone
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock
 
 import pytest
 
@@ -25,6 +24,7 @@ def connector():
 
 
 # ── Security guardrails ──────────────────────────────────────────
+
 
 def test_forbidden_rm_rf():
     assert _is_forbidden("rm -rf /") is True
@@ -50,6 +50,7 @@ def test_allowed_commands():
 
 
 # ── get_health ───────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_get_health_active(connector):
@@ -79,11 +80,14 @@ async def test_get_health_inactive(connector):
 
 # ── list_resources ───────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_list_resources(connector):
-    connector._conn.run = AsyncMock(return_value=MockSSHResult(
-        stdout="nginx.service  loaded active running\nsshd.service  loaded active running\n"
-    ))
+    connector._conn.run = AsyncMock(
+        return_value=MockSSHResult(
+            stdout="nginx.service  loaded active running\nsshd.service  loaded active running\n"
+        )
+    )
     resources = await connector.list_resources("service", Environment.PRODUCTION)
     assert len(resources) == 2
     assert resources[0].name == "nginx"
@@ -92,6 +96,7 @@ async def test_list_resources(connector):
 
 
 # ── execute_action ───────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_restart_service(connector):
@@ -172,6 +177,7 @@ async def test_unsupported_action(connector):
 
 
 # ── Snapshots ────────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_create_snapshot(connector):

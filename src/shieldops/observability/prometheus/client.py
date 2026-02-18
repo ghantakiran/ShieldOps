@@ -4,7 +4,7 @@ Queries Prometheus via its HTTP API for metric data, anomaly detection,
 and instant queries used by investigation agents.
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 import httpx
@@ -52,11 +52,13 @@ class PrometheusSource(MetricSource):
             results = []
             for series in data.get("data", {}).get("result", []):
                 for timestamp, value in series.get("values", []):
-                    results.append({
-                        "timestamp": datetime.fromtimestamp(timestamp, tz=timezone.utc).isoformat(),
-                        "value": float(value),
-                        "labels": series.get("metric", {}),
-                    })
+                    results.append(
+                        {
+                            "timestamp": datetime.fromtimestamp(timestamp, tz=UTC).isoformat(),
+                            "value": float(value),
+                            "labels": series.get("metric", {}),
+                        }
+                    )
             return results
 
         except httpx.HTTPError as e:
@@ -76,15 +78,15 @@ class PrometheusSource(MetricSource):
             results = []
             for series in data.get("data", {}).get("result", []):
                 value = series.get("value", [None, None])
-                results.append({
-                    "metric": series.get("metric", {}),
-                    "value": float(value[1]) if value[1] is not None else None,
-                    "timestamp": datetime.fromtimestamp(
-                        float(value[0]), tz=timezone.utc
-                    ).isoformat()
-                    if value[0]
-                    else None,
-                })
+                results.append(
+                    {
+                        "metric": series.get("metric", {}),
+                        "value": float(value[1]) if value[1] is not None else None,
+                        "timestamp": datetime.fromtimestamp(float(value[0]), tz=UTC).isoformat()
+                        if value[0]
+                        else None,
+                    }
+                )
             return results
 
         except httpx.HTTPError as e:
@@ -122,14 +124,16 @@ class PrometheusSource(MetricSource):
                 continue
             deviation = ((point["value"] - baseline_avg) / baseline_avg) * 100
             if abs(deviation) >= threshold_percent:
-                anomalies.append({
-                    "timestamp": point["timestamp"],
-                    "current_value": point["value"],
-                    "baseline_value": baseline_avg,
-                    "deviation_percent": round(deviation, 2),
-                    "labels": point.get("labels", {}),
-                    "metric_name": metric_name,
-                })
+                anomalies.append(
+                    {
+                        "timestamp": point["timestamp"],
+                        "current_value": point["value"],
+                        "baseline_value": baseline_avg,
+                        "deviation_percent": round(deviation, 2),
+                        "labels": point.get("labels", {}),
+                        "metric_name": metric_name,
+                    }
+                )
 
         logger.info(
             "prometheus_anomaly_detection",

@@ -4,6 +4,7 @@ Bridges infrastructure connectors, policy engine, and approval workflow
 to the agent's LangGraph nodes.
 """
 
+from datetime import UTC
 from typing import Any
 
 import structlog
@@ -124,9 +125,7 @@ class RemediationToolkit:
                 action_id=action.id,
                 status=ExecutionStatus.FAILED,
                 message="No connector router configured",
-                started_at=__import__("datetime").datetime.now(
-                    __import__("datetime").timezone.utc
-                ),
+                started_at=__import__("datetime").datetime.now(__import__("datetime").timezone.utc),
             )
 
         try:
@@ -138,13 +137,13 @@ class RemediationToolkit:
                 action_id=action.id,
                 error=str(e),
             )
-            from datetime import datetime, timezone
+            from datetime import datetime
 
             return ActionResult(
                 action_id=action.id,
                 status=ExecutionStatus.FAILED,
                 message=str(e),
-                started_at=datetime.now(timezone.utc),
+                started_at=datetime.now(UTC),
                 error=str(e),
             )
 
@@ -177,13 +176,13 @@ class RemediationToolkit:
     ) -> ActionResult:
         """Rollback to a previous snapshot."""
         if self._router is None:
-            from datetime import datetime, timezone
+            from datetime import datetime
 
             return ActionResult(
                 action_id=f"rollback-{snapshot_id}",
                 status=ExecutionStatus.FAILED,
                 message="No connector router configured",
-                started_at=datetime.now(timezone.utc),
+                started_at=datetime.now(UTC),
             )
 
         try:
@@ -191,12 +190,12 @@ class RemediationToolkit:
             return await connector.rollback(snapshot_id)
         except (ValueError, Exception) as e:
             logger.error("rollback_failed", snapshot_id=snapshot_id, error=str(e))
-            from datetime import datetime, timezone
+            from datetime import datetime
 
             return ActionResult(
                 action_id=f"rollback-{snapshot_id}",
                 status=ExecutionStatus.FAILED,
                 message=str(e),
-                started_at=datetime.now(timezone.utc),
+                started_at=datetime.now(UTC),
                 error=str(e),
             )

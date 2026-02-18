@@ -120,9 +120,7 @@ async def list_analyses(
 
 
 @router.get("/cost/analyses/{analysis_id}")
-async def get_analysis(
-    analysis_id: str, _user: UserResponse = Depends(get_current_user)
-) -> dict:
+async def get_analysis(analysis_id: str, _user: UserResponse = Depends(get_current_user)) -> dict:
     """Get full cost analysis detail."""
     runner = get_runner()
     result = runner.get_analysis(analysis_id)

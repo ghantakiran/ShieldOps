@@ -4,7 +4,7 @@ Takes analysis parameters, constructs the LangGraph, runs it end-to-end,
 and returns the completed cost analysis state.
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 from uuid import uuid4
 
@@ -97,8 +97,7 @@ class CostRunner:
 
             if final_state.analysis_start:
                 final_state.analysis_duration_ms = int(
-                    (datetime.now(timezone.utc) - final_state.analysis_start).total_seconds()
-                    * 1000
+                    (datetime.now(UTC) - final_state.analysis_start).total_seconds() * 1000
                 )
 
             logger.info(

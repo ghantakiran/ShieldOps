@@ -1,6 +1,6 @@
 """Comprehensive tests for the Supervisor Agent."""
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -31,7 +31,6 @@ from shieldops.agents.supervisor.nodes import (
 )
 from shieldops.agents.supervisor.runner import SupervisorRunner
 from shieldops.agents.supervisor.tools import SupervisorToolkit
-
 
 # ===========================================================================
 # Toolkit Tests
@@ -119,7 +118,9 @@ class TestSupervisorToolkit:
     def test_evaluate_chain_investigation_high_confidence(self):
         toolkit = SupervisorToolkit()
         task = DelegatedTask(
-            task_id="t1", task_type=TaskType.INVESTIGATE, agent_name="investigation",
+            task_id="t1",
+            task_type=TaskType.INVESTIGATE,
+            agent_name="investigation",
             status=TaskStatus.COMPLETED,
             result={"confidence_score": 0.9, "recommended_action": "restart_pod"},
         )
@@ -130,7 +131,9 @@ class TestSupervisorToolkit:
     def test_evaluate_chain_investigation_low_confidence(self):
         toolkit = SupervisorToolkit()
         task = DelegatedTask(
-            task_id="t1", task_type=TaskType.INVESTIGATE, agent_name="investigation",
+            task_id="t1",
+            task_type=TaskType.INVESTIGATE,
+            agent_name="investigation",
             status=TaskStatus.COMPLETED,
             result={"confidence_score": 0.5, "recommended_action": "restart_pod"},
         )
@@ -140,7 +143,9 @@ class TestSupervisorToolkit:
     def test_evaluate_chain_remediation_triggers_learn(self):
         toolkit = SupervisorToolkit()
         task = DelegatedTask(
-            task_id="t1", task_type=TaskType.REMEDIATE, agent_name="remediation",
+            task_id="t1",
+            task_type=TaskType.REMEDIATE,
+            agent_name="remediation",
             status=TaskStatus.COMPLETED,
             result={"status": "success"},
         )
@@ -151,8 +156,11 @@ class TestSupervisorToolkit:
     def test_evaluate_chain_failed_task(self):
         toolkit = SupervisorToolkit()
         task = DelegatedTask(
-            task_id="t1", task_type=TaskType.INVESTIGATE, agent_name="investigation",
-            status=TaskStatus.FAILED, error="crashed",
+            task_id="t1",
+            task_type=TaskType.INVESTIGATE,
+            agent_name="investigation",
+            status=TaskStatus.FAILED,
+            error="crashed",
         )
         result = toolkit.evaluate_chain_rules(task)
         assert result["should_chain"] is False
@@ -160,8 +168,11 @@ class TestSupervisorToolkit:
     def test_evaluate_escalation_failed_critical(self):
         toolkit = SupervisorToolkit()
         task = DelegatedTask(
-            task_id="t1", task_type=TaskType.INVESTIGATE, agent_name="investigation",
-            status=TaskStatus.FAILED, error="timeout",
+            task_id="t1",
+            task_type=TaskType.INVESTIGATE,
+            agent_name="investigation",
+            status=TaskStatus.FAILED,
+            error="timeout",
         )
         result = toolkit.evaluate_escalation_rules(task, {"priority": "critical"})
         assert result["needs_escalation"] is True
@@ -170,17 +181,25 @@ class TestSupervisorToolkit:
     def test_evaluate_escalation_low_confidence(self):
         toolkit = SupervisorToolkit()
         task = DelegatedTask(
-            task_id="t1", task_type=TaskType.INVESTIGATE, agent_name="investigation",
-            status=TaskStatus.COMPLETED, result={},
+            task_id="t1",
+            task_type=TaskType.INVESTIGATE,
+            agent_name="investigation",
+            status=TaskStatus.COMPLETED,
+            result={},
         )
-        result = toolkit.evaluate_escalation_rules(task, {"priority": "critical", "confidence": 0.3})
+        result = toolkit.evaluate_escalation_rules(
+            task, {"priority": "critical", "confidence": 0.3}
+        )
         assert result["needs_escalation"] is True
 
     def test_evaluate_escalation_not_needed(self):
         toolkit = SupervisorToolkit()
         task = DelegatedTask(
-            task_id="t1", task_type=TaskType.INVESTIGATE, agent_name="investigation",
-            status=TaskStatus.COMPLETED, result={},
+            task_id="t1",
+            task_type=TaskType.INVESTIGATE,
+            agent_name="investigation",
+            status=TaskStatus.COMPLETED,
+            result={},
         )
         result = toolkit.evaluate_escalation_rules(task, {"priority": "medium", "confidence": 0.9})
         assert result["needs_escalation"] is False
@@ -199,7 +218,9 @@ class TestClassifyEventNode:
         toolkit = SupervisorToolkit()
         set_toolkit(toolkit)
 
-        state = SupervisorState(session_id="test-001", event={"type": "alert", "severity": "critical"})
+        state = SupervisorState(
+            session_id="test-001", event={"type": "alert", "severity": "critical"}
+        )
         result = await classify_event(state)
 
         assert result["classification"] is not None
@@ -215,7 +236,9 @@ class TestClassifyEventNode:
 
         state = SupervisorState(session_id="test-002", event={"type": "unknown_event"})
 
-        with patch("shieldops.agents.supervisor.nodes.llm_structured", side_effect=RuntimeError("skip")):
+        with patch(
+            "shieldops.agents.supervisor.nodes.llm_structured", side_effect=RuntimeError("skip")
+        ):
             result = await classify_event(state)
 
         # Falls back to rule-based classification
@@ -235,7 +258,9 @@ class TestDispatchToAgentNode:
 
         state = SupervisorState(
             session_id="test-003",
-            classification=EventClassification(event_type="alert", task_type=TaskType.INVESTIGATE, priority="high"),
+            classification=EventClassification(
+                event_type="alert", task_type=TaskType.INVESTIGATE, priority="high"
+            ),
             reasoning_chain=[],
         )
         result = await dispatch_to_agent(state)
@@ -270,15 +295,21 @@ class TestEvaluateResultNode:
         state = SupervisorState(
             session_id="test-005",
             active_task=DelegatedTask(
-                task_id="t1", task_type=TaskType.INVESTIGATE, agent_name="investigation",
+                task_id="t1",
+                task_type=TaskType.INVESTIGATE,
+                agent_name="investigation",
                 status=TaskStatus.COMPLETED,
                 result={"confidence_score": 0.9, "recommended_action": "restart_pod"},
             ),
-            classification=EventClassification(event_type="alert", task_type=TaskType.INVESTIGATE, priority="high"),
+            classification=EventClassification(
+                event_type="alert", task_type=TaskType.INVESTIGATE, priority="high"
+            ),
             reasoning_chain=[],
         )
 
-        with patch("shieldops.agents.supervisor.nodes.llm_structured", side_effect=RuntimeError("skip")):
+        with patch(
+            "shieldops.agents.supervisor.nodes.llm_structured", side_effect=RuntimeError("skip")
+        ):
             result = await evaluate_result(state)
 
         assert result["should_chain"] is True
@@ -298,10 +329,15 @@ class TestEscalateNode:
         state = SupervisorState(
             session_id="test-006",
             active_task=DelegatedTask(
-                task_id="t1", task_type=TaskType.INVESTIGATE, agent_name="investigation",
-                status=TaskStatus.FAILED, error="timeout",
+                task_id="t1",
+                task_type=TaskType.INVESTIGATE,
+                agent_name="investigation",
+                status=TaskStatus.FAILED,
+                error="timeout",
             ),
-            classification=EventClassification(event_type="alert", task_type=TaskType.INVESTIGATE, priority="critical"),
+            classification=EventClassification(
+                event_type="alert", task_type=TaskType.INVESTIGATE, priority="critical"
+            ),
             reasoning_chain=[],
         )
         result = await escalate(state)
@@ -319,8 +355,12 @@ class TestFinalizeNode:
     async def test_finalize(self):
         state = SupervisorState(
             session_id="test-007",
-            session_start=datetime.now(timezone.utc) - timedelta(seconds=2),
-            delegated_tasks=[DelegatedTask(task_id="t1", task_type=TaskType.INVESTIGATE, agent_name="investigation")],
+            session_start=datetime.now(UTC) - timedelta(seconds=2),
+            delegated_tasks=[
+                DelegatedTask(
+                    task_id="t1", task_type=TaskType.INVESTIGATE, agent_name="investigation"
+                )
+            ],
             reasoning_chain=[],
         )
         result = await finalize(state)
@@ -393,14 +433,18 @@ class TestSupervisorRunner:
         runner = SupervisorRunner()
 
         with patch.object(runner, "_app") as mock_app:
-            mock_app.ainvoke = AsyncMock(return_value=SupervisorState(
-                session_id="sup-test",
-                current_step="complete",
-                session_start=datetime.now(timezone.utc),
-                delegated_tasks=[
-                    DelegatedTask(task_id="t1", task_type=TaskType.INVESTIGATE, agent_name="investigation"),
-                ],
-            ).model_dump())
+            mock_app.ainvoke = AsyncMock(
+                return_value=SupervisorState(
+                    session_id="sup-test",
+                    current_step="complete",
+                    session_start=datetime.now(UTC),
+                    delegated_tasks=[
+                        DelegatedTask(
+                            task_id="t1", task_type=TaskType.INVESTIGATE, agent_name="investigation"
+                        ),
+                    ],
+                ).model_dump()
+            )
 
             result = await runner.handle_event({"type": "alert"})
 
@@ -449,8 +493,11 @@ class TestSupervisorAPI:
 
         def _mock_admin_user():
             return UserResponse(
-                id="test-admin", email="admin@test.com", name="Test Admin",
-                role=UserRole.ADMIN, is_active=True,
+                id="test-admin",
+                email="admin@test.com",
+                name="Test Admin",
+                role=UserRole.ADMIN,
+                is_active=True,
             )
 
         app.dependency_overrides[get_current_user] = _mock_admin_user
@@ -483,11 +530,14 @@ class TestSupervisorAPI:
 
     def test_submit_event_async(self):
         client, _ = self._make_app()
-        resp = client.post("/api/v1/supervisor/events", json={
-            "type": "alert",
-            "severity": "critical",
-            "source": "prometheus",
-        })
+        resp = client.post(
+            "/api/v1/supervisor/events",
+            json={
+                "type": "alert",
+                "severity": "critical",
+                "source": "prometheus",
+            },
+        )
         assert resp.status_code == 202
         assert resp.json()["status"] == "accepted"
 
@@ -503,10 +553,13 @@ class TestSupervisorAPI:
 
         runner.handle_event = mock_handle
 
-        resp = client.post("/api/v1/supervisor/events/sync", json={
-            "type": "incident",
-            "severity": "critical",
-        })
+        resp = client.post(
+            "/api/v1/supervisor/events/sync",
+            json={
+                "type": "incident",
+                "severity": "critical",
+            },
+        )
         assert resp.status_code == 200
         assert resp.json()["current_step"] == "complete"
 
@@ -516,7 +569,9 @@ class TestSupervisorAPI:
             session_id="sup-tasks",
             event={"type": "alert"},
             delegated_tasks=[
-                DelegatedTask(task_id="t1", task_type=TaskType.INVESTIGATE, agent_name="investigation"),
+                DelegatedTask(
+                    task_id="t1", task_type=TaskType.INVESTIGATE, agent_name="investigation"
+                ),
                 DelegatedTask(task_id="t2", task_type=TaskType.REMEDIATE, agent_name="remediation"),
             ],
         )

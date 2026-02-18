@@ -77,12 +77,8 @@ class SecurityToolkit:
             "findings": all_findings[:100],
             "critical_findings": critical[:20],
             "high_findings": high[:30],
-            "patches_available": sum(
-                1 for f in all_findings if f.get("fixed_version")
-            ),
-            "sources_queried": [
-                getattr(s, "source_name", "unknown") for s in self._cve_sources
-            ],
+            "patches_available": sum(1 for f in all_findings if f.get("fixed_version")),
+            "sources_queried": [getattr(s, "source_name", "unknown") for s in self._cve_sources],
         }
 
     async def check_credentials(
@@ -163,14 +159,16 @@ class SecurityToolkit:
         framework_controls = self._get_framework_controls(framework)
 
         for control in framework_controls:
-            controls.append({
-                "control_id": control["id"],
-                "framework": framework,
-                "title": control["title"],
-                "status": "passing",  # Default — real implementation queries infra
-                "severity": control.get("severity", "medium"),
-                "evidence": [],
-            })
+            controls.append(
+                {
+                    "control_id": control["id"],
+                    "framework": framework,
+                    "title": control["title"],
+                    "status": "passing",  # Default — real implementation queries infra
+                    "severity": control.get("severity", "medium"),
+                    "evidence": [],
+                }
+            )
 
         passing = sum(1 for c in controls if c["status"] == "passing")
         failing = sum(1 for c in controls if c["status"] == "failing")
@@ -310,9 +308,7 @@ class SecurityToolkit:
             "reasons": decision.reasons,
         }
 
-    def classify_security_risk(
-        self, action_type: str, environment: Environment
-    ) -> RiskLevel:
+    def classify_security_risk(self, action_type: str, environment: Environment) -> RiskLevel:
         """Classify risk level for a security action."""
         if self._policy_engine is not None:
             return self._policy_engine.classify_risk(action_type, environment)
@@ -334,6 +330,7 @@ class SecurityToolkit:
         """Submit an approval request and wait for response."""
         if self._approval_workflow is None:
             from shieldops.models.base import ApprovalStatus
+
             return ApprovalStatus.APPROVED
         return await self._approval_workflow.request_approval(request)
 

@@ -78,9 +78,7 @@ class ApprovalNotifier:
             target=target,
         )
 
-    async def send_resolution(
-        self, request: ApprovalRequest, status: ApprovalStatus
-    ) -> None:
+    async def send_resolution(self, request: ApprovalRequest, status: ApprovalStatus) -> None:
         """Notify the channel of the final approval outcome."""
         if not self.enabled:
             return
@@ -105,9 +103,7 @@ class ApprovalNotifier:
             status=status.value,
         )
 
-    async def _post_message(
-        self, text: str, target_channel: str | None = None
-    ) -> None:
+    async def _post_message(self, text: str, target_channel: str | None = None) -> None:
         """Post a message to Slack via chat.postMessage."""
         channel = target_channel or self._channel
         try:

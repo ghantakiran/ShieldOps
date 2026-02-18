@@ -55,9 +55,9 @@ SEVERITY_COLORS: dict[str, str] = {
 }
 
 CONFIDENCE_COLORS: dict[str, str] = {
-    "high": "#10B981",    # >= 0.8
+    "high": "#10B981",  # >= 0.8
     "medium": "#F59E0B",  # >= 0.5
-    "low": "#EF4444",     # < 0.5
+    "low": "#EF4444",  # < 0.5
 }
 
 

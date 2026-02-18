@@ -54,3 +54,4 @@ service-account.json
 
 # Docker
 *.log
+junit.xml

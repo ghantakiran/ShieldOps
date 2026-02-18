@@ -7,7 +7,7 @@ Each node is an async function that:
 4. Records its reasoning step in the audit trail
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import uuid4
 
 import structlog
@@ -25,7 +25,7 @@ from shieldops.agents.remediation.prompts import (
     ValidationAssessmentResult,
 )
 from shieldops.agents.remediation.tools import RemediationToolkit
-from shieldops.models.base import ApprovalStatus, ExecutionStatus, RiskLevel
+from shieldops.models.base import ExecutionStatus, RiskLevel
 from shieldops.policy.approval.workflow import ApprovalRequest
 from shieldops.utils.llm import llm_structured
 
@@ -48,7 +48,7 @@ def _get_toolkit() -> RemediationToolkit:
 
 
 def _elapsed_ms(start: datetime) -> int:
-    return int((datetime.now(timezone.utc) - start).total_seconds() * 1000)
+    return int((datetime.now(UTC) - start).total_seconds() * 1000)
 
 
 async def evaluate_policy(state: RemediationState) -> dict:
@@ -56,7 +56,7 @@ async def evaluate_policy(state: RemediationState) -> dict:
 
     This is the first gate — if policy denies the action, the workflow stops.
     """
-    start = datetime.now(timezone.utc)
+    start = datetime.now(UTC)
     toolkit = _get_toolkit()
 
     logger.info(
@@ -71,12 +71,11 @@ async def evaluate_policy(state: RemediationState) -> dict:
     policy_result = PolicyResult(
         allowed=decision.allowed,
         reasons=decision.reasons,
-        evaluated_at=datetime.now(timezone.utc),
+        evaluated_at=datetime.now(UTC),
     )
 
     output_summary = (
-        f"Policy {'ALLOWED' if decision.allowed else 'DENIED'}: "
-        f"{'; '.join(decision.reasons[:3])}"
+        f"Policy {'ALLOWED' if decision.allowed else 'DENIED'}: {'; '.join(decision.reasons[:3])}"
     )
 
     step = RemediationStep(
@@ -101,7 +100,7 @@ async def evaluate_policy(state: RemediationState) -> dict:
 
 async def assess_risk(state: RemediationState) -> dict:
     """Assess the risk level of the action using policy engine + LLM."""
-    start = datetime.now(timezone.utc)
+    start = datetime.now(UTC)
     toolkit = _get_toolkit()
 
     logger.info(
@@ -133,13 +132,15 @@ async def assess_risk(state: RemediationState) -> dict:
         f"Reasons: {state.policy_result.reasons if state.policy_result else []}",
     ]
     if state.alert_context:
-        context_lines.extend([
-            "",
-            "## Alert Context",
-            f"Alert: {state.alert_context.alert_name}",
-            f"Severity: {state.alert_context.severity}",
-            f"Resource: {state.alert_context.resource_id}",
-        ])
+        context_lines.extend(
+            [
+                "",
+                "## Alert Context",
+                f"Alert: {state.alert_context.alert_name}",
+                f"Severity: {state.alert_context.severity}",
+                f"Resource: {state.alert_context.resource_id}",
+            ]
+        )
 
     try:
         assessment: RiskAssessmentResult = await llm_structured(
@@ -170,7 +171,9 @@ async def assess_risk(state: RemediationState) -> dict:
     step = RemediationStep(
         step_number=len(state.reasoning_chain) + 1,
         action="assess_risk",
-        input_summary=f"Assessing risk for {state.action.action_type} in {state.action.environment.value}",
+        input_summary=(
+            f"Assessing risk for {state.action.action_type} in {state.action.environment.value}"
+        ),
         output_summary=output_summary,
         duration_ms=_elapsed_ms(start),
         tool_used="policy_engine + llm",
@@ -185,7 +188,7 @@ async def assess_risk(state: RemediationState) -> dict:
 
 async def request_approval(state: RemediationState) -> dict:
     """Request human approval for high/critical risk actions."""
-    start = datetime.now(timezone.utc)
+    start = datetime.now(UTC)
     toolkit = _get_toolkit()
 
     risk = state.assessed_risk or RiskLevel.HIGH
@@ -233,7 +236,7 @@ async def request_approval(state: RemediationState) -> dict:
 
 async def create_snapshot(state: RemediationState) -> dict:
     """Create infrastructure snapshot before executing the action."""
-    start = datetime.now(timezone.utc)
+    start = datetime.now(UTC)
     toolkit = _get_toolkit()
 
     logger.info(
@@ -245,7 +248,8 @@ async def create_snapshot(state: RemediationState) -> dict:
     snapshot = await toolkit.create_snapshot(state.action.target_resource)
 
     output_summary = (
-        f"Snapshot created: {snapshot.id}" if snapshot
+        f"Snapshot created: {snapshot.id}"
+        if snapshot
         else "Snapshot creation failed (proceeding without rollback capability)"
     )
 
@@ -267,7 +271,7 @@ async def create_snapshot(state: RemediationState) -> dict:
 
 async def execute_action(state: RemediationState) -> dict:
     """Execute the remediation action via the infrastructure connector."""
-    start = datetime.now(timezone.utc)
+    start = datetime.now(UTC)
     toolkit = _get_toolkit()
 
     logger.info(
@@ -287,9 +291,7 @@ async def execute_action(state: RemediationState) -> dict:
     step = RemediationStep(
         step_number=len(state.reasoning_chain) + 1,
         action="execute_action",
-        input_summary=(
-            f"Executing {state.action.action_type} on {state.action.target_resource}"
-        ),
+        input_summary=(f"Executing {state.action.action_type} on {state.action.target_resource}"),
         output_summary=output_summary,
         duration_ms=_elapsed_ms(start),
         tool_used="infra_connector",
@@ -304,7 +306,7 @@ async def execute_action(state: RemediationState) -> dict:
 
 async def validate_health(state: RemediationState) -> dict:
     """Validate system health after the remediation action."""
-    start = datetime.now(timezone.utc)
+    start = datetime.now(UTC)
     toolkit = _get_toolkit()
 
     logger.info(
@@ -317,12 +319,14 @@ async def validate_health(state: RemediationState) -> dict:
     health = await toolkit.validate_health(state.action.target_resource)
 
     if health:
-        checks.append(ValidationCheck(
-            check_name="resource_health",
-            passed=health.healthy,
-            message=f"Status: {health.status}. {health.message or ''}".strip(),
-            checked_at=datetime.now(timezone.utc),
-        ))
+        checks.append(
+            ValidationCheck(
+                check_name="resource_health",
+                passed=health.healthy,
+                message=f"Status: {health.status}. {health.message or ''}".strip(),
+                checked_at=datetime.now(UTC),
+            )
+        )
 
     # Use LLM to assess overall validation results
     validation_passed = all(c.passed for c in checks) if checks else None
@@ -339,7 +343,9 @@ async def validate_health(state: RemediationState) -> dict:
             "## Health Checks",
         ]
         for c in checks:
-            context_lines.append(f"- {c.check_name}: {'PASS' if c.passed else 'FAIL'} — {c.message}")
+            context_lines.append(
+                f"- {c.check_name}: {'PASS' if c.passed else 'FAIL'} — {c.message}"
+            )
 
         try:
             assessment: ValidationAssessmentResult = await llm_structured(
@@ -348,17 +354,17 @@ async def validate_health(state: RemediationState) -> dict:
                 schema=ValidationAssessmentResult,
             )
             validation_passed = assessment.overall_healthy
-            output_summary = (
-                f"{assessment.summary}. Recommendation: {assessment.recommendation}"
-            )
+            output_summary = f"{assessment.summary}. Recommendation: {assessment.recommendation}"
 
             if assessment.concerns:
-                checks.append(ValidationCheck(
-                    check_name="llm_assessment",
-                    passed=assessment.overall_healthy,
-                    message=f"Concerns: {'; '.join(assessment.concerns[:3])}",
-                    checked_at=datetime.now(timezone.utc),
-                ))
+                checks.append(
+                    ValidationCheck(
+                        check_name="llm_assessment",
+                        passed=assessment.overall_healthy,
+                        message=f"Concerns: {'; '.join(assessment.concerns[:3])}",
+                        checked_at=datetime.now(UTC),
+                    )
+                )
         except Exception as e:
             logger.error("llm_validation_assessment_failed", error=str(e))
 
@@ -381,7 +387,7 @@ async def validate_health(state: RemediationState) -> dict:
 
 async def perform_rollback(state: RemediationState) -> dict:
     """Rollback to pre-action state using the captured snapshot."""
-    start = datetime.now(timezone.utc)
+    start = datetime.now(UTC)
     toolkit = _get_toolkit()
 
     logger.info(

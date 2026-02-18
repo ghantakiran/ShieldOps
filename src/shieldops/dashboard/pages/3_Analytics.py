@@ -1,7 +1,7 @@
 """Analytics page — MTTR trends, resolution rate, agent accuracy, cost savings."""
 
-import streamlit as st
 import plotly.graph_objects as go
+import streamlit as st
 
 from shieldops.dashboard.api_client import ShieldOpsAPIClient
 from shieldops.dashboard.components import (
@@ -34,12 +34,14 @@ accuracy = client.get_agent_accuracy(period=period)
 savings = client.get_cost_savings_analytics(period=period)
 
 # --- KPI row ---
-render_metric_row([
-    ("Current MTTR", f"{mttr.get('current_mttr_minutes', 0):.0f} min", None),
-    ("Automated Resolution", f"{resolution.get('automated_rate', 0) * 100:.0f}%", None),
-    ("Agent Accuracy", f"{accuracy.get('accuracy', 0) * 100:.0f}%", None),
-    ("Hours Saved", f"{savings.get('hours_saved', 0):.0f}h", None),
-])
+render_metric_row(
+    [
+        ("Current MTTR", f"{mttr.get('current_mttr_minutes', 0):.0f} min", None),
+        ("Automated Resolution", f"{resolution.get('automated_rate', 0) * 100:.0f}%", None),
+        ("Agent Accuracy", f"{accuracy.get('accuracy', 0) * 100:.0f}%", None),
+        ("Hours Saved", f"{savings.get('hours_saved', 0):.0f}h", None),
+    ]
+)
 
 st.divider()
 
@@ -53,13 +55,15 @@ with col_left:
     if data_points:
         dates = [p.get("date", p.get("timestamp", "")) for p in data_points]
         values = [p.get("mttr_minutes", p.get("value", 0)) for p in data_points]
-        fig = go.Figure(go.Scatter(
-            x=dates,
-            y=values,
-            mode="lines+markers",
-            line={"color": "#3B82F6", "width": 2},
-            marker={"size": 6},
-        ))
+        fig = go.Figure(
+            go.Scatter(
+                x=dates,
+                y=values,
+                mode="lines+markers",
+                line={"color": "#3B82F6", "width": 2},
+                marker={"size": 6},
+            )
+        )
         fig.update_layout(
             template="plotly_dark",
             height=300,
@@ -79,12 +83,14 @@ with col_right:
     total_incidents = resolution.get("total_incidents", 0)
 
     if total_incidents > 0:
-        fig = go.Figure(go.Pie(
-            labels=["Automated", "Manual"],
-            values=[auto_rate, manual_rate],
-            hole=0.5,
-            marker={"colors": ["#10B981", "#6B7280"]},
-        ))
+        fig = go.Figure(
+            go.Pie(
+                labels=["Automated", "Manual"],
+                values=[auto_rate, manual_rate],
+                hole=0.5,
+                marker={"colors": ["#10B981", "#6B7280"]},
+            )
+        )
         fig.update_layout(
             template="plotly_dark",
             height=300,
@@ -106,20 +112,22 @@ with col_acc:
     acc_val = accuracy.get("accuracy", 0)
     total_inv = accuracy.get("total_investigations", 0)
 
-    fig = go.Figure(go.Indicator(
-        mode="gauge+number",
-        value=acc_val * 100,
-        number={"suffix": "%"},
-        gauge={
-            "axis": {"range": [0, 100]},
-            "bar": {"color": "#3B82F6"},
-            "steps": [
-                {"range": [0, 50], "color": "rgba(239,68,68,0.19)"},
-                {"range": [50, 80], "color": "rgba(245,158,11,0.19)"},
-                {"range": [80, 100], "color": "rgba(16,185,129,0.19)"},
-            ],
-        },
-    ))
+    fig = go.Figure(
+        go.Indicator(
+            mode="gauge+number",
+            value=acc_val * 100,
+            number={"suffix": "%"},
+            gauge={
+                "axis": {"range": [0, 100]},
+                "bar": {"color": "#3B82F6"},
+                "steps": [
+                    {"range": [0, 50], "color": "rgba(239,68,68,0.19)"},
+                    {"range": [50, 80], "color": "rgba(245,158,11,0.19)"},
+                    {"range": [80, 100], "color": "rgba(16,185,129,0.19)"},
+                ],
+            },
+        )
+    )
     fig.update_layout(
         template="plotly_dark",
         height=250,
@@ -135,8 +143,10 @@ with col_sav:
     usd = savings.get("estimated_savings_usd", 0)
     rate = savings.get("engineer_hourly_rate", 75)
 
-    render_metric_row([
-        ("Hours Saved", f"{hours:.0f}h", None),
-        ("Estimated Savings", f"${usd:,.0f}", None),
-    ])
+    render_metric_row(
+        [
+            ("Hours Saved", f"{hours:.0f}h", None),
+            ("Estimated Savings", f"${usd:,.0f}", None),
+        ]
+    )
     st.caption(f"Based on ${rate}/hr engineer rate")

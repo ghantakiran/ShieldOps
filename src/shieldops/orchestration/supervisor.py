@@ -6,7 +6,7 @@ Security, Learning). It manages the lifecycle of delegated tasks and
 handles escalation when specialist agents fail or are uncertain.
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import StrEnum
 
 import structlog
@@ -32,7 +32,7 @@ class SupervisorTask(BaseModel):
     agent_id: str | None = None
     input_data: dict = Field(default_factory=dict)
     status: str = "pending"  # pending, in_progress, completed, failed, escalated
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     completed_at: datetime | None = None
     result: dict | None = None
     error: str | None = None
@@ -58,7 +58,7 @@ class Supervisor:
         task_type = self._classify_event(event)
 
         task = SupervisorTask(
-            id=f"task-{datetime.now(timezone.utc).timestamp()}",
+            id=f"task-{datetime.now(UTC).timestamp()}",
             task_type=task_type,
             input_data=event,
         )
@@ -104,7 +104,7 @@ class Supervisor:
 
         if confidence >= 0.85 and recommended_action:
             remediation_task = SupervisorTask(
-                id=f"task-{datetime.now(timezone.utc).timestamp()}",
+                id=f"task-{datetime.now(UTC).timestamp()}",
                 task_type=TaskType.REMEDIATE,
                 input_data={
                     "investigation_id": investigation_task_id,

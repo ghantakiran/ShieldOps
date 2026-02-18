@@ -7,7 +7,7 @@ Each node is an async function that:
 4. Records its reasoning step in the audit trail
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import uuid4
 
 import structlog
@@ -52,12 +52,12 @@ def _get_toolkit() -> LearningToolkit:
 
 
 def _elapsed_ms(start: datetime) -> int:
-    return int((datetime.now(timezone.utc) - start).total_seconds() * 1000)
+    return int((datetime.now(UTC) - start).total_seconds() * 1000)
 
 
 async def gather_outcomes(state: LearningState) -> dict:
     """Gather incident outcomes and compute effectiveness metrics."""
-    start = datetime.now(timezone.utc)
+    start = datetime.now(UTC)
     toolkit = _get_toolkit()
 
     logger.info(
@@ -70,23 +70,23 @@ async def gather_outcomes(state: LearningState) -> dict:
 
     outcomes: list[IncidentOutcome] = []
     for raw in outcome_data.get("outcomes", []):
-        outcomes.append(IncidentOutcome(
-            incident_id=raw.get("incident_id", "unknown"),
-            alert_type=raw.get("alert_type", "unknown"),
-            environment=raw.get("environment", "production"),
-            root_cause=raw.get("root_cause", ""),
-            resolution_action=raw.get("resolution_action", ""),
-            investigation_duration_ms=raw.get("investigation_duration_ms", 0),
-            remediation_duration_ms=raw.get("remediation_duration_ms", 0),
-            was_automated=raw.get("was_automated", False),
-            was_correct=raw.get("was_correct", True),
-            feedback=raw.get("feedback", ""),
-        ))
+        outcomes.append(
+            IncidentOutcome(
+                incident_id=raw.get("incident_id", "unknown"),
+                alert_type=raw.get("alert_type", "unknown"),
+                environment=raw.get("environment", "production"),
+                root_cause=raw.get("root_cause", ""),
+                resolution_action=raw.get("resolution_action", ""),
+                investigation_duration_ms=raw.get("investigation_duration_ms", 0),
+                remediation_duration_ms=raw.get("remediation_duration_ms", 0),
+                was_automated=raw.get("was_automated", False),
+                was_correct=raw.get("was_correct", True),
+                feedback=raw.get("feedback", ""),
+            )
+        )
 
     # Compute effectiveness metrics
-    metrics = await toolkit.compute_effectiveness_metrics(
-        outcome_data.get("outcomes", [])
-    )
+    metrics = await toolkit.compute_effectiveness_metrics(outcome_data.get("outcomes", []))
 
     step = LearningStep(
         step_number=1,
@@ -114,7 +114,7 @@ async def gather_outcomes(state: LearningState) -> dict:
 
 async def analyze_patterns(state: LearningState) -> dict:
     """Analyze incident patterns to identify recurring issues."""
-    start = datetime.now(timezone.utc)
+    start = datetime.now(UTC)
 
     logger.info(
         "learning_analyzing_patterns",
@@ -140,23 +140,30 @@ async def analyze_patterns(state: LearningState) -> dict:
             for inc in incidents:
                 root_causes[inc.root_cause] = root_causes.get(inc.root_cause, 0) + 1
                 resolutions[inc.resolution_action] = resolutions.get(inc.resolution_action, 0) + 1
-                envs.add(inc.environment if isinstance(inc.environment, str) else inc.environment.value)
+                envs.add(
+                    inc.environment if isinstance(inc.environment, str) else inc.environment.value
+                )
                 total_time += inc.investigation_duration_ms + inc.remediation_duration_ms
 
             common_cause = max(root_causes, key=root_causes.get) if root_causes else ""
             common_resolution = max(resolutions, key=resolutions.get) if resolutions else ""
 
-            insights.append(PatternInsight(
-                pattern_id=f"pat-{uuid4().hex[:8]}",
-                alert_type=alert_type,
-                description=f"Recurring {alert_type}: {len(incidents)} incidents, common cause: {common_cause}",
-                frequency=len(incidents),
-                avg_resolution_time_ms=total_time // len(incidents),
-                common_root_cause=common_cause,
-                common_resolution=common_resolution,
-                confidence=min(0.95, 0.5 + len(incidents) * 0.1),
-                environments=sorted(envs),
-            ))
+            insights.append(
+                PatternInsight(
+                    pattern_id=f"pat-{uuid4().hex[:8]}",
+                    alert_type=alert_type,
+                    description=(
+                        f"Recurring {alert_type}: {len(incidents)} "
+                        f"incidents, common cause: {common_cause}"
+                    ),
+                    frequency=len(incidents),
+                    avg_resolution_time_ms=total_time // len(incidents),
+                    common_root_cause=common_cause,
+                    common_resolution=common_resolution,
+                    confidence=min(0.95, 0.5 + len(incidents) * 0.1),
+                    environments=sorted(envs),
+                )
+            )
 
     recurring_count = sum(1 for p in insights if p.frequency >= 2)
     output_summary = f"{len(insights)} patterns found, {recurring_count} recurring"
@@ -178,7 +185,9 @@ async def analyze_patterns(state: LearningState) -> dict:
                 f"{automated} automated, {incorrect} incorrect"
             )
             for inc in incidents[:3]:
-                context_lines.append(f"  - {inc.incident_id}: cause={inc.root_cause}, fix={inc.resolution_action}")
+                context_lines.append(
+                    f"  - {inc.incident_id}: cause={inc.root_cause}, fix={inc.resolution_action}"
+                )
                 if inc.feedback:
                     context_lines.append(f"    Feedback: {inc.feedback}")
 
@@ -215,7 +224,7 @@ async def analyze_patterns(state: LearningState) -> dict:
 
 async def recommend_playbooks(state: LearningState) -> dict:
     """Generate playbook updates based on patterns and outcomes."""
-    start = datetime.now(timezone.utc)
+    start = datetime.now(UTC)
     toolkit = _get_toolkit()
 
     logger.info(
@@ -233,53 +242,75 @@ async def recommend_playbooks(state: LearningState) -> dict:
     for pattern in state.pattern_insights:
         if pattern.alert_type not in existing_types:
             # New playbook needed
-            updates.append(PlaybookUpdate(
-                playbook_id=f"pb-{uuid4().hex[:8]}",
-                alert_type=pattern.alert_type,
-                update_type="new_playbook",
-                title=f"Automated response for {pattern.alert_type}",
-                description=f"Based on {pattern.frequency} incidents. Common cause: {pattern.common_root_cause}",
-                steps=[
-                    f"Investigate {pattern.alert_type} via automated analysis",
-                    f"Apply {pattern.common_resolution} if root cause matches: {pattern.common_root_cause}",
-                    "Validate service health post-remediation",
-                    "Escalate to on-call if automated fix fails",
-                ],
-                priority="high" if pattern.frequency >= 3 else "medium",
-                based_on_incidents=[],
-            ))
+            updates.append(
+                PlaybookUpdate(
+                    playbook_id=f"pb-{uuid4().hex[:8]}",
+                    alert_type=pattern.alert_type,
+                    update_type="new_playbook",
+                    title=f"Automated response for {pattern.alert_type}",
+                    description=(
+                        f"Based on {pattern.frequency} incidents. "
+                        f"Common cause: {pattern.common_root_cause}"
+                    ),
+                    steps=[
+                        f"Investigate {pattern.alert_type} via automated analysis",
+                        (
+                            f"Apply {pattern.common_resolution} if root "
+                            f"cause matches: {pattern.common_root_cause}"
+                        ),
+                        "Validate service health post-remediation",
+                        "Escalate to on-call if automated fix fails",
+                    ],
+                    priority="high" if pattern.frequency >= 3 else "medium",
+                    based_on_incidents=[],
+                )
+            )
         elif pattern.frequency >= 3:
             # Existing playbook needs improvement
-            updates.append(PlaybookUpdate(
-                playbook_id=f"pb-{uuid4().hex[:8]}",
-                alert_type=pattern.alert_type,
-                update_type="modify_step",
-                title=f"Improve {pattern.alert_type} playbook",
-                description=f"Recurring pattern ({pattern.frequency}x) suggests current playbook is insufficient",
-                steps=[
-                    f"Add root cause check for: {pattern.common_root_cause}",
-                    f"Auto-apply {pattern.common_resolution} when pattern matches",
-                ],
-                priority="high",
-                based_on_incidents=[],
-            ))
+            updates.append(
+                PlaybookUpdate(
+                    playbook_id=f"pb-{uuid4().hex[:8]}",
+                    alert_type=pattern.alert_type,
+                    update_type="modify_step",
+                    title=f"Improve {pattern.alert_type} playbook",
+                    description=(
+                        f"Recurring pattern ({pattern.frequency}x) "
+                        "suggests current playbook is insufficient"
+                    ),
+                    steps=[
+                        f"Add root cause check for: {pattern.common_root_cause}",
+                        f"Auto-apply {pattern.common_resolution} when pattern matches",
+                    ],
+                    priority="high",
+                    based_on_incidents=[],
+                )
+            )
 
     # Check for incorrect automation — suggest playbook fixes
     for outcome in state.incident_outcomes:
         if outcome.was_automated and not outcome.was_correct:
-            updates.append(PlaybookUpdate(
-                playbook_id=f"pb-{uuid4().hex[:8]}",
-                alert_type=outcome.alert_type,
-                update_type="modify_step",
-                title=f"Fix incorrect automation for {outcome.alert_type}",
-                description=f"Automated action '{outcome.resolution_action}' was incorrect for incident {outcome.incident_id}. Root cause: {outcome.root_cause}",
-                steps=[
-                    f"Add pre-check to distinguish '{outcome.root_cause}' from other {outcome.alert_type} causes",
-                    f"Only apply {outcome.resolution_action} when root cause is confirmed",
-                ],
-                priority="high",
-                based_on_incidents=[outcome.incident_id],
-            ))
+            updates.append(
+                PlaybookUpdate(
+                    playbook_id=f"pb-{uuid4().hex[:8]}",
+                    alert_type=outcome.alert_type,
+                    update_type="modify_step",
+                    title=f"Fix incorrect automation for {outcome.alert_type}",
+                    description=(
+                        f"Automated action '{outcome.resolution_action}' "
+                        f"was incorrect for incident {outcome.incident_id}. "
+                        f"Root cause: {outcome.root_cause}"
+                    ),
+                    steps=[
+                        (
+                            f"Add pre-check to distinguish '{outcome.root_cause}' "
+                            f"from other {outcome.alert_type} causes"
+                        ),
+                        f"Only apply {outcome.resolution_action} when root cause is confirmed",
+                    ],
+                    priority="high",
+                    based_on_incidents=[outcome.incident_id],
+                )
+            )
 
     output_summary = f"{len(updates)} playbook updates recommended"
 
@@ -332,7 +363,7 @@ async def recommend_playbooks(state: LearningState) -> dict:
 
 async def recommend_thresholds(state: LearningState) -> dict:
     """Recommend alerting threshold adjustments based on incident data."""
-    start = datetime.now(timezone.utc)
+    start = datetime.now(UTC)
     toolkit = _get_toolkit()
 
     logger.info(
@@ -371,19 +402,29 @@ async def recommend_thresholds(state: LearningState) -> dict:
             current = threshold_map[metric]["threshold"]
             # Suggest tightening threshold if false positives are high
             recommended = current * 1.1  # increase by 10%
-            adjustments.append(ThresholdAdjustment(
-                adjustment_id=f"adj-{uuid4().hex[:8]}",
-                metric_name=metric,
-                current_threshold=current,
-                recommended_threshold=round(recommended, 1),
-                direction="increase",
-                reason=f"{incorrect_count}/{total} automated actions for {alert_type} were incorrect — threshold may be too sensitive",
-                false_positive_reduction=round(error_rate * 50, 1),  # estimate
-                based_on_incidents=[],
-            ))
+            adjustments.append(
+                ThresholdAdjustment(
+                    adjustment_id=f"adj-{uuid4().hex[:8]}",
+                    metric_name=metric,
+                    current_threshold=current,
+                    recommended_threshold=round(recommended, 1),
+                    direction="increase",
+                    reason=(
+                        f"{incorrect_count}/{total} automated actions for "
+                        f"{alert_type} were incorrect — threshold may be "
+                        "too sensitive"
+                    ),
+                    false_positive_reduction=round(error_rate * 50, 1),  # estimate
+                    based_on_incidents=[],
+                )
+            )
 
-    est_fp_reduction = sum(a.false_positive_reduction for a in adjustments) / max(len(adjustments), 1)
-    output_summary = f"{len(adjustments)} threshold adjustments, est. {est_fp_reduction:.0f}% FP reduction"
+    est_fp_reduction = sum(a.false_positive_reduction for a in adjustments) / max(
+        len(adjustments), 1
+    )
+    output_summary = (
+        f"{len(adjustments)} threshold adjustments, est. {est_fp_reduction:.0f}% FP reduction"
+    )
 
     # LLM assessment
     if state.incident_outcomes:
@@ -391,12 +432,16 @@ async def recommend_thresholds(state: LearningState) -> dict:
             "## Current Thresholds",
         ]
         for t in current_thresholds.get("thresholds", []):
-            context_lines.append(f"- {t['metric_name']}: {t['threshold']} ({t['severity']}, {t['duration']})")
-        context_lines.extend([
-            "",
-            "## Incident Analysis",
-            f"Total incidents: {len(state.incident_outcomes)}",
-        ])
+            context_lines.append(
+                f"- {t['metric_name']}: {t['threshold']} ({t['severity']}, {t['duration']})"
+            )
+        context_lines.extend(
+            [
+                "",
+                "## Incident Analysis",
+                f"Total incidents: {len(state.incident_outcomes)}",
+            ]
+        )
         for at, count in total_by_type.items():
             incorrect = incorrect_by_type.get(at, 0)
             context_lines.append(f"- {at}: {count} total, {incorrect} incorrect automations")
@@ -435,7 +480,7 @@ async def recommend_thresholds(state: LearningState) -> dict:
 
 async def synthesize_improvements(state: LearningState) -> dict:
     """Synthesize all findings into an improvement summary."""
-    start = datetime.now(timezone.utc)
+    start = datetime.now(UTC)
 
     logger.info("learning_synthesizing_improvements", learning_id=state.learning_id)
 
@@ -451,24 +496,26 @@ async def synthesize_improvements(state: LearningState) -> dict:
         f"Recurring: {state.recurring_pattern_count}",
     ]
     for p in state.pattern_insights[:10]:
-        context_lines.append(
-            f"- {p.alert_type}: {p.frequency}x, cause={p.common_root_cause}"
-        )
-    context_lines.extend([
-        "",
-        "## Playbook Updates",
-        f"Recommended: {len(state.playbook_updates)}",
-    ])
+        context_lines.append(f"- {p.alert_type}: {p.frequency}x, cause={p.common_root_cause}")
+    context_lines.extend(
+        [
+            "",
+            "## Playbook Updates",
+            f"Recommended: {len(state.playbook_updates)}",
+        ]
+    )
     for pb in state.playbook_updates[:10]:
         context_lines.append(f"- {pb.update_type}: {pb.title}")
-    context_lines.extend([
-        "",
-        "## Threshold Adjustments",
-        f"Recommended: {len(state.threshold_adjustments)}",
-        f"Est. FP reduction: {state.estimated_false_positive_reduction:.0f}%",
-        "",
-        "## Learning Chain",
-    ])
+    context_lines.extend(
+        [
+            "",
+            "## Threshold Adjustments",
+            f"Recommended: {len(state.threshold_adjustments)}",
+            f"Est. FP reduction: {state.estimated_false_positive_reduction:.0f}%",
+            "",
+            "## Learning Chain",
+        ]
+    )
     for step in state.reasoning_chain:
         context_lines.append(f"Step {step.step_number} ({step.action}): {step.output_summary}")
 
@@ -494,8 +541,7 @@ async def synthesize_improvements(state: LearningState) -> dict:
         )
         improvement_score = assessment.improvement_score
         output_summary = (
-            f"Score: {assessment.improvement_score:.1f}/100. "
-            f"{assessment.summary[:200]}"
+            f"Score: {assessment.improvement_score:.1f}/100. {assessment.summary[:200]}"
         )
     except Exception as e:
         logger.error("llm_improvement_synthesis_failed", error=str(e))
@@ -514,6 +560,8 @@ async def synthesize_improvements(state: LearningState) -> dict:
         "reasoning_chain": [*state.reasoning_chain, step],
         "current_step": "complete",
         "learning_duration_ms": int(
-            (datetime.now(timezone.utc) - state.learning_start).total_seconds() * 1000
-        ) if state.learning_start else 0,
+            (datetime.now(UTC) - state.learning_start).total_seconds() * 1000
+        )
+        if state.learning_start
+        else 0,
     }
