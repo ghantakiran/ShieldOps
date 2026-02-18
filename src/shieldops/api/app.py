@@ -211,10 +211,12 @@ def create_app() -> FastAPI:
     # Middleware stack (order matters: outermost first)
     from shieldops.api.middleware import (
         ErrorHandlerMiddleware,
+        RateLimitMiddleware,
         RequestIDMiddleware,
         RequestLoggingMiddleware,
     )
     app.add_middleware(ErrorHandlerMiddleware)
+    app.add_middleware(RateLimitMiddleware)
     app.add_middleware(RequestLoggingMiddleware)
     app.add_middleware(RequestIDMiddleware)
 
