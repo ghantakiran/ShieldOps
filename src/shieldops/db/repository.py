@@ -1,6 +1,6 @@
 """Repository layer — bridges Pydantic domain models and SQLAlchemy ORM."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import structlog
 from sqlalchemy import select
@@ -9,8 +9,9 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from shieldops.agents.investigation.models import InvestigationState
 from shieldops.agents.remediation.models import RemediationState
 from shieldops.db.models import (
-    AuditLog,
     AgentSession,
+    AuditLog,
+    IncidentOutcomeRecord,
     InvestigationRecord,
     RemediationRecord,
     UserRecord,
@@ -331,3 +332,105 @@ class Repository:
             record.result_data = result_data
             record.duration_ms = duration_ms
             await session.commit()
+
+    # ── Incident Outcomes (Learning Agent) ────────────────────────
+
+    async def save_incident_outcome(
+        self,
+        incident_id: str,
+        alert_type: str,
+        environment: str,
+        root_cause: str,
+        resolution_action: str,
+        investigation_id: str | None = None,
+        remediation_id: str | None = None,
+        investigation_duration_ms: int = 0,
+        remediation_duration_ms: int = 0,
+        was_automated: bool = False,
+        was_correct: bool = True,
+        feedback: str = "",
+    ) -> None:
+        """Persist an incident outcome for learning analysis."""
+        async with self._sf() as session:
+            record = await session.get(IncidentOutcomeRecord, incident_id)
+            if record is None:
+                record = IncidentOutcomeRecord(id=incident_id)
+                session.add(record)
+
+            record.alert_type = alert_type
+            record.environment = environment
+            record.root_cause = root_cause
+            record.resolution_action = resolution_action
+            record.investigation_id = investigation_id
+            record.remediation_id = remediation_id
+            record.investigation_duration_ms = investigation_duration_ms
+            record.remediation_duration_ms = remediation_duration_ms
+            record.was_automated = was_automated
+            record.was_correct = was_correct
+            record.feedback = feedback
+
+            await session.commit()
+            logger.info("incident_outcome_saved", incident_id=incident_id)
+
+    async def query_incident_outcomes(
+        self, period: str = "30d", limit: int = 200
+    ) -> dict:
+        """Query incident outcomes for a given period.
+
+        Returns format compatible with LearningToolkit.get_incident_outcomes().
+        """
+        from datetime import timedelta
+
+        days = int(period.rstrip("d")) if period.endswith("d") else 30
+        cutoff = datetime.now(UTC) - timedelta(days=days)
+
+        async with self._sf() as session:
+            stmt = (
+                select(IncidentOutcomeRecord)
+                .where(IncidentOutcomeRecord.created_at >= cutoff)
+                .order_by(IncidentOutcomeRecord.created_at.desc())
+                .limit(limit)
+            )
+            result = await session.execute(stmt)
+            records = result.scalars().all()
+
+        outcomes = [
+            {
+                "incident_id": r.id,
+                "alert_type": r.alert_type,
+                "environment": r.environment,
+                "root_cause": r.root_cause,
+                "resolution_action": r.resolution_action,
+                "investigation_id": r.investigation_id,
+                "remediation_id": r.remediation_id,
+                "investigation_duration_ms": r.investigation_duration_ms,
+                "remediation_duration_ms": r.remediation_duration_ms,
+                "was_automated": r.was_automated,
+                "was_correct": r.was_correct,
+                "feedback": r.feedback,
+            }
+            for r in records
+        ]
+        return {
+            "period": period,
+            "total_incidents": len(outcomes),
+            "outcomes": outcomes,
+        }
+
+    async def save_feedback(
+        self, incident_id: str, feedback: str, was_correct: bool | None = None
+    ) -> bool:
+        """Update feedback on an existing incident outcome.
+
+        Returns True if the record was found and updated.
+        """
+        async with self._sf() as session:
+            record = await session.get(IncidentOutcomeRecord, incident_id)
+            if record is None:
+                return False
+            record.feedback = feedback
+            if was_correct is not None:
+                record.was_correct = was_correct
+            await session.commit()
+            logger.info("incident_feedback_saved", incident_id=incident_id)
+            return True
