@@ -4,19 +4,13 @@ Bridges incident databases, playbook stores, and alerting systems
 into the learning workflow.
 """
 
-from __future__ import annotations
-
 from datetime import datetime, timedelta, timezone
-from typing import TYPE_CHECKING, Any
+from typing import Any
 from uuid import uuid4
 
 import structlog
 
 from shieldops.models.base import Environment
-
-if TYPE_CHECKING:
-    from shieldops.db.repository import Repository
-    from shieldops.playbooks.loader import PlaybookLoader
 
 logger = structlog.get_logger()
 
@@ -156,37 +150,4 @@ class LearningToolkit:
             "avg_investigation_ms": avg_inv,
             "avg_remediation_ms": avg_rem,
             "by_alert_type": by_alert_type,
-        }
-
-
-class IncidentStoreAdapter:
-    """Adapts Repository into the incident_store interface LearningToolkit expects."""
-
-    def __init__(self, repository: Repository) -> None:
-        self._repo = repository
-
-    async def query(self, period: str = "30d") -> dict[str, Any]:
-        return await self._repo.query_incident_outcomes(period=period)
-
-
-class PlaybookStoreAdapter:
-    """Adapts PlaybookLoader into the async playbook_store interface LearningToolkit expects."""
-
-    def __init__(self, loader: PlaybookLoader) -> None:
-        self._loader = loader
-
-    async def list(self) -> dict[str, Any]:
-        playbooks = self._loader.all()
-        return {
-            "playbooks": [
-                {
-                    "playbook_id": f"pb-{i:03d}",
-                    "alert_type": pb.trigger.alert_type,
-                    "title": pb.name,
-                    "description": pb.description,
-                    "version": pb.version,
-                }
-                for i, pb in enumerate(playbooks, start=1)
-            ],
-            "total": len(playbooks),
         }

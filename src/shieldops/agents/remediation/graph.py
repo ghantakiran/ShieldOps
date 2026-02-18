@@ -36,9 +36,9 @@ def policy_gate(state: RemediationState) -> str:
 
 def approval_gate(state: RemediationState) -> str:
     """Route based on risk level — high/critical need approval."""
-    from shieldops.agents.remediation.nodes import _get_toolkit
+    from shieldops.agents.remediation.tools import RemediationToolkit
 
-    toolkit = _get_toolkit()
+    toolkit = RemediationToolkit()
     if state.assessed_risk and toolkit.requires_approval(state.assessed_risk):
         return "request_approval"
     return "create_snapshot"

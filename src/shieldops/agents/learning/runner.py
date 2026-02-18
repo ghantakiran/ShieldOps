@@ -4,10 +4,8 @@ Takes learning parameters, constructs the LangGraph, runs it end-to-end,
 and returns the completed learning state with improvement recommendations.
 """
 
-from __future__ import annotations
-
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING, Any
+from typing import Any
 from uuid import uuid4
 
 import structlog
@@ -15,15 +13,7 @@ import structlog
 from shieldops.agents.learning.graph import create_learning_graph
 from shieldops.agents.learning.models import LearningState
 from shieldops.agents.learning.nodes import set_toolkit
-from shieldops.agents.learning.tools import (
-    IncidentStoreAdapter,
-    LearningToolkit,
-    PlaybookStoreAdapter,
-)
-
-if TYPE_CHECKING:
-    from shieldops.db.repository import Repository
-    from shieldops.playbooks.loader import PlaybookLoader
+from shieldops.agents.learning.tools import LearningToolkit
 
 logger = structlog.get_logger()
 
@@ -33,8 +23,8 @@ class LearningRunner:
 
     Usage:
         runner = LearningRunner(
-            repository=repo,
-            playbook_loader=playbook_loader,
+            incident_store=db,
+            playbook_store=playbooks,
         )
         result = await runner.learn(period="30d")
     """
@@ -44,21 +34,10 @@ class LearningRunner:
         incident_store: Any | None = None,
         playbook_store: Any | None = None,
         alert_config_store: Any | None = None,
-        repository: Repository | None = None,
-        playbook_loader: PlaybookLoader | None = None,
     ) -> None:
-        # Wire adapters when repository/loader are provided
-        effective_incident_store = incident_store
-        effective_playbook_store = playbook_store
-
-        if repository is not None and effective_incident_store is None:
-            effective_incident_store = IncidentStoreAdapter(repository)
-        if playbook_loader is not None and effective_playbook_store is None:
-            effective_playbook_store = PlaybookStoreAdapter(playbook_loader)
-
         self._toolkit = LearningToolkit(
-            incident_store=effective_incident_store,
-            playbook_store=effective_playbook_store,
+            incident_store=incident_store,
+            playbook_store=playbook_store,
             alert_config_store=alert_config_store,
         )
         set_toolkit(self._toolkit)
