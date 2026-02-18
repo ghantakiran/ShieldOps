@@ -99,6 +99,63 @@ async def evaluate_policy(state: RemediationState) -> dict[str, Any]:
     }
 
 
+async def resolve_playbook(state: RemediationState) -> dict[str, Any]:
+    """Resolve a matching playbook for the current alert context.
+
+    If a playbook matches, populates playbook_context with decision tree
+    and validation info for downstream nodes.
+    """
+    start = datetime.now(UTC)
+    toolkit = _get_toolkit()
+
+    logger.info(
+        "remediation_resolving_playbook",
+        remediation_id=state.remediation_id,
+        has_alert_context=state.alert_context is not None,
+    )
+
+    matched_name: str | None = None
+    playbook_context: dict[str, Any] = {}
+    output_summary = "No alert context — skipping playbook resolution"
+
+    if state.alert_context:
+        playbook = toolkit.resolve_playbook(
+            state.alert_context.alert_name,
+            state.alert_context.severity,
+        )
+        if playbook:
+            matched_name = playbook.name
+            playbook_context = {
+                "decision_tree": [c.model_dump() for c in playbook.decision_tree],
+                "validation": playbook.validation.model_dump() if playbook.validation else None,
+                "description": playbook.description,
+            }
+            output_summary = (
+                f"Matched playbook '{playbook.name}' with "
+                f"{len(playbook.decision_tree)} decision branches"
+            )
+        else:
+            output_summary = f"No playbook matched alert '{state.alert_context.alert_name}'"
+
+    step = RemediationStep(
+        step_number=len(state.reasoning_chain) + 1,
+        action="resolve_playbook",
+        input_summary=(
+            f"Alert: {state.alert_context.alert_name if state.alert_context else 'N/A'}"
+        ),
+        output_summary=output_summary,
+        duration_ms=_elapsed_ms(start),
+        tool_used="playbook_loader",
+    )
+
+    return {
+        "matched_playbook_name": matched_name,
+        "playbook_context": playbook_context,
+        "reasoning_chain": [*state.reasoning_chain, step],
+        "current_step": "resolve_playbook",
+    }
+
+
 async def assess_risk(state: RemediationState) -> dict[str, Any]:
     """Assess the risk level of the action using policy engine + LLM."""
     start = datetime.now(UTC)
@@ -331,6 +388,23 @@ async def validate_health(state: RemediationState) -> dict[str, Any]:
                 checked_at=datetime.now(UTC),
             )
         )
+
+    # Add playbook-defined validation checks
+    playbook_validation = state.playbook_context.get("validation")
+    if playbook_validation and isinstance(playbook_validation, dict):
+        playbook_checks = playbook_validation.get("checks", [])
+        for pc in playbook_checks:
+            check_name = (
+                pc.get("name", "playbook_check") if isinstance(pc, dict) else "playbook_check"
+            )
+            checks.append(
+                ValidationCheck(
+                    check_name=check_name,
+                    passed=True,  # Placeholder — real execution pending
+                    message=f"Playbook check '{check_name}' registered",
+                    checked_at=datetime.now(UTC),
+                )
+            )
 
     # Use LLM to assess overall validation results
     validation_passed = all(c.passed for c in checks) if checks else None

@@ -2,7 +2,8 @@
 
 Workflow:
     evaluate_policy → [DENIED? → END]
-    → assess_risk → [HIGH/CRITICAL? → request_approval → [DENIED? → END]]
+    → resolve_playbook → assess_risk
+    → [HIGH/CRITICAL? → request_approval → [DENIED? → END]]
     → create_snapshot → execute_action
     → [FAILED? → perform_rollback → END]
     → validate_health → [UNHEALTHY? → perform_rollback → END]
@@ -20,6 +21,7 @@ from shieldops.agents.remediation.nodes import (
     execute_action,
     perform_rollback,
     request_approval,
+    resolve_playbook,
     validate_health,
 )
 from shieldops.models.base import ApprovalStatus, ExecutionStatus
@@ -30,7 +32,7 @@ logger = structlog.get_logger()
 def policy_gate(state: RemediationState) -> str:
     """Route based on policy evaluation result."""
     if state.policy_result and state.policy_result.allowed:
-        return "assess_risk"
+        return "resolve_playbook"
     return END
 
 
@@ -74,6 +76,7 @@ def create_remediation_graph() -> StateGraph[RemediationState]:
 
     # Add nodes
     graph.add_node("evaluate_policy", evaluate_policy)
+    graph.add_node("resolve_playbook", resolve_playbook)
     graph.add_node("assess_risk", assess_risk)
     graph.add_node("request_approval", request_approval)
     graph.add_node("create_snapshot", create_snapshot)
@@ -84,15 +87,18 @@ def create_remediation_graph() -> StateGraph[RemediationState]:
     # Entry point
     graph.set_entry_point("evaluate_policy")
 
-    # Policy gate: allowed → assess_risk, denied → END
+    # Policy gate: allowed → resolve_playbook, denied → END
     graph.add_conditional_edges(
         "evaluate_policy",
         policy_gate,
         {
-            "assess_risk": "assess_risk",
+            "resolve_playbook": "resolve_playbook",
             END: END,
         },
     )
+
+    # Playbook resolution → assess risk (unconditional)
+    graph.add_edge("resolve_playbook", "assess_risk")
 
     # Risk assessment → approval or direct execution
     graph.add_conditional_edges(

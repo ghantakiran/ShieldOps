@@ -665,7 +665,7 @@ class TestGraphRouting:
     def test_policy_gate_allowed(self, state_after_policy):
         from shieldops.agents.remediation.graph import policy_gate
 
-        assert policy_gate(state_after_policy) == "assess_risk"
+        assert policy_gate(state_after_policy) == "resolve_playbook"
 
     def test_policy_gate_denied(self, remediation_state):
         from shieldops.agents.remediation.graph import policy_gate

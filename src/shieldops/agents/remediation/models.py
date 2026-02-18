@@ -1,6 +1,7 @@
 """State models for the Remediation Agent."""
 
 from datetime import datetime
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -50,6 +51,10 @@ class RemediationState(BaseModel):
     action: RemediationAction
     alert_context: AlertContext | None = None
     investigation_id: str | None = None
+
+    # Playbook
+    matched_playbook_name: str | None = None
+    playbook_context: dict[str, Any] = Field(default_factory=dict)
 
     # Policy & risk
     policy_result: PolicyResult | None = None
