@@ -48,8 +48,28 @@ def create_connector_router(settings: Settings) -> ConnectorRouter:
         router.register(linux)
         logger.info("connector_registered", provider="linux")
 
-    # TODO: Register GCP connector when settings.gcp_project_id is configured
-    # TODO: Register Azure connector when settings.azure_subscription_id is configured
+    # GCP — registered when gcp_project_id is configured
+    if settings.gcp_project_id:
+        from shieldops.connectors.gcp.connector import GCPConnector
+
+        gcp = GCPConnector(
+            project_id=settings.gcp_project_id,
+            region=settings.gcp_region,
+        )
+        router.register(gcp)
+        logger.info("connector_registered", provider="gcp")
+
+    # Azure — registered when azure_subscription_id is configured
+    if settings.azure_subscription_id:
+        from shieldops.connectors.azure.connector import AzureConnector
+
+        azure = AzureConnector(
+            subscription_id=settings.azure_subscription_id,
+            resource_group=settings.azure_resource_group,
+            location=settings.azure_location,
+        )
+        router.register(azure)
+        logger.info("connector_registered", provider="azure")
 
     logger.info("connector_router_ready", providers=router.providers)
     return router
