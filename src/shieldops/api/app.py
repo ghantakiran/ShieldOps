@@ -137,7 +137,12 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     remediations.set_repository(repository)
 
     # Security runner — cve_sources/credential_stores left empty until integrations land
-    sec_runner = SecurityRunner(connector_router=router)
+    sec_runner = SecurityRunner(
+        connector_router=router,
+        policy_engine=policy_engine,
+        approval_workflow=approval_workflow,
+        repository=repository,
+    )
     security.set_runner(sec_runner)
 
     # Cost runner — billing_sources left empty until integrations land

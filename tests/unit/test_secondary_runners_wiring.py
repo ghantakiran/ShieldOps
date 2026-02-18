@@ -48,7 +48,12 @@ class TestSecurityRunnerWiring:
 
             app = create_app()
             async with app.router.lifespan_context(app):
-                mock_sec_cls.assert_called_once_with(connector_router=mock_router)
+                mock_sec_cls.assert_called_once()
+                call_kwargs = mock_sec_cls.call_args[1]
+                assert call_kwargs["connector_router"] is mock_router
+                assert "policy_engine" in call_kwargs
+                assert "approval_workflow" in call_kwargs
+                assert "repository" in call_kwargs
                 assert security._runner is mock_sec_cls.return_value
 
 

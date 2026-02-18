@@ -1,11 +1,10 @@
 """State models for the Security Agent."""
 
 from datetime import datetime
-from typing import Any
 
 from pydantic import BaseModel, Field
 
-from shieldops.models.base import AlertContext, Environment
+from shieldops.models.base import Environment
 
 
 class CVEFinding(BaseModel):
@@ -60,6 +59,36 @@ class SecurityPosture(BaseModel):
     top_risks: list[str] = Field(default_factory=list)
 
 
+class PatchResult(BaseModel):
+    """Result of applying a CVE patch to a resource."""
+
+    cve_id: str
+    package_name: str
+    target_resource: str
+    success: bool
+    message: str = ""
+    applied_version: str | None = None
+
+
+class RotationResult(BaseModel):
+    """Result of rotating a credential."""
+
+    credential_id: str
+    credential_type: str
+    service: str
+    success: bool
+    message: str = ""
+    new_expiry: datetime | None = None
+
+
+class SecurityPolicyResult(BaseModel):
+    """Result of OPA policy evaluation for security actions."""
+
+    allowed: bool
+    reasons: list[str] = Field(default_factory=list)
+    evaluated_at: datetime | None = None
+
+
 class SecurityStep(BaseModel):
     """A single step in the security agent's reasoning chain."""
 
@@ -96,6 +125,15 @@ class SecurityScanState(BaseModel):
 
     # Overall posture
     posture: SecurityPosture | None = None
+
+    # Action execution results
+    patch_results: list[PatchResult] = Field(default_factory=list)
+    rotation_results: list[RotationResult] = Field(default_factory=list)
+    patches_applied: int = 0
+    credentials_rotated: int = 0
+    action_policy_result: SecurityPolicyResult | None = None
+    action_approval_status: str | None = None
+    execute_actions: bool = False  # Opt-in flag (backward compatible)
 
     # Metadata
     scan_start: datetime | None = None

@@ -1,10 +1,16 @@
 """Repository layer — bridges Pydantic domain models and SQLAlchemy ORM."""
 
+from __future__ import annotations
+
 from datetime import UTC, datetime
+from typing import TYPE_CHECKING
 
 import structlog
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+
+if TYPE_CHECKING:
+    from shieldops.agents.security.models import SecurityScanState
 
 from shieldops.agents.investigation.models import InvestigationState
 from shieldops.agents.remediation.models import RemediationState
@@ -14,6 +20,7 @@ from shieldops.db.models import (
     IncidentOutcomeRecord,
     InvestigationRecord,
     RemediationRecord,
+    SecurityScanRecord,
     UserRecord,
 )
 from shieldops.models.base import AuditEntry
@@ -252,6 +259,99 @@ class Repository:
             "execution_result": record.execution_result,
             "snapshot_data": record.snapshot_data,
             "investigation_id": record.investigation_id,
+            "duration_ms": record.duration_ms,
+            "error": record.error,
+            "created_at": record.created_at.isoformat() if record.created_at else None,
+            "updated_at": record.updated_at.isoformat() if record.updated_at else None,
+        }
+
+    # ── Security Scans ─────────────────────────────────────────────
+
+    async def save_security_scan(
+        self, scan_id: str, state: SecurityScanState
+    ) -> None:
+        """Upsert a security scan result to the database."""
+        async with self._sf() as session:
+            record = await session.get(SecurityScanRecord, scan_id)
+            if record is None:
+                record = SecurityScanRecord(id=scan_id)
+                session.add(record)
+
+            record.scan_type = state.scan_type
+            record.environment = state.target_environment.value
+            record.status = state.current_step
+            record.cve_findings = [f.model_dump(mode="json") for f in state.cve_findings]
+            record.critical_cve_count = state.critical_cve_count
+            record.credential_statuses = [
+                c.model_dump(mode="json") for c in state.credential_statuses
+            ]
+            record.compliance_controls = [
+                c.model_dump(mode="json") for c in state.compliance_controls
+            ]
+            record.compliance_score = state.compliance_score
+            record.patch_results = [p.model_dump(mode="json") for p in state.patch_results]
+            record.rotation_results = [r.model_dump(mode="json") for r in state.rotation_results]
+            record.patches_applied = state.patches_applied
+            record.credentials_rotated = state.credentials_rotated
+            record.posture_data = (
+                state.posture.model_dump(mode="json") if state.posture else None
+            )
+            record.reasoning_chain = [r.model_dump(mode="json") for r in state.reasoning_chain]
+            record.error = state.error
+            record.duration_ms = state.scan_duration_ms
+
+            await session.commit()
+            logger.info("security_scan_persisted", scan_id=scan_id)
+
+    async def get_security_scan(self, scan_id: str) -> dict | None:
+        """Load a security scan record as a dict."""
+        async with self._sf() as session:
+            record = await session.get(SecurityScanRecord, scan_id)
+            if record is None:
+                return None
+            return self._security_scan_to_dict(record)
+
+    async def list_security_scans(
+        self,
+        environment: str | None = None,
+        scan_type: str | None = None,
+        status: str | None = None,
+        limit: int = 50,
+        offset: int = 0,
+    ) -> list[dict]:
+        """List security scan summaries from the database."""
+        async with self._sf() as session:
+            stmt = select(SecurityScanRecord).order_by(
+                SecurityScanRecord.created_at.desc()
+            )
+            if environment:
+                stmt = stmt.where(SecurityScanRecord.environment == environment)
+            if scan_type:
+                stmt = stmt.where(SecurityScanRecord.scan_type == scan_type)
+            if status:
+                stmt = stmt.where(SecurityScanRecord.status == status)
+            stmt = stmt.offset(offset).limit(limit)
+            result = await session.execute(stmt)
+            return [self._security_scan_to_dict(r) for r in result.scalars().all()]
+
+    @staticmethod
+    def _security_scan_to_dict(record: SecurityScanRecord) -> dict:
+        return {
+            "scan_id": record.id,
+            "scan_type": record.scan_type,
+            "environment": record.environment,
+            "status": record.status,
+            "cve_findings": record.cve_findings,
+            "critical_cve_count": record.critical_cve_count,
+            "credential_statuses": record.credential_statuses,
+            "compliance_controls": record.compliance_controls,
+            "compliance_score": record.compliance_score,
+            "patch_results": record.patch_results,
+            "rotation_results": record.rotation_results,
+            "patches_applied": record.patches_applied,
+            "credentials_rotated": record.credentials_rotated,
+            "posture_data": record.posture_data,
+            "reasoning_chain": record.reasoning_chain,
             "duration_ms": record.duration_ms,
             "error": record.error,
             "created_at": record.created_at.isoformat() if record.created_at else None,
