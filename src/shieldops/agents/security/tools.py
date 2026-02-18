@@ -4,13 +4,14 @@ Bridges CVE databases, credential stores, compliance frameworks, and
 infrastructure connectors to the agent's LangGraph nodes.
 """
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import structlog
 
+from shieldops.agents.security.protocols import CredentialStore, CVESource
 from shieldops.connectors.base import ConnectorRouter
-from shieldops.models.base import Environment
+from shieldops.models.base import Environment, RemediationAction, RiskLevel
 
 logger = structlog.get_logger()
 
@@ -24,12 +25,18 @@ class SecurityToolkit:
     def __init__(
         self,
         connector_router: ConnectorRouter | None = None,
-        cve_sources: list[Any] | None = None,
-        credential_stores: list[Any] | None = None,
+        cve_sources: list[CVESource] | None = None,
+        credential_stores: list[CredentialStore] | None = None,
+        policy_engine: Any | None = None,
+        approval_workflow: Any | None = None,
     ) -> None:
         self._router = connector_router
         self._cve_sources = cve_sources or []
         self._credential_stores = credential_stores or []
+        self._policy_engine = policy_engine
+        self._approval_workflow = approval_workflow
+
+    # ── Scan tools (existing) ─────────────────────────────────────
 
     async def scan_cves(
         self,
@@ -88,7 +95,7 @@ class SecurityToolkit:
         Returns credentials grouped by urgency.
         """
         all_credentials: list[dict[str, Any]] = []
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         rotation_threshold = now + timedelta(days=rotation_window_days)
 
         for store in self._credential_stores:
@@ -198,6 +205,138 @@ class SecurityToolkit:
             logger.error("resource_list_failed", error=str(e))
             return []
 
+    # ── Action execution tools (new) ──────────────────────────────
+
+    async def apply_patch(
+        self,
+        host: str,
+        package_name: str,
+        target_version: str,
+        provider: str = "kubernetes",
+    ) -> dict[str, Any]:
+        """Apply a package patch via the infrastructure connector.
+
+        Constructs a RemediationAction and delegates to the connector.
+        """
+        if self._router is None:
+            return {"success": False, "message": "No connector router configured"}
+
+        action = RemediationAction(
+            id=f"patch-{package_name}-{host}",
+            action_type="apply_patch",
+            target_resource=host,
+            environment=Environment.PRODUCTION,
+            risk_level=RiskLevel.MEDIUM,
+            parameters={
+                "package_name": package_name,
+                "target_version": target_version,
+            },
+            description=f"Patch {package_name} to {target_version} on {host}",
+        )
+
+        try:
+            connector = self._router.get(provider)
+            result = await connector.execute_action(action)
+            return {
+                "success": result.status.value == "success",
+                "message": result.message,
+                "applied_version": target_version if result.status.value == "success" else None,
+            }
+        except Exception as e:
+            logger.error(
+                "patch_apply_failed",
+                host=host,
+                package=package_name,
+                error=str(e),
+            )
+            return {"success": False, "message": str(e)}
+
+    async def rotate_credential(
+        self,
+        credential_id: str,
+        credential_type: str,
+        service: str,
+    ) -> dict[str, Any]:
+        """Rotate a credential via the appropriate credential store."""
+        for store in self._credential_stores:
+            try:
+                result = await store.rotate_credential(credential_id, credential_type)
+                if result.get("success"):
+                    return result
+            except Exception as e:
+                logger.error(
+                    "credential_rotation_failed",
+                    credential_id=credential_id,
+                    store=getattr(store, "store_name", "unknown"),
+                    error=str(e),
+                )
+
+        return {
+            "credential_id": credential_id,
+            "credential_type": credential_type,
+            "service": service,
+            "success": False,
+            "message": "No credential store could rotate this credential",
+        }
+
+    async def evaluate_security_policy(
+        self,
+        action_type: str,
+        target_resource: str,
+        environment: Environment,
+    ) -> dict[str, Any]:
+        """Evaluate a security action against OPA policies."""
+        if self._policy_engine is None:
+            return {"allowed": True, "reasons": ["No policy engine configured"]}
+
+        risk = self.classify_security_risk(action_type, environment)
+
+        action = RemediationAction(
+            id=f"sec-{action_type}",
+            action_type=action_type,
+            target_resource=target_resource,
+            environment=environment,
+            risk_level=risk,
+            parameters={},
+            description=f"Security action: {action_type} on {target_resource}",
+        )
+
+        decision = await self._policy_engine.evaluate(
+            action=action,
+            agent_id="security-agent",
+        )
+        return {
+            "allowed": decision.allowed,
+            "reasons": decision.reasons,
+        }
+
+    def classify_security_risk(
+        self, action_type: str, environment: Environment
+    ) -> RiskLevel:
+        """Classify risk level for a security action."""
+        if self._policy_engine is not None:
+            return self._policy_engine.classify_risk(action_type, environment)
+
+        # Fallback classification
+        if environment == Environment.PRODUCTION:
+            return RiskLevel.HIGH
+        if environment == Environment.STAGING:
+            return RiskLevel.MEDIUM
+        return RiskLevel.LOW
+
+    def requires_approval(self, risk_level: RiskLevel) -> bool:
+        """Check whether a security action at this risk level needs approval."""
+        if self._approval_workflow is None:
+            return False
+        return self._approval_workflow.requires_approval(risk_level)
+
+    async def request_approval(self, request: Any) -> Any:
+        """Submit an approval request and wait for response."""
+        if self._approval_workflow is None:
+            from shieldops.models.base import ApprovalStatus
+            return ApprovalStatus.APPROVED
+        return await self._approval_workflow.request_approval(request)
+
     @staticmethod
     def _get_framework_controls(framework: str) -> list[dict[str, str]]:
         """Get control definitions for a compliance framework."""
@@ -212,7 +351,11 @@ class SecurityToolkit:
             ],
             "pci_dss": [
                 {"id": "PCI-DSS-1.1", "title": "Network segmentation", "severity": "critical"},
-                {"id": "PCI-DSS-2.1", "title": "Default credential removal", "severity": "critical"},
+                {
+                    "id": "PCI-DSS-2.1",
+                    "title": "Default credential removal",
+                    "severity": "critical",
+                },
                 {"id": "PCI-DSS-6.2", "title": "Security patching", "severity": "high"},
                 {"id": "PCI-DSS-8.1", "title": "User identification", "severity": "high"},
                 {"id": "PCI-DSS-10.1", "title": "Audit logging", "severity": "high"},
@@ -225,7 +368,11 @@ class SecurityToolkit:
                 {"id": "HIPAA-164.312e", "title": "Transmission security", "severity": "high"},
             ],
             "cis": [
-                {"id": "CIS-1.1", "title": "API server anonymous auth disabled", "severity": "critical"},
+                {
+                    "id": "CIS-1.1",
+                    "title": "API server anonymous auth disabled",
+                    "severity": "critical",
+                },
                 {"id": "CIS-1.2", "title": "API server auth mode", "severity": "high"},
                 {"id": "CIS-4.1", "title": "Worker node kubelet auth", "severity": "high"},
                 {"id": "CIS-5.1", "title": "RBAC enabled", "severity": "critical"},
