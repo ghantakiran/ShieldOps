@@ -25,6 +25,16 @@ class Settings(BaseSettings):
     # Redis
     redis_url: str = "redis://localhost:6379/0"
 
+    # Rate Limiting (HTTP API)
+    rate_limit_enabled: bool = True
+    rate_limit_window_seconds: int = 60
+    rate_limit_admin: int = 300
+    rate_limit_operator: int = 120
+    rate_limit_viewer: int = 60
+    rate_limit_default: int = 60
+    rate_limit_auth_login: int = 10
+    rate_limit_auth_register: int = 5
+
     # Kafka
     kafka_brokers: str = "localhost:9092"
     kafka_consumer_group: str = "shieldops-agents"
