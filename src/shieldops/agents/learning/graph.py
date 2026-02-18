@@ -44,7 +44,7 @@ def should_recommend_thresholds(state: LearningState) -> str:
     return "recommend_thresholds"
 
 
-def create_learning_graph() -> StateGraph:
+def create_learning_graph() -> StateGraph[LearningState]:
     """Build the Learning Agent LangGraph workflow."""
     graph = StateGraph(LearningState)
 

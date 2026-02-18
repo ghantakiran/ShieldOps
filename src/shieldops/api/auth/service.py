@@ -6,6 +6,7 @@ import hmac
 import json
 import secrets
 from datetime import UTC, datetime, timedelta
+from typing import Any
 
 from shieldops.config import settings
 
@@ -62,7 +63,7 @@ def create_access_token(
     return f"{header_b64}.{payload_b64}.{sig_b64}"
 
 
-def decode_token(token: str) -> dict | None:
+def decode_token(token: str) -> dict[str, Any] | None:
     """Decode and verify a JWT token. Returns payload dict or None."""
     try:
         parts = token.split(".")
@@ -79,7 +80,7 @@ def decode_token(token: str) -> dict | None:
         if not hmac.compare_digest(expected_sig, actual_sig):
             return None
 
-        payload = json.loads(_b64url_decode(payload_b64))
+        payload: dict[str, Any] = json.loads(_b64url_decode(payload_b64))
 
         # Check expiration
         exp = payload.get("exp")

@@ -1,6 +1,7 @@
 """Agent registry — manages agent registrations, status, and heartbeats."""
 
 from datetime import UTC, datetime
+from typing import Any
 from uuid import uuid4
 
 import structlog
@@ -22,8 +23,8 @@ class AgentRegistry:
         self,
         agent_type: str,
         environment: str = "production",
-        config: dict | None = None,
-    ) -> dict:
+        config: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """Register or update an agent."""
         async with self._sf() as session:
             # Check if already registered for this type+env
@@ -58,7 +59,7 @@ class AgentRegistry:
         self,
         environment: str | None = None,
         status: str | None = None,
-    ) -> list[dict]:
+    ) -> list[dict[str, Any]]:
         async with self._sf() as session:
             stmt = select(AgentRegistration).order_by(AgentRegistration.agent_type)
             if environment:
@@ -68,14 +69,14 @@ class AgentRegistry:
             result = await session.execute(stmt)
             return [self._to_dict(r) for r in result.scalars().all()]
 
-    async def get_agent(self, agent_id: str) -> dict | None:
+    async def get_agent(self, agent_id: str) -> dict[str, Any] | None:
         async with self._sf() as session:
             record = await session.get(AgentRegistration, agent_id)
             if record is None:
                 return None
             return self._to_dict(record)
 
-    async def enable(self, agent_id: str) -> dict | None:
+    async def enable(self, agent_id: str) -> dict[str, Any] | None:
         async with self._sf() as session:
             record = await session.get(AgentRegistration, agent_id)
             if record is None:
@@ -85,7 +86,7 @@ class AgentRegistry:
             await session.refresh(record)
             return self._to_dict(record)
 
-    async def disable(self, agent_id: str) -> dict | None:
+    async def disable(self, agent_id: str) -> dict[str, Any] | None:
         async with self._sf() as session:
             record = await session.get(AgentRegistration, agent_id)
             if record is None:
@@ -95,7 +96,7 @@ class AgentRegistry:
             await session.refresh(record)
             return self._to_dict(record)
 
-    async def heartbeat(self, agent_id: str) -> dict | None:
+    async def heartbeat(self, agent_id: str) -> dict[str, Any] | None:
         async with self._sf() as session:
             record = await session.get(AgentRegistration, agent_id)
             if record is None:
@@ -106,7 +107,7 @@ class AgentRegistry:
             return self._to_dict(record)
 
     @staticmethod
-    def _to_dict(record: AgentRegistration) -> dict:
+    def _to_dict(record: AgentRegistration) -> dict[str, Any]:
         return {
             "agent_id": record.id,
             "agent_type": record.agent_type,

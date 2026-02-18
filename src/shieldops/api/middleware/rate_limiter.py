@@ -5,9 +5,11 @@ from __future__ import annotations
 import time
 
 import structlog
+from redis.asyncio import Redis
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
+from starlette.types import ASGIApp
 
 from shieldops.config import settings
 
@@ -65,15 +67,17 @@ def _extract_user(request: Request) -> tuple[str | None, str | None]:
 class RateLimitMiddleware(BaseHTTPMiddleware):
     """Fixed-window rate limiter backed by Redis INCR + EXPIRE."""
 
-    def __init__(self, app: object) -> None:
+    def __init__(self, app: ASGIApp) -> None:
         super().__init__(app)
-        self._client: object | None = None
+        self._client: Redis | None = None
 
-    async def _ensure_client(self) -> object:
+    async def _ensure_client(self) -> Redis:
         if self._client is None:
             import redis.asyncio as aioredis
 
-            self._client = aioredis.from_url(settings.redis_url, decode_responses=True)
+            self._client = aioredis.from_url(  # type: ignore[no-untyped-call]
+                settings.redis_url, decode_responses=True
+            )
         return self._client
 
     async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
@@ -97,9 +101,9 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         # Try Redis counter
         try:
             client = await self._ensure_client()
-            count = await client.incr(redis_key)  # type: ignore[union-attr]
+            count = await client.incr(redis_key)
             if count == 1:
-                await client.expire(redis_key, window)  # type: ignore[union-attr]
+                await client.expire(redis_key, window)
         except Exception as exc:
             # Fail-open: let request through, log warning
             logger.warning("rate_limit_redis_error", error=str(exc), path=path)

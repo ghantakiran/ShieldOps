@@ -1,6 +1,7 @@
 """WebSocket connection manager — per-channel subscriber tracking."""
 
 from collections import defaultdict
+from typing import Any
 
 import structlog
 from starlette.websockets import WebSocket
@@ -26,7 +27,7 @@ class ConnectionManager:
             del self._channels[channel]
         logger.info("ws_disconnected", channel=channel)
 
-    async def broadcast(self, channel: str, event: dict) -> None:
+    async def broadcast(self, channel: str, event: dict[str, Any]) -> None:
         """Send an event to all subscribers of a channel."""
         dead: list[WebSocket] = []
         for ws in self._channels.get(channel, set()):
@@ -37,7 +38,7 @@ class ConnectionManager:
         for ws in dead:
             self._channels[channel].discard(ws)
 
-    async def send_personal(self, websocket: WebSocket, event: dict) -> None:
+    async def send_personal(self, websocket: WebSocket, event: dict[str, Any]) -> None:
         await websocket.send_json(event)
 
     @property

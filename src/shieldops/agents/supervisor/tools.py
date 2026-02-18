@@ -88,7 +88,9 @@ class SupervisorToolkit:
                 "description": playbook_match.description,
                 "decision_tree": [c.model_dump() for c in playbook_match.decision_tree],
             }
-            result["reasoning"] += f" | Matched playbook: {playbook_match.name}"
+            result["reasoning"] = (
+                str(result["reasoning"]) + f" | Matched playbook: {playbook_match.name}"
+            )
 
         return result
 
@@ -156,7 +158,12 @@ class SupervisorToolkit:
         notifier = self._channels.get(channel)
         if notifier:
             try:
-                return await notifier.send(message=message, urgency=urgency, metadata=metadata)
+                result: dict[str, Any] = await notifier.send(
+                    message=message,
+                    urgency=urgency,
+                    metadata=metadata,
+                )
+                return result
             except Exception as e:
                 logger.error("escalation_send_failed", channel=channel, error=str(e))
 

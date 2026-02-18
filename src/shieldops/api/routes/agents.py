@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from fastapi import APIRouter, Depends, HTTPException
 
@@ -28,7 +28,7 @@ async def list_agents(
     environment: str | None = None,
     status: AgentStatus | None = None,
     _user: UserResponse = Depends(get_current_user),
-) -> dict:
+) -> dict[str, Any]:
     """List all deployed agents with status and health."""
     if _registry:
         items = await _registry.list_agents(
@@ -48,7 +48,10 @@ async def list_agents(
 
 
 @router.get("/agents/{agent_id}")
-async def get_agent(agent_id: str, _user: UserResponse = Depends(get_current_user)) -> dict:
+async def get_agent(
+    agent_id: str,
+    _user: UserResponse = Depends(get_current_user),
+) -> dict[str, Any]:
     """Get detailed agent information including config and recent activity."""
     if _registry:
         result = await _registry.get_agent(agent_id)
@@ -61,7 +64,7 @@ async def get_agent(agent_id: str, _user: UserResponse = Depends(get_current_use
 async def enable_agent(
     agent_id: str,
     _user: UserResponse = Depends(require_role(UserRole.ADMIN, UserRole.OPERATOR)),
-) -> dict:
+) -> dict[str, Any]:
     """Enable a disabled agent."""
     if _registry:
         result = await _registry.enable(agent_id)
@@ -74,7 +77,7 @@ async def enable_agent(
 async def disable_agent(
     agent_id: str,
     _user: UserResponse = Depends(require_role(UserRole.ADMIN, UserRole.OPERATOR)),
-) -> dict:
+) -> dict[str, Any]:
     """Disable an active agent (graceful shutdown)."""
     if _registry:
         result = await _registry.disable(agent_id)

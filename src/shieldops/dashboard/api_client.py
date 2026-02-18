@@ -33,7 +33,7 @@ class ShieldOpsAPIClient:
     # Internal helpers
     # ------------------------------------------------------------------
 
-    def _get(self, path: str, params: dict[str, Any] | None = None) -> dict:
+    def _get(self, path: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         try:
             resp = httpx.get(
                 f"{self.base_url}{path}",
@@ -42,13 +42,14 @@ class ShieldOpsAPIClient:
                 timeout=self.timeout,
             )
             resp.raise_for_status()
-            return resp.json()
+            result: dict[str, Any] = resp.json()
+            return result
         except httpx.HTTPStatusError as exc:
             return {"error": f"HTTP {exc.response.status_code}: {exc.response.text}"}
         except httpx.RequestError as exc:
             return {"error": f"Connection error: {exc}"}
 
-    def _post(self, path: str, json: dict[str, Any] | None = None) -> dict:
+    def _post(self, path: str, json: dict[str, Any] | None = None) -> dict[str, Any]:
         try:
             resp = httpx.post(
                 f"{self.base_url}{path}",
@@ -57,7 +58,8 @@ class ShieldOpsAPIClient:
                 timeout=self.timeout,
             )
             resp.raise_for_status()
-            return resp.json()
+            result: dict[str, Any] = resp.json()
+            return result
         except httpx.HTTPStatusError as exc:
             return {"error": f"HTTP {exc.response.status_code}: {exc.response.text}"}
         except httpx.RequestError as exc:
@@ -71,16 +73,16 @@ class ShieldOpsAPIClient:
         self,
         environment: str | None = None,
         status: str | None = None,
-    ) -> dict:
+    ) -> dict[str, Any]:
         return self._get("/agents", {"environment": environment, "status": status})
 
-    def get_agent(self, agent_id: str) -> dict:
+    def get_agent(self, agent_id: str) -> dict[str, Any]:
         return self._get(f"/agents/{agent_id}")
 
-    def enable_agent(self, agent_id: str) -> dict:
+    def enable_agent(self, agent_id: str) -> dict[str, Any]:
         return self._post(f"/agents/{agent_id}/enable")
 
-    def disable_agent(self, agent_id: str) -> dict:
+    def disable_agent(self, agent_id: str) -> dict[str, Any]:
         return self._post(f"/agents/{agent_id}/disable")
 
     # ------------------------------------------------------------------
@@ -92,13 +94,13 @@ class ShieldOpsAPIClient:
         status: str | None = None,
         limit: int = 50,
         offset: int = 0,
-    ) -> dict:
+    ) -> dict[str, Any]:
         return self._get(
             "/investigations",
             {"status": status, "limit": limit, "offset": offset},
         )
 
-    def get_investigation(self, investigation_id: str) -> dict:
+    def get_investigation(self, investigation_id: str) -> dict[str, Any]:
         return self._get(f"/investigations/{investigation_id}")
 
     def trigger_investigation(
@@ -108,7 +110,7 @@ class ShieldOpsAPIClient:
         severity: str = "warning",
         source: str = "dashboard",
         description: str | None = None,
-    ) -> dict:
+    ) -> dict[str, Any]:
         return self._post(
             "/investigations",
             {
@@ -130,13 +132,13 @@ class ShieldOpsAPIClient:
         status: str | None = None,
         limit: int = 50,
         offset: int = 0,
-    ) -> dict:
+    ) -> dict[str, Any]:
         return self._get(
             "/remediations",
             {"environment": environment, "status": status, "limit": limit, "offset": offset},
         )
 
-    def get_remediation(self, remediation_id: str) -> dict:
+    def get_remediation(self, remediation_id: str) -> dict[str, Any]:
         return self._get(f"/remediations/{remediation_id}")
 
     def trigger_remediation(
@@ -145,9 +147,9 @@ class ShieldOpsAPIClient:
         target_resource: str,
         environment: str = "production",
         risk_level: str = "medium",
-        parameters: dict | None = None,
+        parameters: dict[str, Any] | None = None,
         description: str = "",
-    ) -> dict:
+    ) -> dict[str, Any]:
         return self._post(
             "/remediations",
             {
@@ -160,39 +162,53 @@ class ShieldOpsAPIClient:
             },
         )
 
-    def approve_remediation(self, remediation_id: str, approver: str, reason: str = "") -> dict:
+    def approve_remediation(
+        self,
+        remediation_id: str,
+        approver: str,
+        reason: str = "",
+    ) -> dict[str, Any]:
         return self._post(
             f"/remediations/{remediation_id}/approve",
             {"approver": approver, "reason": reason},
         )
 
-    def deny_remediation(self, remediation_id: str, approver: str, reason: str = "") -> dict:
+    def deny_remediation(
+        self,
+        remediation_id: str,
+        approver: str,
+        reason: str = "",
+    ) -> dict[str, Any]:
         return self._post(
             f"/remediations/{remediation_id}/deny",
             {"approver": approver, "reason": reason},
         )
 
-    def rollback_remediation(self, remediation_id: str) -> dict:
+    def rollback_remediation(self, remediation_id: str) -> dict[str, Any]:
         return self._post(f"/remediations/{remediation_id}/rollback")
 
     # ------------------------------------------------------------------
     # Analytics
     # ------------------------------------------------------------------
 
-    def get_mttr_trends(self, period: str = "30d", environment: str | None = None) -> dict:
+    def get_mttr_trends(
+        self,
+        period: str = "30d",
+        environment: str | None = None,
+    ) -> dict[str, Any]:
         return self._get("/analytics/mttr", {"period": period, "environment": environment})
 
-    def get_resolution_rate(self, period: str = "30d") -> dict:
+    def get_resolution_rate(self, period: str = "30d") -> dict[str, Any]:
         return self._get("/analytics/resolution-rate", {"period": period})
 
-    def get_agent_accuracy(self, period: str = "30d") -> dict:
+    def get_agent_accuracy(self, period: str = "30d") -> dict[str, Any]:
         return self._get("/analytics/agent-accuracy", {"period": period})
 
     def get_cost_savings_analytics(
         self,
         period: str = "30d",
         engineer_hourly_rate: float = 75.0,
-    ) -> dict:
+    ) -> dict[str, Any]:
         return self._get(
             "/analytics/cost-savings",
             {"period": period, "engineer_hourly_rate": engineer_hourly_rate},
@@ -207,13 +223,13 @@ class ShieldOpsAPIClient:
         scan_type: str | None = None,
         limit: int = 50,
         offset: int = 0,
-    ) -> dict:
+    ) -> dict[str, Any]:
         return self._get(
             "/security/scans",
             {"scan_type": scan_type, "limit": limit, "offset": offset},
         )
 
-    def get_scan(self, scan_id: str) -> dict:
+    def get_scan(self, scan_id: str) -> dict[str, Any]:
         return self._get(f"/security/scans/{scan_id}")
 
     def trigger_scan(
@@ -222,7 +238,7 @@ class ShieldOpsAPIClient:
         scan_type: str = "full",
         target_resources: list[str] | None = None,
         compliance_frameworks: list[str] | None = None,
-    ) -> dict:
+    ) -> dict[str, Any]:
         return self._post(
             "/security/scans",
             {
@@ -233,13 +249,13 @@ class ShieldOpsAPIClient:
             },
         )
 
-    def get_security_posture(self) -> dict:
+    def get_security_posture(self) -> dict[str, Any]:
         return self._get("/security/posture")
 
-    def list_cves(self, severity: str | None = None, limit: int = 50) -> dict:
+    def list_cves(self, severity: str | None = None, limit: int = 50) -> dict[str, Any]:
         return self._get("/security/cves", {"severity": severity, "limit": limit})
 
-    def get_compliance(self, framework: str) -> dict:
+    def get_compliance(self, framework: str) -> dict[str, Any]:
         return self._get(f"/security/compliance/{framework}")
 
     # ------------------------------------------------------------------
@@ -251,13 +267,13 @@ class ShieldOpsAPIClient:
         analysis_type: str | None = None,
         limit: int = 50,
         offset: int = 0,
-    ) -> dict:
+    ) -> dict[str, Any]:
         return self._get(
             "/cost/analyses",
             {"analysis_type": analysis_type, "limit": limit, "offset": offset},
         )
 
-    def get_cost_analysis(self, analysis_id: str) -> dict:
+    def get_cost_analysis(self, analysis_id: str) -> dict[str, Any]:
         return self._get(f"/cost/analyses/{analysis_id}")
 
     def trigger_cost_analysis(
@@ -266,7 +282,7 @@ class ShieldOpsAPIClient:
         analysis_type: str = "full",
         target_services: list[str] | None = None,
         period: str = "30d",
-    ) -> dict:
+    ) -> dict[str, Any]:
         return self._post(
             "/cost/analyses",
             {
@@ -277,13 +293,13 @@ class ShieldOpsAPIClient:
             },
         )
 
-    def list_anomalies(self, severity: str | None = None, limit: int = 50) -> dict:
+    def list_anomalies(self, severity: str | None = None, limit: int = 50) -> dict[str, Any]:
         return self._get("/cost/anomalies", {"severity": severity, "limit": limit})
 
-    def list_optimizations(self, category: str | None = None, limit: int = 50) -> dict:
+    def list_optimizations(self, category: str | None = None, limit: int = 50) -> dict[str, Any]:
         return self._get("/cost/optimizations", {"category": category, "limit": limit})
 
-    def get_savings_summary(self) -> dict:
+    def get_savings_summary(self) -> dict[str, Any]:
         return self._get("/cost/savings")
 
     # ------------------------------------------------------------------
@@ -295,35 +311,39 @@ class ShieldOpsAPIClient:
         learning_type: str | None = None,
         limit: int = 50,
         offset: int = 0,
-    ) -> dict:
+    ) -> dict[str, Any]:
         return self._get(
             "/learning/cycles",
             {"learning_type": learning_type, "limit": limit, "offset": offset},
         )
 
-    def get_learning_cycle(self, learning_id: str) -> dict:
+    def get_learning_cycle(self, learning_id: str) -> dict[str, Any]:
         return self._get(f"/learning/cycles/{learning_id}")
 
     def trigger_learning_cycle(
         self,
         learning_type: str = "full",
         period: str = "30d",
-    ) -> dict:
+    ) -> dict[str, Any]:
         return self._post(
             "/learning/cycles",
             {"learning_type": learning_type, "period": period},
         )
 
-    def list_patterns(self, alert_type: str | None = None, limit: int = 50) -> dict:
+    def list_patterns(self, alert_type: str | None = None, limit: int = 50) -> dict[str, Any]:
         return self._get("/learning/patterns", {"alert_type": alert_type, "limit": limit})
 
-    def list_playbook_updates(self, update_type: str | None = None, limit: int = 50) -> dict:
+    def list_playbook_updates(
+        self,
+        update_type: str | None = None,
+        limit: int = 50,
+    ) -> dict[str, Any]:
         return self._get(
             "/learning/playbook-updates",
             {"update_type": update_type, "limit": limit},
         )
 
-    def list_threshold_adjustments(self) -> dict:
+    def list_threshold_adjustments(self) -> dict[str, Any]:
         return self._get("/learning/threshold-adjustments")
 
     # ------------------------------------------------------------------
@@ -335,19 +355,19 @@ class ShieldOpsAPIClient:
         event_type: str | None = None,
         limit: int = 50,
         offset: int = 0,
-    ) -> dict:
+    ) -> dict[str, Any]:
         return self._get(
             "/supervisor/sessions",
             {"event_type": event_type, "limit": limit, "offset": offset},
         )
 
-    def get_session(self, session_id: str) -> dict:
+    def get_session(self, session_id: str) -> dict[str, Any]:
         return self._get(f"/supervisor/sessions/{session_id}")
 
-    def get_session_tasks(self, session_id: str) -> dict:
+    def get_session_tasks(self, session_id: str) -> dict[str, Any]:
         return self._get(f"/supervisor/sessions/{session_id}/tasks")
 
-    def get_session_escalations(self, session_id: str) -> dict:
+    def get_session_escalations(self, session_id: str) -> dict[str, Any]:
         return self._get(f"/supervisor/sessions/{session_id}/escalations")
 
     def submit_event(
@@ -357,8 +377,8 @@ class ShieldOpsAPIClient:
         source: str = "dashboard",
         resource_id: str | None = None,
         description: str | None = None,
-        metadata: dict | None = None,
-    ) -> dict:
+        metadata: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         return self._post(
             "/supervisor/events",
             {

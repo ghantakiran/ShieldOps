@@ -7,7 +7,7 @@ investigation agent workflows.
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from pydantic import BaseModel, Field
@@ -84,7 +84,7 @@ async def trigger_investigation(
     request: TriggerInvestigationRequest,
     background_tasks: BackgroundTasks,
     _user: UserResponse = Depends(require_role(UserRole.ADMIN, UserRole.OPERATOR)),
-) -> dict:
+) -> dict[str, Any]:
     """Trigger a new investigation for an alert.
 
     The investigation runs asynchronously. Returns immediately with a 202
@@ -118,7 +118,7 @@ async def trigger_investigation(
 async def trigger_investigation_sync(
     request: TriggerInvestigationRequest,
     _user: UserResponse = Depends(require_role(UserRole.ADMIN, UserRole.OPERATOR)),
-) -> dict:
+) -> dict[str, Any]:
     """Trigger an investigation and wait for completion.
 
     Useful for testing and CLI tools. For production use, prefer the
@@ -147,7 +147,7 @@ async def list_investigations(
     limit: int = 50,
     offset: int = 0,
     _user: UserResponse = Depends(get_current_user),
-) -> dict:
+) -> dict[str, Any]:
     """List active and recent investigations.
 
     Queries from PostgreSQL when available, falls back to in-memory.
@@ -181,15 +181,15 @@ async def list_investigations(
 async def get_investigation(
     investigation_id: str,
     _user: UserResponse = Depends(get_current_user),
-) -> dict:
+) -> dict[str, Any]:
     """Get full investigation detail including reasoning chain and evidence."""
     if _repository:
-        result = await _repository.get_investigation(investigation_id)
-        if result is not None:
-            return result
+        db_result = await _repository.get_investigation(investigation_id)
+        if db_result is not None:
+            return db_result
 
     runner = get_runner()
-    result = runner.get_investigation(investigation_id)
-    if result is None:
+    state = runner.get_investigation(investigation_id)
+    if state is None:
         raise HTTPException(status_code=404, detail="Investigation not found")
-    return result.model_dump(mode="json")
+    return state.model_dump(mode="json")

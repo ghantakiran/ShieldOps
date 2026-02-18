@@ -42,7 +42,7 @@ def should_detect_anomalies(state: CostAnalysisState) -> str:
     return "detect_anomalies"
 
 
-def create_cost_graph() -> StateGraph:
+def create_cost_graph() -> StateGraph[CostAnalysisState]:
     """Build the Cost Agent LangGraph workflow."""
     graph = StateGraph(CostAnalysisState)
 

@@ -45,7 +45,8 @@ class LearningToolkit:
         """
         if self._incident_store:
             try:
-                return await self._incident_store.query(period=period)
+                result: dict[str, Any] = await self._incident_store.query(period=period)
+                return result
             except Exception as e:
                 logger.warning("incident_store_query_failed", error=str(e))
 
@@ -157,7 +158,8 @@ class LearningToolkit:
         """Get current operational playbooks."""
         if self._playbook_store:
             try:
-                return await self._playbook_store.list()
+                result: dict[str, Any] = await self._playbook_store.list()
+                return result
             except Exception as e:
                 logger.warning("playbook_store_query_failed", error=str(e))
 
@@ -204,7 +206,8 @@ class LearningToolkit:
         """Get current alerting thresholds."""
         if self._alert_config_store:
             try:
-                return await self._alert_config_store.get_thresholds()
+                result: dict[str, Any] = await self._alert_config_store.get_thresholds()
+                return result
             except Exception as e:
                 logger.warning("alert_config_query_failed", error=str(e))
 
@@ -276,7 +279,7 @@ class LearningToolkit:
         automated = [o for o in outcomes if o.get("was_automated")]
         correct_automated = [o for o in automated if o.get("was_correct")]
 
-        by_alert_type: dict[str, dict] = {}
+        by_alert_type: dict[str, dict[str, Any]] = {}
         for o in outcomes:
             at = o.get("alert_type", "unknown")
             if at not in by_alert_type:

@@ -4,6 +4,8 @@ Provides REST endpoints for triggering security scans, viewing posture,
 browsing CVEs, and checking compliance status.
 """
 
+from typing import Any
+
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from pydantic import BaseModel, Field
 
@@ -53,7 +55,7 @@ async def trigger_scan(
     request: TriggerScanRequest,
     background_tasks: BackgroundTasks,
     _user: UserResponse = Depends(require_role(UserRole.ADMIN, UserRole.OPERATOR)),
-) -> dict:
+) -> dict[str, Any]:
     """Trigger a new security scan. Runs asynchronously."""
     runner = get_runner()
 
@@ -83,7 +85,7 @@ async def trigger_scan(
 async def trigger_scan_sync(
     request: TriggerScanRequest,
     _user: UserResponse = Depends(require_role(UserRole.ADMIN, UserRole.OPERATOR)),
-) -> dict:
+) -> dict[str, Any]:
     """Trigger a security scan and wait for completion."""
     runner = get_runner()
 
@@ -108,7 +110,7 @@ async def list_scans(
     limit: int = 50,
     offset: int = 0,
     _user: UserResponse = Depends(get_current_user),
-) -> dict:
+) -> dict[str, Any]:
     """List all security scans."""
     runner = get_runner()
     all_scans = runner.list_scans()
@@ -123,7 +125,7 @@ async def list_scans(
 
 
 @router.get("/security/scans/{scan_id}")
-async def get_scan(scan_id: str, _user: UserResponse = Depends(get_current_user)) -> dict:
+async def get_scan(scan_id: str, _user: UserResponse = Depends(get_current_user)) -> dict[str, Any]:
     """Get full security scan detail."""
     runner = get_runner()
     result = runner.get_scan(scan_id)
@@ -133,7 +135,7 @@ async def get_scan(scan_id: str, _user: UserResponse = Depends(get_current_user)
 
 
 @router.get("/security/posture")
-async def get_security_posture(_user: UserResponse = Depends(get_current_user)) -> dict:
+async def get_security_posture(_user: UserResponse = Depends(get_current_user)) -> dict[str, Any]:
     """Get overall security posture from the most recent full scan."""
     runner = get_runner()
     scans = runner.list_scans()
@@ -167,7 +169,7 @@ async def list_cves(
     severity: str | None = None,
     limit: int = 50,
     _user: UserResponse = Depends(get_current_user),
-) -> dict:
+) -> dict[str, Any]:
     """List CVEs from the most recent scan."""
     runner = get_runner()
     scans = runner.list_scans()
@@ -194,7 +196,7 @@ async def list_cves(
 @router.get("/security/compliance/{framework}")
 async def get_compliance_status(
     framework: str, _user: UserResponse = Depends(get_current_user)
-) -> dict:
+) -> dict[str, Any]:
     """Get compliance status for a specific framework."""
     runner = get_runner()
     scans = runner.list_scans()

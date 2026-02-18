@@ -41,7 +41,7 @@ def after_chain(state: SupervisorState) -> str:
     return "finalize"
 
 
-def create_supervisor_graph() -> StateGraph:
+def create_supervisor_graph() -> StateGraph[SupervisorState]:
     """Build the Supervisor Agent LangGraph workflow."""
     graph = StateGraph(SupervisorState)
 

@@ -55,7 +55,7 @@ async def submit_event(
     request: SubmitEventRequest,
     background_tasks: BackgroundTasks,
     _user: UserResponse = Depends(require_role(UserRole.ADMIN, UserRole.OPERATOR)),
-) -> dict:
+) -> dict[str, Any]:
     """Submit an event for supervisor orchestration. Runs asynchronously."""
     runner = get_runner()
 
@@ -74,7 +74,7 @@ async def submit_event(
 async def submit_event_sync(
     request: SubmitEventRequest,
     _user: UserResponse = Depends(require_role(UserRole.ADMIN, UserRole.OPERATOR)),
-) -> dict:
+) -> dict[str, Any]:
     """Submit an event and wait for supervisor orchestration to complete."""
     runner = get_runner()
 
@@ -89,7 +89,7 @@ async def list_sessions(
     limit: int = 50,
     offset: int = 0,
     _user: UserResponse = Depends(get_current_user),
-) -> dict:
+) -> dict[str, Any]:
     """List all supervisor sessions."""
     runner = get_runner()
     all_sessions = runner.list_sessions()
@@ -104,7 +104,10 @@ async def list_sessions(
 
 
 @router.get("/supervisor/sessions/{session_id}")
-async def get_session(session_id: str, _user: UserResponse = Depends(get_current_user)) -> dict:
+async def get_session(
+    session_id: str,
+    _user: UserResponse = Depends(get_current_user),
+) -> dict[str, Any]:
     """Get full supervisor session detail."""
     runner = get_runner()
     result = runner.get_session(session_id)
@@ -116,7 +119,7 @@ async def get_session(session_id: str, _user: UserResponse = Depends(get_current
 @router.get("/supervisor/sessions/{session_id}/tasks")
 async def get_session_tasks(
     session_id: str, _user: UserResponse = Depends(get_current_user)
-) -> dict:
+) -> dict[str, Any]:
     """Get all delegated tasks for a session."""
     runner = get_runner()
     result = runner.get_session(session_id)
@@ -133,7 +136,7 @@ async def get_session_tasks(
 @router.get("/supervisor/sessions/{session_id}/escalations")
 async def get_session_escalations(
     session_id: str, _user: UserResponse = Depends(get_current_user)
-) -> dict:
+) -> dict[str, Any]:
     """Get all escalations for a session."""
     runner = get_runner()
     result = runner.get_session(session_id)

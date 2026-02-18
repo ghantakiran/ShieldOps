@@ -68,7 +68,7 @@ def validation_gate(state: RemediationState) -> str:
     return END
 
 
-def create_remediation_graph() -> StateGraph:
+def create_remediation_graph() -> StateGraph[RemediationState]:
     """Build the Remediation Agent LangGraph workflow."""
     graph = StateGraph(RemediationState)
 

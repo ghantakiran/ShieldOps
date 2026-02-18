@@ -8,6 +8,7 @@ handles escalation when specialist agents fail or are uncertain.
 
 from datetime import UTC, datetime
 from enum import StrEnum
+from typing import Any
 
 import structlog
 from pydantic import BaseModel, Field
@@ -30,11 +31,11 @@ class SupervisorTask(BaseModel):
     id: str
     task_type: TaskType
     agent_id: str | None = None
-    input_data: dict = Field(default_factory=dict)
+    input_data: dict[str, Any] = Field(default_factory=dict)
     status: str = "pending"  # pending, in_progress, completed, failed, escalated
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     completed_at: datetime | None = None
-    result: dict | None = None
+    result: dict[str, Any] | None = None
     error: str | None = None
 
 
@@ -53,7 +54,7 @@ class Supervisor:
     def __init__(self) -> None:
         self._active_tasks: dict[str, SupervisorTask] = {}
 
-    async def handle_event(self, event: dict) -> SupervisorTask:
+    async def handle_event(self, event: dict[str, Any]) -> SupervisorTask:
         """Process an incoming event and delegate to appropriate agent."""
         task_type = self._classify_event(event)
 
@@ -75,7 +76,7 @@ class Supervisor:
 
         return task
 
-    def _classify_event(self, event: dict) -> TaskType:
+    def _classify_event(self, event: dict[str, Any]) -> TaskType:
         """Classify an event to determine which specialist agent should handle it."""
         event_type = event.get("type", "")
 

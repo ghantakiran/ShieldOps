@@ -2,6 +2,7 @@
 
 import contextlib
 from datetime import UTC, datetime, timedelta
+from typing import Any
 
 import structlog
 from sqlalchemy import func, select, text
@@ -28,7 +29,11 @@ class AnalyticsEngine:
     def __init__(self, session_factory: async_sessionmaker[AsyncSession]) -> None:
         self._sf = session_factory
 
-    async def mttr_trends(self, period: str = "30d", environment: str | None = None) -> dict:
+    async def mttr_trends(
+        self,
+        period: str = "30d",
+        environment: str | None = None,
+    ) -> dict[str, Any]:
         """Compute Mean Time to Resolution trends.
 
         Returns daily average duration_ms from completed remediations.
@@ -51,19 +56,26 @@ class AnalyticsEngine:
             result = await session.execute(stmt)
             rows = result.all()
 
-            data_points = [
-                {
-                    "date": row.day.isoformat() if row.day else None,
-                    "avg_duration_ms": round(float(row.avg_ms), 1) if row.avg_ms else 0,
-                    "count": row.count,
-                }
-                for row in rows
-            ]
+            avg_ms_values: list[float] = []
+            count_values: list[int] = []
+            data_points: list[dict[str, Any]] = []
+            for row in rows:
+                avg_ms = round(float(row.avg_ms), 1) if row.avg_ms else 0.0
+                cnt = int(row[2])  # count column
+                avg_ms_values.append(avg_ms)
+                count_values.append(cnt)
+                data_points.append(
+                    {
+                        "date": row.day.isoformat() if row.day else None,
+                        "avg_duration_ms": avg_ms,
+                        "count": cnt,
+                    }
+                )
 
             current_mttr = 0.0
             if data_points:
-                total_ms = sum(d["avg_duration_ms"] * d["count"] for d in data_points)
-                total_count = sum(d["count"] for d in data_points)
+                total_ms = sum(a * c for a, c in zip(avg_ms_values, count_values, strict=True))
+                total_count = sum(count_values)
                 if total_count > 0:
                     current_mttr = round(total_ms / total_count / 60_000, 2)  # minutes
 
@@ -73,7 +85,7 @@ class AnalyticsEngine:
                 "current_mttr_minutes": current_mttr,
             }
 
-    async def resolution_rate(self, period: str = "30d") -> dict:
+    async def resolution_rate(self, period: str = "30d") -> dict[str, Any]:
         """Compute automated vs manual resolution rate."""
         cutoff = _parse_period(period)
         async with self._sf() as session:
@@ -107,7 +119,7 @@ class AnalyticsEngine:
                 "total_incidents": total,
             }
 
-    async def agent_accuracy(self, period: str = "30d") -> dict:
+    async def agent_accuracy(self, period: str = "30d") -> dict[str, Any]:
         """Compute agent diagnosis accuracy — investigations with confidence >= 0.7."""
         cutoff = _parse_period(period)
         async with self._sf() as session:
@@ -133,7 +145,7 @@ class AnalyticsEngine:
                 "total_investigations": total,
             }
 
-    async def cost_savings(self, period: str = "30d", hourly_rate: float = 75.0) -> dict:
+    async def cost_savings(self, period: str = "30d", hourly_rate: float = 75.0) -> dict[str, Any]:
         """Estimate cost savings from automated operations.
 
         Assumes each auto-resolved remediation saves ~0.5 hours of engineer time.

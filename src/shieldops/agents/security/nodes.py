@@ -8,6 +8,7 @@ Each node is an async function that:
 """
 
 from datetime import UTC, datetime
+from typing import Any, cast
 
 import structlog
 
@@ -57,7 +58,7 @@ def _elapsed_ms(start: datetime) -> int:
     return int((datetime.now(UTC) - start).total_seconds() * 1000)
 
 
-async def scan_vulnerabilities(state: SecurityScanState) -> dict:
+async def scan_vulnerabilities(state: SecurityScanState) -> dict[str, Any]:
     """Scan target resources for known CVEs."""
     start = datetime.now(UTC)
     toolkit = _get_toolkit()
@@ -112,7 +113,7 @@ async def scan_vulnerabilities(state: SecurityScanState) -> dict:
     }
 
 
-async def assess_findings(state: SecurityScanState) -> dict:
+async def assess_findings(state: SecurityScanState) -> dict[str, Any]:
     """Use LLM to assess vulnerability findings and prioritize patches."""
     start = datetime.now(UTC)
 
@@ -142,10 +143,13 @@ async def assess_findings(state: SecurityScanState) -> dict:
             )
 
         try:
-            assessment: VulnerabilityAssessmentResult = await llm_structured(
-                system_prompt=SYSTEM_VULNERABILITY_ASSESSMENT,
-                user_prompt="\n".join(context_lines),
-                schema=VulnerabilityAssessmentResult,
+            assessment = cast(
+                VulnerabilityAssessmentResult,
+                await llm_structured(
+                    system_prompt=SYSTEM_VULNERABILITY_ASSESSMENT,
+                    user_prompt="\n".join(context_lines),
+                    schema=VulnerabilityAssessmentResult,
+                ),
             )
             output_summary = (
                 f"{assessment.summary}. Risk: {assessment.risk_level}. "
@@ -169,7 +173,7 @@ async def assess_findings(state: SecurityScanState) -> dict:
     }
 
 
-async def check_credentials(state: SecurityScanState) -> dict:
+async def check_credentials(state: SecurityScanState) -> dict[str, Any]:
     """Check credential expiry status across managed services."""
     start = datetime.now(UTC)
     toolkit = _get_toolkit()
@@ -228,10 +232,13 @@ async def check_credentials(state: SecurityScanState) -> dict:
             )
 
         try:
-            assessment: CredentialAssessmentResult = await llm_structured(
-                system_prompt=SYSTEM_CREDENTIAL_ASSESSMENT,
-                user_prompt="\n".join(context_lines),
-                schema=CredentialAssessmentResult,
+            assessment = cast(
+                CredentialAssessmentResult,
+                await llm_structured(
+                    system_prompt=SYSTEM_CREDENTIAL_ASSESSMENT,
+                    user_prompt="\n".join(context_lines),
+                    schema=CredentialAssessmentResult,
+                ),
             )
             output_summary = (
                 f"{assessment.summary}. Urgent rotations: {len(assessment.urgent_rotations)}"
@@ -256,7 +263,7 @@ async def check_credentials(state: SecurityScanState) -> dict:
     }
 
 
-async def evaluate_compliance(state: SecurityScanState) -> dict:
+async def evaluate_compliance(state: SecurityScanState) -> dict[str, Any]:
     """Evaluate compliance posture against configured frameworks."""
     start = datetime.now(UTC)
     toolkit = _get_toolkit()
@@ -318,10 +325,13 @@ async def evaluate_compliance(state: SecurityScanState) -> dict:
             context_lines.append("All controls passing.")
 
         try:
-            assessment: ComplianceAssessmentResult = await llm_structured(
-                system_prompt=SYSTEM_COMPLIANCE_ASSESSMENT,
-                user_prompt="\n".join(context_lines),
-                schema=ComplianceAssessmentResult,
+            assessment = cast(
+                ComplianceAssessmentResult,
+                await llm_structured(
+                    system_prompt=SYSTEM_COMPLIANCE_ASSESSMENT,
+                    user_prompt="\n".join(context_lines),
+                    schema=ComplianceAssessmentResult,
+                ),
             )
             compliance_score = assessment.overall_score
             output_summary = (
@@ -349,7 +359,7 @@ async def evaluate_compliance(state: SecurityScanState) -> dict:
     }
 
 
-async def synthesize_posture(state: SecurityScanState) -> dict:
+async def synthesize_posture(state: SecurityScanState) -> dict[str, Any]:
     """Synthesize all findings into an overall security posture assessment."""
     start = datetime.now(UTC)
 
@@ -399,10 +409,13 @@ async def synthesize_posture(state: SecurityScanState) -> dict:
     output_summary = f"Security posture score: {raw_score:.1f}/100"
 
     try:
-        assessment: SecurityPostureResult = await llm_structured(
-            system_prompt=SYSTEM_POSTURE_SYNTHESIS,
-            user_prompt="\n".join(context_lines),
-            schema=SecurityPostureResult,
+        assessment = cast(
+            SecurityPostureResult,
+            await llm_structured(
+                system_prompt=SYSTEM_POSTURE_SYNTHESIS,
+                user_prompt="\n".join(context_lines),
+                schema=SecurityPostureResult,
+            ),
         )
         posture.overall_score = assessment.overall_score
         posture.top_risks = assessment.top_risks[:5]
@@ -432,7 +445,7 @@ async def synthesize_posture(state: SecurityScanState) -> dict:
 # ── Action execution nodes ────────────────────────────────────────
 
 
-async def evaluate_action_policy(state: SecurityScanState) -> dict:
+async def evaluate_action_policy(state: SecurityScanState) -> dict[str, Any]:
     """Evaluate OPA policy for planned security actions (patches + rotations)."""
     start = datetime.now(UTC)
     toolkit = _get_toolkit()
@@ -476,7 +489,7 @@ async def evaluate_action_policy(state: SecurityScanState) -> dict:
     }
 
 
-async def execute_patches(state: SecurityScanState) -> dict:
+async def execute_patches(state: SecurityScanState) -> dict[str, Any]:
     """Apply patches for CVEs that have a fixed_version, sorted by CVSS score."""
     start = datetime.now(UTC)
     toolkit = _get_toolkit()
@@ -531,7 +544,7 @@ async def execute_patches(state: SecurityScanState) -> dict:
     }
 
 
-async def rotate_credentials(state: SecurityScanState) -> dict:
+async def rotate_credentials(state: SecurityScanState) -> dict[str, Any]:
     """Rotate all credentials marked as needs_rotation."""
     start = datetime.now(UTC)
     toolkit = _get_toolkit()

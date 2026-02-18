@@ -73,7 +73,7 @@ class SupervisorRunner:
 
         try:
             final_state_dict = await self._app.ainvoke(
-                initial_state.model_dump(),
+                initial_state.model_dump(),  # type: ignore[arg-type]
                 config={
                     "metadata": {
                         "session_id": session_id,
@@ -121,7 +121,7 @@ class SupervisorRunner:
         """Retrieve a completed session by ID."""
         return self._sessions.get(session_id)
 
-    def list_sessions(self) -> list[dict]:
+    def list_sessions(self) -> list[dict[str, Any]]:
         """List all sessions with summary info."""
         return [
             {

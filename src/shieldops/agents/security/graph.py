@@ -70,7 +70,7 @@ def should_rotate_after_patches(state: SecurityScanState) -> str:
     return "rotate_credentials"
 
 
-def create_security_graph() -> StateGraph:
+def create_security_graph() -> StateGraph[SecurityScanState]:
     """Build the Security Agent LangGraph workflow."""
     graph = StateGraph(SecurityScanState)
 

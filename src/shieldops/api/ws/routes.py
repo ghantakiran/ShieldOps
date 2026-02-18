@@ -1,5 +1,7 @@
 """WebSocket routes for real-time event streaming."""
 
+from typing import Any
+
 import structlog
 from fastapi import APIRouter, Query, WebSocket, WebSocketDisconnect
 
@@ -16,7 +18,7 @@ def get_manager() -> ConnectionManager:
     return manager
 
 
-async def _authenticate_ws(websocket: WebSocket, token: str | None) -> dict | None:
+async def _authenticate_ws(websocket: WebSocket, token: str | None) -> dict[str, Any] | None:
     """Validate JWT from query parameter. Returns payload or None."""
     if not token:
         return None

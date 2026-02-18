@@ -221,7 +221,11 @@ class InvestigationToolkit:
             logger.error("k8s_events_failed", resource_id=resource_id, error=str(e))
             return []
 
-    async def get_resource_health(self, resource_id: str, provider: str = "kubernetes") -> dict:
+    async def get_resource_health(
+        self,
+        resource_id: str,
+        provider: str = "kubernetes",
+    ) -> dict[str, Any]:
         """Get health status of a specific resource."""
         if self._router is None:
             return {"healthy": None, "status": "unknown", "message": "No connector available"}

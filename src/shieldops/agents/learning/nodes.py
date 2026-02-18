@@ -8,6 +8,7 @@ Each node is an async function that:
 """
 
 from datetime import UTC, datetime
+from typing import Any, cast
 from uuid import uuid4
 
 import structlog
@@ -55,7 +56,7 @@ def _elapsed_ms(start: datetime) -> int:
     return int((datetime.now(UTC) - start).total_seconds() * 1000)
 
 
-async def gather_outcomes(state: LearningState) -> dict:
+async def gather_outcomes(state: LearningState) -> dict[str, Any]:
     """Gather incident outcomes and compute effectiveness metrics."""
     start = datetime.now(UTC)
     toolkit = _get_toolkit()
@@ -112,7 +113,7 @@ async def gather_outcomes(state: LearningState) -> dict:
     }
 
 
-async def analyze_patterns(state: LearningState) -> dict:
+async def analyze_patterns(state: LearningState) -> dict[str, Any]:
     """Analyze incident patterns to identify recurring issues."""
     start = datetime.now(UTC)
 
@@ -145,8 +146,10 @@ async def analyze_patterns(state: LearningState) -> dict:
                 )
                 total_time += inc.investigation_duration_ms + inc.remediation_duration_ms
 
-            common_cause = max(root_causes, key=root_causes.get) if root_causes else ""
-            common_resolution = max(resolutions, key=resolutions.get) if resolutions else ""
+            common_cause = max(root_causes, key=lambda x: root_causes[x]) if root_causes else ""
+            common_resolution = (
+                max(resolutions, key=lambda x: resolutions[x]) if resolutions else ""
+            )
 
             insights.append(
                 PatternInsight(
@@ -192,10 +195,13 @@ async def analyze_patterns(state: LearningState) -> dict:
                     context_lines.append(f"    Feedback: {inc.feedback}")
 
         try:
-            assessment: PatternAnalysisResult = await llm_structured(
-                system_prompt=SYSTEM_PATTERN_ANALYSIS,
-                user_prompt="\n".join(context_lines),
-                schema=PatternAnalysisResult,
+            assessment = cast(
+                PatternAnalysisResult,
+                await llm_structured(
+                    system_prompt=SYSTEM_PATTERN_ANALYSIS,
+                    user_prompt="\n".join(context_lines),
+                    schema=PatternAnalysisResult,
+                ),
             )
             output_summary = (
                 f"{assessment.summary}. "
@@ -222,7 +228,7 @@ async def analyze_patterns(state: LearningState) -> dict:
     }
 
 
-async def recommend_playbooks(state: LearningState) -> dict:
+async def recommend_playbooks(state: LearningState) -> dict[str, Any]:
     """Generate playbook updates based on patterns and outcomes."""
     start = datetime.now(UTC)
     toolkit = _get_toolkit()
@@ -332,10 +338,13 @@ async def recommend_playbooks(state: LearningState) -> dict:
             context_lines.append(f"- {update.update_type}: {update.title}")
 
         try:
-            assessment: PlaybookRecommendationResult = await llm_structured(
-                system_prompt=SYSTEM_PLAYBOOK_RECOMMENDATION,
-                user_prompt="\n".join(context_lines),
-                schema=PlaybookRecommendationResult,
+            assessment = cast(
+                PlaybookRecommendationResult,
+                await llm_structured(
+                    system_prompt=SYSTEM_PLAYBOOK_RECOMMENDATION,
+                    user_prompt="\n".join(context_lines),
+                    schema=PlaybookRecommendationResult,
+                ),
             )
             output_summary = (
                 f"{assessment.summary}. "
@@ -361,7 +370,7 @@ async def recommend_playbooks(state: LearningState) -> dict:
     }
 
 
-async def recommend_thresholds(state: LearningState) -> dict:
+async def recommend_thresholds(state: LearningState) -> dict[str, Any]:
     """Recommend alerting threshold adjustments based on incident data."""
     start = datetime.now(UTC)
     toolkit = _get_toolkit()
@@ -447,10 +456,13 @@ async def recommend_thresholds(state: LearningState) -> dict:
             context_lines.append(f"- {at}: {count} total, {incorrect} incorrect automations")
 
         try:
-            assessment: ThresholdRecommendationResult = await llm_structured(
-                system_prompt=SYSTEM_THRESHOLD_RECOMMENDATION,
-                user_prompt="\n".join(context_lines),
-                schema=ThresholdRecommendationResult,
+            assessment = cast(
+                ThresholdRecommendationResult,
+                await llm_structured(
+                    system_prompt=SYSTEM_THRESHOLD_RECOMMENDATION,
+                    user_prompt="\n".join(context_lines),
+                    schema=ThresholdRecommendationResult,
+                ),
             )
             est_fp_reduction = assessment.estimated_noise_reduction
             output_summary = (
@@ -478,7 +490,7 @@ async def recommend_thresholds(state: LearningState) -> dict:
     }
 
 
-async def synthesize_improvements(state: LearningState) -> dict:
+async def synthesize_improvements(state: LearningState) -> dict[str, Any]:
     """Synthesize all findings into an improvement summary."""
     start = datetime.now(UTC)
 
@@ -534,10 +546,13 @@ async def synthesize_improvements(state: LearningState) -> dict:
     output_summary = f"Improvement score: {improvement_score:.1f}/100"
 
     try:
-        assessment: ImprovementSynthesisResult = await llm_structured(
-            system_prompt=SYSTEM_IMPROVEMENT_SYNTHESIS,
-            user_prompt="\n".join(context_lines),
-            schema=ImprovementSynthesisResult,
+        assessment = cast(
+            ImprovementSynthesisResult,
+            await llm_structured(
+                system_prompt=SYSTEM_IMPROVEMENT_SYNTHESIS,
+                user_prompt="\n".join(context_lines),
+                schema=ImprovementSynthesisResult,
+            ),
         )
         improvement_score = assessment.improvement_score
         output_summary = (

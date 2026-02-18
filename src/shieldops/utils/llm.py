@@ -24,9 +24,9 @@ def get_llm() -> ChatAnthropic:
     """Get or create the shared LLM client."""
     global _llm_instance
     if _llm_instance is None:
-        _llm_instance = ChatAnthropic(
+        _llm_instance = ChatAnthropic(  # type: ignore[call-arg]
             model=settings.anthropic_model,
-            api_key=settings.anthropic_api_key,
+            api_key=settings.anthropic_api_key,  # type: ignore[arg-type]
             max_tokens=4096,
             temperature=0.1,  # Low temp for deterministic infrastructure reasoning
         )
@@ -59,7 +59,11 @@ async def llm_analyze(
         format_instructions = parser.get_format_instructions()
         messages[0] = SystemMessage(content=f"{system_prompt}\n\n{format_instructions}")
         response = await llm.ainvoke(messages)
-        return parser.parse(response.content)
+        content_str = (
+            str(response.content) if not isinstance(response.content, str) else response.content
+        )
+        parsed: dict[str, Any] = await parser.aparse(content_str)
+        return parsed
 
     response = await llm.ainvoke(messages)
     return {"content": response.content}
@@ -69,7 +73,7 @@ async def llm_structured(
     system_prompt: str,
     user_prompt: str,
     schema: type[BaseModel],
-) -> BaseModel:
+) -> dict[str, Any] | BaseModel:
     """Run LLM analysis and return a validated Pydantic model.
 
     Uses Claude's native tool_use for reliable structured output.

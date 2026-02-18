@@ -311,7 +311,8 @@ class SecurityToolkit:
     def classify_security_risk(self, action_type: str, environment: Environment) -> RiskLevel:
         """Classify risk level for a security action."""
         if self._policy_engine is not None:
-            return self._policy_engine.classify_risk(action_type, environment)
+            risk: RiskLevel = self._policy_engine.classify_risk(action_type, environment)
+            return risk
 
         # Fallback classification
         if environment == Environment.PRODUCTION:
@@ -324,7 +325,8 @@ class SecurityToolkit:
         """Check whether a security action at this risk level needs approval."""
         if self._approval_workflow is None:
             return False
-        return self._approval_workflow.requires_approval(risk_level)
+        result: bool = self._approval_workflow.requires_approval(risk_level)
+        return result
 
     async def request_approval(self, request: Any) -> Any:
         """Submit an approval request and wait for response."""

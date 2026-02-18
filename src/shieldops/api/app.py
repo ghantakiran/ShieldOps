@@ -2,10 +2,12 @@
 
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from typing import Any
 
 import structlog
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from shieldops.agents.cost.runner import CostRunner
 from shieldops.agents.investigation.runner import InvestigationRunner
@@ -260,8 +262,8 @@ def create_app() -> FastAPI:
     async def health_check() -> dict[str, str]:
         return {"status": "healthy", "version": settings.app_version}
 
-    @app.get("/ready")
-    async def readiness_check() -> dict:
+    @app.get("/ready", response_model=None)
+    async def readiness_check() -> dict[str, Any] | JSONResponse:
         """Check readiness of all dependencies (DB, Redis, OPA)."""
         import httpx as _httpx
 
@@ -288,7 +290,9 @@ def create_app() -> FastAPI:
         try:
             import redis.asyncio as aioredis
 
-            r = aioredis.from_url(settings.redis_url, socket_connect_timeout=2)
+            r = aioredis.from_url(  # type: ignore[no-untyped-call]
+                settings.redis_url, socket_connect_timeout=2
+            )
             await r.ping()
             await r.aclose()
             checks["redis"] = "ok"
@@ -306,8 +310,6 @@ def create_app() -> FastAPI:
         except Exception as e:
             checks["opa"] = f"error: {e}"
             all_ok = False
-
-        from fastapi.responses import JSONResponse
 
         status_code = 200 if all_ok else 503
         return JSONResponse(
