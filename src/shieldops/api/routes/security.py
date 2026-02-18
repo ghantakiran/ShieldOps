@@ -42,7 +42,6 @@ class TriggerScanRequest(BaseModel):
     scan_type: str = "full"  # full, cve_only, credentials_only, compliance_only
     target_resources: list[str] = Field(default_factory=list)
     compliance_frameworks: list[str] = Field(default_factory=list)
-    execute_actions: bool = False  # Opt-in: apply patches and rotate credentials
 
 
 # --- Endpoints ---
@@ -68,7 +67,6 @@ async def trigger_scan(
         scan_type=request.scan_type,
         target_resources=request.target_resources or None,
         compliance_frameworks=request.compliance_frameworks or None,
-        execute_actions=request.execute_actions,
     )
 
     return {
@@ -97,7 +95,6 @@ async def trigger_scan_sync(
         scan_type=request.scan_type,
         target_resources=request.target_resources or None,
         compliance_frameworks=request.compliance_frameworks or None,
-        execute_actions=request.execute_actions,
     )
     return result.model_dump(mode="json")
 

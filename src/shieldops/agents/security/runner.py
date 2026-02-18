@@ -4,7 +4,7 @@ Takes scan parameters, constructs the LangGraph, runs it end-to-end,
 and returns the completed security scan state.
 """
 
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from typing import Any
 from uuid import uuid4
 
@@ -13,7 +13,6 @@ import structlog
 from shieldops.agents.security.graph import create_security_graph
 from shieldops.agents.security.models import SecurityScanState
 from shieldops.agents.security.nodes import set_toolkit
-from shieldops.agents.security.protocols import CredentialStore, CVESource
 from shieldops.agents.security.tools import SecurityToolkit
 from shieldops.connectors.base import ConnectorRouter
 from shieldops.models.base import Environment
@@ -29,9 +28,6 @@ class SecurityRunner:
             connector_router=router,
             cve_sources=[nvd_source],
             credential_stores=[vault_store],
-            policy_engine=policy_engine,
-            approval_workflow=approval_workflow,
-            repository=repository,
         )
         result = await runner.scan(environment=Environment.PRODUCTION)
     """
@@ -39,20 +35,14 @@ class SecurityRunner:
     def __init__(
         self,
         connector_router: ConnectorRouter | None = None,
-        cve_sources: list[CVESource] | None = None,
-        credential_stores: list[CredentialStore] | None = None,
-        policy_engine: Any | None = None,
-        approval_workflow: Any | None = None,
-        repository: Any | None = None,
+        cve_sources: list[Any] | None = None,
+        credential_stores: list[Any] | None = None,
     ) -> None:
         self._toolkit = SecurityToolkit(
             connector_router=connector_router,
             cve_sources=cve_sources or [],
             credential_stores=credential_stores or [],
-            policy_engine=policy_engine,
-            approval_workflow=approval_workflow,
         )
-        self._repository = repository
         set_toolkit(self._toolkit)
 
         graph = create_security_graph()
@@ -66,7 +56,6 @@ class SecurityRunner:
         scan_type: str = "full",
         target_resources: list[str] | None = None,
         compliance_frameworks: list[str] | None = None,
-        execute_actions: bool = False,
     ) -> SecurityScanState:
         """Run a security scan.
 
@@ -75,7 +64,6 @@ class SecurityRunner:
             scan_type: Type of scan — full, cve_only, credentials_only, compliance_only.
             target_resources: Specific resources to scan (auto-discovers if empty).
             compliance_frameworks: Frameworks to check (defaults to soc2).
-            execute_actions: If True, apply patches and rotate credentials after scan.
 
         Returns:
             The completed SecurityScanState with all findings.
@@ -87,7 +75,6 @@ class SecurityRunner:
             scan_id=scan_id,
             environment=environment.value,
             scan_type=scan_type,
-            execute_actions=execute_actions,
         )
 
         initial_state = SecurityScanState(
@@ -96,7 +83,6 @@ class SecurityRunner:
             target_resources=target_resources or [],
             target_environment=environment,
             compliance_frameworks=compliance_frameworks or ["soc2"],
-            execute_actions=execute_actions,
         )
 
         try:
@@ -114,7 +100,7 @@ class SecurityRunner:
 
             if final_state.scan_start:
                 final_state.scan_duration_ms = int(
-                    (datetime.now(UTC) - final_state.scan_start).total_seconds()
+                    (datetime.now(timezone.utc) - final_state.scan_start).total_seconds()
                     * 1000
                 )
 
@@ -127,14 +113,10 @@ class SecurityRunner:
                 credentials_at_risk=final_state.credentials_needing_rotation,
                 compliance_score=final_state.compliance_score,
                 posture_score=final_state.posture.overall_score if final_state.posture else 0,
-                patches_applied=final_state.patches_applied,
-                credentials_rotated=final_state.credentials_rotated,
                 steps=len(final_state.reasoning_chain),
             )
 
             self._scans[scan_id] = final_state
-            await self._persist(scan_id, final_state)
-            await self._write_audit(scan_id, final_state)
             return final_state
 
         except Exception as e:
@@ -151,7 +133,6 @@ class SecurityRunner:
                 current_step="failed",
             )
             self._scans[scan_id] = error_state
-            await self._persist(scan_id, error_state)
             return error_state
 
     def get_scan(self, scan_id: str) -> SecurityScanState | None:
@@ -171,56 +152,8 @@ class SecurityRunner:
                 "credentials_at_risk": state.credentials_needing_rotation,
                 "compliance_score": state.compliance_score,
                 "posture_score": state.posture.overall_score if state.posture else 0,
-                "patches_applied": state.patches_applied,
-                "credentials_rotated": state.credentials_rotated,
                 "duration_ms": state.scan_duration_ms,
                 "error": state.error,
             }
             for scan_id, state in self._scans.items()
         ]
-
-    async def _persist(self, scan_id: str, state: SecurityScanState) -> None:
-        """Save scan result to DB via repository."""
-        if self._repository is None:
-            return
-        try:
-            await self._repository.save_security_scan(scan_id, state)
-        except Exception as e:
-            logger.warning("security_scan_persist_failed", scan_id=scan_id, error=str(e))
-
-    async def _write_audit(self, scan_id: str, state: SecurityScanState) -> None:
-        """Write an audit log entry for completed scan actions."""
-        if self._repository is None:
-            return
-        if not state.patches_applied and not state.credentials_rotated:
-            return  # No actions taken — nothing to audit
-
-        try:
-            from shieldops.models.base import (
-                AuditEntry,
-                ExecutionStatus,
-                RiskLevel,
-            )
-
-            entry = AuditEntry(
-                id=f"aud-sec-{uuid4().hex[:12]}",
-                timestamp=datetime.now(UTC),
-                agent_type="security",
-                action="security_remediation",
-                target_resource=state.target_resources[0] if state.target_resources else "*",
-                environment=state.target_environment,
-                risk_level=RiskLevel.MEDIUM,
-                policy_evaluation=(
-                    "allowed" if state.action_policy_result
-                    and state.action_policy_result.allowed else "denied"
-                ),
-                outcome=ExecutionStatus.SUCCESS if not state.error else ExecutionStatus.FAILED,
-                reasoning=(
-                    f"Patches applied: {state.patches_applied}, "
-                    f"Credentials rotated: {state.credentials_rotated}"
-                ),
-                actor="security-agent",
-            )
-            await self._repository.append_audit_log(entry)
-        except Exception as e:
-            logger.warning("security_audit_write_failed", scan_id=scan_id, error=str(e))
