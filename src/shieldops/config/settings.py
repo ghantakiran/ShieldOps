@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     environment: str = "development"  # development, staging, production
 
     # API
-    api_host: str = "0.0.0.0"  # noqa: S104
+    api_host: str = "0.0.0.0"  # noqa: S104  # nosec B104
     api_port: int = 8000
     api_prefix: str = "/api/v1"
     cors_origins: list[str] = ["http://localhost:3000"]

@@ -202,4 +202,4 @@ def render_auto_refresh(sidebar: bool = True) -> None:
 def render_json_expander(label: str, data: Any, expanded: bool = False) -> None:
     """Show a collapsible JSON viewer."""
     with st.expander(label, expanded=expanded):
-        st.json(data if isinstance(data, (dict, list)) else json.loads(str(data)))
+        st.json(data if isinstance(data, dict | list) else json.loads(str(data)))
