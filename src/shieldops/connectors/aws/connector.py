@@ -32,6 +32,7 @@ class AWSConnector(InfraConnector):
         self._region = region
         self._ec2_client: Any = None
         self._ecs_client: Any = None
+        self._cloudtrail_client: Any = None
         self._snapshots: dict[str, dict[str, Any]] = {}
 
     def _ensure_clients(self) -> None:
@@ -42,6 +43,7 @@ class AWSConnector(InfraConnector):
             session = boto3.Session(region_name=self._region)
             self._ec2_client = session.client("ec2")
             self._ecs_client = session.client("ecs")
+            self._cloudtrail_client = session.client("cloudtrail")
 
     async def _run_sync(self, func: Any, *args: Any, **kwargs: Any) -> Any:
         """Run a synchronous boto3 call in a thread executor."""
@@ -182,8 +184,61 @@ class AWSConnector(InfraConnector):
         return resources
 
     async def get_events(self, resource_id: str, time_range: TimeRange) -> list[dict[str, Any]]:
-        """Get CloudTrail-style events for a resource (stub — requires CloudTrail integration)."""
-        return []
+        """Get CloudTrail events for a resource."""
+        self._ensure_clients()
+
+        try:
+            events: list[dict[str, Any]] = []
+            next_token: str | None = None
+
+            for _ in range(2):  # max 2 pages
+                kwargs: dict[str, Any] = {
+                    "LookupAttributes": [
+                        {
+                            "AttributeKey": "ResourceName",
+                            "AttributeValue": resource_id,
+                        }
+                    ],
+                    "StartTime": time_range.start,
+                    "EndTime": time_range.end,
+                    "MaxResults": 50,
+                }
+                if next_token:
+                    kwargs["NextToken"] = next_token
+
+                resp = await self._run_sync(self._cloudtrail_client.lookup_events, **kwargs)
+
+                for raw in resp.get("Events", []):
+                    resources = raw.get("Resources", [])
+                    events.append(
+                        {
+                            "event_id": raw.get("EventId", ""),
+                            "event_name": raw.get("EventName", ""),
+                            "event_source": raw.get("EventSource", ""),
+                            "event_time": raw.get("EventTime"),
+                            "username": raw.get("Username", ""),
+                            "resource_type": resources[0].get("ResourceType", "")
+                            if resources
+                            else "",
+                            "resource_name": resources[0].get("ResourceName", "")
+                            if resources
+                            else "",
+                            "raw_event": raw.get("CloudTrailEvent", ""),
+                        }
+                    )
+
+                next_token = resp.get("NextToken")
+                if not next_token:
+                    break
+
+            return events
+        except Exception as e:
+            logger.error(
+                "cloudtrail_get_events_failed",
+                resource_id=resource_id,
+                error=str(e),
+            )
+            return []
 
     async def execute_action(self, action: RemediationAction) -> ActionResult:
         """Execute a remediation action on AWS resources."""

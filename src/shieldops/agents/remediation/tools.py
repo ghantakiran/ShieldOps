@@ -19,6 +19,7 @@ from shieldops.models.base import (
     RiskLevel,
     Snapshot,
 )
+from shieldops.playbooks.loader import Playbook, PlaybookLoader, PlaybookValidation
 from shieldops.policy.approval.workflow import ApprovalRequest, ApprovalWorkflow
 from shieldops.policy.opa.client import PolicyDecision, PolicyEngine
 
@@ -37,10 +38,12 @@ class RemediationToolkit:
         connector_router: ConnectorRouter | None = None,
         policy_engine: PolicyEngine | None = None,
         approval_workflow: ApprovalWorkflow | None = None,
+        playbook_loader: PlaybookLoader | None = None,
     ) -> None:
         self._router = connector_router
         self._policy_engine = policy_engine
         self._approval_workflow = approval_workflow
+        self._playbook_loader = playbook_loader
 
     async def evaluate_policy(
         self,
@@ -199,3 +202,18 @@ class RemediationToolkit:
                 started_at=datetime.now(UTC),
                 error=str(e),
             )
+
+    def resolve_playbook(self, alert_name: str, severity: str | None = None) -> Playbook | None:
+        """Find a matching playbook for the given alert."""
+        if self._playbook_loader is None:
+            return None
+        return self._playbook_loader.match(alert_name, severity)
+
+    def get_playbook_validation(self, playbook_name: str) -> PlaybookValidation | None:
+        """Get validation config for a named playbook."""
+        if self._playbook_loader is None:
+            return None
+        playbook = self._playbook_loader.get(playbook_name)
+        if playbook is None:
+            return None
+        return playbook.validation

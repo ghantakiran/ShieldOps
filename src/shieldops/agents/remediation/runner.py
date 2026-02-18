@@ -22,6 +22,7 @@ from shieldops.models.base import (
     ExecutionStatus,
     RemediationAction,
 )
+from shieldops.playbooks.loader import PlaybookLoader
 from shieldops.policy.approval.workflow import ApprovalWorkflow
 from shieldops.policy.opa.client import PolicyEngine
 from shieldops.policy.rollback.manager import RollbackManager
@@ -51,11 +52,16 @@ class RemediationRunner:
         approval_workflow: ApprovalWorkflow | None = None,
         repository: "Repository | None" = None,
         ws_manager: "object | None" = None,
+        playbook_loader: PlaybookLoader | None = None,
     ) -> None:
+        if playbook_loader is not None:
+            playbook_loader.load_all()
+
         self._toolkit = RemediationToolkit(
             connector_router=connector_router,
             policy_engine=policy_engine,
             approval_workflow=approval_workflow,
+            playbook_loader=playbook_loader,
         )
         # Configure the module-level toolkit for nodes
         set_toolkit(self._toolkit)

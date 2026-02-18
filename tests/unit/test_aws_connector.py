@@ -764,11 +764,155 @@ class TestValidateHealth:
 
 class TestGetEvents:
     @pytest.mark.asyncio
-    async def test_returns_empty_list(self, connector: AWSConnector, time_range: TimeRange) -> None:
-        """get_events is currently a stub that returns an empty list."""
+    async def test_returns_cloudtrail_events(
+        self, connector: AWSConnector, time_range: TimeRange
+    ) -> None:
+        """CloudTrail events are parsed into structured dicts."""
+        connector._cloudtrail_client = MagicMock()
+        connector._cloudtrail_client.lookup_events.return_value = {
+            "Events": [
+                {
+                    "EventId": "evt-001",
+                    "EventName": "StopInstances",
+                    "EventSource": "ec2.amazonaws.com",
+                    "EventTime": datetime(2025, 6, 1, 12, 0, tzinfo=UTC),
+                    "Username": "admin",
+                    "Resources": [
+                        {"ResourceType": "AWS::EC2::Instance", "ResourceName": "i-abc123"}
+                    ],
+                    "CloudTrailEvent": '{"raw": true}',
+                },
+                {
+                    "EventId": "evt-002",
+                    "EventName": "StartInstances",
+                    "EventSource": "ec2.amazonaws.com",
+                    "EventTime": datetime(2025, 6, 1, 12, 5, tzinfo=UTC),
+                    "Username": "deploy-bot",
+                    "Resources": [
+                        {"ResourceType": "AWS::EC2::Instance", "ResourceName": "i-abc123"}
+                    ],
+                    "CloudTrailEvent": '{"raw": true}',
+                },
+            ]
+        }
+
+        events = await connector.get_events("i-abc123", time_range)
+
+        assert len(events) == 2
+        assert events[0]["event_id"] == "evt-001"
+        assert events[0]["event_name"] == "StopInstances"
+        assert events[0]["event_source"] == "ec2.amazonaws.com"
+        assert events[0]["username"] == "admin"
+        assert events[0]["resource_type"] == "AWS::EC2::Instance"
+        assert events[0]["resource_name"] == "i-abc123"
+        assert events[0]["raw_event"] == '{"raw": true}'
+        assert events[1]["event_name"] == "StartInstances"
+
+    @pytest.mark.asyncio
+    async def test_passes_time_range_and_resource_id(
+        self, connector: AWSConnector, time_range: TimeRange
+    ) -> None:
+        """Verify correct parameters are passed to lookup_events."""
+        connector._cloudtrail_client = MagicMock()
+        connector._cloudtrail_client.lookup_events.return_value = {"Events": []}
+
+        await connector.get_events("i-xyz789", time_range)
+
+        call_kwargs = connector._cloudtrail_client.lookup_events.call_args
+        assert call_kwargs.kwargs["LookupAttributes"] == [
+            {"AttributeKey": "ResourceName", "AttributeValue": "i-xyz789"}
+        ]
+        assert call_kwargs.kwargs["StartTime"] == time_range.start
+        assert call_kwargs.kwargs["EndTime"] == time_range.end
+        assert call_kwargs.kwargs["MaxResults"] == 50
+
+    @pytest.mark.asyncio
+    async def test_pagination_with_next_token(
+        self, connector: AWSConnector, time_range: TimeRange
+    ) -> None:
+        """Two-page response is correctly concatenated."""
+        connector._cloudtrail_client = MagicMock()
+        page1 = {
+            "Events": [
+                {
+                    "EventId": "evt-p1",
+                    "EventName": "DescribeInstances",
+                    "EventSource": "ec2.amazonaws.com",
+                    "EventTime": datetime(2025, 6, 1, tzinfo=UTC),
+                    "Resources": [],
+                }
+            ],
+            "NextToken": "token-abc",
+        }
+        page2 = {
+            "Events": [
+                {
+                    "EventId": "evt-p2",
+                    "EventName": "RunInstances",
+                    "EventSource": "ec2.amazonaws.com",
+                    "EventTime": datetime(2025, 6, 1, tzinfo=UTC),
+                    "Resources": [],
+                }
+            ],
+        }
+        connector._cloudtrail_client.lookup_events.side_effect = [page1, page2]
+
+        events = await connector.get_events("i-abc123", time_range)
+
+        assert len(events) == 2
+        assert events[0]["event_id"] == "evt-p1"
+        assert events[1]["event_id"] == "evt-p2"
+        assert connector._cloudtrail_client.lookup_events.call_count == 2
+        # Second call should include NextToken
+        second_call = connector._cloudtrail_client.lookup_events.call_args_list[1]
+        assert second_call.kwargs["NextToken"] == "token-abc"
+
+    @pytest.mark.asyncio
+    async def test_api_error_returns_empty(
+        self, connector: AWSConnector, time_range: TimeRange
+    ) -> None:
+        """Exception from CloudTrail API returns empty list."""
+        connector._cloudtrail_client = MagicMock()
+        connector._cloudtrail_client.lookup_events.side_effect = Exception("AccessDenied")
+
         events = await connector.get_events("i-abc123", time_range)
 
         assert events == []
+
+    @pytest.mark.asyncio
+    async def test_empty_response(self, connector: AWSConnector, time_range: TimeRange) -> None:
+        """Empty Events list from CloudTrail returns empty list."""
+        connector._cloudtrail_client = MagicMock()
+        connector._cloudtrail_client.lookup_events.return_value = {"Events": []}
+
+        events = await connector.get_events("i-abc123", time_range)
+
+        assert events == []
+
+    @pytest.mark.asyncio
+    async def test_event_without_optional_fields(
+        self, connector: AWSConnector, time_range: TimeRange
+    ) -> None:
+        """Events missing Username or Resources are handled gracefully."""
+        connector._cloudtrail_client = MagicMock()
+        connector._cloudtrail_client.lookup_events.return_value = {
+            "Events": [
+                {
+                    "EventId": "evt-minimal",
+                    "EventName": "SomeAction",
+                    # No Username, no Resources, no CloudTrailEvent
+                }
+            ]
+        }
+
+        events = await connector.get_events("i-abc123", time_range)
+
+        assert len(events) == 1
+        assert events[0]["event_id"] == "evt-minimal"
+        assert events[0]["username"] == ""
+        assert events[0]["resource_type"] == ""
+        assert events[0]["resource_name"] == ""
+        assert events[0]["raw_event"] == ""
 
 
 # ============================================================================
@@ -797,6 +941,7 @@ class TestConnectorInit:
         connector = AWSConnector(region="us-east-1")
         assert connector._ec2_client is None
         assert connector._ecs_client is None
+        assert connector._cloudtrail_client is None
 
 
 # ============================================================================
