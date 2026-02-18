@@ -84,7 +84,7 @@ class CostRunner:
 
         try:
             final_state_dict = await self._app.ainvoke(
-                initial_state.model_dump(),
+                initial_state.model_dump(),  # type: ignore[arg-type]
                 config={
                     "metadata": {
                         "analysis_id": analysis_id,
@@ -134,7 +134,7 @@ class CostRunner:
         """Retrieve a completed analysis by ID."""
         return self._analyses.get(analysis_id)
 
-    def list_analyses(self) -> list[dict]:
+    def list_analyses(self) -> list[dict[str, Any]]:
         """List all analyses with summary info."""
         return [
             {

@@ -1,6 +1,7 @@
 """SQLAlchemy 2.x ORM models for ShieldOps persistence."""
 
 from datetime import UTC, datetime
+from typing import Any
 from uuid import uuid4
 
 from sqlalchemy import Boolean, DateTime, Index, Integer, String, Text, func
@@ -44,12 +45,12 @@ class InvestigationRecord(Base):
     severity: Mapped[str] = mapped_column(String(32), default="warning")
     status: Mapped[str] = mapped_column(String(32), default="init", index=True)
     confidence: Mapped[float] = mapped_column(default=0.0)
-    hypotheses: Mapped[dict] = mapped_column(JSONB, default=list)
-    reasoning_chain: Mapped[dict] = mapped_column(JSONB, default=list)
-    alert_context: Mapped[dict] = mapped_column(JSONB, default=dict)
-    log_findings: Mapped[dict] = mapped_column(JSONB, default=list)
-    metric_anomalies: Mapped[dict] = mapped_column(JSONB, default=list)
-    recommended_action: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    hypotheses: Mapped[list[dict[str, Any]]] = mapped_column(JSONB, default=list)
+    reasoning_chain: Mapped[list[dict[str, Any]]] = mapped_column(JSONB, default=list)
+    alert_context: Mapped[dict[str, Any]] = mapped_column(JSONB, default=dict)
+    log_findings: Mapped[list[dict[str, Any]]] = mapped_column(JSONB, default=list)
+    metric_anomalies: Mapped[list[dict[str, Any]]] = mapped_column(JSONB, default=list)
+    recommended_action: Mapped[dict[str, Any] | None] = mapped_column(JSONB, nullable=True)
     error: Mapped[str | None] = mapped_column(Text, nullable=True)
     duration_ms: Mapped[int] = mapped_column(default=0)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
@@ -70,10 +71,10 @@ class RemediationRecord(Base):
     risk_level: Mapped[str] = mapped_column(String(32))
     status: Mapped[str] = mapped_column(String(32), default="init", index=True)
     validation_passed: Mapped[bool | None] = mapped_column(nullable=True)
-    reasoning_chain: Mapped[dict] = mapped_column(JSONB, default=list)
-    action_data: Mapped[dict] = mapped_column(JSONB, default=dict)
-    execution_result: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
-    snapshot_data: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    reasoning_chain: Mapped[list[dict[str, Any]]] = mapped_column(JSONB, default=list)
+    action_data: Mapped[dict[str, Any]] = mapped_column(JSONB, default=dict)
+    execution_result: Mapped[dict[str, Any] | None] = mapped_column(JSONB, nullable=True)
+    snapshot_data: Mapped[dict[str, Any] | None] = mapped_column(JSONB, nullable=True)
     investigation_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
     error: Mapped[str | None] = mapped_column(Text, nullable=True)
     duration_ms: Mapped[int] = mapped_column(default=0)
@@ -144,27 +145,27 @@ class SecurityScanRecord(Base):
     status: Mapped[str] = mapped_column(String(32), default="init", index=True)
 
     # CVE findings
-    cve_findings: Mapped[dict] = mapped_column(JSONB, default=list)
+    cve_findings: Mapped[list[dict[str, Any]]] = mapped_column(JSONB, default=list)
     critical_cve_count: Mapped[int] = mapped_column(Integer, default=0)
 
     # Credential status
-    credential_statuses: Mapped[dict] = mapped_column(JSONB, default=list)
+    credential_statuses: Mapped[list[dict[str, Any]]] = mapped_column(JSONB, default=list)
 
     # Compliance
-    compliance_controls: Mapped[dict] = mapped_column(JSONB, default=list)
+    compliance_controls: Mapped[list[dict[str, Any]]] = mapped_column(JSONB, default=list)
     compliance_score: Mapped[float] = mapped_column(default=0.0)
 
     # Action execution results
-    patch_results: Mapped[dict] = mapped_column(JSONB, default=list)
-    rotation_results: Mapped[dict] = mapped_column(JSONB, default=list)
+    patch_results: Mapped[list[dict[str, Any]]] = mapped_column(JSONB, default=list)
+    rotation_results: Mapped[list[dict[str, Any]]] = mapped_column(JSONB, default=list)
     patches_applied: Mapped[int] = mapped_column(Integer, default=0)
     credentials_rotated: Mapped[int] = mapped_column(Integer, default=0)
 
     # Posture
-    posture_data: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    posture_data: Mapped[dict[str, Any] | None] = mapped_column(JSONB, nullable=True)
 
     # Metadata
-    reasoning_chain: Mapped[dict] = mapped_column(JSONB, default=list)
+    reasoning_chain: Mapped[list[dict[str, Any]]] = mapped_column(JSONB, default=list)
     error: Mapped[str | None] = mapped_column(Text, nullable=True)
     duration_ms: Mapped[int] = mapped_column(Integer, default=0)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
@@ -184,8 +185,8 @@ class AgentSession(Base):
     agent_type: Mapped[str] = mapped_column(String(64), index=True)
     event_type: Mapped[str] = mapped_column(String(64))
     status: Mapped[str] = mapped_column(String(32), default="started", index=True)
-    input_data: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
-    result_data: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    input_data: Mapped[dict[str, Any] | None] = mapped_column(JSONB, nullable=True)
+    result_data: Mapped[dict[str, Any] | None] = mapped_column(JSONB, nullable=True)
     duration_ms: Mapped[int] = mapped_column(default=0)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
@@ -204,7 +205,7 @@ class AgentRegistration(Base):
     agent_type: Mapped[str] = mapped_column(String(64), index=True)
     environment: Mapped[str] = mapped_column(String(32), default="production")
     status: Mapped[str] = mapped_column(String(32), default="idle", index=True)
-    config: Mapped[dict] = mapped_column(JSONB, default=dict)
+    config: Mapped[dict[str, Any]] = mapped_column(JSONB, default=dict)
     last_heartbeat: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(

@@ -99,7 +99,7 @@ class LearningRunner:
 
         try:
             final_state_dict = await self._app.ainvoke(
-                initial_state.model_dump(),
+                initial_state.model_dump(),  # type: ignore[arg-type]
                 config={
                     "metadata": {
                         "learning_id": learning_id,
@@ -149,7 +149,7 @@ class LearningRunner:
         """Retrieve a completed learning cycle by ID."""
         return self._cycles.get(learning_id)
 
-    def list_cycles(self) -> list[dict]:
+    def list_cycles(self) -> list[dict[str, Any]]:
         """List all learning cycles with summary info."""
         return [
             {

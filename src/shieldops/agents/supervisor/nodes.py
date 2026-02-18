@@ -8,6 +8,7 @@ Each node is an async function that:
 """
 
 from datetime import UTC, datetime
+from typing import Any, cast
 from uuid import uuid4
 
 import structlog
@@ -52,7 +53,7 @@ def _elapsed_ms(start: datetime) -> int:
     return int((datetime.now(UTC) - start).total_seconds() * 1000)
 
 
-async def classify_event(state: SupervisorState) -> dict:
+async def classify_event(state: SupervisorState) -> dict[str, Any]:
     """Classify the incoming event and determine which agent should handle it."""
     start = datetime.now(UTC)
     toolkit = _get_toolkit()
@@ -94,10 +95,13 @@ async def classify_event(state: SupervisorState) -> dict:
         )
 
         try:
-            assessment: EventClassificationResult = await llm_structured(
-                system_prompt=SYSTEM_EVENT_CLASSIFICATION,
-                user_prompt="\n".join(context_lines),
-                schema=EventClassificationResult,
+            assessment = cast(
+                EventClassificationResult,
+                await llm_structured(
+                    system_prompt=SYSTEM_EVENT_CLASSIFICATION,
+                    user_prompt="\n".join(context_lines),
+                    schema=EventClassificationResult,
+                ),
             )
             task_type = TaskType(assessment.task_type)
             priority = assessment.priority
@@ -131,7 +135,7 @@ async def classify_event(state: SupervisorState) -> dict:
     }
 
 
-async def dispatch_to_agent(state: SupervisorState) -> dict:
+async def dispatch_to_agent(state: SupervisorState) -> dict[str, Any]:
     """Dispatch the classified task to the appropriate specialist agent."""
     start = datetime.now(UTC)
     toolkit = _get_toolkit()
@@ -169,7 +173,7 @@ async def dispatch_to_agent(state: SupervisorState) -> dict:
     }
 
 
-async def evaluate_result(state: SupervisorState) -> dict:
+async def evaluate_result(state: SupervisorState) -> dict[str, Any]:
     """Evaluate the completed task result and decide on chaining and escalation."""
     start = datetime.now(UTC)
     toolkit = _get_toolkit()
@@ -222,10 +226,13 @@ async def evaluate_result(state: SupervisorState) -> dict:
         )
 
         try:
-            assessment: ChainDecisionResult = await llm_structured(
-                system_prompt=SYSTEM_CHAIN_DECISION,
-                user_prompt="\n".join(context_lines),
-                schema=ChainDecisionResult,
+            assessment = cast(
+                ChainDecisionResult,
+                await llm_structured(
+                    system_prompt=SYSTEM_CHAIN_DECISION,
+                    user_prompt="\n".join(context_lines),
+                    schema=ChainDecisionResult,
+                ),
             )
             should_chain = assessment.should_chain
             if should_chain and assessment.chain_task_type != "none":
@@ -265,7 +272,7 @@ async def evaluate_result(state: SupervisorState) -> dict:
     }
 
 
-async def chain_followup(state: SupervisorState) -> dict:
+async def chain_followup(state: SupervisorState) -> dict[str, Any]:
     """Chain a follow-up task to another specialist agent."""
     start = datetime.now(UTC)
     toolkit = _get_toolkit()
@@ -318,7 +325,7 @@ async def chain_followup(state: SupervisorState) -> dict:
     }
 
 
-async def escalate(state: SupervisorState) -> dict:
+async def escalate(state: SupervisorState) -> dict[str, Any]:
     """Escalate the situation to a human operator."""
     start = datetime.now(UTC)
     toolkit = _get_toolkit()
@@ -383,7 +390,7 @@ async def escalate(state: SupervisorState) -> dict:
     }
 
 
-async def finalize(state: SupervisorState) -> dict:
+async def finalize(state: SupervisorState) -> dict[str, Any]:
     """Finalize the supervisor session with summary."""
     start = datetime.now(UTC)
 

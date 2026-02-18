@@ -5,6 +5,7 @@ and returns the completed remediation state.
 """
 
 from datetime import UTC, datetime
+from typing import Any
 from uuid import uuid4
 
 import structlog
@@ -109,7 +110,7 @@ class RemediationRunner:
         try:
             # Run the LangGraph workflow
             final_state_dict = await self._app.ainvoke(
-                initial_state.model_dump(),
+                initial_state.model_dump(),  # type: ignore[arg-type]
                 config={
                     "metadata": {
                         "remediation_id": remediation_id,
@@ -176,8 +177,8 @@ class RemediationRunner:
                 "action_type": state.action.action_type,
                 "validation_passed": state.validation_passed,
             }
-            await self._ws_manager.broadcast("global", event)
-            await self._ws_manager.broadcast(f"remediation:{remediation_id}", event)
+            await self._ws_manager.broadcast("global", event)  # type: ignore[attr-defined]
+            await self._ws_manager.broadcast(f"remediation:{remediation_id}", event)  # type: ignore[attr-defined]
         except Exception as e:
             logger.warning("ws_broadcast_failed", id=remediation_id, error=str(e))
 
@@ -224,7 +225,7 @@ class RemediationRunner:
         """Retrieve a completed remediation by ID."""
         return self._remediations.get(remediation_id)
 
-    def list_remediations(self) -> list[dict]:
+    def list_remediations(self) -> list[dict[str, Any]]:
         """List all remediations with summary info."""
         return [
             {

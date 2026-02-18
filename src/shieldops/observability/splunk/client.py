@@ -122,7 +122,8 @@ class SplunkSource(LogSource):
         data = response.json()
 
         # oneshot mode returns results directly
-        return data.get("results", [])
+        results: list[dict[str, Any]] = data.get("results", [])
+        return results
 
     async def _run_search_async_job(self, spl: str) -> list[dict[str, Any]]:
         """Create a normal (non-oneshot) search job and poll for results."""
@@ -154,7 +155,8 @@ class SplunkSource(LogSource):
             params={"output_mode": "json", "count": 1000},
         )
         results_resp.raise_for_status()
-        return results_resp.json().get("results", [])
+        job_results: list[dict[str, Any]] = results_resp.json().get("results", [])
+        return job_results
 
     def _normalize_results(self, raw_results: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """Normalize Splunk results to standard log entry format."""
@@ -176,7 +178,8 @@ class SplunkSource(LogSource):
         # Check explicit level fields first
         for field in ("log_level", "level", "severity"):
             if field in result:
-                return result[field].lower()
+                level: str = str(result[field]).lower()
+                return level
 
         # Fall back to content analysis
         raw = result.get("_raw", "").upper()

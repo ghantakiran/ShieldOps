@@ -37,7 +37,7 @@ class CostToolkit:
         """
         if self._router:
             try:
-                resources = []
+                resources: list[dict[str, Any]] = []
                 for provider in self._router.providers:
                     connector = self._router.get(provider)
                     provider_resources = await connector.list_resources(
@@ -115,7 +115,8 @@ class CostToolkit:
         """
         for source in self._billing_sources:
             try:
-                return await source.query(environment=environment, period=period)
+                result: dict[str, Any] = await source.query(environment=environment, period=period)
+                return result
             except Exception as e:
                 logger.warning("billing_source_failed", source=type(source).__name__, error=str(e))
 

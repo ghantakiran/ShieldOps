@@ -13,6 +13,7 @@ from shieldops.connectors.base import ConnectorRouter
 from shieldops.models.base import (
     ActionResult,
     AuditEntry,
+    Environment,
     ExecutionStatus,
     RiskLevel,
     Snapshot,
@@ -129,7 +130,7 @@ class RollbackManager:
                 agent_type="rollback",
                 action="rollback",
                 target_resource=snapshot.resource_id,
-                environment="production",
+                environment=Environment.PRODUCTION,
                 risk_level=RiskLevel.HIGH,
                 policy_evaluation="allowed",
                 outcome=result.status,

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from fastapi import APIRouter, Depends
 
@@ -27,7 +27,7 @@ async def get_mttr_trends(
     period: str = "30d",
     environment: str | None = None,
     _user: UserResponse = Depends(get_current_user),
-) -> dict:
+) -> dict[str, Any]:
     """Get Mean Time to Resolution trends."""
     if _engine:
         return await _engine.mttr_trends(period=period, environment=environment)
@@ -38,7 +38,7 @@ async def get_mttr_trends(
 async def get_resolution_rate(
     period: str = "30d",
     _user: UserResponse = Depends(get_current_user),
-) -> dict:
+) -> dict[str, Any]:
     """Get automated vs manual resolution rates."""
     if _engine:
         return await _engine.resolution_rate(period=period)
@@ -54,7 +54,7 @@ async def get_resolution_rate(
 async def get_agent_accuracy(
     period: str = "30d",
     _user: UserResponse = Depends(get_current_user),
-) -> dict:
+) -> dict[str, Any]:
     """Get agent diagnosis accuracy over time."""
     if _engine:
         return await _engine.agent_accuracy(period=period)
@@ -66,7 +66,7 @@ async def get_cost_savings(
     period: str = "30d",
     engineer_hourly_rate: float = 75.0,
     _user: UserResponse = Depends(get_current_user),
-) -> dict:
+) -> dict[str, Any]:
     """Estimate cost savings from automated operations."""
     if _engine:
         return await _engine.cost_savings(period=period, hourly_rate=engineer_hourly_rate)

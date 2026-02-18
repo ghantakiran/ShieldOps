@@ -77,7 +77,7 @@ def render_metric_row(metrics: list[tuple[str, Any, str | None]]) -> None:
 # ------------------------------------------------------------------
 
 
-def render_reasoning_chain(steps: list[dict]) -> None:
+def render_reasoning_chain(steps: list[dict[str, Any]]) -> None:
     """Display a reasoning chain as a vertical timeline."""
     if not steps:
         st.info("No reasoning steps recorded.")
@@ -136,7 +136,7 @@ def render_confidence_bar(label: str, value: float) -> None:
 
 
 def render_data_table(
-    rows: list[dict],
+    rows: list[dict[str, Any]],
     columns: list[str] | None = None,
     key: str | None = None,
 ) -> None:

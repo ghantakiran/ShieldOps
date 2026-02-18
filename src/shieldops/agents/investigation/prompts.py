@@ -1,5 +1,7 @@
 """LLM prompt templates and response schemas for the Investigation Agent."""
 
+from typing import Any
+
 from pydantic import BaseModel, Field
 
 # --- Response schemas for structured LLM output ---
@@ -74,7 +76,7 @@ class RecommendedActionOutput(BaseModel):
     target_resource: str = Field(description="Resource to act on (e.g., namespace/pod-name)")
     description: str = Field(description="Human-readable description of what this action does")
     risk_level: str = Field(description="Risk level: low, medium, high, critical")
-    parameters: dict = Field(
+    parameters: dict[str, Any] = Field(
         default_factory=dict,
         description="Action parameters (e.g., replicas count, memory limit)",
     )

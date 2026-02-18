@@ -5,6 +5,7 @@ and returns the completed investigation state.
 """
 
 from datetime import UTC, datetime
+from typing import Any
 from uuid import uuid4
 
 import structlog
@@ -89,7 +90,7 @@ class InvestigationRunner:
         try:
             # Run the LangGraph workflow
             final_state_dict = await self._app.ainvoke(
-                initial_state.model_dump(),
+                initial_state.model_dump(),  # type: ignore[arg-type]
                 config={
                     "metadata": {
                         "investigation_id": investigation_id,
@@ -152,8 +153,8 @@ class InvestigationRunner:
                 "confidence": state.confidence_score,
                 "hypotheses_count": len(state.hypotheses),
             }
-            await self._ws_manager.broadcast("global", event)
-            await self._ws_manager.broadcast(f"investigation:{investigation_id}", event)
+            await self._ws_manager.broadcast("global", event)  # type: ignore[attr-defined]
+            await self._ws_manager.broadcast(f"investigation:{investigation_id}", event)  # type: ignore[attr-defined]
         except Exception as e:
             logger.warning("ws_broadcast_failed", id=investigation_id, error=str(e))
 
@@ -170,7 +171,7 @@ class InvestigationRunner:
         """Retrieve a completed investigation by ID."""
         return self._investigations.get(investigation_id)
 
-    def list_investigations(self) -> list[dict]:
+    def list_investigations(self) -> list[dict[str, Any]]:
         """List all investigations with summary info."""
         return [
             {

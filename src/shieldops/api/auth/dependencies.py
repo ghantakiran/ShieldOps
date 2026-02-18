@@ -1,5 +1,8 @@
 """FastAPI dependencies for auth — current user extraction and role enforcement."""
 
+from collections.abc import Callable, Coroutine
+from typing import Any
+
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
@@ -56,7 +59,7 @@ async def get_current_user(
     )
 
 
-def require_role(*roles: UserRole):
+def require_role(*roles: UserRole) -> Callable[..., Coroutine[Any, Any, UserResponse]]:
     """Factory that returns a dependency enforcing one or more roles."""
 
     async def _check(user: UserResponse = Depends(get_current_user)) -> UserResponse:

@@ -101,7 +101,7 @@ class SecurityRunner:
 
         try:
             final_state_dict = await self._app.ainvoke(
-                initial_state.model_dump(),
+                initial_state.model_dump(),  # type: ignore[arg-type]
                 config={
                     "metadata": {
                         "scan_id": scan_id,
@@ -157,7 +157,7 @@ class SecurityRunner:
         """Retrieve a completed scan by ID."""
         return self._scans.get(scan_id)
 
-    def list_scans(self) -> list[dict]:
+    def list_scans(self) -> list[dict[str, Any]]:
         """List all scans with summary info."""
         return [
             {

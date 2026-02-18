@@ -8,7 +8,7 @@ Each node is an async function that:
 """
 
 from datetime import UTC, datetime
-from typing import Any
+from typing import Any, cast
 
 import structlog
 
@@ -52,7 +52,7 @@ def _get_toolkit() -> InvestigationToolkit:
     return _toolkit
 
 
-async def gather_context(state: InvestigationState) -> dict:
+async def gather_context(state: InvestigationState) -> dict[str, Any]:
     """Gather initial context about the alert and affected resources.
 
     Queries Kubernetes events and resource health for the affected resource.
@@ -95,7 +95,7 @@ async def gather_context(state: InvestigationState) -> dict:
     }
 
 
-async def analyze_logs(state: InvestigationState) -> dict:
+async def analyze_logs(state: InvestigationState) -> dict[str, Any]:
     """Query and analyze logs using the LLM to identify error patterns."""
     start = datetime.now(UTC)
     toolkit = _get_toolkit()
@@ -121,10 +121,13 @@ async def analyze_logs(state: InvestigationState) -> dict:
 
     if log_data["total_entries"] > 0:
         try:
-            analysis: LogAnalysisResult = await llm_structured(
-                system_prompt=SYSTEM_LOG_ANALYSIS,
-                user_prompt=log_context,
-                schema=LogAnalysisResult,
+            analysis = cast(
+                LogAnalysisResult,
+                await llm_structured(
+                    system_prompt=SYSTEM_LOG_ANALYSIS,
+                    user_prompt=log_context,
+                    schema=LogAnalysisResult,
+                ),
             )
             output_summary = analysis.summary
 
@@ -182,7 +185,7 @@ async def analyze_logs(state: InvestigationState) -> dict:
     }
 
 
-async def analyze_metrics(state: InvestigationState) -> dict:
+async def analyze_metrics(state: InvestigationState) -> dict[str, Any]:
     """Analyze metrics for anomalies using the LLM to interpret results."""
     start = datetime.now(UTC)
     toolkit = _get_toolkit()
@@ -216,10 +219,13 @@ async def analyze_metrics(state: InvestigationState) -> dict:
     if metric_data["current_values"] or anomalies:
         metric_context = _format_metric_context(state, metric_data)
         try:
-            analysis: MetricAnalysisResult = await llm_structured(
-                system_prompt=SYSTEM_METRIC_ANALYSIS,
-                user_prompt=metric_context,
-                schema=MetricAnalysisResult,
+            analysis = cast(
+                MetricAnalysisResult,
+                await llm_structured(
+                    system_prompt=SYSTEM_METRIC_ANALYSIS,
+                    user_prompt=metric_context,
+                    schema=MetricAnalysisResult,
+                ),
             )
             output_summary = (
                 f"{analysis.summary}. "
@@ -245,7 +251,7 @@ async def analyze_metrics(state: InvestigationState) -> dict:
     }
 
 
-async def analyze_traces(state: InvestigationState) -> dict:
+async def analyze_traces(state: InvestigationState) -> dict[str, Any]:
     """Analyze distributed traces to find bottleneck services."""
     start = datetime.now(UTC)
     toolkit = _get_toolkit()
@@ -295,7 +301,7 @@ async def analyze_traces(state: InvestigationState) -> dict:
     }
 
 
-async def correlate_findings(state: InvestigationState) -> dict:
+async def correlate_findings(state: InvestigationState) -> dict[str, Any]:
     """Correlate findings across logs, metrics, and traces using the LLM."""
     start = datetime.now(UTC)
 
@@ -313,10 +319,13 @@ async def correlate_findings(state: InvestigationState) -> dict:
 
     if state.log_findings or state.metric_anomalies:
         try:
-            result: CorrelationResult = await llm_structured(
-                system_prompt=SYSTEM_CORRELATION,
-                user_prompt=all_findings,
-                schema=CorrelationResult,
+            result = cast(
+                CorrelationResult,
+                await llm_structured(
+                    system_prompt=SYSTEM_CORRELATION,
+                    user_prompt=all_findings,
+                    schema=CorrelationResult,
+                ),
             )
 
             for _i, event_desc in enumerate(result.correlated_events):
@@ -357,7 +366,7 @@ async def correlate_findings(state: InvestigationState) -> dict:
     }
 
 
-async def generate_hypotheses(state: InvestigationState) -> dict:
+async def generate_hypotheses(state: InvestigationState) -> dict[str, Any]:
     """Generate ranked root cause hypotheses using the LLM."""
     start = datetime.now(UTC)
 
@@ -368,10 +377,13 @@ async def generate_hypotheses(state: InvestigationState) -> dict:
     confidence_score = 0.0
 
     try:
-        result: HypothesesOutput = await llm_structured(
-            system_prompt=SYSTEM_HYPOTHESIS_GENERATION,
-            user_prompt=all_context,
-            schema=HypothesesOutput,
+        result = cast(
+            HypothesesOutput,
+            await llm_structured(
+                system_prompt=SYSTEM_HYPOTHESIS_GENERATION,
+                user_prompt=all_context,
+                schema=HypothesesOutput,
+            ),
         )
 
         for i, h in enumerate(result.hypotheses):

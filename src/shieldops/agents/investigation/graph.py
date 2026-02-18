@@ -1,6 +1,7 @@
 """LangGraph workflow definition for the Investigation Agent."""
 
 from datetime import UTC, datetime
+from typing import Any, cast
 from uuid import uuid4
 
 import structlog
@@ -46,7 +47,7 @@ def should_recommend_action(state: InvestigationState) -> str:
     return END
 
 
-async def recommend_action(state: InvestigationState) -> dict:
+async def recommend_action(state: InvestigationState) -> dict[str, Any]:
     """Generate a remediation recommendation for high-confidence hypotheses using the LLM."""
     start = datetime.now(UTC)
     top_hypothesis = state.hypotheses[0] if state.hypotheses else None
@@ -80,10 +81,13 @@ async def recommend_action(state: InvestigationState) -> dict:
         user_prompt = "\n".join(context_lines)
 
         try:
-            result: RecommendedActionOutput = await llm_structured(
-                system_prompt=SYSTEM_RECOMMEND_ACTION,
-                user_prompt=user_prompt,
-                schema=RecommendedActionOutput,
+            result = cast(
+                RecommendedActionOutput,
+                await llm_structured(
+                    system_prompt=SYSTEM_RECOMMEND_ACTION,
+                    user_prompt=user_prompt,
+                    schema=RecommendedActionOutput,
+                ),
             )
 
             env_str = state.alert_context.labels.get("environment", "production")
@@ -140,7 +144,7 @@ async def recommend_action(state: InvestigationState) -> dict:
     }
 
 
-def create_investigation_graph() -> StateGraph:
+def create_investigation_graph() -> StateGraph[InvestigationState]:
     """Build the Investigation Agent LangGraph workflow.
 
     Workflow:

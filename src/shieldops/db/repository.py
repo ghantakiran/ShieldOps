@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import structlog
 from sqlalchemy import select
@@ -36,7 +36,7 @@ class Repository:
 
     # ── Users ─────────────────────────────────────────────────────────
 
-    async def get_user_by_email(self, email: str) -> dict | None:
+    async def get_user_by_email(self, email: str) -> dict[str, Any] | None:
         async with self._sf() as session:
             stmt = select(UserRecord).where(UserRecord.email == email)
             result = await session.execute(stmt)
@@ -45,7 +45,7 @@ class Repository:
                 return None
             return self._user_to_dict(record)
 
-    async def get_user_by_id(self, user_id: str) -> dict | None:
+    async def get_user_by_id(self, user_id: str) -> dict[str, Any] | None:
         async with self._sf() as session:
             record = await session.get(UserRecord, user_id)
             if record is None:
@@ -54,7 +54,7 @@ class Repository:
 
     async def create_user(
         self, email: str, name: str, password_hash: str, role: str = "viewer"
-    ) -> dict:
+    ) -> dict[str, Any]:
         async with self._sf() as session:
             record = UserRecord(
                 email=email,
@@ -68,7 +68,7 @@ class Repository:
             return self._user_to_dict(record)
 
     @staticmethod
-    def _user_to_dict(record: UserRecord) -> dict:
+    def _user_to_dict(record: UserRecord) -> dict[str, Any]:
         return {
             "id": record.id,
             "email": record.email,
@@ -110,7 +110,7 @@ class Repository:
             await session.commit()
             logger.info("investigation_persisted", investigation_id=investigation_id)
 
-    async def get_investigation(self, investigation_id: str) -> dict | None:
+    async def get_investigation(self, investigation_id: str) -> dict[str, Any] | None:
         """Load an investigation record as a dict (matching runner.list format)."""
         async with self._sf() as session:
             record = await session.get(InvestigationRecord, investigation_id)
@@ -120,7 +120,7 @@ class Repository:
 
     async def list_investigations(
         self, status: str | None = None, limit: int = 50, offset: int = 0
-    ) -> list[dict]:
+    ) -> list[dict[str, Any]]:
         """List investigation summaries from the database."""
         async with self._sf() as session:
             stmt = select(InvestigationRecord).order_by(InvestigationRecord.created_at.desc())
@@ -142,7 +142,7 @@ class Repository:
             return result.scalar_one()
 
     @staticmethod
-    def _investigation_to_dict(record: InvestigationRecord) -> dict:
+    def _investigation_to_dict(record: InvestigationRecord) -> dict[str, Any]:
         return {
             "investigation_id": record.id,
             "alert_id": record.alert_id,
@@ -194,7 +194,7 @@ class Repository:
             await session.commit()
             logger.info("remediation_persisted", remediation_id=remediation_id)
 
-    async def get_remediation(self, remediation_id: str) -> dict | None:
+    async def get_remediation(self, remediation_id: str) -> dict[str, Any] | None:
         """Load a remediation record as a dict."""
         async with self._sf() as session:
             record = await session.get(RemediationRecord, remediation_id)
@@ -208,7 +208,7 @@ class Repository:
         status: str | None = None,
         limit: int = 50,
         offset: int = 0,
-    ) -> list[dict]:
+    ) -> list[dict[str, Any]]:
         """List remediation summaries from the database."""
         async with self._sf() as session:
             stmt = select(RemediationRecord).order_by(RemediationRecord.created_at.desc())
@@ -235,7 +235,7 @@ class Repository:
             return result.scalar_one()
 
     @staticmethod
-    def _remediation_to_dict(record: RemediationRecord) -> dict:
+    def _remediation_to_dict(record: RemediationRecord) -> dict[str, Any]:
         return {
             "remediation_id": record.id,
             "action_type": record.action_type,
@@ -289,7 +289,7 @@ class Repository:
             await session.commit()
             logger.info("security_scan_persisted", scan_id=scan_id)
 
-    async def get_security_scan(self, scan_id: str) -> dict | None:
+    async def get_security_scan(self, scan_id: str) -> dict[str, Any] | None:
         """Load a security scan record as a dict."""
         async with self._sf() as session:
             record = await session.get(SecurityScanRecord, scan_id)
@@ -304,7 +304,7 @@ class Repository:
         status: str | None = None,
         limit: int = 50,
         offset: int = 0,
-    ) -> list[dict]:
+    ) -> list[dict[str, Any]]:
         """List security scan summaries from the database."""
         async with self._sf() as session:
             stmt = select(SecurityScanRecord).order_by(SecurityScanRecord.created_at.desc())
@@ -319,7 +319,7 @@ class Repository:
             return [self._security_scan_to_dict(r) for r in result.scalars().all()]
 
     @staticmethod
-    def _security_scan_to_dict(record: SecurityScanRecord) -> dict:
+    def _security_scan_to_dict(record: SecurityScanRecord) -> dict[str, Any]:
         return {
             "scan_id": record.id,
             "scan_type": record.scan_type,
@@ -367,7 +367,7 @@ class Repository:
 
     async def list_audit_logs(
         self, environment: str | None = None, limit: int = 100, offset: int = 0
-    ) -> list[dict]:
+    ) -> list[dict[str, Any]]:
         async with self._sf() as session:
             stmt = select(AuditLog).order_by(AuditLog.timestamp.desc())
             if environment:
@@ -400,8 +400,8 @@ class Repository:
         agent_type: str,
         event_type: str,
         status: str = "started",
-        input_data: dict | None = None,
-        result_data: dict | None = None,
+        input_data: dict[str, Any] | None = None,
+        result_data: dict[str, Any] | None = None,
         duration_ms: int = 0,
     ) -> None:
         async with self._sf() as session:
@@ -456,7 +456,11 @@ class Repository:
             await session.commit()
             logger.info("incident_outcome_saved", incident_id=incident_id)
 
-    async def query_incident_outcomes(self, period: str = "30d", limit: int = 200) -> dict:
+    async def query_incident_outcomes(
+        self,
+        period: str = "30d",
+        limit: int = 200,
+    ) -> dict[str, Any]:
         """Query incident outcomes for a given period.
 
         Returns format compatible with LearningToolkit.get_incident_outcomes().

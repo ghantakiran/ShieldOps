@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Any
 
 import structlog
-import yaml
+import yaml  # type: ignore[import-untyped]
 from pydantic import BaseModel, Field
 
 logger = structlog.get_logger()

@@ -8,6 +8,7 @@ Each node is an async function that:
 """
 
 from datetime import UTC, datetime
+from typing import Any, cast
 from uuid import uuid4
 
 import structlog
@@ -53,7 +54,7 @@ def _elapsed_ms(start: datetime) -> int:
     return int((datetime.now(UTC) - start).total_seconds() * 1000)
 
 
-async def gather_costs(state: CostAnalysisState) -> dict:
+async def gather_costs(state: CostAnalysisState) -> dict[str, Any]:
     """Gather resource inventory and billing data."""
     start = datetime.now(UTC)
     toolkit = _get_toolkit()
@@ -116,7 +117,7 @@ async def gather_costs(state: CostAnalysisState) -> dict:
     }
 
 
-async def detect_anomalies(state: CostAnalysisState) -> dict:
+async def detect_anomalies(state: CostAnalysisState) -> dict[str, Any]:
     """Detect cost anomalies across resources."""
     start = datetime.now(UTC)
     toolkit = _get_toolkit()
@@ -179,10 +180,13 @@ async def detect_anomalies(state: CostAnalysisState) -> dict:
             )
 
         try:
-            assessment: CostAnomalyAssessmentResult = await llm_structured(
-                system_prompt=SYSTEM_COST_ANOMALY_ASSESSMENT,
-                user_prompt="\n".join(context_lines),
-                schema=CostAnomalyAssessmentResult,
+            assessment = cast(
+                CostAnomalyAssessmentResult,
+                await llm_structured(
+                    system_prompt=SYSTEM_COST_ANOMALY_ASSESSMENT,
+                    user_prompt="\n".join(context_lines),
+                    schema=CostAnomalyAssessmentResult,
+                ),
             )
             output_summary = (
                 f"{assessment.summary}. "
@@ -209,7 +213,7 @@ async def detect_anomalies(state: CostAnalysisState) -> dict:
     }
 
 
-async def recommend_optimizations(state: CostAnalysisState) -> dict:
+async def recommend_optimizations(state: CostAnalysisState) -> dict[str, Any]:
     """Identify and prioritize cost optimization opportunities."""
     start = datetime.now(UTC)
     toolkit = _get_toolkit()
@@ -274,10 +278,13 @@ async def recommend_optimizations(state: CostAnalysisState) -> dict:
             )
 
         try:
-            assessment: OptimizationAssessmentResult = await llm_structured(
-                system_prompt=SYSTEM_OPTIMIZATION_ASSESSMENT,
-                user_prompt="\n".join(context_lines),
-                schema=OptimizationAssessmentResult,
+            assessment = cast(
+                OptimizationAssessmentResult,
+                await llm_structured(
+                    system_prompt=SYSTEM_OPTIMIZATION_ASSESSMENT,
+                    user_prompt="\n".join(context_lines),
+                    schema=OptimizationAssessmentResult,
+                ),
             )
             output_summary = (
                 f"{assessment.summary}. "
@@ -304,7 +311,7 @@ async def recommend_optimizations(state: CostAnalysisState) -> dict:
     }
 
 
-async def synthesize_savings(state: CostAnalysisState) -> dict:
+async def synthesize_savings(state: CostAnalysisState) -> dict[str, Any]:
     """Synthesize all findings into a cost savings summary and forecast."""
     start = datetime.now(UTC)
     toolkit = _get_toolkit()
@@ -376,10 +383,13 @@ async def synthesize_savings(state: CostAnalysisState) -> dict:
     output_summary = f"Cost health score: {health_score:.1f}/100"
 
     try:
-        assessment: CostForecastResult = await llm_structured(
-            system_prompt=SYSTEM_COST_FORECAST,
-            user_prompt="\n".join(context_lines),
-            schema=CostForecastResult,
+        assessment = cast(
+            CostForecastResult,
+            await llm_structured(
+                system_prompt=SYSTEM_COST_FORECAST,
+                user_prompt="\n".join(context_lines),
+                schema=CostForecastResult,
+            ),
         )
         health_score = assessment.overall_health_score
         output_summary = (

@@ -6,7 +6,7 @@ and rolling back remediation agent workflows.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from pydantic import BaseModel, Field
@@ -56,7 +56,7 @@ class TriggerRemediationRequest(BaseModel):
     target_resource: str
     environment: str = "production"
     risk_level: str = "medium"
-    parameters: dict = Field(default_factory=dict)
+    parameters: dict[str, Any] = Field(default_factory=dict)
     description: str = ""
     investigation_id: str | None = None
     alert_id: str | None = None
@@ -84,7 +84,7 @@ async def trigger_remediation(
     request: TriggerRemediationRequest,
     background_tasks: BackgroundTasks,
     _user: UserResponse = Depends(require_role(UserRole.ADMIN, UserRole.OPERATOR)),
-) -> dict:
+) -> dict[str, Any]:
     """Trigger a new remediation action.
 
     Runs asynchronously. Returns 202 immediately.
@@ -116,7 +116,7 @@ async def trigger_remediation(
 async def trigger_remediation_sync(
     request: TriggerRemediationRequest,
     _user: UserResponse = Depends(require_role(UserRole.ADMIN, UserRole.OPERATOR)),
-) -> dict:
+) -> dict[str, Any]:
     """Trigger a remediation and wait for completion.
 
     Useful for testing and CLI tools.
@@ -145,7 +145,7 @@ async def list_remediations(
     limit: int = 50,
     offset: int = 0,
     _user: UserResponse = Depends(get_current_user),
-) -> dict:
+) -> dict[str, Any]:
     """List remediation timeline (newest first).
 
     Queries from PostgreSQL when available, falls back to in-memory.
@@ -182,18 +182,18 @@ async def list_remediations(
 @router.get("/remediations/{remediation_id}")
 async def get_remediation(
     remediation_id: str, _user: UserResponse = Depends(get_current_user)
-) -> dict:
+) -> dict[str, Any]:
     """Get remediation detail with execution results and audit trail."""
     if _repository:
-        result = await _repository.get_remediation(remediation_id)
-        if result is not None:
-            return result
+        db_result = await _repository.get_remediation(remediation_id)
+        if db_result is not None:
+            return db_result
 
     runner = get_runner()
-    result = runner.get_remediation(remediation_id)
-    if result is None:
+    state = runner.get_remediation(remediation_id)
+    if state is None:
         raise HTTPException(status_code=404, detail="Remediation not found")
-    return result.model_dump(mode="json")
+    return state.model_dump(mode="json")
 
 
 @router.post("/remediations/{remediation_id}/approve")
@@ -201,7 +201,7 @@ async def approve_remediation(
     remediation_id: str,
     request: ApprovalActionRequest,
     _user: UserResponse = Depends(require_role(UserRole.ADMIN, UserRole.OPERATOR)),
-) -> dict:
+) -> dict[str, Any]:
     """Approve a pending remediation action."""
     runner = get_runner()
     state = runner.get_remediation(remediation_id)
@@ -229,7 +229,7 @@ async def deny_remediation(
     remediation_id: str,
     request: ApprovalActionRequest,
     _user: UserResponse = Depends(require_role(UserRole.ADMIN, UserRole.OPERATOR)),
-) -> dict:
+) -> dict[str, Any]:
     """Deny a pending remediation action."""
     runner = get_runner()
     state = runner.get_remediation(remediation_id)
@@ -258,7 +258,7 @@ async def rollback_remediation(
     remediation_id: str,
     request: RollbackRequest | None = None,
     _user: UserResponse = Depends(require_role(UserRole.ADMIN, UserRole.OPERATOR)),
-) -> dict:
+) -> dict[str, Any]:
     """Rollback a completed remediation to pre-action state."""
     runner = get_runner()
     state = runner.get_remediation(remediation_id)

@@ -8,6 +8,7 @@ Each node is an async function that:
 """
 
 from datetime import UTC, datetime
+from typing import Any, cast
 from uuid import uuid4
 
 import structlog
@@ -51,7 +52,7 @@ def _elapsed_ms(start: datetime) -> int:
     return int((datetime.now(UTC) - start).total_seconds() * 1000)
 
 
-async def evaluate_policy(state: RemediationState) -> dict:
+async def evaluate_policy(state: RemediationState) -> dict[str, Any]:
     """Evaluate the remediation action against OPA policies.
 
     This is the first gate — if policy denies the action, the workflow stops.
@@ -98,7 +99,7 @@ async def evaluate_policy(state: RemediationState) -> dict:
     }
 
 
-async def assess_risk(state: RemediationState) -> dict:
+async def assess_risk(state: RemediationState) -> dict[str, Any]:
     """Assess the risk level of the action using policy engine + LLM."""
     start = datetime.now(UTC)
     toolkit = _get_toolkit()
@@ -143,10 +144,13 @@ async def assess_risk(state: RemediationState) -> dict:
         )
 
     try:
-        assessment: RiskAssessmentResult = await llm_structured(
-            system_prompt=SYSTEM_RISK_ASSESSMENT,
-            user_prompt="\n".join(context_lines),
-            schema=RiskAssessmentResult,
+        assessment = cast(
+            RiskAssessmentResult,
+            await llm_structured(
+                system_prompt=SYSTEM_RISK_ASSESSMENT,
+                user_prompt="\n".join(context_lines),
+                schema=RiskAssessmentResult,
+            ),
         )
 
         try:
@@ -186,7 +190,7 @@ async def assess_risk(state: RemediationState) -> dict:
     }
 
 
-async def request_approval(state: RemediationState) -> dict:
+async def request_approval(state: RemediationState) -> dict[str, Any]:
     """Request human approval for high/critical risk actions."""
     start = datetime.now(UTC)
     toolkit = _get_toolkit()
@@ -234,7 +238,7 @@ async def request_approval(state: RemediationState) -> dict:
     }
 
 
-async def create_snapshot(state: RemediationState) -> dict:
+async def create_snapshot(state: RemediationState) -> dict[str, Any]:
     """Create infrastructure snapshot before executing the action."""
     start = datetime.now(UTC)
     toolkit = _get_toolkit()
@@ -269,7 +273,7 @@ async def create_snapshot(state: RemediationState) -> dict:
     }
 
 
-async def execute_action(state: RemediationState) -> dict:
+async def execute_action(state: RemediationState) -> dict[str, Any]:
     """Execute the remediation action via the infrastructure connector."""
     start = datetime.now(UTC)
     toolkit = _get_toolkit()
@@ -304,7 +308,7 @@ async def execute_action(state: RemediationState) -> dict:
     }
 
 
-async def validate_health(state: RemediationState) -> dict:
+async def validate_health(state: RemediationState) -> dict[str, Any]:
     """Validate system health after the remediation action."""
     start = datetime.now(UTC)
     toolkit = _get_toolkit()
@@ -348,10 +352,13 @@ async def validate_health(state: RemediationState) -> dict:
             )
 
         try:
-            assessment: ValidationAssessmentResult = await llm_structured(
-                system_prompt=SYSTEM_VALIDATION_ASSESSMENT,
-                user_prompt="\n".join(context_lines),
-                schema=ValidationAssessmentResult,
+            assessment = cast(
+                ValidationAssessmentResult,
+                await llm_structured(
+                    system_prompt=SYSTEM_VALIDATION_ASSESSMENT,
+                    user_prompt="\n".join(context_lines),
+                    schema=ValidationAssessmentResult,
+                ),
             )
             validation_passed = assessment.overall_healthy
             output_summary = f"{assessment.summary}. Recommendation: {assessment.recommendation}"
@@ -385,7 +392,7 @@ async def validate_health(state: RemediationState) -> dict:
     }
 
 
-async def perform_rollback(state: RemediationState) -> dict:
+async def perform_rollback(state: RemediationState) -> dict[str, Any]:
     """Rollback to pre-action state using the captured snapshot."""
     start = datetime.now(UTC)
     toolkit = _get_toolkit()
