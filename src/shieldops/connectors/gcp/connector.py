@@ -345,7 +345,7 @@ class GCPConnector(InfraConnector):
         return ActionResult(
             action_id=action.id,
             status=ExecutionStatus.SUCCESS,
-            message=(f"Cloud Run service {service_name} updated" f" (traffic={traffic_percent}%)"),
+            message=(f"Cloud Run service {service_name} updated (traffic={traffic_percent}%)"),
             started_at=started_at,
             completed_at=datetime.now(UTC),
         )
