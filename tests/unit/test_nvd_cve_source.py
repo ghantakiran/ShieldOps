@@ -54,7 +54,7 @@ def _make_cve_item(
                             "cpeMatch": [
                                 {
                                     "criteria": (
-                                        f"cpe:2.3:a:vendor:{package_name}" ":1.0.0:*:*:*:*:*:*:*"
+                                        f"cpe:2.3:a:vendor:{package_name}:1.0.0:*:*:*:*:*:*:*"
                                     ),
                                     "versionEndExcluding": "1.1.0",
                                 }

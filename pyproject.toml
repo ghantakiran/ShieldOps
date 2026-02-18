@@ -50,7 +50,6 @@ dependencies = [
 
     # Auth
     "passlib[bcrypt]>=1.7.4",
-    "python-jose[cryptography]>=3.3.0",
 
     # Utilities
     "httpx>=0.28.0",
@@ -104,6 +103,24 @@ strict = true
 warn_return_any = true
 warn_unused_configs = true
 warn_unused_ignores = false  # type: ignore comments must work across local + pre-commit envs
+
+[[tool.mypy.overrides]]
+module = [
+    "boto3",
+    "boto3.*",
+    "botocore.*",
+    "streamlit",
+    "streamlit.*",
+    "plotly",
+    "plotly.*",
+    "kubernetes_asyncio",
+    "kubernetes_asyncio.*",
+    "google.cloud",
+    "google.cloud.*",
+    "azure.identity",
+    "azure.mgmt.*",
+]
+ignore_missing_imports = true
 
 [tool.coverage.run]
 source = ["src/shieldops"]

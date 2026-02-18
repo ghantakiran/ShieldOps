@@ -65,7 +65,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-python-cached
         with:
-          install-args: ".[dev]"
+          install-args: ".[dev,dashboard]"
 
       - name: Run database migrations
         run: alembic upgrade head

@@ -427,9 +427,7 @@ class AzureConnector(InfraConnector):
         return ActionResult(
             action_id=action.id,
             status=ExecutionStatus.SUCCESS,
-            message=(
-                f"Container App {app_name} scaled to " f"min={min_replicas}, max={max_replicas}"
-            ),
+            message=(f"Container App {app_name} scaled to min={min_replicas}, max={max_replicas}"),
             started_at=started_at,
             completed_at=datetime.now(UTC),
         )
