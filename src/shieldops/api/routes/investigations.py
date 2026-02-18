@@ -9,10 +9,12 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
-from fastapi import APIRouter, BackgroundTasks, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from pydantic import BaseModel, Field
 
 from shieldops.agents.investigation.runner import InvestigationRunner
+from shieldops.api.auth.dependencies import get_current_user, require_role
+from shieldops.api.auth.models import UserResponse, UserRole
 from shieldops.models.base import AlertContext
 
 if TYPE_CHECKING:
@@ -81,6 +83,7 @@ class InvestigationSummary(BaseModel):
 async def trigger_investigation(
     request: TriggerInvestigationRequest,
     background_tasks: BackgroundTasks,
+    _user: UserResponse = Depends(require_role(UserRole.ADMIN, UserRole.OPERATOR)),
 ) -> dict:
     """Trigger a new investigation for an alert.
 
@@ -114,6 +117,7 @@ async def trigger_investigation(
 @router.post("/investigations/sync")
 async def trigger_investigation_sync(
     request: TriggerInvestigationRequest,
+    _user: UserResponse = Depends(require_role(UserRole.ADMIN, UserRole.OPERATOR)),
 ) -> dict:
     """Trigger an investigation and wait for completion.
 
@@ -142,6 +146,7 @@ async def list_investigations(
     status: str | None = None,
     limit: int = 50,
     offset: int = 0,
+    _user: UserResponse = Depends(get_current_user),
 ) -> dict:
     """List active and recent investigations.
 
@@ -177,7 +182,10 @@ async def list_investigations(
 
 
 @router.get("/investigations/{investigation_id}")
-async def get_investigation(investigation_id: str) -> dict:
+async def get_investigation(
+    investigation_id: str,
+    _user: UserResponse = Depends(get_current_user),
+) -> dict:
     """Get full investigation detail including reasoning chain and evidence."""
     if _repository:
         result = await _repository.get_investigation(investigation_id)

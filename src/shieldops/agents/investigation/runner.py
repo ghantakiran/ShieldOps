@@ -43,6 +43,7 @@ class InvestigationRunner:
         metric_sources: list[MetricSource] | None = None,
         trace_sources: list[TraceSource] | None = None,
         repository: "Repository | None" = None,
+        ws_manager: "object | None" = None,
     ) -> None:
         self._toolkit = InvestigationToolkit(
             connector_router=connector_router,
@@ -60,6 +61,7 @@ class InvestigationRunner:
         # In-memory store of completed investigations (fallback when no DB)
         self._investigations: dict[str, InvestigationState] = {}
         self._repository = repository
+        self._ws_manager = ws_manager
 
     async def investigate(self, alert: AlertContext) -> InvestigationState:
         """Run a full investigation for an alert.
@@ -119,6 +121,7 @@ class InvestigationRunner:
             # Store result
             self._investigations[investigation_id] = final_state
             await self._persist(investigation_id, final_state)
+            await self._broadcast(investigation_id, final_state)
             return final_state
 
         except Exception as e:
@@ -138,6 +141,23 @@ class InvestigationRunner:
             self._investigations[investigation_id] = error_state
             await self._persist(investigation_id, error_state)
             return error_state
+
+    async def _broadcast(self, investigation_id: str, state: InvestigationState) -> None:
+        """Broadcast progress via WebSocket if manager is available."""
+        if self._ws_manager is None:
+            return
+        try:
+            event = {
+                "type": "investigation_update",
+                "investigation_id": investigation_id,
+                "status": state.current_step,
+                "confidence": state.confidence_score,
+                "hypotheses_count": len(state.hypotheses),
+            }
+            await self._ws_manager.broadcast("global", event)
+            await self._ws_manager.broadcast(f"investigation:{investigation_id}", event)
+        except Exception as e:
+            logger.warning("ws_broadcast_failed", id=investigation_id, error=str(e))
 
     async def _persist(self, investigation_id: str, state: InvestigationState) -> None:
         """Persist to DB if repository is available."""

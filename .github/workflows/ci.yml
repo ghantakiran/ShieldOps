@@ -59,6 +59,9 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -e ".[dev]"
+      - run: alembic upgrade head
+        env:
+          SHIELDOPS_DATABASE_URL: postgresql+asyncpg://shieldops:shieldops@localhost:5432/shieldops_test
       - run: pytest tests/ -v --cov=src/shieldops --cov-report=xml
         env:
           SHIELDOPS_DATABASE_URL: postgresql+asyncpg://shieldops:shieldops@localhost:5432/shieldops_test

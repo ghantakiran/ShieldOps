@@ -4,7 +4,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
+
+from shieldops.api.auth.dependencies import get_current_user
+from shieldops.api.auth.models import UserResponse
 
 if TYPE_CHECKING:
     from shieldops.playbooks.loader import PlaybookLoader
@@ -21,7 +24,7 @@ def set_loader(loader: PlaybookLoader | None) -> None:
 
 
 @router.get("/playbooks")
-async def list_playbooks() -> dict:
+async def list_playbooks(_user: UserResponse = Depends(get_current_user)) -> dict:
     """List all loaded remediation playbooks."""
     if _loader is None:
         return {"playbooks": [], "total": 0}
@@ -40,7 +43,7 @@ async def list_playbooks() -> dict:
 
 
 @router.get("/playbooks/{name}")
-async def get_playbook(name: str) -> dict:
+async def get_playbook(name: str, _user: UserResponse = Depends(get_current_user)) -> dict:
     """Get a single playbook by name."""
     if _loader is None:
         raise HTTPException(status_code=404, detail="Playbook loader not initialized")

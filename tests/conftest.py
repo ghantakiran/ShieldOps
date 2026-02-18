@@ -26,3 +26,24 @@ _k8s_mod.config = _k8s_config
 sys.modules["kubernetes_asyncio"] = _k8s_mod
 sys.modules["kubernetes_asyncio.client"] = _k8s_client
 sys.modules["kubernetes_asyncio.config"] = _k8s_config
+
+
+# ── Auth override for all API tests ──────────────────────────────────
+# This ensures API tests don't need a real JWT token.
+from shieldops.api.auth.dependencies import get_current_user  # noqa: E402
+from shieldops.api.auth.models import UserResponse, UserRole  # noqa: E402
+
+
+def _mock_admin_user():
+    return UserResponse(
+        id="test-admin",
+        email="admin@shieldops.test",
+        name="Test Admin",
+        role=UserRole.ADMIN,
+        is_active=True,
+    )
+
+
+# Apply override to the FastAPI app so all endpoint tests bypass auth
+from shieldops.api.app import app as _app  # noqa: E402
+_app.dependency_overrides[get_current_user] = _mock_admin_user

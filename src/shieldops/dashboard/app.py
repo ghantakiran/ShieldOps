@@ -29,10 +29,34 @@ st.set_page_config(
 )
 
 
-@st.cache_resource
 def get_client() -> ShieldOpsAPIClient:
-    return ShieldOpsAPIClient()
+    token = st.session_state.get("auth_token")
+    return ShieldOpsAPIClient(token=token)
 
+
+# --- Login gate ---
+if "auth_token" not in st.session_state:
+    st.title("ShieldOps Login")
+    with st.form("login_form"):
+        email = st.text_input("Email")
+        password = st.text_input("Password", type="password")
+        submitted = st.form_submit_button("Login")
+        if submitted and email and password:
+            import httpx
+            try:
+                resp = httpx.post(
+                    f"{ShieldOpsAPIClient().base_url}/auth/login",
+                    json={"email": email, "password": password},
+                    timeout=10,
+                )
+                if resp.status_code == 200:
+                    st.session_state["auth_token"] = resp.json()["access_token"]
+                    st.rerun()
+                else:
+                    st.error("Invalid credentials")
+            except httpx.RequestError:
+                st.error("Cannot connect to backend")
+    st.stop()
 
 client = get_client()
 

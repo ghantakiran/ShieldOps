@@ -8,7 +8,13 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from shieldops.agents.investigation.models import InvestigationState
 from shieldops.agents.remediation.models import RemediationState
-from shieldops.db.models import AuditLog, AgentSession, InvestigationRecord, RemediationRecord
+from shieldops.db.models import (
+    AuditLog,
+    AgentSession,
+    InvestigationRecord,
+    RemediationRecord,
+    UserRecord,
+)
 from shieldops.models.base import AuditEntry
 
 logger = structlog.get_logger()
@@ -19,6 +25,51 @@ class Repository:
 
     def __init__(self, session_factory: async_sessionmaker[AsyncSession]) -> None:
         self._sf = session_factory
+
+    # ── Users ─────────────────────────────────────────────────────────
+
+    async def get_user_by_email(self, email: str) -> dict | None:
+        async with self._sf() as session:
+            stmt = select(UserRecord).where(UserRecord.email == email)
+            result = await session.execute(stmt)
+            record = result.scalar_one_or_none()
+            if record is None:
+                return None
+            return self._user_to_dict(record)
+
+    async def get_user_by_id(self, user_id: str) -> dict | None:
+        async with self._sf() as session:
+            record = await session.get(UserRecord, user_id)
+            if record is None:
+                return None
+            return self._user_to_dict(record)
+
+    async def create_user(
+        self, email: str, name: str, password_hash: str, role: str = "viewer"
+    ) -> dict:
+        async with self._sf() as session:
+            record = UserRecord(
+                email=email,
+                name=name,
+                password_hash=password_hash,
+                role=role,
+            )
+            session.add(record)
+            await session.commit()
+            await session.refresh(record)
+            return self._user_to_dict(record)
+
+    @staticmethod
+    def _user_to_dict(record: UserRecord) -> dict:
+        return {
+            "id": record.id,
+            "email": record.email,
+            "name": record.name,
+            "password_hash": record.password_hash,
+            "role": record.role,
+            "is_active": record.is_active,
+            "created_at": record.created_at.isoformat() if record.created_at else None,
+        }
 
     # ── Investigations ──────────────────────────────────────────────
 

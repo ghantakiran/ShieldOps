@@ -646,6 +646,17 @@ class TestSecurityAPI:
         set_runner(mock_runner)
         app = create_app()
 
+        from shieldops.api.auth.dependencies import get_current_user
+        from shieldops.api.auth.models import UserResponse, UserRole
+
+        def _mock_admin_user():
+            return UserResponse(
+                id="test-admin", email="admin@test.com", name="Test Admin",
+                role=UserRole.ADMIN, is_active=True,
+            )
+
+        app.dependency_overrides[get_current_user] = _mock_admin_user
+
         async with AsyncClient(
             transport=ASGITransport(app=app), base_url="http://test"
         ) as ac:

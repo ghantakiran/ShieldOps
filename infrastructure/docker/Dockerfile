@@ -11,9 +11,11 @@ RUN apt-get update && \
 COPY pyproject.toml ./
 RUN pip install --no-cache-dir -e ".[dev]" 2>/dev/null || pip install --no-cache-dir .
 
-# Copy source code
+# Copy source code and migrations
 COPY src/ src/
 COPY playbooks/ playbooks/
+COPY alembic.ini ./
+COPY alembic/ alembic/
 
 # Create non-root user
 RUN groupadd -r shieldops && useradd -r -g shieldops shieldops
@@ -25,4 +27,4 @@ HEALTHCHECK --interval=30s --timeout=10s --retries=3 \
 
 EXPOSE 8000
 
-CMD ["uvicorn", "shieldops.api.app:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["sh", "-c", "alembic upgrade head && uvicorn shieldops.api.app:app --host 0.0.0.0 --port 8000"]

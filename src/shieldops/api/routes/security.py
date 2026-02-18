@@ -4,10 +4,12 @@ Provides REST endpoints for triggering security scans, viewing posture,
 browsing CVEs, and checking compliance status.
 """
 
-from fastapi import APIRouter, BackgroundTasks, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from pydantic import BaseModel, Field
 
 from shieldops.agents.security.runner import SecurityRunner
+from shieldops.api.auth.dependencies import get_current_user, require_role
+from shieldops.api.auth.models import UserResponse, UserRole
 from shieldops.models.base import Environment
 
 router = APIRouter()
@@ -49,6 +51,7 @@ class TriggerScanRequest(BaseModel):
 async def trigger_scan(
     request: TriggerScanRequest,
     background_tasks: BackgroundTasks,
+    _user: UserResponse = Depends(require_role(UserRole.ADMIN, UserRole.OPERATOR)),
 ) -> dict:
     """Trigger a new security scan. Runs asynchronously."""
     runner = get_runner()
@@ -75,7 +78,10 @@ async def trigger_scan(
 
 
 @router.post("/security/scans/sync")
-async def trigger_scan_sync(request: TriggerScanRequest) -> dict:
+async def trigger_scan_sync(
+    request: TriggerScanRequest,
+    _user: UserResponse = Depends(require_role(UserRole.ADMIN, UserRole.OPERATOR)),
+) -> dict:
     """Trigger a security scan and wait for completion."""
     runner = get_runner()
 
@@ -98,6 +104,7 @@ async def list_scans(
     scan_type: str | None = None,
     limit: int = 50,
     offset: int = 0,
+    _user: UserResponse = Depends(get_current_user),
 ) -> dict:
     """List all security scans."""
     runner = get_runner()
@@ -113,7 +120,7 @@ async def list_scans(
 
 
 @router.get("/security/scans/{scan_id}")
-async def get_scan(scan_id: str) -> dict:
+async def get_scan(scan_id: str, _user: UserResponse = Depends(get_current_user)) -> dict:
     """Get full security scan detail."""
     runner = get_runner()
     result = runner.get_scan(scan_id)
@@ -123,7 +130,7 @@ async def get_scan(scan_id: str) -> dict:
 
 
 @router.get("/security/posture")
-async def get_security_posture() -> dict:
+async def get_security_posture(_user: UserResponse = Depends(get_current_user)) -> dict:
     """Get overall security posture from the most recent full scan."""
     runner = get_runner()
     scans = runner.list_scans()
@@ -156,6 +163,7 @@ async def get_security_posture() -> dict:
 async def list_cves(
     severity: str | None = None,
     limit: int = 50,
+    _user: UserResponse = Depends(get_current_user),
 ) -> dict:
     """List CVEs from the most recent scan."""
     runner = get_runner()
@@ -181,7 +189,9 @@ async def list_cves(
 
 
 @router.get("/security/compliance/{framework}")
-async def get_compliance_status(framework: str) -> dict:
+async def get_compliance_status(
+    framework: str, _user: UserResponse = Depends(get_current_user)
+) -> dict:
     """Get compliance status for a specific framework."""
     runner = get_runner()
     scans = runner.list_scans()

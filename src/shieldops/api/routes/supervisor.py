@@ -6,10 +6,12 @@ viewing orchestration sessions, and checking delegation history.
 
 from typing import Any
 
-from fastapi import APIRouter, BackgroundTasks, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from pydantic import BaseModel, Field
 
 from shieldops.agents.supervisor.runner import SupervisorRunner
+from shieldops.api.auth.dependencies import get_current_user, require_role
+from shieldops.api.auth.models import UserResponse, UserRole
 
 router = APIRouter()
 
@@ -52,6 +54,7 @@ class SubmitEventRequest(BaseModel):
 async def submit_event(
     request: SubmitEventRequest,
     background_tasks: BackgroundTasks,
+    _user: UserResponse = Depends(require_role(UserRole.ADMIN, UserRole.OPERATOR)),
 ) -> dict:
     """Submit an event for supervisor orchestration. Runs asynchronously."""
     runner = get_runner()
@@ -68,7 +71,10 @@ async def submit_event(
 
 
 @router.post("/supervisor/events/sync")
-async def submit_event_sync(request: SubmitEventRequest) -> dict:
+async def submit_event_sync(
+    request: SubmitEventRequest,
+    _user: UserResponse = Depends(require_role(UserRole.ADMIN, UserRole.OPERATOR)),
+) -> dict:
     """Submit an event and wait for supervisor orchestration to complete."""
     runner = get_runner()
 
@@ -82,6 +88,7 @@ async def list_sessions(
     event_type: str | None = None,
     limit: int = 50,
     offset: int = 0,
+    _user: UserResponse = Depends(get_current_user),
 ) -> dict:
     """List all supervisor sessions."""
     runner = get_runner()
@@ -97,7 +104,9 @@ async def list_sessions(
 
 
 @router.get("/supervisor/sessions/{session_id}")
-async def get_session(session_id: str) -> dict:
+async def get_session(
+    session_id: str, _user: UserResponse = Depends(get_current_user)
+) -> dict:
     """Get full supervisor session detail."""
     runner = get_runner()
     result = runner.get_session(session_id)
@@ -107,7 +116,9 @@ async def get_session(session_id: str) -> dict:
 
 
 @router.get("/supervisor/sessions/{session_id}/tasks")
-async def get_session_tasks(session_id: str) -> dict:
+async def get_session_tasks(
+    session_id: str, _user: UserResponse = Depends(get_current_user)
+) -> dict:
     """Get all delegated tasks for a session."""
     runner = get_runner()
     result = runner.get_session(session_id)
@@ -122,7 +133,9 @@ async def get_session_tasks(session_id: str) -> dict:
 
 
 @router.get("/supervisor/sessions/{session_id}/escalations")
-async def get_session_escalations(session_id: str) -> dict:
+async def get_session_escalations(
+    session_id: str, _user: UserResponse = Depends(get_current_user)
+) -> dict:
     """Get all escalations for a session."""
     runner = get_runner()
     result = runner.get_session(session_id)

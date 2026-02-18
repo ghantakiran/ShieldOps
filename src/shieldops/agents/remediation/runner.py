@@ -47,6 +47,7 @@ class RemediationRunner:
         policy_engine: PolicyEngine | None = None,
         approval_workflow: ApprovalWorkflow | None = None,
         repository: "Repository | None" = None,
+        ws_manager: "object | None" = None,
     ) -> None:
         self._toolkit = RemediationToolkit(
             connector_router=connector_router,
@@ -63,6 +64,7 @@ class RemediationRunner:
         # In-memory store of completed remediations (fallback when no DB)
         self._remediations: dict[str, RemediationState] = {}
         self._repository = repository
+        self._ws_manager = ws_manager
 
     async def remediate(
         self,
@@ -133,6 +135,7 @@ class RemediationRunner:
             self._remediations[remediation_id] = final_state
             await self._persist(remediation_id, final_state)
             await self._write_audit(remediation_id, final_state)
+            await self._broadcast(remediation_id, final_state)
             return final_state
 
         except Exception as e:
@@ -155,6 +158,23 @@ class RemediationRunner:
             await self._persist(remediation_id, error_state)
             await self._write_audit(remediation_id, error_state)
             return error_state
+
+    async def _broadcast(self, remediation_id: str, state: RemediationState) -> None:
+        """Broadcast progress via WebSocket if manager is available."""
+        if self._ws_manager is None:
+            return
+        try:
+            event = {
+                "type": "remediation_update",
+                "remediation_id": remediation_id,
+                "status": state.current_step,
+                "action_type": state.action.action_type,
+                "validation_passed": state.validation_passed,
+            }
+            await self._ws_manager.broadcast("global", event)
+            await self._ws_manager.broadcast(f"remediation:{remediation_id}", event)
+        except Exception as e:
+            logger.warning("ws_broadcast_failed", id=remediation_id, error=str(e))
 
     async def _persist(self, remediation_id: str, state: RemediationState) -> None:
         """Persist to DB if repository is available."""

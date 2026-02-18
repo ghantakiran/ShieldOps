@@ -1,6 +1,17 @@
 version: "3.9"
 
 services:
+  migrate:
+    build:
+      context: ../..
+      dockerfile: infrastructure/docker/Dockerfile
+    command: ["alembic", "upgrade", "head"]
+    environment:
+      - SHIELDOPS_DATABASE_URL=postgresql+asyncpg://shieldops:shieldops@postgres:5432/shieldops
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   api:
     build:
       context: ../..
@@ -14,6 +25,8 @@ services:
       - SHIELDOPS_OPA_ENDPOINT=http://opa:8181
       - SHIELDOPS_ENVIRONMENT=development
     depends_on:
+      migrate:
+        condition: service_completed_successfully
       postgres:
         condition: service_healthy
       redis:

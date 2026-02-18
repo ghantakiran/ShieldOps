@@ -39,21 +39,65 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
     # ── Database layer ──────────────────────────────────────────
     repository = None
+    session_factory = None
     engine = None
     try:
-        from shieldops.db.models import Base
+        from sqlalchemy import text
+
         from shieldops.db.repository import Repository
         from shieldops.db.session import create_async_engine, get_session_factory
 
         engine = create_async_engine(
             settings.database_url, pool_size=settings.database_pool_size
         )
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
-        repository = Repository(get_session_factory())
+        session_factory = get_session_factory()
+        # Verify DB connectivity with a test query
+        async with session_factory() as session:
+            await session.execute(text("SELECT 1"))
+        repository = Repository(session_factory)
         logger.info("database_initialized")
     except Exception as e:
         logger.warning("database_init_failed", error=str(e), detail="falling back to in-memory")
+        session_factory = None
+        repository = None
+        if engine:
+            try:
+                await engine.dispose()
+            except Exception:
+                pass
+            engine = None
+
+    # Store on app.state for readiness checks and analytics
+    app.state.session_factory = session_factory
+    app.state.repository = repository
+    app.state.engine = engine
+
+    # ── Agent registry ─────────────────────────────────────────────
+    if session_factory:
+        try:
+            from shieldops.agents.registry import AgentRegistry
+            agent_registry = AgentRegistry(session_factory)
+            agents.set_registry(agent_registry)
+            # Auto-register the 6 agent types
+            for atype in (
+                "investigation", "remediation", "security", "cost", "learning", "supervisor"
+            ):
+                try:
+                    await agent_registry.register(
+                        agent_type=atype, environment=settings.environment
+                    )
+                except Exception:
+                    pass  # Individual failures are non-fatal
+            logger.info("agent_registry_initialized")
+        except Exception as e:
+            logger.warning("agent_registry_init_failed", error=str(e))
+
+    # ── Analytics engine ───────────────────────────────────────────
+    if session_factory:
+        from shieldops.analytics.engine import AnalyticsEngine
+        analytics_engine = AnalyticsEngine(session_factory)
+        analytics.set_engine(analytics_engine)
+        logger.info("analytics_engine_initialized")
 
     # ── Infrastructure layer ────────────────────────────────────
     obs_sources = create_observability_sources(settings)
@@ -164,6 +208,20 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
+    # Middleware stack (order matters: outermost first)
+    from shieldops.api.middleware import (
+        ErrorHandlerMiddleware,
+        RequestIDMiddleware,
+        RequestLoggingMiddleware,
+    )
+    app.add_middleware(ErrorHandlerMiddleware)
+    app.add_middleware(RequestLoggingMiddleware)
+    app.add_middleware(RequestIDMiddleware)
+
+    # Auth router (no prefix — routes are /auth/*)
+    from shieldops.api.auth.routes import router as auth_router
+    app.include_router(auth_router, prefix=settings.api_prefix, tags=["Auth"])
+
     # Register route modules
     app.include_router(agents.router, prefix=settings.api_prefix, tags=["Agents"])
     app.include_router(
@@ -178,9 +236,69 @@ def create_app() -> FastAPI:
     app.include_router(learning.router, prefix=settings.api_prefix, tags=["Learning"])
     app.include_router(supervisor.router, prefix=settings.api_prefix, tags=["Supervisor"])
 
+    # WebSocket routes
+    from shieldops.api.ws.routes import router as ws_router
+    app.include_router(ws_router, tags=["WebSocket"])
+
     @app.get("/health")
     async def health_check() -> dict[str, str]:
         return {"status": "healthy", "version": settings.app_version}
+
+    @app.get("/ready")
+    async def readiness_check() -> dict:
+        """Check readiness of all dependencies (DB, Redis, OPA)."""
+        import httpx as _httpx
+
+        checks: dict[str, str] = {}
+        all_ok = True
+
+        # Database check
+        sf = getattr(app.state, "session_factory", None)
+        if sf:
+            try:
+                from sqlalchemy import text
+                async with sf() as session:
+                    await session.execute(text("SELECT 1"))
+                checks["database"] = "ok"
+            except Exception as e:
+                checks["database"] = f"error: {e}"
+                all_ok = False
+        else:
+            checks["database"] = "not_configured"
+            all_ok = False
+
+        # Redis check
+        try:
+            import redis.asyncio as aioredis
+            r = aioredis.from_url(settings.redis_url, socket_connect_timeout=2)
+            await r.ping()
+            await r.aclose()
+            checks["redis"] = "ok"
+        except Exception as e:
+            checks["redis"] = f"error: {e}"
+            all_ok = False
+
+        # OPA check
+        try:
+            async with _httpx.AsyncClient(timeout=2) as client:
+                resp = await client.get(f"{settings.opa_endpoint}/health")
+                checks["opa"] = "ok" if resp.status_code == 200 else f"status:{resp.status_code}"
+                if resp.status_code != 200:
+                    all_ok = False
+        except Exception as e:
+            checks["opa"] = f"error: {e}"
+            all_ok = False
+
+        from fastapi.responses import JSONResponse
+        status_code = 200 if all_ok else 503
+        return JSONResponse(
+            status_code=status_code,
+            content={
+                "status": "ready" if all_ok else "degraded",
+                "version": settings.app_version,
+                "checks": checks,
+            },
+        )
 
     return app
 

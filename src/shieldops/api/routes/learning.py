@@ -4,10 +4,12 @@ Provides REST endpoints for triggering learning cycles, viewing patterns,
 browsing playbook updates, and checking threshold recommendations.
 """
 
-from fastapi import APIRouter, BackgroundTasks, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from pydantic import BaseModel
 
 from shieldops.agents.learning.runner import LearningRunner
+from shieldops.api.auth.dependencies import get_current_user, require_role
+from shieldops.api.auth.models import UserResponse, UserRole
 
 router = APIRouter()
 
@@ -46,6 +48,7 @@ class TriggerLearningRequest(BaseModel):
 async def trigger_learning_cycle(
     request: TriggerLearningRequest,
     background_tasks: BackgroundTasks,
+    _user: UserResponse = Depends(require_role(UserRole.ADMIN, UserRole.OPERATOR)),
 ) -> dict:
     """Trigger a new learning cycle. Runs asynchronously."""
     runner = get_runner()
@@ -65,7 +68,10 @@ async def trigger_learning_cycle(
 
 
 @router.post("/learning/cycles/sync")
-async def trigger_learning_cycle_sync(request: TriggerLearningRequest) -> dict:
+async def trigger_learning_cycle_sync(
+    request: TriggerLearningRequest,
+    _user: UserResponse = Depends(require_role(UserRole.ADMIN, UserRole.OPERATOR)),
+) -> dict:
     """Trigger a learning cycle and wait for completion."""
     runner = get_runner()
 
@@ -81,6 +87,7 @@ async def list_cycles(
     learning_type: str | None = None,
     limit: int = 50,
     offset: int = 0,
+    _user: UserResponse = Depends(get_current_user),
 ) -> dict:
     """List all learning cycles."""
     runner = get_runner()
@@ -96,7 +103,9 @@ async def list_cycles(
 
 
 @router.get("/learning/cycles/{learning_id}")
-async def get_cycle(learning_id: str) -> dict:
+async def get_cycle(
+    learning_id: str, _user: UserResponse = Depends(get_current_user)
+) -> dict:
     """Get full learning cycle detail."""
     runner = get_runner()
     result = runner.get_cycle(learning_id)
@@ -109,6 +118,7 @@ async def get_cycle(learning_id: str) -> dict:
 async def list_patterns(
     alert_type: str | None = None,
     limit: int = 50,
+    _user: UserResponse = Depends(get_current_user),
 ) -> dict:
     """List pattern insights from the most recent learning cycle."""
     runner = get_runner()
@@ -137,6 +147,7 @@ async def list_patterns(
 async def list_playbook_updates(
     update_type: str | None = None,
     limit: int = 50,
+    _user: UserResponse = Depends(get_current_user),
 ) -> dict:
     """List playbook update recommendations from the most recent learning cycle."""
     runner = get_runner()
@@ -162,7 +173,9 @@ async def list_playbook_updates(
 
 
 @router.get("/learning/threshold-adjustments")
-async def list_threshold_adjustments() -> dict:
+async def list_threshold_adjustments(
+    _user: UserResponse = Depends(get_current_user),
+) -> dict:
     """List threshold adjustment recommendations from the most recent learning cycle."""
     runner = get_runner()
     cycles = runner.list_cycles()

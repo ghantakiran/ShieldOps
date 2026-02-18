@@ -9,10 +9,12 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
-from fastapi import APIRouter, BackgroundTasks, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from pydantic import BaseModel, Field
 
 from shieldops.agents.remediation.runner import RemediationRunner
+from shieldops.api.auth.dependencies import get_current_user, require_role
+from shieldops.api.auth.models import UserResponse, UserRole
 from shieldops.models.base import Environment, RemediationAction, RiskLevel
 
 if TYPE_CHECKING:
@@ -76,6 +78,7 @@ class ApprovalActionRequest(BaseModel):
 async def trigger_remediation(
     request: TriggerRemediationRequest,
     background_tasks: BackgroundTasks,
+    _user: UserResponse = Depends(require_role(UserRole.ADMIN, UserRole.OPERATOR)),
 ) -> dict:
     """Trigger a new remediation action.
 
@@ -107,6 +110,7 @@ async def trigger_remediation(
 @router.post("/remediations/sync")
 async def trigger_remediation_sync(
     request: TriggerRemediationRequest,
+    _user: UserResponse = Depends(require_role(UserRole.ADMIN, UserRole.OPERATOR)),
 ) -> dict:
     """Trigger a remediation and wait for completion.
 
@@ -135,6 +139,7 @@ async def list_remediations(
     status: str | None = None,
     limit: int = 50,
     offset: int = 0,
+    _user: UserResponse = Depends(get_current_user),
 ) -> dict:
     """List remediation timeline (newest first).
 
@@ -176,7 +181,9 @@ async def list_remediations(
 
 
 @router.get("/remediations/{remediation_id}")
-async def get_remediation(remediation_id: str) -> dict:
+async def get_remediation(
+    remediation_id: str, _user: UserResponse = Depends(get_current_user)
+) -> dict:
     """Get remediation detail with execution results and audit trail."""
     if _repository:
         result = await _repository.get_remediation(remediation_id)
@@ -194,6 +201,7 @@ async def get_remediation(remediation_id: str) -> dict:
 async def approve_remediation(
     remediation_id: str,
     request: ApprovalActionRequest,
+    _user: UserResponse = Depends(require_role(UserRole.ADMIN, UserRole.OPERATOR)),
 ) -> dict:
     """Approve a pending remediation action."""
     runner = get_runner()
@@ -212,6 +220,7 @@ async def approve_remediation(
 async def deny_remediation(
     remediation_id: str,
     request: ApprovalActionRequest,
+    _user: UserResponse = Depends(require_role(UserRole.ADMIN, UserRole.OPERATOR)),
 ) -> dict:
     """Deny a pending remediation action."""
     runner = get_runner()
@@ -228,7 +237,10 @@ async def deny_remediation(
 
 
 @router.post("/remediations/{remediation_id}/rollback")
-async def rollback_remediation(remediation_id: str) -> dict:
+async def rollback_remediation(
+    remediation_id: str,
+    _user: UserResponse = Depends(require_role(UserRole.ADMIN, UserRole.OPERATOR)),
+) -> dict:
     """Rollback a completed remediation to pre-action state."""
     runner = get_runner()
     state = runner.get_remediation(remediation_id)

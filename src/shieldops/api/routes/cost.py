@@ -4,10 +4,12 @@ Provides REST endpoints for triggering cost analyses, viewing anomalies,
 browsing optimization recommendations, and checking savings.
 """
 
-from fastapi import APIRouter, BackgroundTasks, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from pydantic import BaseModel, Field
 
 from shieldops.agents.cost.runner import CostRunner
+from shieldops.api.auth.dependencies import get_current_user, require_role
+from shieldops.api.auth.models import UserResponse, UserRole
 from shieldops.models.base import Environment
 
 router = APIRouter()
@@ -49,6 +51,7 @@ class TriggerAnalysisRequest(BaseModel):
 async def trigger_analysis(
     request: TriggerAnalysisRequest,
     background_tasks: BackgroundTasks,
+    _user: UserResponse = Depends(require_role(UserRole.ADMIN, UserRole.OPERATOR)),
 ) -> dict:
     """Trigger a new cost analysis. Runs asynchronously."""
     runner = get_runner()
@@ -75,7 +78,10 @@ async def trigger_analysis(
 
 
 @router.post("/cost/analyses/sync")
-async def trigger_analysis_sync(request: TriggerAnalysisRequest) -> dict:
+async def trigger_analysis_sync(
+    request: TriggerAnalysisRequest,
+    _user: UserResponse = Depends(require_role(UserRole.ADMIN, UserRole.OPERATOR)),
+) -> dict:
     """Trigger a cost analysis and wait for completion."""
     runner = get_runner()
 
@@ -98,6 +104,7 @@ async def list_analyses(
     analysis_type: str | None = None,
     limit: int = 50,
     offset: int = 0,
+    _user: UserResponse = Depends(get_current_user),
 ) -> dict:
     """List all cost analyses."""
     runner = get_runner()
@@ -113,7 +120,9 @@ async def list_analyses(
 
 
 @router.get("/cost/analyses/{analysis_id}")
-async def get_analysis(analysis_id: str) -> dict:
+async def get_analysis(
+    analysis_id: str, _user: UserResponse = Depends(get_current_user)
+) -> dict:
     """Get full cost analysis detail."""
     runner = get_runner()
     result = runner.get_analysis(analysis_id)
@@ -126,6 +135,7 @@ async def get_analysis(analysis_id: str) -> dict:
 async def list_anomalies(
     severity: str | None = None,
     limit: int = 50,
+    _user: UserResponse = Depends(get_current_user),
 ) -> dict:
     """List cost anomalies from the most recent analysis."""
     runner = get_runner()
@@ -154,6 +164,7 @@ async def list_anomalies(
 async def list_optimizations(
     category: str | None = None,
     limit: int = 50,
+    _user: UserResponse = Depends(get_current_user),
 ) -> dict:
     """List optimization recommendations from the most recent analysis."""
     runner = get_runner()
@@ -180,7 +191,7 @@ async def list_optimizations(
 
 
 @router.get("/cost/savings")
-async def get_savings_summary() -> dict:
+async def get_savings_summary(_user: UserResponse = Depends(get_current_user)) -> dict:
     """Get cost savings summary from the most recent analysis."""
     runner = get_runner()
     analyses = runner.list_analyses()

@@ -442,8 +442,19 @@ class TestSupervisorAPI:
         supervisor_module.set_runner(runner)
 
         from shieldops.api.app import create_app
+        from shieldops.api.auth.dependencies import get_current_user
+        from shieldops.api.auth.models import UserResponse, UserRole
 
         app = create_app()
+
+        def _mock_admin_user():
+            return UserResponse(
+                id="test-admin", email="admin@test.com", name="Test Admin",
+                role=UserRole.ADMIN, is_active=True,
+            )
+
+        app.dependency_overrides[get_current_user] = _mock_admin_user
+
         return TestClient(app), runner
 
     def test_list_sessions(self):

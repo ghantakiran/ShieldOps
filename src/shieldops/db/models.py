@@ -13,6 +13,27 @@ class Base(DeclarativeBase):
     pass
 
 
+class UserRecord(Base):
+    """Platform user for authentication."""
+
+    __tablename__ = "users"
+
+    id: Mapped[str] = mapped_column(
+        String(64), primary_key=True, default=lambda: f"usr-{uuid4().hex[:12]}"
+    )
+    email: Mapped[str] = mapped_column(String(256), unique=True, index=True)
+    name: Mapped[str] = mapped_column(String(256))
+    password_hash: Mapped[str] = mapped_column(Text)
+    role: Mapped[str] = mapped_column(String(32), default="viewer")
+    is_active: Mapped[bool] = mapped_column(default=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+
 class InvestigationRecord(Base):
     """Persisted investigation result."""
 
@@ -109,6 +130,29 @@ class AgentSession(Base):
     input_data: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     result_data: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     duration_ms: Mapped[int] = mapped_column(default=0)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+
+class AgentRegistration(Base):
+    """Registered agent in the fleet."""
+
+    __tablename__ = "agent_registrations"
+
+    id: Mapped[str] = mapped_column(
+        String(64), primary_key=True, default=lambda: f"agt-{uuid4().hex[:12]}"
+    )
+    agent_type: Mapped[str] = mapped_column(String(64), index=True)
+    environment: Mapped[str] = mapped_column(String(32), default="production")
+    status: Mapped[str] = mapped_column(String(32), default="idle", index=True)
+    config: Mapped[dict] = mapped_column(JSONB, default=dict)
+    last_heartbeat: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )

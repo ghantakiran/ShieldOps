@@ -14,9 +14,20 @@ class ShieldOpsAPIClient:
     All methods return dicts; errors are returned as ``{"error": msg}``.
     """
 
-    def __init__(self, base_url: str = API_BASE_URL, timeout: int = API_TIMEOUT) -> None:
+    def __init__(
+        self,
+        base_url: str = API_BASE_URL,
+        timeout: int = API_TIMEOUT,
+        token: str | None = None,
+    ) -> None:
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout
+        self.token = token
+
+    def _headers(self) -> dict[str, str]:
+        if self.token:
+            return {"Authorization": f"Bearer {self.token}"}
+        return {}
 
     # ------------------------------------------------------------------
     # Internal helpers
@@ -27,6 +38,7 @@ class ShieldOpsAPIClient:
             resp = httpx.get(
                 f"{self.base_url}{path}",
                 params={k: v for k, v in (params or {}).items() if v is not None},
+                headers=self._headers(),
                 timeout=self.timeout,
             )
             resp.raise_for_status()
@@ -41,6 +53,7 @@ class ShieldOpsAPIClient:
             resp = httpx.post(
                 f"{self.base_url}{path}",
                 json=json or {},
+                headers=self._headers(),
                 timeout=self.timeout,
             )
             resp.raise_for_status()

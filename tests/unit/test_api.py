@@ -24,6 +24,37 @@ class TestHealthCheck:
         assert "version" in data
 
 
+class TestReadinessEndpoints:
+    @pytest.mark.asyncio
+    async def test_ready_endpoint_returns_response(self, client):
+        """Readiness endpoint returns a response (503 expected without DB/Redis/OPA)."""
+        response = await client.get("/ready")
+        # May be 503 (degraded) in test env without real deps, or 200 if mocked
+        assert response.status_code in (200, 503)
+        data = response.json()
+        assert "status" in data
+        assert "checks" in data
+        assert data["status"] in ("ready", "degraded")
+
+    @pytest.mark.asyncio
+    async def test_ready_reports_database_check(self, client):
+        response = await client.get("/ready")
+        data = response.json()
+        assert "database" in data["checks"]
+
+    @pytest.mark.asyncio
+    async def test_ready_reports_redis_check(self, client):
+        response = await client.get("/ready")
+        data = response.json()
+        assert "redis" in data["checks"]
+
+    @pytest.mark.asyncio
+    async def test_ready_reports_opa_check(self, client):
+        response = await client.get("/ready")
+        data = response.json()
+        assert "opa" in data["checks"]
+
+
 class TestAgentEndpoints:
     @pytest.mark.asyncio
     async def test_list_agents(self, client):
@@ -36,7 +67,7 @@ class TestAgentEndpoints:
     @pytest.mark.asyncio
     async def test_get_agent_not_found(self, client):
         response = await client.get("/api/v1/agents/nonexistent")
-        assert response.status_code == 200  # Returns status not_found
+        assert response.status_code == 404
 
 
 class TestInvestigationEndpoints:
