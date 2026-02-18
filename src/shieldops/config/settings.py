@@ -87,6 +87,24 @@ class Settings(BaseSettings):
     aws_secret_access_key: str = ""
     cloudwatch_log_group: str = ""
 
+    # GCP
+    gcp_project_id: str = ""
+    gcp_region: str = "us-central1"
+
+    # Azure
+    azure_subscription_id: str = ""
+    azure_resource_group: str = ""
+    azure_location: str = "eastus"
+
+    # NVD CVE Source
+    nvd_api_key: str = ""
+
+    # HashiCorp Vault
+    vault_addr: str = ""
+    vault_token: str = ""
+    vault_mount_point: str = "secret"
+    vault_namespace: str = ""
+
     # Linux SSH
     linux_host: str = ""
     linux_username: str = ""
