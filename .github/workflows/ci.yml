@@ -97,6 +97,28 @@ jobs:
         with:
           file: coverage.xml
 
+  terraform:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        provider: [aws, gcp, azure]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~> 1.5"
+
+      - name: Terraform fmt
+        run: terraform fmt -check -recursive infrastructure/terraform/${{ matrix.provider }}
+
+      - name: Terraform init
+        run: terraform -chdir=infrastructure/terraform/${{ matrix.provider }} init -backend=false
+
+      - name: Terraform validate
+        run: terraform -chdir=infrastructure/terraform/${{ matrix.provider }} validate
+
   security:
     runs-on: ubuntu-latest
     steps:
