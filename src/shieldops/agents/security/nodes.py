@@ -7,15 +7,17 @@ Each node is an async function that:
 4. Records its reasoning step in the audit trail
 """
 
-from datetime import datetime, timezone
-from typing import Any
+from datetime import UTC, datetime
 
 import structlog
 
 from shieldops.agents.security.models import (
-    CVEFinding,
     ComplianceControl,
     CredentialStatus,
+    CVEFinding,
+    PatchResult,
+    RotationResult,
+    SecurityPolicyResult,
     SecurityPosture,
     SecurityScanState,
     SecurityStep,
@@ -52,12 +54,12 @@ def _get_toolkit() -> SecurityToolkit:
 
 
 def _elapsed_ms(start: datetime) -> int:
-    return int((datetime.now(timezone.utc) - start).total_seconds() * 1000)
+    return int((datetime.now(UTC) - start).total_seconds() * 1000)
 
 
 async def scan_vulnerabilities(state: SecurityScanState) -> dict:
     """Scan target resources for known CVEs."""
-    start = datetime.now(timezone.utc)
+    start = datetime.now(UTC)
     toolkit = _get_toolkit()
 
     logger.info(
@@ -110,7 +112,7 @@ async def scan_vulnerabilities(state: SecurityScanState) -> dict:
 
 async def assess_findings(state: SecurityScanState) -> dict:
     """Use LLM to assess vulnerability findings and prioritize patches."""
-    start = datetime.now(timezone.utc)
+    start = datetime.now(UTC)
 
     logger.info(
         "security_assessing_findings",
@@ -167,7 +169,7 @@ async def assess_findings(state: SecurityScanState) -> dict:
 
 async def check_credentials(state: SecurityScanState) -> dict:
     """Check credential expiry status across managed services."""
-    start = datetime.now(timezone.utc)
+    start = datetime.now(UTC)
     toolkit = _get_toolkit()
 
     logger.info(
@@ -179,7 +181,7 @@ async def check_credentials(state: SecurityScanState) -> dict:
     cred_data = await toolkit.check_credentials(environment=state.target_environment)
 
     statuses: list[CredentialStatus] = []
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
 
     for raw in cred_data.get("expired", []) + cred_data.get("expiring_soon", []):
         expires_at = raw.get("expires_at")
@@ -253,7 +255,7 @@ async def check_credentials(state: SecurityScanState) -> dict:
 
 async def evaluate_compliance(state: SecurityScanState) -> dict:
     """Evaluate compliance posture against configured frameworks."""
-    start = datetime.now(timezone.utc)
+    start = datetime.now(UTC)
     toolkit = _get_toolkit()
 
     frameworks = state.compliance_frameworks or ["soc2"]
@@ -344,7 +346,7 @@ async def evaluate_compliance(state: SecurityScanState) -> dict:
 
 async def synthesize_posture(state: SecurityScanState) -> dict:
     """Synthesize all findings into an overall security posture assessment."""
-    start = datetime.now(timezone.utc)
+    start = datetime.now(UTC)
 
     logger.info("security_synthesizing_posture", scan_id=state.scan_id)
 
@@ -374,7 +376,9 @@ async def synthesize_posture(state: SecurityScanState) -> dict:
         raw_score -= min(40, state.critical_cve_count * 10)
     if state.credentials_needing_rotation > 0:
         raw_score -= min(20, state.credentials_needing_rotation * 5)
-    raw_score = max(0, min(100, raw_score * (state.compliance_score / 100) if state.compliance_score else raw_score))
+    if state.compliance_score:
+        raw_score = raw_score * (state.compliance_score / 100)
+    raw_score = max(0, min(100, raw_score))
 
     posture = SecurityPosture(
         overall_score=raw_score,
@@ -419,6 +423,154 @@ async def synthesize_posture(state: SecurityScanState) -> dict:
         "reasoning_chain": [*state.reasoning_chain, step],
         "current_step": "complete",
         "scan_duration_ms": int(
-            (datetime.now(timezone.utc) - state.scan_start).total_seconds() * 1000
+            (datetime.now(UTC) - state.scan_start).total_seconds() * 1000
         ) if state.scan_start else 0,
+    }
+
+
+# ── Action execution nodes ────────────────────────────────────────
+
+
+async def evaluate_action_policy(state: SecurityScanState) -> dict:
+    """Evaluate OPA policy for planned security actions (patches + rotations)."""
+    start = datetime.now(UTC)
+    toolkit = _get_toolkit()
+
+    logger.info(
+        "security_evaluating_action_policy",
+        scan_id=state.scan_id,
+        environment=state.target_environment.value,
+    )
+
+    policy_data = await toolkit.evaluate_security_policy(
+        action_type="security_remediation",
+        target_resource=state.target_resources[0] if state.target_resources else "*",
+        environment=state.target_environment,
+    )
+
+    policy_result = SecurityPolicyResult(
+        allowed=policy_data["allowed"],
+        reasons=policy_data.get("reasons", []),
+        evaluated_at=datetime.now(UTC),
+    )
+
+    output_summary = (
+        f"Policy {'ALLOWED' if policy_result.allowed else 'DENIED'} "
+        f"security actions: {', '.join(policy_result.reasons)}"
+    )
+
+    step = SecurityStep(
+        step_number=len(state.reasoning_chain) + 1,
+        action="evaluate_action_policy",
+        input_summary="Evaluating OPA policy for security actions",
+        output_summary=output_summary,
+        duration_ms=_elapsed_ms(start),
+        tool_used="policy_engine",
+    )
+
+    return {
+        "action_policy_result": policy_result,
+        "reasoning_chain": [*state.reasoning_chain, step],
+        "current_step": "evaluate_action_policy",
+    }
+
+
+async def execute_patches(state: SecurityScanState) -> dict:
+    """Apply patches for CVEs that have a fixed_version, sorted by CVSS score."""
+    start = datetime.now(UTC)
+    toolkit = _get_toolkit()
+
+    # Only patch CVEs with a fixed version, sorted by CVSS (highest first), cap 20
+    patchable = sorted(
+        [c for c in state.cve_findings if c.fixed_version],
+        key=lambda c: c.cvss_score,
+        reverse=True,
+    )[:20]
+
+    logger.info(
+        "security_executing_patches",
+        scan_id=state.scan_id,
+        patchable_count=len(patchable),
+    )
+
+    results: list[PatchResult] = []
+    for cve in patchable:
+        patch_data = await toolkit.apply_patch(
+            host=cve.affected_resource,
+            package_name=cve.package_name,
+            target_version=cve.fixed_version,  # type: ignore[arg-type]
+        )
+        results.append(PatchResult(
+            cve_id=cve.cve_id,
+            package_name=cve.package_name,
+            target_resource=cve.affected_resource,
+            success=patch_data.get("success", False),
+            message=patch_data.get("message", ""),
+            applied_version=patch_data.get("applied_version"),
+        ))
+
+    applied = sum(1 for r in results if r.success)
+
+    step = SecurityStep(
+        step_number=len(state.reasoning_chain) + 1,
+        action="execute_patches",
+        input_summary=f"Applying {len(patchable)} patches",
+        output_summary=f"{applied}/{len(patchable)} patches applied successfully",
+        duration_ms=_elapsed_ms(start),
+        tool_used="connector",
+    )
+
+    return {
+        "patch_results": results,
+        "patches_applied": applied,
+        "reasoning_chain": [*state.reasoning_chain, step],
+        "current_step": "execute_patches",
+    }
+
+
+async def rotate_credentials(state: SecurityScanState) -> dict:
+    """Rotate all credentials marked as needs_rotation."""
+    start = datetime.now(UTC)
+    toolkit = _get_toolkit()
+
+    to_rotate = [c for c in state.credential_statuses if c.needs_rotation]
+
+    logger.info(
+        "security_rotating_credentials",
+        scan_id=state.scan_id,
+        rotation_count=len(to_rotate),
+    )
+
+    results: list[RotationResult] = []
+    for cred in to_rotate:
+        rot_data = await toolkit.rotate_credential(
+            credential_id=cred.credential_id,
+            credential_type=cred.credential_type,
+            service=cred.service,
+        )
+        results.append(RotationResult(
+            credential_id=cred.credential_id,
+            credential_type=cred.credential_type,
+            service=cred.service,
+            success=rot_data.get("success", False),
+            message=rot_data.get("message", ""),
+            new_expiry=rot_data.get("new_expiry"),
+        ))
+
+    rotated = sum(1 for r in results if r.success)
+
+    step = SecurityStep(
+        step_number=len(state.reasoning_chain) + 1,
+        action="rotate_credentials",
+        input_summary=f"Rotating {len(to_rotate)} credentials",
+        output_summary=f"{rotated}/{len(to_rotate)} credentials rotated successfully",
+        duration_ms=_elapsed_ms(start),
+        tool_used="credential_store",
+    )
+
+    return {
+        "rotation_results": results,
+        "credentials_rotated": rotated,
+        "reasoning_chain": [*state.reasoning_chain, step],
+        "current_step": "rotate_credentials",
     }

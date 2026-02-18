@@ -146,6 +146,52 @@ class IncidentOutcomeRecord(Base):
     )
 
 
+class SecurityScanRecord(Base):
+    """Persisted security scan result."""
+
+    __tablename__ = "security_scans"
+
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    scan_type: Mapped[str] = mapped_column(String(32), index=True)
+    environment: Mapped[str] = mapped_column(String(32), index=True)
+    status: Mapped[str] = mapped_column(String(32), default="init", index=True)
+
+    # CVE findings
+    cve_findings: Mapped[dict] = mapped_column(JSONB, default=list)
+    critical_cve_count: Mapped[int] = mapped_column(Integer, default=0)
+
+    # Credential status
+    credential_statuses: Mapped[dict] = mapped_column(JSONB, default=list)
+
+    # Compliance
+    compliance_controls: Mapped[dict] = mapped_column(JSONB, default=list)
+    compliance_score: Mapped[float] = mapped_column(default=0.0)
+
+    # Action execution results
+    patch_results: Mapped[dict] = mapped_column(JSONB, default=list)
+    rotation_results: Mapped[dict] = mapped_column(JSONB, default=list)
+    patches_applied: Mapped[int] = mapped_column(Integer, default=0)
+    credentials_rotated: Mapped[int] = mapped_column(Integer, default=0)
+
+    # Posture
+    posture_data: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+
+    # Metadata
+    reasoning_chain: Mapped[dict] = mapped_column(JSONB, default=list)
+    error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    duration_ms: Mapped[int] = mapped_column(Integer, default=0)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+    __table_args__ = (
+        Index("ix_security_scans_env_created", "environment", "created_at"),
+    )
+
+
 class AgentSession(Base):
     """Tracks agent execution sessions for observability."""
 
