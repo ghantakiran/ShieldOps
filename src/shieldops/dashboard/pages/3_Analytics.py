@@ -14,7 +14,7 @@ from shieldops.dashboard.components import (
 st.set_page_config(page_title="Analytics | ShieldOps", page_icon="📊", layout="wide")
 
 
-@st.cache_resource
+@st.cache_resource  # type: ignore[untyped-decorator]
 def get_client() -> ShieldOpsAPIClient:
     return ShieldOpsAPIClient()
 

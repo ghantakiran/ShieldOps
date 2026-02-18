@@ -103,6 +103,7 @@ python_version = "3.12"
 strict = true
 warn_return_any = true
 warn_unused_configs = true
+warn_unused_ignores = false  # type: ignore comments must work across local + pre-commit envs
 
 [tool.coverage.run]
 source = ["src/shieldops"]

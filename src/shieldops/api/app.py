@@ -293,7 +293,7 @@ def create_app() -> FastAPI:
             r = aioredis.from_url(  # type: ignore[no-untyped-call]
                 settings.redis_url, socket_connect_timeout=2
             )
-            await r.ping()
+            await r.ping()  # type: ignore[misc]
             await r.aclose()
             checks["redis"] = "ok"
         except Exception as e:

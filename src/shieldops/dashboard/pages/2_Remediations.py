@@ -18,7 +18,7 @@ from shieldops.dashboard.config import SUPPORTED_ENVIRONMENTS
 st.set_page_config(page_title="Remediations | ShieldOps", page_icon="🔧", layout="wide")
 
 
-@st.cache_resource
+@st.cache_resource  # type: ignore[untyped-decorator]
 def get_client() -> ShieldOpsAPIClient:
     return ShieldOpsAPIClient()
 
