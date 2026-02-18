@@ -7,7 +7,7 @@ name = "shieldops"
 version = "0.1.0"
 description = "AI-Powered Autonomous SRE Platform"
 readme = "README.md"
-license = "Proprietary"
+license = "LicenseRef-Proprietary"
 requires-python = ">=3.12"
 authors = [
     { name = "ShieldOps Team" },
