@@ -1,6 +1,6 @@
 """Comprehensive tests for the Learning Agent."""
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -31,7 +31,6 @@ from shieldops.agents.learning.runner import LearningRunner
 from shieldops.agents.learning.tools import LearningToolkit
 from shieldops.models.base import Environment
 
-
 # ===========================================================================
 # Toolkit Tests
 # ===========================================================================
@@ -46,7 +45,12 @@ class TestLearningToolkit:
         store.query.return_value = {
             "total_incidents": 5,
             "outcomes": [
-                {"incident_id": "inc-1", "alert_type": "high_cpu", "was_automated": True, "was_correct": True},
+                {
+                    "incident_id": "inc-1",
+                    "alert_type": "high_cpu",
+                    "was_automated": True,
+                    "was_correct": True,
+                },
             ],
         }
         toolkit = LearningToolkit(incident_store=store)
@@ -88,9 +92,30 @@ class TestLearningToolkit:
     async def test_compute_effectiveness_metrics(self):
         toolkit = LearningToolkit()
         outcomes = [
-            {"incident_id": "1", "alert_type": "high_cpu", "was_automated": True, "was_correct": True, "investigation_duration_ms": 30000, "remediation_duration_ms": 10000},
-            {"incident_id": "2", "alert_type": "high_cpu", "was_automated": True, "was_correct": False, "investigation_duration_ms": 40000, "remediation_duration_ms": 15000},
-            {"incident_id": "3", "alert_type": "oom_kill", "was_automated": False, "was_correct": True, "investigation_duration_ms": 60000, "remediation_duration_ms": 20000},
+            {
+                "incident_id": "1",
+                "alert_type": "high_cpu",
+                "was_automated": True,
+                "was_correct": True,
+                "investigation_duration_ms": 30000,
+                "remediation_duration_ms": 10000,
+            },
+            {
+                "incident_id": "2",
+                "alert_type": "high_cpu",
+                "was_automated": True,
+                "was_correct": False,
+                "investigation_duration_ms": 40000,
+                "remediation_duration_ms": 15000,
+            },
+            {
+                "incident_id": "3",
+                "alert_type": "oom_kill",
+                "was_automated": False,
+                "was_correct": True,
+                "investigation_duration_ms": 60000,
+                "remediation_duration_ms": 20000,
+            },
         ]
         result = await toolkit.compute_effectiveness_metrics(outcomes)
         assert result["total_incidents"] == 3
@@ -154,9 +179,27 @@ class TestAnalyzePatternsNode:
         state = LearningState(
             learning_id="test-003",
             incident_outcomes=[
-                IncidentOutcome(incident_id="1", alert_type="high_cpu", root_cause="memory leak", resolution_action="restart_pod", was_automated=True),
-                IncidentOutcome(incident_id="2", alert_type="high_cpu", root_cause="memory leak", resolution_action="restart_pod", was_automated=True),
-                IncidentOutcome(incident_id="3", alert_type="oom_kill", root_cause="bad config", resolution_action="increase_resources", was_automated=False),
+                IncidentOutcome(
+                    incident_id="1",
+                    alert_type="high_cpu",
+                    root_cause="memory leak",
+                    resolution_action="restart_pod",
+                    was_automated=True,
+                ),
+                IncidentOutcome(
+                    incident_id="2",
+                    alert_type="high_cpu",
+                    root_cause="memory leak",
+                    resolution_action="restart_pod",
+                    was_automated=True,
+                ),
+                IncidentOutcome(
+                    incident_id="3",
+                    alert_type="oom_kill",
+                    root_cause="bad config",
+                    resolution_action="increase_resources",
+                    was_automated=False,
+                ),
             ],
             automation_accuracy=100.0,
             reasoning_chain=[],
@@ -204,7 +247,14 @@ class TestRecommendPlaybooksNode:
             learning_id="test-005",
             incident_outcomes=[],
             pattern_insights=[
-                PatternInsight(pattern_id="p1", alert_type="latency_spike", description="Recurring latency", frequency=3, common_root_cause="db pool", common_resolution="scale_horizontal"),
+                PatternInsight(
+                    pattern_id="p1",
+                    alert_type="latency_spike",
+                    description="Recurring latency",
+                    frequency=3,
+                    common_root_cause="db pool",
+                    common_resolution="scale_horizontal",
+                ),
             ],
             reasoning_chain=[],
         )
@@ -224,7 +274,14 @@ class TestRecommendPlaybooksNode:
         state = LearningState(
             learning_id="test-006",
             incident_outcomes=[
-                IncidentOutcome(incident_id="inc-1", alert_type="high_cpu", root_cause="cron job", resolution_action="restart_pod", was_automated=True, was_correct=False),
+                IncidentOutcome(
+                    incident_id="inc-1",
+                    alert_type="high_cpu",
+                    root_cause="cron job",
+                    resolution_action="restart_pod",
+                    was_automated=True,
+                    was_correct=False,
+                ),
             ],
             pattern_insights=[],
             reasoning_chain=[],
@@ -250,19 +307,29 @@ class TestRecommendThresholdsNode:
         state = LearningState(
             learning_id="test-007",
             incident_outcomes=[
-                IncidentOutcome(incident_id="1", alert_type="high_cpu", was_automated=True, was_correct=False),
-                IncidentOutcome(incident_id="2", alert_type="high_cpu", was_automated=True, was_correct=False),
-                IncidentOutcome(incident_id="3", alert_type="high_cpu", was_automated=True, was_correct=True),
+                IncidentOutcome(
+                    incident_id="1", alert_type="high_cpu", was_automated=True, was_correct=False
+                ),
+                IncidentOutcome(
+                    incident_id="2", alert_type="high_cpu", was_automated=True, was_correct=False
+                ),
+                IncidentOutcome(
+                    incident_id="3", alert_type="high_cpu", was_automated=True, was_correct=True
+                ),
             ],
             reasoning_chain=[],
         )
 
-        with patch("shieldops.agents.learning.nodes.llm_structured", side_effect=RuntimeError("skip")):
+        with patch(
+            "shieldops.agents.learning.nodes.llm_structured", side_effect=RuntimeError("skip")
+        ):
             result = await recommend_thresholds(state)
 
         # 2/3 high_cpu automations were wrong (66% error rate) — should suggest adjustment
         assert len(result["threshold_adjustments"]) > 0
-        cpu_adj = [a for a in result["threshold_adjustments"] if a.metric_name == "cpu_usage_percent"]
+        cpu_adj = [
+            a for a in result["threshold_adjustments"] if a.metric_name == "cpu_usage_percent"
+        ]
         assert len(cpu_adj) > 0
 
         set_toolkit(None)
@@ -275,13 +342,19 @@ class TestRecommendThresholdsNode:
         state = LearningState(
             learning_id="test-008",
             incident_outcomes=[
-                IncidentOutcome(incident_id="1", alert_type="high_cpu", was_automated=True, was_correct=True),
-                IncidentOutcome(incident_id="2", alert_type="high_cpu", was_automated=True, was_correct=True),
+                IncidentOutcome(
+                    incident_id="1", alert_type="high_cpu", was_automated=True, was_correct=True
+                ),
+                IncidentOutcome(
+                    incident_id="2", alert_type="high_cpu", was_automated=True, was_correct=True
+                ),
             ],
             reasoning_chain=[],
         )
 
-        with patch("shieldops.agents.learning.nodes.llm_structured", side_effect=RuntimeError("skip")):
+        with patch(
+            "shieldops.agents.learning.nodes.llm_structured", side_effect=RuntimeError("skip")
+        ):
             result = await recommend_thresholds(state)
 
         # All correct — no adjustments needed
@@ -300,22 +373,35 @@ class TestSynthesizeImprovementsNode:
 
         state = LearningState(
             learning_id="test-009",
-            learning_start=datetime.now(timezone.utc) - timedelta(seconds=5),
+            learning_start=datetime.now(UTC) - timedelta(seconds=5),
             total_incidents_analyzed=10,
             automation_accuracy=85.0,
             avg_resolution_time_ms=50000,
             pattern_insights=[
-                PatternInsight(pattern_id="p1", alert_type="high_cpu", description="test", frequency=3, common_root_cause="leak"),
+                PatternInsight(
+                    pattern_id="p1",
+                    alert_type="high_cpu",
+                    description="test",
+                    frequency=3,
+                    common_root_cause="leak",
+                ),
             ],
             recurring_pattern_count=1,
             playbook_updates=[
-                PlaybookUpdate(playbook_id="pb1", alert_type="high_cpu", update_type="modify_step", title="Fix CPU playbook"),
+                PlaybookUpdate(
+                    playbook_id="pb1",
+                    alert_type="high_cpu",
+                    update_type="modify_step",
+                    title="Fix CPU playbook",
+                ),
             ],
             threshold_adjustments=[],
             reasoning_chain=[],
         )
 
-        with patch("shieldops.agents.learning.nodes.llm_structured", side_effect=RuntimeError("skip")):
+        with patch(
+            "shieldops.agents.learning.nodes.llm_structured", side_effect=RuntimeError("skip")
+        ):
             result = await synthesize_improvements(state)
 
         assert result["improvement_score"] > 0
@@ -331,14 +417,18 @@ class TestSynthesizeImprovementsNode:
 
         state = LearningState(
             learning_id="test-010",
-            learning_start=datetime.now(timezone.utc),
+            learning_start=datetime.now(UTC),
             automation_accuracy=95.0,
             recurring_pattern_count=0,
-            playbook_updates=[PlaybookUpdate(playbook_id="pb1", alert_type="x", update_type="new", title="t")],
+            playbook_updates=[
+                PlaybookUpdate(playbook_id="pb1", alert_type="x", update_type="new", title="t")
+            ],
             reasoning_chain=[],
         )
 
-        with patch("shieldops.agents.learning.nodes.llm_structured", side_effect=RuntimeError("skip")):
+        with patch(
+            "shieldops.agents.learning.nodes.llm_structured", side_effect=RuntimeError("skip")
+        ):
             result = await synthesize_improvements(state)
 
         # High accuracy + no recurring patterns + actionable updates = high score
@@ -414,13 +504,15 @@ class TestLearningRunner:
         runner = LearningRunner()
 
         with patch.object(runner, "_app") as mock_app:
-            mock_app.ainvoke = AsyncMock(return_value=LearningState(
-                learning_id="learn-test",
-                learning_type="full",
-                current_step="complete",
-                total_incidents_analyzed=10,
-                learning_start=datetime.now(timezone.utc),
-            ).model_dump())
+            mock_app.ainvoke = AsyncMock(
+                return_value=LearningState(
+                    learning_id="learn-test",
+                    learning_type="full",
+                    current_step="complete",
+                    total_incidents_analyzed=10,
+                    learning_start=datetime.now(UTC),
+                ).model_dump()
+            )
 
             result = await runner.learn()
 
@@ -470,8 +562,11 @@ class TestLearningAPI:
 
         def _mock_admin_user():
             return UserResponse(
-                id="test-admin", email="admin@test.com", name="Test Admin",
-                role=UserRole.ADMIN, is_active=True,
+                id="test-admin",
+                email="admin@test.com",
+                name="Test Admin",
+                role=UserRole.ADMIN,
+                is_active=True,
             )
 
         app.dependency_overrides[get_current_user] = _mock_admin_user
@@ -505,10 +600,13 @@ class TestLearningAPI:
 
     def test_trigger_cycle_async(self):
         client, _ = self._make_app()
-        resp = client.post("/api/v1/learning/cycles", json={
-            "learning_type": "full",
-            "period": "30d",
-        })
+        resp = client.post(
+            "/api/v1/learning/cycles",
+            json={
+                "learning_type": "full",
+                "period": "30d",
+            },
+        )
         assert resp.status_code == 202
         assert resp.json()["status"] == "accepted"
 
@@ -524,9 +622,12 @@ class TestLearningAPI:
 
         runner.learn = mock_learn
 
-        resp = client.post("/api/v1/learning/cycles/sync", json={
-            "learning_type": "full",
-        })
+        resp = client.post(
+            "/api/v1/learning/cycles/sync",
+            json={
+                "learning_type": "full",
+            },
+        )
         assert resp.status_code == 200
         assert resp.json()["current_step"] == "complete"
 
@@ -542,8 +643,20 @@ class TestLearningAPI:
             learning_id="learn-pat",
             current_step="complete",
             pattern_insights=[
-                PatternInsight(pattern_id="p1", alert_type="high_cpu", description="Recurring CPU", frequency=3, common_root_cause="leak"),
-                PatternInsight(pattern_id="p2", alert_type="oom_kill", description="OOM pattern", frequency=2, common_root_cause="limits"),
+                PatternInsight(
+                    pattern_id="p1",
+                    alert_type="high_cpu",
+                    description="Recurring CPU",
+                    frequency=3,
+                    common_root_cause="leak",
+                ),
+                PatternInsight(
+                    pattern_id="p2",
+                    alert_type="oom_kill",
+                    description="OOM pattern",
+                    frequency=2,
+                    common_root_cause="limits",
+                ),
             ],
         )
         runner._cycles["learn-pat"] = state
@@ -558,8 +671,20 @@ class TestLearningAPI:
             learning_id="learn-pat2",
             current_step="complete",
             pattern_insights=[
-                PatternInsight(pattern_id="p1", alert_type="high_cpu", description="CPU", frequency=3, common_root_cause="leak"),
-                PatternInsight(pattern_id="p2", alert_type="oom_kill", description="OOM", frequency=2, common_root_cause="limits"),
+                PatternInsight(
+                    pattern_id="p1",
+                    alert_type="high_cpu",
+                    description="CPU",
+                    frequency=3,
+                    common_root_cause="leak",
+                ),
+                PatternInsight(
+                    pattern_id="p2",
+                    alert_type="oom_kill",
+                    description="OOM",
+                    frequency=2,
+                    common_root_cause="limits",
+                ),
             ],
         )
         runner._cycles["learn-pat2"] = state
@@ -574,7 +699,12 @@ class TestLearningAPI:
             learning_id="learn-pb",
             current_step="complete",
             playbook_updates=[
-                PlaybookUpdate(playbook_id="pb1", alert_type="high_cpu", update_type="new_playbook", title="New CPU playbook"),
+                PlaybookUpdate(
+                    playbook_id="pb1",
+                    alert_type="high_cpu",
+                    update_type="new_playbook",
+                    title="New CPU playbook",
+                ),
             ],
         )
         runner._cycles["learn-pb"] = state
@@ -589,8 +719,15 @@ class TestLearningAPI:
             learning_id="learn-pb2",
             current_step="complete",
             playbook_updates=[
-                PlaybookUpdate(playbook_id="pb1", alert_type="high_cpu", update_type="new_playbook", title="New"),
-                PlaybookUpdate(playbook_id="pb2", alert_type="high_cpu", update_type="modify_step", title="Fix"),
+                PlaybookUpdate(
+                    playbook_id="pb1",
+                    alert_type="high_cpu",
+                    update_type="new_playbook",
+                    title="New",
+                ),
+                PlaybookUpdate(
+                    playbook_id="pb2", alert_type="high_cpu", update_type="modify_step", title="Fix"
+                ),
             ],
         )
         runner._cycles["learn-pb2"] = state
@@ -605,7 +742,14 @@ class TestLearningAPI:
             learning_id="learn-th",
             current_step="complete",
             threshold_adjustments=[
-                ThresholdAdjustment(adjustment_id="adj1", metric_name="cpu_usage_percent", current_threshold=80.0, recommended_threshold=88.0, direction="increase", reason="too sensitive"),
+                ThresholdAdjustment(
+                    adjustment_id="adj1",
+                    metric_name="cpu_usage_percent",
+                    current_threshold=80.0,
+                    recommended_threshold=88.0,
+                    direction="increase",
+                    reason="too sensitive",
+                ),
             ],
             estimated_false_positive_reduction=15.0,
         )

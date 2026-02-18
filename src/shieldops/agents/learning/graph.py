@@ -25,7 +25,11 @@ logger = structlog.get_logger()
 def should_recommend_playbooks(state: LearningState) -> str:
     """Skip playbook recommendations if learning type is pattern_only or threshold_only."""
     if state.learning_type in ("pattern_only", "threshold_only"):
-        return "synthesize_improvements" if state.learning_type == "pattern_only" else "recommend_thresholds"
+        return (
+            "synthesize_improvements"
+            if state.learning_type == "pattern_only"
+            else "recommend_thresholds"
+        )
     if state.error:
         return "synthesize_improvements"
     return "recommend_playbooks"

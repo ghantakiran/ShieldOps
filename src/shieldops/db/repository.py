@@ -81,9 +81,7 @@ class Repository:
 
     # ── Investigations ──────────────────────────────────────────────
 
-    async def save_investigation(
-        self, investigation_id: str, state: InvestigationState
-    ) -> None:
+    async def save_investigation(self, investigation_id: str, state: InvestigationState) -> None:
         """Upsert an investigation result to the database."""
         async with self._sf() as session:
             record = await session.get(InvestigationRecord, investigation_id)
@@ -125,9 +123,7 @@ class Repository:
     ) -> list[dict]:
         """List investigation summaries from the database."""
         async with self._sf() as session:
-            stmt = select(InvestigationRecord).order_by(
-                InvestigationRecord.created_at.desc()
-            )
+            stmt = select(InvestigationRecord).order_by(InvestigationRecord.created_at.desc())
             if status:
                 stmt = stmt.where(InvestigationRecord.status == status)
             stmt = stmt.offset(offset).limit(limit)
@@ -169,9 +165,7 @@ class Repository:
 
     # ── Remediations ────────────────────────────────────────────────
 
-    async def save_remediation(
-        self, remediation_id: str, state: RemediationState
-    ) -> None:
+    async def save_remediation(self, remediation_id: str, state: RemediationState) -> None:
         """Upsert a remediation result to the database."""
         async with self._sf() as session:
             record = await session.get(RemediationRecord, remediation_id)
@@ -188,9 +182,7 @@ class Repository:
             record.reasoning_chain = [r.model_dump(mode="json") for r in state.reasoning_chain]
             record.action_data = state.action.model_dump(mode="json")
             record.execution_result = (
-                state.execution_result.model_dump(mode="json")
-                if state.execution_result
-                else None
+                state.execution_result.model_dump(mode="json") if state.execution_result else None
             )
             record.snapshot_data = (
                 state.snapshot.model_dump(mode="json") if state.snapshot else None
@@ -219,9 +211,7 @@ class Repository:
     ) -> list[dict]:
         """List remediation summaries from the database."""
         async with self._sf() as session:
-            stmt = select(RemediationRecord).order_by(
-                RemediationRecord.created_at.desc()
-            )
+            stmt = select(RemediationRecord).order_by(RemediationRecord.created_at.desc())
             if environment:
                 stmt = stmt.where(RemediationRecord.environment == environment)
             if status:
@@ -267,9 +257,7 @@ class Repository:
 
     # ── Security Scans ─────────────────────────────────────────────
 
-    async def save_security_scan(
-        self, scan_id: str, state: SecurityScanState
-    ) -> None:
+    async def save_security_scan(self, scan_id: str, state: SecurityScanState) -> None:
         """Upsert a security scan result to the database."""
         async with self._sf() as session:
             record = await session.get(SecurityScanRecord, scan_id)
@@ -293,9 +281,7 @@ class Repository:
             record.rotation_results = [r.model_dump(mode="json") for r in state.rotation_results]
             record.patches_applied = state.patches_applied
             record.credentials_rotated = state.credentials_rotated
-            record.posture_data = (
-                state.posture.model_dump(mode="json") if state.posture else None
-            )
+            record.posture_data = state.posture.model_dump(mode="json") if state.posture else None
             record.reasoning_chain = [r.model_dump(mode="json") for r in state.reasoning_chain]
             record.error = state.error
             record.duration_ms = state.scan_duration_ms
@@ -321,9 +307,7 @@ class Repository:
     ) -> list[dict]:
         """List security scan summaries from the database."""
         async with self._sf() as session:
-            stmt = select(SecurityScanRecord).order_by(
-                SecurityScanRecord.created_at.desc()
-            )
+            stmt = select(SecurityScanRecord).order_by(SecurityScanRecord.created_at.desc())
             if environment:
                 stmt = stmt.where(SecurityScanRecord.environment == environment)
             if scan_type:
@@ -472,9 +456,7 @@ class Repository:
             await session.commit()
             logger.info("incident_outcome_saved", incident_id=incident_id)
 
-    async def query_incident_outcomes(
-        self, period: str = "30d", limit: int = 200
-    ) -> dict:
+    async def query_incident_outcomes(self, period: str = "30d", limit: int = 200) -> dict:
         """Query incident outcomes for a given period.
 
         Returns format compatible with LearningToolkit.get_incident_outcomes().

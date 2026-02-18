@@ -3,7 +3,6 @@
 from unittest.mock import MagicMock, patch
 
 import httpx
-import pytest
 
 from shieldops.dashboard.api_client import ShieldOpsAPIClient
 from shieldops.dashboard.components import (
@@ -17,7 +16,6 @@ from shieldops.dashboard.config import (
     STATUS_COLORS,
     confidence_color,
 )
-
 
 # =====================================================================
 # Config tests
@@ -148,10 +146,12 @@ class TestAPIClientInvestigations:
 
     @patch("httpx.get")
     def test_list_investigations(self, mock_get):
-        mock_get.return_value = _mock_response({
-            "investigations": [{"investigation_id": "inv-1"}],
-            "total": 1,
-        })
+        mock_get.return_value = _mock_response(
+            {
+                "investigations": [{"investigation_id": "inv-1"}],
+                "total": 1,
+            }
+        )
         result = self.client.list_investigations()
         assert result["total"] == 1
 
@@ -165,7 +165,9 @@ class TestAPIClientInvestigations:
     def test_trigger_investigation(self, mock_post):
         mock_post.return_value = _mock_response({"status": "accepted", "alert_id": "a1"})
         result = self.client.trigger_investigation(
-            alert_id="a1", alert_name="HighCPU", severity="critical",
+            alert_id="a1",
+            alert_name="HighCPU",
+            severity="critical",
         )
         assert result["status"] == "accepted"
         payload = mock_post.call_args[1]["json"]

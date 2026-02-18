@@ -1,7 +1,7 @@
 """Comprehensive tests for the Cost Agent."""
 
-from datetime import datetime, timedelta, timezone
-from unittest.mock import AsyncMock, MagicMock, patch
+from datetime import UTC, datetime, timedelta
+from unittest.mock import AsyncMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
@@ -29,7 +29,6 @@ from shieldops.agents.cost.nodes import (
 from shieldops.agents.cost.runner import CostRunner
 from shieldops.agents.cost.tools import CostToolkit
 from shieldops.models.base import Environment
-
 
 # ===========================================================================
 # Toolkit Tests
@@ -84,8 +83,20 @@ class TestCostToolkit:
     async def test_detect_anomalies(self):
         toolkit = CostToolkit()
         resources = [
-            {"resource_id": "r1", "service": "compute", "daily_cost": 100, "monthly_cost": 3000, "usage_percent": 10},
-            {"resource_id": "r2", "service": "compute", "daily_cost": 5, "monthly_cost": 150, "usage_percent": 90},
+            {
+                "resource_id": "r1",
+                "service": "compute",
+                "daily_cost": 100,
+                "monthly_cost": 3000,
+                "usage_percent": 10,
+            },
+            {
+                "resource_id": "r2",
+                "service": "compute",
+                "daily_cost": 5,
+                "monthly_cost": 150,
+                "usage_percent": 90,
+            },
         ]
         result = await toolkit.detect_anomalies(resources)
         assert result["total_anomalies"] > 0
@@ -97,7 +108,13 @@ class TestCostToolkit:
     async def test_detect_anomalies_no_issues(self):
         toolkit = CostToolkit()
         resources = [
-            {"resource_id": "r1", "service": "compute", "daily_cost": 5, "monthly_cost": 150, "usage_percent": 80},
+            {
+                "resource_id": "r1",
+                "service": "compute",
+                "daily_cost": 5,
+                "monthly_cost": 150,
+                "usage_percent": 80,
+            },
         ]
         result = await toolkit.detect_anomalies(resources)
         # Low cost, high usage — no anomalies from the unused check
@@ -108,8 +125,20 @@ class TestCostToolkit:
     async def test_get_optimization_opportunities(self):
         toolkit = CostToolkit()
         resources = [
-            {"resource_id": "r1", "service": "compute", "daily_cost": 50, "monthly_cost": 1500, "usage_percent": 20},
-            {"resource_id": "r2", "service": "compute", "daily_cost": 50, "monthly_cost": 1500, "usage_percent": 90},
+            {
+                "resource_id": "r1",
+                "service": "compute",
+                "daily_cost": 50,
+                "monthly_cost": 1500,
+                "usage_percent": 20,
+            },
+            {
+                "resource_id": "r2",
+                "service": "compute",
+                "daily_cost": 50,
+                "monthly_cost": 1500,
+                "usage_percent": 90,
+            },
         ]
         result = await toolkit.get_optimization_opportunities(resources)
         assert result["total_recommendations"] > 0
@@ -121,7 +150,13 @@ class TestCostToolkit:
     async def test_get_optimization_no_opportunities(self):
         toolkit = CostToolkit()
         resources = [
-            {"resource_id": "r1", "service": "compute", "daily_cost": 50, "monthly_cost": 1500, "usage_percent": 90},
+            {
+                "resource_id": "r1",
+                "service": "compute",
+                "daily_cost": 50,
+                "monthly_cost": 1500,
+                "usage_percent": 90,
+            },
         ]
         result = await toolkit.get_optimization_opportunities(resources)
         assert result["total_recommendations"] == 0
@@ -188,7 +223,16 @@ class TestDetectAnomaliesNode:
         state = CostAnalysisState(
             analysis_id="test-003",
             resource_costs=[
-                ResourceCost(resource_id="r1", resource_type="instance", service="compute", environment=Environment.PRODUCTION, provider="aws", daily_cost=100, monthly_cost=3000, usage_percent=5),
+                ResourceCost(
+                    resource_id="r1",
+                    resource_type="instance",
+                    service="compute",
+                    environment=Environment.PRODUCTION,
+                    provider="aws",
+                    daily_cost=100,
+                    monthly_cost=3000,
+                    usage_percent=5,
+                ),
             ],
             reasoning_chain=[],
         )
@@ -207,12 +251,23 @@ class TestDetectAnomaliesNode:
         state = CostAnalysisState(
             analysis_id="test-004",
             resource_costs=[
-                ResourceCost(resource_id="r1", resource_type="instance", service="compute", environment=Environment.PRODUCTION, provider="aws", daily_cost=100, monthly_cost=3000, usage_percent=5),
+                ResourceCost(
+                    resource_id="r1",
+                    resource_type="instance",
+                    service="compute",
+                    environment=Environment.PRODUCTION,
+                    provider="aws",
+                    daily_cost=100,
+                    monthly_cost=3000,
+                    usage_percent=5,
+                ),
             ],
             reasoning_chain=[],
         )
 
-        with patch("shieldops.agents.cost.nodes.llm_structured", side_effect=RuntimeError("LLM down")):
+        with patch(
+            "shieldops.agents.cost.nodes.llm_structured", side_effect=RuntimeError("LLM down")
+        ):
             result = await detect_anomalies(state)
 
         # Should still return anomalies even if LLM fails
@@ -233,7 +288,16 @@ class TestRecommendOptimizationsNode:
         state = CostAnalysisState(
             analysis_id="test-005",
             resource_costs=[
-                ResourceCost(resource_id="r1", resource_type="instance", service="compute", environment=Environment.PRODUCTION, provider="aws", daily_cost=50, monthly_cost=1500, usage_percent=20),
+                ResourceCost(
+                    resource_id="r1",
+                    resource_type="instance",
+                    service="compute",
+                    environment=Environment.PRODUCTION,
+                    provider="aws",
+                    daily_cost=50,
+                    monthly_cost=1500,
+                    usage_percent=20,
+                ),
             ],
             reasoning_chain=[],
         )
@@ -253,7 +317,16 @@ class TestRecommendOptimizationsNode:
         state = CostAnalysisState(
             analysis_id="test-006",
             resource_costs=[
-                ResourceCost(resource_id="r1", resource_type="instance", service="compute", environment=Environment.PRODUCTION, provider="aws", daily_cost=50, monthly_cost=1500, usage_percent=90),
+                ResourceCost(
+                    resource_id="r1",
+                    resource_type="instance",
+                    service="compute",
+                    environment=Environment.PRODUCTION,
+                    provider="aws",
+                    daily_cost=50,
+                    monthly_cost=1500,
+                    usage_percent=90,
+                ),
             ],
             reasoning_chain=[],
         )
@@ -275,22 +348,41 @@ class TestSynthesizeSavingsNode:
 
         state = CostAnalysisState(
             analysis_id="test-007",
-            analysis_start=datetime.now(timezone.utc) - timedelta(seconds=5),
+            analysis_start=datetime.now(UTC) - timedelta(seconds=5),
             total_monthly_spend=10000.0,
             total_daily_spend=333.0,
             total_potential_savings=2000.0,
             spend_by_service={"compute": 7000, "storage": 3000},
             cost_anomalies=[
-                CostAnomaly(resource_id="r1", service="compute", anomaly_type="spike", severity="critical", expected_daily_cost=50, actual_daily_cost=150, deviation_percent=200),
+                CostAnomaly(
+                    resource_id="r1",
+                    service="compute",
+                    anomaly_type="spike",
+                    severity="critical",
+                    expected_daily_cost=50,
+                    actual_daily_cost=150,
+                    deviation_percent=200,
+                ),
             ],
             critical_anomaly_count=1,
             optimization_recommendations=[
-                OptimizationRecommendation(id="opt-1", category="rightsizing", resource_id="r1", service="compute", current_monthly_cost=1500, projected_monthly_cost=900, monthly_savings=600, confidence=0.8),
+                OptimizationRecommendation(
+                    id="opt-1",
+                    category="rightsizing",
+                    resource_id="r1",
+                    service="compute",
+                    current_monthly_cost=1500,
+                    projected_monthly_cost=900,
+                    monthly_savings=600,
+                    confidence=0.8,
+                ),
             ],
             reasoning_chain=[],
         )
 
-        with patch("shieldops.agents.cost.nodes.llm_structured", side_effect=RuntimeError("LLM down")):
+        with patch(
+            "shieldops.agents.cost.nodes.llm_structured", side_effect=RuntimeError("LLM down")
+        ):
             result = await synthesize_savings(state)
 
         assert result["cost_savings"] is not None
@@ -307,13 +399,40 @@ class TestSynthesizeSavingsNode:
 
         state = CostAnalysisState(
             analysis_id="test-008",
-            analysis_start=datetime.now(timezone.utc),
+            analysis_start=datetime.now(UTC),
             total_monthly_spend=5000.0,
             total_potential_savings=1000.0,
             optimization_recommendations=[
-                OptimizationRecommendation(id="opt-1", category="rightsizing", resource_id="r1", service="compute", current_monthly_cost=1000, projected_monthly_cost=600, monthly_savings=400, confidence=0.8),
-                OptimizationRecommendation(id="opt-2", category="rightsizing", resource_id="r2", service="compute", current_monthly_cost=800, projected_monthly_cost=500, monthly_savings=300, confidence=0.7),
-                OptimizationRecommendation(id="opt-3", category="unused_resources", resource_id="r3", service="storage", current_monthly_cost=300, projected_monthly_cost=0, monthly_savings=300, confidence=0.9),
+                OptimizationRecommendation(
+                    id="opt-1",
+                    category="rightsizing",
+                    resource_id="r1",
+                    service="compute",
+                    current_monthly_cost=1000,
+                    projected_monthly_cost=600,
+                    monthly_savings=400,
+                    confidence=0.8,
+                ),
+                OptimizationRecommendation(
+                    id="opt-2",
+                    category="rightsizing",
+                    resource_id="r2",
+                    service="compute",
+                    current_monthly_cost=800,
+                    projected_monthly_cost=500,
+                    monthly_savings=300,
+                    confidence=0.7,
+                ),
+                OptimizationRecommendation(
+                    id="opt-3",
+                    category="unused_resources",
+                    resource_id="r3",
+                    service="storage",
+                    current_monthly_cost=300,
+                    projected_monthly_cost=0,
+                    monthly_savings=300,
+                    confidence=0.9,
+                ),
             ],
             reasoning_chain=[],
         )
@@ -391,13 +510,15 @@ class TestCostRunner:
         runner = CostRunner()
 
         with patch.object(runner, "_app") as mock_app:
-            mock_app.ainvoke = AsyncMock(return_value=CostAnalysisState(
-                analysis_id="cost-test",
-                analysis_type="full",
-                current_step="complete",
-                total_monthly_spend=10000.0,
-                analysis_start=datetime.now(timezone.utc),
-            ).model_dump())
+            mock_app.ainvoke = AsyncMock(
+                return_value=CostAnalysisState(
+                    analysis_id="cost-test",
+                    analysis_type="full",
+                    current_step="complete",
+                    total_monthly_spend=10000.0,
+                    analysis_start=datetime.now(UTC),
+                ).model_dump()
+            )
 
             result = await runner.analyze(environment=Environment.PRODUCTION)
 
@@ -447,8 +568,11 @@ class TestCostAPI:
 
         def _mock_admin_user():
             return UserResponse(
-                id="test-admin", email="admin@test.com", name="Test Admin",
-                role=UserRole.ADMIN, is_active=True,
+                id="test-admin",
+                email="admin@test.com",
+                name="Test Admin",
+                role=UserRole.ADMIN,
+                is_active=True,
             )
 
         app.dependency_overrides[get_current_user] = _mock_admin_user
@@ -482,11 +606,14 @@ class TestCostAPI:
 
     def test_trigger_analysis_async(self):
         client, _ = self._make_app()
-        resp = client.post("/api/v1/cost/analyses", json={
-            "environment": "production",
-            "analysis_type": "full",
-            "period": "30d",
-        })
+        resp = client.post(
+            "/api/v1/cost/analyses",
+            json={
+                "environment": "production",
+                "analysis_type": "full",
+                "period": "30d",
+            },
+        )
         assert resp.status_code == 202
         assert resp.json()["status"] == "accepted"
 
@@ -502,10 +629,13 @@ class TestCostAPI:
 
         runner.analyze = mock_analyze
 
-        resp = client.post("/api/v1/cost/analyses/sync", json={
-            "environment": "staging",
-            "analysis_type": "full",
-        })
+        resp = client.post(
+            "/api/v1/cost/analyses/sync",
+            json={
+                "environment": "staging",
+                "analysis_type": "full",
+            },
+        )
         assert resp.status_code == 200
         assert resp.json()["current_step"] == "complete"
 
@@ -521,8 +651,24 @@ class TestCostAPI:
             analysis_id="cost-anom",
             current_step="complete",
             cost_anomalies=[
-                CostAnomaly(resource_id="r1", service="compute", anomaly_type="spike", severity="critical", expected_daily_cost=50, actual_daily_cost=150, deviation_percent=200),
-                CostAnomaly(resource_id="r2", service="storage", anomaly_type="unused", severity="medium", expected_daily_cost=10, actual_daily_cost=30, deviation_percent=200),
+                CostAnomaly(
+                    resource_id="r1",
+                    service="compute",
+                    anomaly_type="spike",
+                    severity="critical",
+                    expected_daily_cost=50,
+                    actual_daily_cost=150,
+                    deviation_percent=200,
+                ),
+                CostAnomaly(
+                    resource_id="r2",
+                    service="storage",
+                    anomaly_type="unused",
+                    severity="medium",
+                    expected_daily_cost=10,
+                    actual_daily_cost=30,
+                    deviation_percent=200,
+                ),
             ],
         )
         runner._analyses["cost-anom"] = state
@@ -537,8 +683,24 @@ class TestCostAPI:
             analysis_id="cost-anom2",
             current_step="complete",
             cost_anomalies=[
-                CostAnomaly(resource_id="r1", service="compute", anomaly_type="spike", severity="critical", expected_daily_cost=50, actual_daily_cost=150, deviation_percent=200),
-                CostAnomaly(resource_id="r2", service="storage", anomaly_type="unused", severity="medium", expected_daily_cost=10, actual_daily_cost=30, deviation_percent=200),
+                CostAnomaly(
+                    resource_id="r1",
+                    service="compute",
+                    anomaly_type="spike",
+                    severity="critical",
+                    expected_daily_cost=50,
+                    actual_daily_cost=150,
+                    deviation_percent=200,
+                ),
+                CostAnomaly(
+                    resource_id="r2",
+                    service="storage",
+                    anomaly_type="unused",
+                    severity="medium",
+                    expected_daily_cost=10,
+                    actual_daily_cost=30,
+                    deviation_percent=200,
+                ),
             ],
         )
         runner._analyses["cost-anom2"] = state
@@ -554,7 +716,16 @@ class TestCostAPI:
             current_step="complete",
             total_potential_savings=600.0,
             optimization_recommendations=[
-                OptimizationRecommendation(id="opt-1", category="rightsizing", resource_id="r1", service="compute", current_monthly_cost=1500, projected_monthly_cost=900, monthly_savings=600, confidence=0.8),
+                OptimizationRecommendation(
+                    id="opt-1",
+                    category="rightsizing",
+                    resource_id="r1",
+                    service="compute",
+                    current_monthly_cost=1500,
+                    projected_monthly_cost=900,
+                    monthly_savings=600,
+                    confidence=0.8,
+                ),
             ],
         )
         runner._analyses["cost-opt"] = state
@@ -571,8 +742,26 @@ class TestCostAPI:
             current_step="complete",
             total_potential_savings=1000.0,
             optimization_recommendations=[
-                OptimizationRecommendation(id="opt-1", category="rightsizing", resource_id="r1", service="compute", current_monthly_cost=1500, projected_monthly_cost=900, monthly_savings=600, confidence=0.8),
-                OptimizationRecommendation(id="opt-2", category="unused_resources", resource_id="r2", service="storage", current_monthly_cost=400, projected_monthly_cost=0, monthly_savings=400, confidence=0.9),
+                OptimizationRecommendation(
+                    id="opt-1",
+                    category="rightsizing",
+                    resource_id="r1",
+                    service="compute",
+                    current_monthly_cost=1500,
+                    projected_monthly_cost=900,
+                    monthly_savings=600,
+                    confidence=0.8,
+                ),
+                OptimizationRecommendation(
+                    id="opt-2",
+                    category="unused_resources",
+                    resource_id="r2",
+                    service="storage",
+                    current_monthly_cost=400,
+                    projected_monthly_cost=0,
+                    monthly_savings=400,
+                    confidence=0.9,
+                ),
             ],
         )
         runner._analyses["cost-opt2"] = state

@@ -1,0 +1,162 @@
+name: CD — Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "Image tag to deploy (e.g. sha-abc1234) — must be verified in staging first"
+        required: true
+        type: string
+      rollback:
+        description: "Roll back to previous task definition revision"
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  id-token: write
+  contents: write  # Required for creating release tags
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPO: shieldops-production
+  ECR_STAGING_REPO: shieldops-staging
+  ECS_CLUSTER: shieldops-production-cluster
+  ECS_SERVICE: shieldops-production-service
+  TASK_FAMILY: shieldops-production-app
+  CONTAINER_NAME: shieldops-app
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # ----- Rollback path -----
+      - name: Rollback to previous revision
+        if: inputs.rollback
+        run: |
+          echo "Rolling back to previous task definition..."
+          CURRENT=$(aws ecs describe-services \
+            --cluster "${ECS_CLUSTER}" \
+            --services "${ECS_SERVICE}" \
+            --query 'services[0].taskDefinition' \
+            --output text)
+          REVISION="${CURRENT##*:}"
+          if [ "${REVISION}" -le 1 ]; then
+            echo "ERROR: Current revision is ${REVISION}, no previous revision to roll back to."
+            exit 1
+          fi
+          PREV_REVISION=$((REVISION - 1))
+          PREV_ARN="${CURRENT%:*}:${PREV_REVISION}"
+          echo "Current: ${CURRENT} (revision ${REVISION})"
+          echo "Rolling back to: ${PREV_ARN}"
+          # Verify the previous revision exists and is not deregistered
+          PREV_STATUS=$(aws ecs describe-task-definition \
+            --task-definition "${PREV_ARN}" \
+            --query 'taskDefinition.status' \
+            --output text 2>/dev/null || echo "NOT_FOUND")
+          if [ "${PREV_STATUS}" != "ACTIVE" ]; then
+            echo "ERROR: Previous revision ${PREV_REVISION} is ${PREV_STATUS}. Cannot roll back."
+            exit 1
+          fi
+          aws ecs update-service \
+            --cluster "${ECS_CLUSTER}" \
+            --service "${ECS_SERVICE}" \
+            --task-definition "${PREV_ARN}" \
+            --force-new-deployment \
+            --no-cli-pager
+
+      # ----- Normal deploy path -----
+      - name: Promote image from staging ECR
+        if: ${{ !inputs.rollback }}
+        env:
+          REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+          TAG: ${{ inputs.image_tag }}
+        run: |
+          STAGING_IMAGE="${REGISTRY}/${ECR_STAGING_REPO}:${TAG}"
+          PROD_IMAGE="${REGISTRY}/${ECR_REPO}:${TAG}"
+
+          echo "Pulling staging image: ${STAGING_IMAGE}"
+          docker pull "${STAGING_IMAGE}"
+          docker tag "${STAGING_IMAGE}" "${PROD_IMAGE}"
+          docker push "${PROD_IMAGE}"
+          echo "IMAGE_URI=${PROD_IMAGE}" >> "$GITHUB_ENV"
+
+      - name: Download current task definition
+        if: ${{ !inputs.rollback }}
+        run: |
+          aws ecs describe-task-definition \
+            --task-definition "${TASK_FAMILY}" \
+            --query 'taskDefinition' \
+            --output json > task-def.json
+
+      - name: Update image in task definition
+        if: ${{ !inputs.rollback }}
+        run: |
+          jq --arg img "${IMAGE_URI}" --arg name "${CONTAINER_NAME}" \
+            '(.containerDefinitions[] | select(.name == $name)).image = $img
+             | del(.taskDefinitionArn, .revision, .status, .requiresAttributes,
+                   .compatibilities, .registeredAt, .registeredBy)' \
+            task-def.json > new-task-def.json
+
+      - name: Register and deploy new task definition
+        if: ${{ !inputs.rollback }}
+        run: |
+          ARN=$(aws ecs register-task-definition \
+            --cli-input-json file://new-task-def.json \
+            --query 'taskDefinition.taskDefinitionArn' \
+            --output text)
+          echo "Deploying task definition: ${ARN}"
+          aws ecs update-service \
+            --cluster "${ECS_CLUSTER}" \
+            --service "${ECS_SERVICE}" \
+            --task-definition "${ARN}" \
+            --force-new-deployment \
+            --no-cli-pager
+
+      # ----- Shared post-deploy steps -----
+      - name: Wait for deployment stability
+        run: |
+          echo "Waiting for ECS service to stabilize (up to 10 minutes)..."
+          aws ecs wait services-stable \
+            --cluster "${ECS_CLUSTER}" \
+            --services "${ECS_SERVICE}"
+
+      - name: Verify ALB health
+        env:
+          HEALTH_URL: ${{ secrets.PRODUCTION_HEALTH_URL }}
+        run: |
+          echo "Polling health endpoint for up to 180s..."
+          for i in $(seq 1 36); do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${HEALTH_URL}" || true)
+            if [ "${STATUS}" = "200" ]; then
+              echo "Health check passed!"
+              exit 0
+            fi
+            echo "Attempt ${i}/36: status=${STATUS}, retrying in 5s..."
+            sleep 5
+          done
+          echo "Health check failed after 180s"
+          exit 1
+
+      - name: Create release tag
+        if: ${{ !inputs.rollback }}
+        env:
+          TAG: ${{ inputs.image_tag }}
+        run: |
+          RELEASE_TAG="v$(date +%Y%m%d)-${TAG}"
+          git tag "${RELEASE_TAG}"
+          git push origin "${RELEASE_TAG}"
+          echo "Created release tag: ${RELEASE_TAG}"

@@ -37,9 +37,7 @@ class InfraConnector(ABC):
         """List resources of a given type in an environment."""
 
     @abstractmethod
-    async def get_events(
-        self, resource_id: str, time_range: TimeRange
-    ) -> list[dict[str, Any]]:
+    async def get_events(self, resource_id: str, time_range: TimeRange) -> list[dict[str, Any]]:
         """Get events for a resource within a time range."""
 
     @abstractmethod

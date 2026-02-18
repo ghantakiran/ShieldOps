@@ -204,9 +204,7 @@ class TestApprovalNotifier:
             mock_client = AsyncMock()
             mock_client.__aenter__ = AsyncMock(return_value=mock_client)
             mock_client.__aexit__ = AsyncMock(return_value=False)
-            mock_client.post.return_value = AsyncMock(
-                json=lambda: {"ok": True, "ts": "1234.5678"}
-            )
+            mock_client.post.return_value = AsyncMock(json=lambda: {"ok": True, "ts": "1234.5678"})
             mock_client_cls.return_value = mock_client
 
             await notifier.send_request(approval_req)
@@ -230,9 +228,7 @@ class TestApprovalNotifier:
             mock_client = AsyncMock()
             mock_client.__aenter__ = AsyncMock(return_value=mock_client)
             mock_client.__aexit__ = AsyncMock(return_value=False)
-            mock_client.post.return_value = AsyncMock(
-                json=lambda: {"ok": True, "ts": "1234.5678"}
-            )
+            mock_client.post.return_value = AsyncMock(json=lambda: {"ok": True, "ts": "1234.5678"})
             mock_client_cls.return_value = mock_client
 
             await notifier.send_escalation(approval_req, "@sre-manager")

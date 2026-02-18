@@ -1,7 +1,7 @@
 """AWS connector implementation for EC2 and ECS operations."""
 
 import asyncio
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from functools import partial
 from typing import Any
 from uuid import uuid4
@@ -63,7 +63,7 @@ class AWSConnector(InfraConnector):
                 healthy=False,
                 status="error",
                 message=str(e),
-                last_checked=datetime.now(timezone.utc),
+                last_checked=datetime.now(UTC),
             )
 
     async def _get_ec2_health(self, instance_id: str) -> HealthStatus:
@@ -79,7 +79,7 @@ class AWSConnector(InfraConnector):
                 healthy=False,
                 status="not_found",
                 message="Instance not found",
-                last_checked=datetime.now(timezone.utc),
+                last_checked=datetime.now(UTC),
             )
 
         status = statuses[0]
@@ -93,7 +93,7 @@ class AWSConnector(InfraConnector):
             healthy=healthy,
             status=state,
             message=f"system={system_ok}, instance={instance_ok}",
-            last_checked=datetime.now(timezone.utc),
+            last_checked=datetime.now(UTC),
             metrics={
                 "system_status_ok": float(system_ok),
                 "instance_status_ok": float(instance_ok),
@@ -117,7 +117,7 @@ class AWSConnector(InfraConnector):
                 healthy=False,
                 status="not_found",
                 message="Service not found",
-                last_checked=datetime.now(timezone.utc),
+                last_checked=datetime.now(UTC),
             )
 
         svc = services[0]
@@ -131,7 +131,7 @@ class AWSConnector(InfraConnector):
             healthy=healthy,
             status="running" if healthy else "degraded",
             message=f"running={running}, desired={desired}",
-            last_checked=datetime.now(timezone.utc),
+            last_checked=datetime.now(UTC),
             metrics={"running_count": float(running), "desired_count": float(desired)},
         )
 
@@ -181,16 +181,14 @@ class AWSConnector(InfraConnector):
 
         return resources
 
-    async def get_events(
-        self, resource_id: str, time_range: TimeRange
-    ) -> list[dict[str, Any]]:
+    async def get_events(self, resource_id: str, time_range: TimeRange) -> list[dict[str, Any]]:
         """Get CloudTrail-style events for a resource (stub — requires CloudTrail integration)."""
         return []
 
     async def execute_action(self, action: RemediationAction) -> ActionResult:
         """Execute a remediation action on AWS resources."""
         self._ensure_clients()
-        started_at = datetime.now(timezone.utc)
+        started_at = datetime.now(UTC)
 
         logger.info(
             "aws_execute_action",
@@ -203,9 +201,10 @@ class AWSConnector(InfraConnector):
                 return await self._reboot_instance(action, started_at)
             elif action.action_type == "force_new_deployment":
                 return await self._force_new_deployment(action, started_at)
-            elif action.action_type == "update_desired_count":
-                return await self._update_desired_count(action, started_at)
-            elif action.action_type == "scale_horizontal":
+            elif (
+                action.action_type == "update_desired_count"
+                or action.action_type == "scale_horizontal"
+            ):
                 return await self._update_desired_count(action, started_at)
             else:
                 return ActionResult(
@@ -213,7 +212,7 @@ class AWSConnector(InfraConnector):
                     status=ExecutionStatus.FAILED,
                     message=f"Unsupported action type: {action.action_type}",
                     started_at=started_at,
-                    completed_at=datetime.now(timezone.utc),
+                    completed_at=datetime.now(UTC),
                 )
         except Exception as e:
             logger.error("aws_action_failed", action=action.id, error=str(e))
@@ -222,7 +221,7 @@ class AWSConnector(InfraConnector):
                 status=ExecutionStatus.FAILED,
                 message=f"AWS API error: {e}",
                 started_at=started_at,
-                completed_at=datetime.now(timezone.utc),
+                completed_at=datetime.now(UTC),
                 error=str(e),
             )
 
@@ -236,7 +235,7 @@ class AWSConnector(InfraConnector):
             status=ExecutionStatus.SUCCESS,
             message=f"EC2 instance {instance_id} reboot initiated",
             started_at=started_at,
-            completed_at=datetime.now(timezone.utc),
+            completed_at=datetime.now(UTC),
         )
 
     async def _force_new_deployment(
@@ -255,7 +254,7 @@ class AWSConnector(InfraConnector):
             status=ExecutionStatus.SUCCESS,
             message=f"ECS service {service} force new deployment triggered",
             started_at=started_at,
-            completed_at=datetime.now(timezone.utc),
+            completed_at=datetime.now(UTC),
         )
 
     async def _update_desired_count(
@@ -275,7 +274,7 @@ class AWSConnector(InfraConnector):
             status=ExecutionStatus.SUCCESS,
             message=f"ECS service {service} scaled to {desired} tasks",
             started_at=started_at,
-            completed_at=datetime.now(timezone.utc),
+            completed_at=datetime.now(UTC),
         )
 
     async def create_snapshot(self, resource_id: str) -> Snapshot:
@@ -299,15 +298,13 @@ class AWSConnector(InfraConnector):
             resource_id=resource_id,
             snapshot_type=snapshot_type,
             state=state,
-            created_at=datetime.now(timezone.utc),
+            created_at=datetime.now(UTC),
         )
         self._snapshots[snapshot_id] = state
         return snapshot
 
     async def _snapshot_ec2(self, instance_id: str) -> dict[str, Any]:
-        resp = await self._run_sync(
-            self._ec2_client.describe_instances, InstanceIds=[instance_id]
-        )
+        resp = await self._run_sync(self._ec2_client.describe_instances, InstanceIds=[instance_id])
         instances = resp.get("Reservations", [{}])[0].get("Instances", [])
         return instances[0] if instances else {"instance_id": instance_id}
 
@@ -330,7 +327,7 @@ class AWSConnector(InfraConnector):
 
     async def rollback(self, snapshot_id: str) -> ActionResult:
         """Rollback to a captured snapshot state."""
-        started_at = datetime.now(timezone.utc)
+        started_at = datetime.now(UTC)
 
         if snapshot_id not in self._snapshots:
             return ActionResult(
@@ -338,7 +335,7 @@ class AWSConnector(InfraConnector):
                 status=ExecutionStatus.FAILED,
                 message=f"Snapshot {snapshot_id} not found",
                 started_at=started_at,
-                completed_at=datetime.now(timezone.utc),
+                completed_at=datetime.now(UTC),
             )
 
         logger.info("aws_rollback", snapshot_id=snapshot_id)
@@ -347,14 +344,14 @@ class AWSConnector(InfraConnector):
             status=ExecutionStatus.SUCCESS,
             message=f"Rolled back to snapshot {snapshot_id}",
             started_at=started_at,
-            completed_at=datetime.now(timezone.utc),
+            completed_at=datetime.now(UTC),
             snapshot_id=snapshot_id,
         )
 
     async def validate_health(self, resource_id: str, timeout_seconds: int = 300) -> bool:
         """Poll until resource is healthy or timeout."""
-        deadline = datetime.now(timezone.utc).timestamp() + timeout_seconds
-        while datetime.now(timezone.utc).timestamp() < deadline:
+        deadline = datetime.now(UTC).timestamp() + timeout_seconds
+        while datetime.now(UTC).timestamp() < deadline:
             health = await self.get_health(resource_id)
             if health.healthy:
                 return True

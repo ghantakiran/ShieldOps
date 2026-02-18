@@ -5,7 +5,7 @@ Used by investigation agents for log analysis and pattern searching.
 """
 
 import asyncio
-from datetime import timezone
+from datetime import UTC
 from typing import Any
 
 import httpx
@@ -51,8 +51,8 @@ class SplunkSource(LogSource):
         `query` is used as the source filter (e.g. 'namespace/pod_name').
         Translates to SPL: search index=<idx> source=<query> earliest=<start> latest=<end>
         """
-        earliest = time_range.start.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
-        latest = time_range.end.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
+        earliest = time_range.start.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%S")
+        latest = time_range.end.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%S")
         spl = (
             f'search index={self._index} source="{query}" '
             f"earliest={earliest} latest={latest} "
@@ -76,8 +76,8 @@ class SplunkSource(LogSource):
         time_range: TimeRange,
     ) -> dict[str, list[dict[str, Any]]]:
         """Search Splunk logs for specific patterns."""
-        earliest = time_range.start.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
-        latest = time_range.end.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
+        earliest = time_range.start.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%S")
+        latest = time_range.end.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%S")
 
         results: dict[str, list[dict[str, Any]]] = {p: [] for p in patterns}
 
@@ -160,12 +160,14 @@ class SplunkSource(LogSource):
         """Normalize Splunk results to standard log entry format."""
         entries = []
         for result in raw_results:
-            entries.append({
-                "timestamp": result.get("_time", ""),
-                "message": result.get("_raw", result.get("message", "")),
-                "level": self._detect_level(result),
-                "source": result.get("source", "splunk"),
-            })
+            entries.append(
+                {
+                    "timestamp": result.get("_time", ""),
+                    "message": result.get("_raw", result.get("message", "")),
+                    "level": self._detect_level(result),
+                    "source": result.get("source", "splunk"),
+                }
+            )
         return entries
 
     @staticmethod

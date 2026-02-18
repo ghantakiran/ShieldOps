@@ -61,10 +61,12 @@ if st.session_state.selected_remediation:
             action = detail.get("action_type", "")
             target = detail.get("target_resource", "")
             st.subheader(f"{action} → {target}")
-            badges = " ".join([
-                render_status_badge(detail.get("status", "unknown")),
-                render_risk_badge(detail.get("risk_level", "medium")),
-            ])
+            badges = " ".join(
+                [
+                    render_status_badge(detail.get("status", "unknown")),
+                    render_risk_badge(detail.get("risk_level", "medium")),
+                ]
+            )
             st.markdown(badges, unsafe_allow_html=True)
         with col_r:
             env = detail.get("environment", "")
@@ -100,21 +102,24 @@ if st.session_state.selected_remediation:
                         st.warning("Denied")
                         st.rerun()
 
-        if status in ("success", "complete"):
-            if st.button("Rollback"):
-                res = client.rollback_remediation(st.session_state.selected_remediation)
-                if "error" in res:
-                    st.error(res["error"])
-                else:
-                    st.info(f"Rollback initiated (snapshot: {res.get('snapshot_id', 'N/A')})")
-                    st.rerun()
+        if status in ("success", "complete") and st.button("Rollback"):
+            res = client.rollback_remediation(st.session_state.selected_remediation)
+            if "error" in res:
+                st.error(res["error"])
+            else:
+                st.info(f"Rollback initiated (snapshot: {res.get('snapshot_id', 'N/A')})")
+                st.rerun()
 
         st.divider()
 
         # Detail sections
-        tab_policy, tab_exec, tab_reason = st.tabs([
-            "Policy Evaluation", "Execution Result", "Reasoning",
-        ])
+        tab_policy, tab_exec, tab_reason = st.tabs(
+            [
+                "Policy Evaluation",
+                "Execution Result",
+                "Reasoning",
+            ]
+        )
 
         with tab_policy:
             policy = detail.get("policy_evaluation", detail.get("policy_result", {}))
@@ -155,8 +160,16 @@ else:
     with col2:
         status_filter = st.selectbox(
             "Status",
-            ["All", "pending", "waiting_approval", "in_progress", "success", "failed",
-             "rolled_back", "cancelled"],
+            [
+                "All",
+                "pending",
+                "waiting_approval",
+                "in_progress",
+                "success",
+                "failed",
+                "rolled_back",
+                "cancelled",
+            ],
             key="rem_status_filter",
         )
     with col3:
@@ -191,7 +204,9 @@ else:
                         unsafe_allow_html=True,
                     )
                 with c5:
-                    st.button("View", key=f"view_rem_{rem_id}", on_click=show_detail, args=(rem_id,))
+                    st.button(
+                        "View", key=f"view_rem_{rem_id}", on_click=show_detail, args=(rem_id,)
+                    )
                 st.divider()
         else:
             render_empty_state("No remediations found.")
@@ -202,8 +217,15 @@ else:
             st.markdown("#### Trigger New Remediation")
             action_type = st.selectbox(
                 "Action Type",
-                ["restart_pod", "scale_horizontal", "rollback", "patch", "restart_service",
-                 "resize", "drain_node"],
+                [
+                    "restart_pod",
+                    "scale_horizontal",
+                    "rollback",
+                    "patch",
+                    "restart_service",
+                    "resize",
+                    "drain_node",
+                ],
             )
             target = st.text_input("Target Resource", placeholder="my-app-pod-xyz")
             environment = st.selectbox("Environment", SUPPORTED_ENVIRONMENTS)

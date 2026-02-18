@@ -8,7 +8,7 @@ Tests cover:
 - API endpoints (routes/investigations.py)
 """
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -30,8 +30,7 @@ from shieldops.agents.investigation.prompts import (
     RecommendedActionOutput,
 )
 from shieldops.agents.investigation.tools import InvestigationToolkit
-from shieldops.models.base import AlertContext, Environment, Hypothesis, RiskLevel
-
+from shieldops.models.base import AlertContext, Hypothesis, RiskLevel
 
 # --- Fixtures ---
 
@@ -45,7 +44,7 @@ def alert_context():
         source="prometheus",
         resource_id="default/api-server",
         labels={"app": "api", "environment": "production"},
-        triggered_at=datetime.now(timezone.utc),
+        triggered_at=datetime.now(UTC),
         description="Pod api-server has restarted 15 times in the last hour",
     )
 
@@ -55,7 +54,7 @@ def investigation_state(alert_context):
     return InvestigationState(
         alert_id=alert_context.alert_id,
         alert_context=alert_context,
-        investigation_start=datetime.now(timezone.utc),
+        investigation_start=datetime.now(UTC),
     )
 
 
@@ -79,13 +78,13 @@ def state_with_findings(investigation_state):
             current_value=1073741824,
             baseline_value=536870912,
             deviation_percent=100.0,
-            started_at=datetime.now(timezone.utc),
+            started_at=datetime.now(UTC),
             labels={"namespace": "default", "pod": "api-server"},
         ),
     ]
     investigation_state.correlated_events = [
         CorrelatedEvent(
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
             source="cross-correlation",
             event_type="correlated",
             description="Memory spike at 14:30 correlates with OOMKill at 14:31",
@@ -170,14 +169,18 @@ def state_with_hypotheses(state_with_findings):
 def mock_log_source():
     source = AsyncMock()
     source.source_name = "kubernetes"
-    source.query_logs = AsyncMock(return_value=[
-        {"timestamp": "2025-01-01T00:00:00Z", "message": "ERROR OOMKilled", "level": "error"},
-        {"timestamp": "2025-01-01T00:00:01Z", "message": "INFO Starting", "level": "info"},
-    ])
-    source.search_patterns = AsyncMock(return_value={
-        "error": [{"message": "ERROR OOMKilled"}],
-        "OOMKilled": [{"message": "ERROR OOMKilled"}],
-    })
+    source.query_logs = AsyncMock(
+        return_value=[
+            {"timestamp": "2025-01-01T00:00:00Z", "message": "ERROR OOMKilled", "level": "error"},
+            {"timestamp": "2025-01-01T00:00:01Z", "message": "INFO Starting", "level": "info"},
+        ]
+    )
+    source.search_patterns = AsyncMock(
+        return_value={
+            "error": [{"message": "ERROR OOMKilled"}],
+            "OOMKilled": [{"message": "ERROR OOMKilled"}],
+        }
+    )
     return source
 
 
@@ -186,15 +189,17 @@ def mock_metric_source():
     source = AsyncMock()
     source.source_name = "prometheus"
     source.query_instant = AsyncMock(return_value=[{"value": 1073741824}])
-    source.detect_anomalies = AsyncMock(return_value=[
-        {
-            "metric_name": "container_memory_usage_bytes",
-            "current_value": 1073741824,
-            "baseline_value": 536870912,
-            "deviation_percent": 100.0,
-            "labels": {"namespace": "default", "pod": "api-server"},
-        },
-    ])
+    source.detect_anomalies = AsyncMock(
+        return_value=[
+            {
+                "metric_name": "container_memory_usage_bytes",
+                "current_value": 1073741824,
+                "baseline_value": 536870912,
+                "deviation_percent": 100.0,
+                "labels": {"namespace": "default", "pod": "api-server"},
+            },
+        ]
+    )
     return source
 
 
@@ -202,12 +207,20 @@ def mock_metric_source():
 def mock_connector_router():
     router = MagicMock()
     connector = AsyncMock()
-    connector.get_events = AsyncMock(return_value=[
-        {"reason": "OOMKilling", "message": "Memory cgroup out of memory"},
-    ])
-    connector.get_health = AsyncMock(return_value=MagicMock(
-        model_dump=lambda: {"healthy": False, "status": "CrashLoopBackOff", "message": "Restarting"}
-    ))
+    connector.get_events = AsyncMock(
+        return_value=[
+            {"reason": "OOMKilling", "message": "Memory cgroup out of memory"},
+        ]
+    )
+    connector.get_health = AsyncMock(
+        return_value=MagicMock(
+            model_dump=lambda: {
+                "healthy": False,
+                "status": "CrashLoopBackOff",
+                "message": "Restarting",
+            }
+        )
+    )
     router.get = MagicMock(return_value=connector)
     return router
 
@@ -231,9 +244,7 @@ class TestInvestigationToolkit:
     @pytest.mark.asyncio
     async def test_query_logs_with_patterns(self, mock_log_source):
         toolkit = InvestigationToolkit(log_sources=[mock_log_source])
-        result = await toolkit.query_logs(
-            "default/api-server", patterns=["error", "OOMKilled"]
-        )
+        result = await toolkit.query_logs("default/api-server", patterns=["error", "OOMKilled"])
 
         assert "error" in result["pattern_matches"]
         assert "OOMKilled" in result["pattern_matches"]
@@ -269,9 +280,7 @@ class TestInvestigationToolkit:
     @pytest.mark.asyncio
     async def test_query_metrics_custom_names(self, mock_metric_source):
         toolkit = InvestigationToolkit(metric_sources=[mock_metric_source])
-        result = await toolkit.query_metrics(
-            "default/api-server", metric_names=["custom_metric"]
-        )
+        result = await toolkit.query_metrics("default/api-server", metric_names=["custom_metric"])
 
         assert result["metrics_checked"] == ["custom_metric"]
 
@@ -280,11 +289,13 @@ class TestInvestigationToolkit:
         trace_source = AsyncMock()
         trace_source.source_name = "jaeger"
         trace_source.search_traces = AsyncMock(return_value=[])
-        trace_source.find_bottleneck = AsyncMock(return_value={
-            "trace_id": "abc123",
-            "service": "db-service",
-            "duration_ms": 5000,
-        })
+        trace_source.find_bottleneck = AsyncMock(
+            return_value={
+                "trace_id": "abc123",
+                "service": "db-service",
+                "duration_ms": 5000,
+            }
+        )
 
         toolkit = InvestigationToolkit(trace_sources=[trace_source])
         result = await toolkit.query_traces("api-service")
@@ -329,9 +340,7 @@ class TestInvestigationToolkit:
         assert labels == {"pod": "api-server"}
 
     def test_format_labels(self):
-        result = InvestigationToolkit._format_labels(
-            {"namespace": "default", "pod": "api-server"}
-        )
+        result = InvestigationToolkit._format_labels({"namespace": "default", "pod": "api-server"})
         assert 'namespace="default"' in result
         assert 'pod="api-server"' in result
 
@@ -371,8 +380,11 @@ class TestAnalyzeLogsNode:
 
         investigation_state.reasoning_chain = [
             ReasoningStep(
-                step_number=1, action="gather_context",
-                input_summary="", output_summary="", duration_ms=0,
+                step_number=1,
+                action="gather_context",
+                input_summary="",
+                output_summary="",
+                duration_ms=0,
             ),
         ]
         result = await analyze_logs(investigation_state)
@@ -392,8 +404,11 @@ class TestAnalyzeLogsNode:
 
         investigation_state.reasoning_chain = [
             ReasoningStep(
-                step_number=1, action="gather_context",
-                input_summary="", output_summary="", duration_ms=0,
+                step_number=1,
+                action="gather_context",
+                input_summary="",
+                output_summary="",
+                duration_ms=0,
             ),
         ]
 
@@ -418,9 +433,7 @@ class TestAnalyzeLogsNode:
         set_toolkit(None)
 
     @pytest.mark.asyncio
-    async def test_analyze_logs_llm_failure_fallback(
-        self, investigation_state, mock_log_source
-    ):
+    async def test_analyze_logs_llm_failure_fallback(self, investigation_state, mock_log_source):
         """When LLM fails, should fall back to raw data analysis."""
         from shieldops.agents.investigation.nodes import analyze_logs, set_toolkit
 
@@ -429,8 +442,11 @@ class TestAnalyzeLogsNode:
 
         investigation_state.reasoning_chain = [
             ReasoningStep(
-                step_number=1, action="gather_context",
-                input_summary="", output_summary="", duration_ms=0,
+                step_number=1,
+                action="gather_context",
+                input_summary="",
+                output_summary="",
+                duration_ms=0,
             ),
         ]
 
@@ -443,24 +459,37 @@ class TestAnalyzeLogsNode:
 
         # Should still produce findings from raw error data
         assert len(result["log_findings"]) == 1
-        assert "error" in result["log_findings"][0].summary.lower() or result["log_findings"][0].severity == "error"
+        assert (
+            "error" in result["log_findings"][0].summary.lower()
+            or result["log_findings"][0].severity == "error"
+        )
 
         set_toolkit(None)
 
 
 class TestAnalyzeMetricsNode:
     @pytest.mark.asyncio
-    async def test_analyze_metrics_with_anomalies(
-        self, investigation_state, mock_metric_source
-    ):
+    async def test_analyze_metrics_with_anomalies(self, investigation_state, mock_metric_source):
         from shieldops.agents.investigation.nodes import analyze_metrics, set_toolkit
 
         toolkit = InvestigationToolkit(metric_sources=[mock_metric_source])
         set_toolkit(toolkit)
 
         investigation_state.reasoning_chain = [
-            ReasoningStep(step_number=1, action="gather_context", input_summary="", output_summary="", duration_ms=0),
-            ReasoningStep(step_number=2, action="analyze_logs", input_summary="", output_summary="", duration_ms=0),
+            ReasoningStep(
+                step_number=1,
+                action="gather_context",
+                input_summary="",
+                output_summary="",
+                duration_ms=0,
+            ),
+            ReasoningStep(
+                step_number=2,
+                action="analyze_logs",
+                input_summary="",
+                output_summary="",
+                duration_ms=0,
+            ),
         ]
 
         mock_result = MetricAnalysisResult(
@@ -510,7 +539,9 @@ class TestCorrelateFindings:
         from shieldops.agents.investigation.nodes import correlate_findings
 
         investigation_state.reasoning_chain = [
-            ReasoningStep(step_number=1, action="test", input_summary="", output_summary="", duration_ms=0),
+            ReasoningStep(
+                step_number=1, action="test", input_summary="", output_summary="", duration_ms=0
+            ),
         ]
 
         result = await correlate_findings(investigation_state)
@@ -572,8 +603,11 @@ class TestGraphRouting:
 
         investigation_state.log_findings = [
             LogFinding(
-                source="kubernetes", query="", summary="Connection timeout to db",
-                severity="error", count=5,
+                source="kubernetes",
+                query="",
+                summary="Connection timeout to db",
+                severity="error",
+                count=5,
             ),
         ]
         assert should_analyze_traces(investigation_state) == "analyze_traces"
@@ -583,8 +617,11 @@ class TestGraphRouting:
 
         investigation_state.log_findings = [
             LogFinding(
-                source="kubernetes", query="", summary="OOMKilled",
-                severity="error", count=5,
+                source="kubernetes",
+                query="",
+                summary="OOMKilled",
+                severity="error",
+                count=5,
             ),
         ]
         assert should_analyze_traces(investigation_state) == "correlate_findings"
@@ -651,7 +688,7 @@ class TestRecommendActionNode:
     async def test_recommend_action_no_hypotheses(self, investigation_state):
         from shieldops.agents.investigation.graph import recommend_action
 
-        investigation_state.investigation_start = datetime.now(timezone.utc)
+        investigation_state.investigation_start = datetime.now(UTC)
         result = await recommend_action(investigation_state)
 
         assert result["recommended_action"] is None
@@ -691,7 +728,7 @@ class TestInvestigationRunner:
         mock_state = InvestigationState(
             alert_id=alert_context.alert_id,
             alert_context=alert_context,
-            investigation_start=datetime.now(timezone.utc),
+            investigation_start=datetime.now(UTC),
             current_step="complete",
             confidence_score=0.85,
             hypotheses=[
@@ -794,15 +831,16 @@ class TestInvestigationAPI:
 
         def _mock_admin_user():
             return UserResponse(
-                id="test-admin", email="admin@test.com", name="Test Admin",
-                role=UserRole.ADMIN, is_active=True,
+                id="test-admin",
+                email="admin@test.com",
+                name="Test Admin",
+                role=UserRole.ADMIN,
+                is_active=True,
             )
 
         app.dependency_overrides[get_current_user] = _mock_admin_user
 
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as ac:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
             yield ac
 
         set_runner(None)
@@ -838,7 +876,7 @@ class TestInvestigationAPI:
                 alert_name="Test",
                 severity="warning",
                 source="test",
-                triggered_at=datetime.now(timezone.utc),
+                triggered_at=datetime.now(UTC),
             ),
             current_step="complete",
         )
@@ -908,7 +946,7 @@ class TestInvestigationModels:
             current_value=95.0,
             baseline_value=30.0,
             deviation_percent=216.7,
-            started_at=datetime.now(timezone.utc),
+            started_at=datetime.now(UTC),
         )
         assert anomaly.deviation_percent > 200
 
@@ -923,7 +961,7 @@ class TestInvestigationModels:
 
     def test_correlated_event_score_bounds(self):
         event = CorrelatedEvent(
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
             source="cross-correlation",
             event_type="correlated",
             description="Test correlation",

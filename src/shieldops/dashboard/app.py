@@ -43,6 +43,7 @@ if "auth_token" not in st.session_state:
         submitted = st.form_submit_button("Login")
         if submitted and email and password:
             import httpx
+
             try:
                 resp = httpx.post(
                     f"{ShieldOpsAPIClient().base_url}/auth/login",
@@ -91,25 +92,32 @@ rem_data = client.list_remediations(environment=selected_env, limit=1000)
 
 total_agents = agents_data.get("total", 0)
 total_investigations = inv_data.get("total", 0)
-active_investigations = len([
-    i for i in inv_data.get("investigations", [])
-    if i.get("status") in ("in_progress", "investigating")
-])
-resolved_count = len([
-    i for i in inv_data.get("investigations", [])
-    if i.get("status") in ("complete", "success")
-])
-pending_remediations = len([
-    r for r in rem_data.get("remediations", [])
-    if r.get("status") in ("pending", "waiting_approval")
-])
+active_investigations = len(
+    [
+        i
+        for i in inv_data.get("investigations", [])
+        if i.get("status") in ("in_progress", "investigating")
+    ]
+)
+resolved_count = len(
+    [i for i in inv_data.get("investigations", []) if i.get("status") in ("complete", "success")]
+)
+pending_remediations = len(
+    [
+        r
+        for r in rem_data.get("remediations", [])
+        if r.get("status") in ("pending", "waiting_approval")
+    ]
+)
 
-render_metric_row([
-    ("Agents Deployed", total_agents, None),
-    ("Active Investigations", active_investigations, None),
-    ("Resolved", resolved_count, None),
-    ("Pending Remediations", pending_remediations, None),
-])
+render_metric_row(
+    [
+        ("Agents Deployed", total_agents, None),
+        ("Active Investigations", active_investigations, None),
+        ("Resolved", resolved_count, None),
+        ("Pending Remediations", pending_remediations, None),
+    ]
+)
 
 st.divider()
 
@@ -126,9 +134,9 @@ if agents:
             st.markdown(
                 f'<div style="border-left:4px solid {color};padding:8px 12px;'
                 f'margin-bottom:8px;border-radius:4px;background:#1E1E1E">'
-                f'<strong>{agent.get("agent_id", "unknown")}</strong><br/>'
-                f'{render_status_badge(status)}'
-                f'</div>',
+                f"<strong>{agent.get('agent_id', 'unknown')}</strong><br/>"
+                f"{render_status_badge(status)}"
+                f"</div>",
                 unsafe_allow_html=True,
             )
 else:

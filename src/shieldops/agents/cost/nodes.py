@@ -7,8 +7,7 @@ Each node is an async function that:
 4. Records its reasoning step in the audit trail
 """
 
-from datetime import datetime, timezone
-from typing import Any
+from datetime import UTC, datetime
 from uuid import uuid4
 
 import structlog
@@ -51,12 +50,12 @@ def _get_toolkit() -> CostToolkit:
 
 
 def _elapsed_ms(start: datetime) -> int:
-    return int((datetime.now(timezone.utc) - start).total_seconds() * 1000)
+    return int((datetime.now(UTC) - start).total_seconds() * 1000)
 
 
 async def gather_costs(state: CostAnalysisState) -> dict:
     """Gather resource inventory and billing data."""
-    start = datetime.now(timezone.utc)
+    start = datetime.now(UTC)
     toolkit = _get_toolkit()
 
     logger.info(
@@ -74,25 +73,32 @@ async def gather_costs(state: CostAnalysisState) -> dict:
     # Build resource cost models
     resource_costs: list[ResourceCost] = []
     for raw in billing.get("resource_costs", []):
-        resource_costs.append(ResourceCost(
-            resource_id=raw.get("resource_id", "unknown"),
-            resource_type=raw.get("resource_type", "unknown"),
-            service=raw.get("service", "unknown"),
-            environment=state.target_environment,
-            provider=raw.get("provider", "unknown"),
-            daily_cost=raw.get("daily_cost", 0),
-            monthly_cost=raw.get("monthly_cost", 0),
-            usage_percent=raw.get("usage_percent", 0),
-        ))
+        resource_costs.append(
+            ResourceCost(
+                resource_id=raw.get("resource_id", "unknown"),
+                resource_type=raw.get("resource_type", "unknown"),
+                service=raw.get("service", "unknown"),
+                environment=state.target_environment,
+                provider=raw.get("provider", "unknown"),
+                daily_cost=raw.get("daily_cost", 0),
+                monthly_cost=raw.get("monthly_cost", 0),
+                usage_percent=raw.get("usage_percent", 0),
+            )
+        )
+
+    by_service = billing.get("by_service", {"unknown": 0})
+    top_service = max(by_service, key=by_service.get)
 
     step = CostStep(
         step_number=1,
         action="gather_costs",
-        input_summary=f"Gathering billing data for {state.target_environment.value} ({state.period})",
+        input_summary=(
+            f"Gathering billing data for {state.target_environment.value} ({state.period})"
+        ),
         output_summary=(
             f"Total: ${billing['total_monthly']:.0f}/mo across "
             f"{len(resource_costs)} resources. "
-            f"Top service: {max(billing.get('by_service', {'unknown': 0}), key=billing.get('by_service', {'unknown': 0}).get)}"
+            f"Top service: {top_service}"
         ),
         duration_ms=_elapsed_ms(start),
         tool_used="billing_api",
@@ -112,7 +118,7 @@ async def gather_costs(state: CostAnalysisState) -> dict:
 
 async def detect_anomalies(state: CostAnalysisState) -> dict:
     """Detect cost anomalies across resources."""
-    start = datetime.now(timezone.utc)
+    start = datetime.now(UTC)
     toolkit = _get_toolkit()
 
     logger.info(
@@ -137,17 +143,19 @@ async def detect_anomalies(state: CostAnalysisState) -> dict:
 
     anomalies: list[CostAnomaly] = []
     for raw in anomaly_data.get("anomalies", []):
-        anomalies.append(CostAnomaly(
-            resource_id=raw.get("resource_id", "unknown"),
-            service=raw.get("service", "unknown"),
-            anomaly_type=raw.get("anomaly_type", "unknown"),
-            severity=raw.get("severity", "medium"),
-            expected_daily_cost=raw.get("expected_daily_cost", 0),
-            actual_daily_cost=raw.get("actual_daily_cost", 0),
-            deviation_percent=raw.get("deviation_percent", 0),
-            started_at=raw.get("started_at"),
-            description=raw.get("description", ""),
-        ))
+        anomalies.append(
+            CostAnomaly(
+                resource_id=raw.get("resource_id", "unknown"),
+                service=raw.get("service", "unknown"),
+                anomaly_type=raw.get("anomaly_type", "unknown"),
+                severity=raw.get("severity", "medium"),
+                expected_daily_cost=raw.get("expected_daily_cost", 0),
+                actual_daily_cost=raw.get("actual_daily_cost", 0),
+                deviation_percent=raw.get("deviation_percent", 0),
+                started_at=raw.get("started_at"),
+                description=raw.get("description", ""),
+            )
+        )
 
     output_summary = (
         f"Found {anomaly_data['total_anomalies']} anomalies, "
@@ -203,7 +211,7 @@ async def detect_anomalies(state: CostAnalysisState) -> dict:
 
 async def recommend_optimizations(state: CostAnalysisState) -> dict:
     """Identify and prioritize cost optimization opportunities."""
-    start = datetime.now(timezone.utc)
+    start = datetime.now(UTC)
     toolkit = _get_toolkit()
 
     logger.info(
@@ -227,19 +235,21 @@ async def recommend_optimizations(state: CostAnalysisState) -> dict:
 
     recommendations: list[OptimizationRecommendation] = []
     for raw in opt_data.get("recommendations", []):
-        recommendations.append(OptimizationRecommendation(
-            id=f"opt-{uuid4().hex[:8]}",
-            category=raw.get("category", "general"),
-            resource_id=raw.get("resource_id", "unknown"),
-            service=raw.get("service", "unknown"),
-            current_monthly_cost=raw.get("current_monthly_cost", 0),
-            projected_monthly_cost=raw.get("projected_monthly_cost", 0),
-            monthly_savings=raw.get("monthly_savings", 0),
-            confidence=raw.get("confidence", 0.5),
-            effort=raw.get("effort", "medium"),
-            description=raw.get("description", ""),
-            implementation_steps=raw.get("implementation_steps", []),
-        ))
+        recommendations.append(
+            OptimizationRecommendation(
+                id=f"opt-{uuid4().hex[:8]}",
+                category=raw.get("category", "general"),
+                resource_id=raw.get("resource_id", "unknown"),
+                service=raw.get("service", "unknown"),
+                current_monthly_cost=raw.get("current_monthly_cost", 0),
+                projected_monthly_cost=raw.get("projected_monthly_cost", 0),
+                monthly_savings=raw.get("monthly_savings", 0),
+                confidence=raw.get("confidence", 0.5),
+                effort=raw.get("effort", "medium"),
+                description=raw.get("description", ""),
+                implementation_steps=raw.get("implementation_steps", []),
+            )
+        )
 
     total_savings = opt_data.get("total_potential_monthly_savings", 0)
     output_summary = (
@@ -296,7 +306,7 @@ async def recommend_optimizations(state: CostAnalysisState) -> dict:
 
 async def synthesize_savings(state: CostAnalysisState) -> dict:
     """Synthesize all findings into a cost savings summary and forecast."""
-    start = datetime.now(timezone.utc)
+    start = datetime.now(UTC)
     toolkit = _get_toolkit()
 
     logger.info("cost_synthesizing_savings", analysis_id=state.analysis_id)
@@ -333,22 +343,24 @@ async def synthesize_savings(state: CostAnalysisState) -> dict:
     for svc, cost in state.spend_by_service.items():
         context_lines.append(f"- {svc}: ${cost:.0f}/mo")
 
-    context_lines.extend([
-        "",
-        "## Anomalies",
-        f"Total anomalies: {len(state.cost_anomalies)}",
-        f"Critical: {state.critical_anomaly_count}",
-        "",
-        "## Optimizations",
-        f"Recommendations: {len(state.optimization_recommendations)}",
-        f"Potential savings: ${state.total_potential_savings:.0f}/mo",
-        "",
-        "## Automation Savings",
-        f"Hours saved: {savings.hours_saved_by_automation:.0f}",
-        f"Automation savings: ${savings.automation_savings_usd:.0f}",
-        "",
-        "## Investigation Chain",
-    ])
+    context_lines.extend(
+        [
+            "",
+            "## Anomalies",
+            f"Total anomalies: {len(state.cost_anomalies)}",
+            f"Critical: {state.critical_anomaly_count}",
+            "",
+            "## Optimizations",
+            f"Recommendations: {len(state.optimization_recommendations)}",
+            f"Potential savings: ${state.total_potential_savings:.0f}/mo",
+            "",
+            "## Automation Savings",
+            f"Hours saved: {savings.hours_saved_by_automation:.0f}",
+            f"Automation savings: ${savings.automation_savings_usd:.0f}",
+            "",
+            "## Investigation Chain",
+        ]
+    )
     for step in state.reasoning_chain:
         context_lines.append(f"Step {step.step_number} ({step.action}): {step.output_summary}")
 
@@ -371,8 +383,7 @@ async def synthesize_savings(state: CostAnalysisState) -> dict:
         )
         health_score = assessment.overall_health_score
         output_summary = (
-            f"Score: {assessment.overall_health_score:.1f}/100. "
-            f"{assessment.summary[:200]}"
+            f"Score: {assessment.overall_health_score:.1f}/100. {assessment.summary[:200]}"
         )
     except Exception as e:
         logger.error("llm_cost_forecast_failed", error=str(e))
@@ -391,6 +402,8 @@ async def synthesize_savings(state: CostAnalysisState) -> dict:
         "reasoning_chain": [*state.reasoning_chain, step],
         "current_step": "complete",
         "analysis_duration_ms": int(
-            (datetime.now(timezone.utc) - state.analysis_start).total_seconds() * 1000
-        ) if state.analysis_start else 0,
+            (datetime.now(UTC) - state.analysis_start).total_seconds() * 1000
+        )
+        if state.analysis_start
+        else 0,
     }

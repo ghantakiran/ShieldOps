@@ -37,9 +37,7 @@ class TestSecurityRunnerWiring:
 
         with ExitStack() as stack:
             _enter_infra_patches(stack, mock_router)
-            mock_sec_cls = stack.enter_context(
-                patch("shieldops.api.app.SecurityRunner")
-            )
+            mock_sec_cls = stack.enter_context(patch("shieldops.api.app.SecurityRunner"))
             stack.enter_context(patch("shieldops.api.app.CostRunner"))
             stack.enter_context(patch("shieldops.api.app.LearningRunner"))
 
@@ -65,9 +63,7 @@ class TestCostRunnerWiring:
         with ExitStack() as stack:
             _enter_infra_patches(stack, mock_router)
             stack.enter_context(patch("shieldops.api.app.SecurityRunner"))
-            mock_cost_cls = stack.enter_context(
-                patch("shieldops.api.app.CostRunner")
-            )
+            mock_cost_cls = stack.enter_context(patch("shieldops.api.app.CostRunner"))
             stack.enter_context(patch("shieldops.api.app.LearningRunner"))
 
             from shieldops.api.app import create_app
@@ -88,9 +84,7 @@ class TestLearningRunnerWiring:
             _enter_infra_patches(stack, mock_router)
             stack.enter_context(patch("shieldops.api.app.SecurityRunner"))
             stack.enter_context(patch("shieldops.api.app.CostRunner"))
-            mock_learn_cls = stack.enter_context(
-                patch("shieldops.api.app.LearningRunner")
-            )
+            mock_learn_cls = stack.enter_context(patch("shieldops.api.app.LearningRunner"))
 
             from shieldops.api.app import create_app
             from shieldops.api.routes import learning

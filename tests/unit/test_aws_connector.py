@@ -13,7 +13,7 @@ Tests cover:
 - Connector initialization and import re-exports
 """
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -27,7 +27,6 @@ from shieldops.models.base import (
     RiskLevel,
     TimeRange,
 )
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -68,7 +67,7 @@ def _make_action(
 
 @pytest.fixture
 def time_range() -> TimeRange:
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     return TimeRange(start=now - timedelta(hours=1), end=now)
 
 
@@ -157,9 +156,7 @@ class TestEC2GetHealth:
 
     @pytest.mark.asyncio
     async def test_instance_not_found(self, connector: AWSConnector) -> None:
-        connector._ec2_client.describe_instance_status.return_value = {
-            "InstanceStatuses": []
-        }
+        connector._ec2_client.describe_instance_status.return_value = {"InstanceStatuses": []}
 
         health = await connector.get_health("i-nonexistent")
 
@@ -170,9 +167,7 @@ class TestEC2GetHealth:
 
     @pytest.mark.asyncio
     async def test_ec2_api_error(self, connector: AWSConnector) -> None:
-        connector._ec2_client.describe_instance_status.side_effect = Exception(
-            "AccessDenied"
-        )
+        connector._ec2_client.describe_instance_status.side_effect = Exception("AccessDenied")
 
         health = await connector.get_health("i-abc123")
 
@@ -196,7 +191,7 @@ class TestEC2GetHealth:
 
         assert health.last_checked is not None
         # Should be recent (within 5 seconds)
-        delta = datetime.now(timezone.utc) - health.last_checked
+        delta = datetime.now(UTC) - health.last_checked
         assert delta.total_seconds() < 5
 
 
@@ -300,7 +295,7 @@ class TestListResources:
                                 {"Key": "Environment", "Value": "staging"},
                             ],
                             "Placement": {"AvailabilityZone": "us-east-1a"},
-                            "LaunchTime": datetime(2025, 1, 1, tzinfo=timezone.utc),
+                            "LaunchTime": datetime(2025, 1, 1, tzinfo=UTC),
                         }
                     ]
                 }
@@ -359,9 +354,7 @@ class TestListResources:
         """When filters contain 'state', it maps to instance-state-name."""
         connector._ec2_client.describe_instances.return_value = {"Reservations": []}
 
-        await connector.list_resources(
-            "ec2", Environment.STAGING, filters={"state": "running"}
-        )
+        await connector.list_resources("ec2", Environment.STAGING, filters={"state": "running"})
 
         call_kwargs = connector._ec2_client.describe_instances.call_args
         filters_arg = call_kwargs.kwargs.get("Filters", call_kwargs[1].get("Filters", []))
@@ -372,9 +365,7 @@ class TestListResources:
     async def test_list_with_tag_filter(self, connector: AWSConnector) -> None:
         connector._ec2_client.describe_instances.return_value = {"Reservations": []}
 
-        await connector.list_resources(
-            "ec2", Environment.STAGING, filters={"team": "platform"}
-        )
+        await connector.list_resources("ec2", Environment.STAGING, filters={"team": "platform"})
 
         call_kwargs = connector._ec2_client.describe_instances.call_args
         filters_arg = call_kwargs.kwargs.get("Filters", call_kwargs[1].get("Filters", []))
@@ -454,9 +445,7 @@ class TestExecuteAction:
 
         assert result.status == ExecutionStatus.SUCCESS
         assert "reboot" in result.message.lower()
-        connector._ec2_client.reboot_instances.assert_called_once_with(
-            InstanceIds=["i-abc123"]
-        )
+        connector._ec2_client.reboot_instances.assert_called_once_with(InstanceIds=["i-abc123"])
 
     @pytest.mark.asyncio
     async def test_restart_ec2(self, connector: AWSConnector) -> None:
@@ -701,9 +690,7 @@ class TestRollback:
 
 class TestValidateHealth:
     @pytest.mark.asyncio
-    async def test_returns_true_when_immediately_healthy(
-        self, connector: AWSConnector
-    ) -> None:
+    async def test_returns_true_when_immediately_healthy(self, connector: AWSConnector) -> None:
         connector._ec2_client.describe_instance_status.return_value = {
             "InstanceStatuses": [
                 {
@@ -731,9 +718,7 @@ class TestValidateHealth:
             ]
         }
 
-        with patch(
-            "shieldops.connectors.aws.connector.asyncio.sleep", new_callable=AsyncMock
-        ):
+        with patch("shieldops.connectors.aws.connector.asyncio.sleep", new_callable=AsyncMock):
             result = await connector.validate_health("i-abc123", timeout_seconds=0)
 
         assert result is False
@@ -765,9 +750,7 @@ class TestValidateHealth:
             healthy,
         ]
 
-        with patch(
-            "shieldops.connectors.aws.connector.asyncio.sleep", new_callable=AsyncMock
-        ):
+        with patch("shieldops.connectors.aws.connector.asyncio.sleep", new_callable=AsyncMock):
             result = await connector.validate_health("i-abc123", timeout_seconds=120)
 
         assert result is True
@@ -781,9 +764,7 @@ class TestValidateHealth:
 
 class TestGetEvents:
     @pytest.mark.asyncio
-    async def test_returns_empty_list(
-        self, connector: AWSConnector, time_range: TimeRange
-    ) -> None:
+    async def test_returns_empty_list(self, connector: AWSConnector, time_range: TimeRange) -> None:
         """get_events is currently a stub that returns an empty list."""
         events = await connector.get_events("i-abc123", time_range)
 

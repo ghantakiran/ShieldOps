@@ -1,11 +1,11 @@
 """Auth request/response models."""
 
-from enum import Enum
+from enum import StrEnum
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 
 
-class UserRole(str, Enum):
+class UserRole(StrEnum):
     ADMIN = "admin"
     OPERATOR = "operator"
     VIEWER = "viewer"
@@ -25,7 +25,7 @@ class RegisterRequest(BaseModel):
 
 class TokenResponse(BaseModel):
     access_token: str
-    token_type: str = "bearer"
+    token_type: str = "bearer"  # noqa: S105
     expires_in: int
 
 

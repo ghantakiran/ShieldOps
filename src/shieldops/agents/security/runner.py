@@ -114,8 +114,7 @@ class SecurityRunner:
 
             if final_state.scan_start:
                 final_state.scan_duration_ms = int(
-                    (datetime.now(UTC) - final_state.scan_start).total_seconds()
-                    * 1000
+                    (datetime.now(UTC) - final_state.scan_start).total_seconds() * 1000
                 )
 
             logger.info(
@@ -211,8 +210,9 @@ class SecurityRunner:
                 environment=state.target_environment,
                 risk_level=RiskLevel.MEDIUM,
                 policy_evaluation=(
-                    "allowed" if state.action_policy_result
-                    and state.action_policy_result.allowed else "denied"
+                    "allowed"
+                    if state.action_policy_result and state.action_policy_result.allowed
+                    else "denied"
                 ),
                 outcome=ExecutionStatus.SUCCESS if not state.error else ExecutionStatus.FAILED,
                 reasoning=(

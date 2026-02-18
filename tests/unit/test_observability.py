@@ -6,7 +6,7 @@ Tests cover:
 - JaegerSource (TraceSource) — Jaeger HTTP API
 """
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock
 
 import httpx
@@ -16,7 +16,6 @@ from shieldops.models.base import TimeRange
 from shieldops.observability.datadog.client import DatadogSource
 from shieldops.observability.otel.client import JaegerSource
 from shieldops.observability.splunk.client import SplunkSource
-
 
 # --- Helpers ---
 
@@ -42,13 +41,13 @@ def _mock_response_error(exc: Exception) -> MagicMock:
 
 @pytest.fixture
 def time_range():
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     return TimeRange(start=now - timedelta(hours=1), end=now)
 
 
 @pytest.fixture
 def baseline_range():
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     return TimeRange(start=now - timedelta(days=1, hours=1), end=now - timedelta(days=1))
 
 
@@ -90,9 +89,7 @@ class TestSplunkSource:
     async def test_query_logs_returns_normalized_entries(
         self, splunk, time_range, mock_splunk_data
     ):
-        splunk._client.post = AsyncMock(
-            return_value=_mock_response(mock_splunk_data)
-        )
+        splunk._client.post = AsyncMock(return_value=_mock_response(mock_splunk_data))
 
         results = await splunk.query_logs("default/api-server", time_range)
 
@@ -104,9 +101,7 @@ class TestSplunkSource:
 
     @pytest.mark.asyncio
     async def test_query_logs_spl_construction(self, splunk, time_range):
-        splunk._client.post = AsyncMock(
-            return_value=_mock_response({"results": []})
-        )
+        splunk._client.post = AsyncMock(return_value=_mock_response({"results": []}))
 
         await splunk.query_logs("default/api-server", time_range, limit=50)
 
@@ -122,9 +117,7 @@ class TestSplunkSource:
 
     @pytest.mark.asyncio
     async def test_query_logs_connection_error(self, splunk, time_range):
-        splunk._client.post = AsyncMock(
-            side_effect=httpx.ConnectError("Connection refused")
-        )
+        splunk._client.post = AsyncMock(side_effect=httpx.ConnectError("Connection refused"))
         results = await splunk.query_logs("default/api-server", time_range)
         assert results == []
 
@@ -140,19 +133,13 @@ class TestSplunkSource:
 
     @pytest.mark.asyncio
     async def test_query_logs_empty_results(self, splunk, time_range):
-        splunk._client.post = AsyncMock(
-            return_value=_mock_response({"results": []})
-        )
+        splunk._client.post = AsyncMock(return_value=_mock_response({"results": []}))
         results = await splunk.query_logs("default/api-server", time_range)
         assert results == []
 
     @pytest.mark.asyncio
-    async def test_search_patterns_returns_matches(
-        self, splunk, time_range, mock_splunk_data
-    ):
-        splunk._client.post = AsyncMock(
-            return_value=_mock_response(mock_splunk_data)
-        )
+    async def test_search_patterns_returns_matches(self, splunk, time_range, mock_splunk_data):
+        splunk._client.post = AsyncMock(return_value=_mock_response(mock_splunk_data))
 
         results = await splunk.search_patterns(
             "default/api-server", ["OOMKilled", "timeout"], time_range
@@ -164,12 +151,8 @@ class TestSplunkSource:
 
     @pytest.mark.asyncio
     async def test_search_patterns_error_handling(self, splunk, time_range):
-        splunk._client.post = AsyncMock(
-            side_effect=httpx.ConnectError("Connection refused")
-        )
-        results = await splunk.search_patterns(
-            "default/api-server", ["error"], time_range
-        )
+        splunk._client.post = AsyncMock(side_effect=httpx.ConnectError("Connection refused"))
+        results = await splunk.search_patterns("default/api-server", ["error"], time_range)
         assert results == {"error": []}
 
     @pytest.mark.asyncio
@@ -194,18 +177,14 @@ class TestSplunkSource:
 
     @pytest.mark.asyncio
     async def test_query_logs_timeout(self, splunk, time_range):
-        splunk._client.post = AsyncMock(
-            side_effect=httpx.ReadTimeout("Read timed out")
-        )
+        splunk._client.post = AsyncMock(side_effect=httpx.ReadTimeout("Read timed out"))
         results = await splunk.query_logs("default/api-server", time_range)
         assert results == []
 
     @pytest.mark.asyncio
     async def test_normalize_results_missing_fields(self, splunk, time_range):
         splunk._client.post = AsyncMock(
-            return_value=_mock_response(
-                {"results": [{"_time": "2025-01-01T00:00:00Z"}]}
-            )
+            return_value=_mock_response({"results": [{"_time": "2025-01-01T00:00:00Z"}]})
         )
         results = await splunk.query_logs("default/pod", time_range)
         assert len(results) == 1
@@ -214,9 +193,7 @@ class TestSplunkSource:
 
     @pytest.mark.asyncio
     async def test_query_logs_uses_oneshot_mode(self, splunk, time_range):
-        splunk._client.post = AsyncMock(
-            return_value=_mock_response({"results": []})
-        )
+        splunk._client.post = AsyncMock(return_value=_mock_response({"results": []}))
         await splunk.query_logs("default/pod", time_range)
 
         call_kwargs = splunk._client.post.call_args
@@ -256,16 +233,10 @@ class TestDatadogSource:
         }
 
     @pytest.mark.asyncio
-    async def test_query_metric_returns_timeseries(
-        self, datadog, time_range, mock_dd_series
-    ):
-        datadog._client.get = AsyncMock(
-            return_value=_mock_response(mock_dd_series)
-        )
+    async def test_query_metric_returns_timeseries(self, datadog, time_range, mock_dd_series):
+        datadog._client.get = AsyncMock(return_value=_mock_response(mock_dd_series))
 
-        results = await datadog.query_metric(
-            "system.cpu.user", {"host": "web-01"}, time_range
-        )
+        results = await datadog.query_metric("system.cpu.user", {"host": "web-01"}, time_range)
 
         assert len(results) == 3
         assert results[0]["value"] == 45.5
@@ -274,13 +245,9 @@ class TestDatadogSource:
 
     @pytest.mark.asyncio
     async def test_query_metric_datadog_query_construction(self, datadog, time_range):
-        datadog._client.get = AsyncMock(
-            return_value=_mock_response({"series": []})
-        )
+        datadog._client.get = AsyncMock(return_value=_mock_response({"series": []}))
 
-        await datadog.query_metric(
-            "system.cpu.user", {"host": "web-01", "env": "prod"}, time_range
-        )
+        await datadog.query_metric("system.cpu.user", {"host": "web-01", "env": "prod"}, time_range)
 
         call_kwargs = datadog._client.get.call_args
         params = call_kwargs.kwargs.get("params", call_kwargs[1].get("params", {}))
@@ -295,25 +262,19 @@ class TestDatadogSource:
 
     @pytest.mark.asyncio
     async def test_query_metric_connection_error(self, datadog, time_range):
-        datadog._client.get = AsyncMock(
-            side_effect=httpx.ConnectError("Connection refused")
-        )
+        datadog._client.get = AsyncMock(side_effect=httpx.ConnectError("Connection refused"))
         results = await datadog.query_metric("system.cpu.user", {}, time_range)
         assert results == []
 
     @pytest.mark.asyncio
     async def test_query_metric_empty_series(self, datadog, time_range):
-        datadog._client.get = AsyncMock(
-            return_value=_mock_response({"series": []})
-        )
+        datadog._client.get = AsyncMock(return_value=_mock_response({"series": []}))
         results = await datadog.query_metric("cpu", {}, time_range)
         assert results == []
 
     @pytest.mark.asyncio
     async def test_query_instant_returns_latest(self, datadog, mock_dd_series):
-        datadog._client.get = AsyncMock(
-            return_value=_mock_response(mock_dd_series)
-        )
+        datadog._client.get = AsyncMock(return_value=_mock_response(mock_dd_series))
 
         results = await datadog.query_instant("avg:system.cpu.user{*}")
 
@@ -323,29 +284,29 @@ class TestDatadogSource:
 
     @pytest.mark.asyncio
     async def test_query_instant_error(self, datadog):
-        datadog._client.get = AsyncMock(
-            side_effect=httpx.ConnectError("Connection refused")
-        )
+        datadog._client.get = AsyncMock(side_effect=httpx.ConnectError("Connection refused"))
         results = await datadog.query_instant("avg:system.cpu.user{*}")
         assert results == []
 
     @pytest.mark.asyncio
-    async def test_detect_anomalies_flags_deviation(
-        self, datadog, time_range, baseline_range
-    ):
+    async def test_detect_anomalies_flags_deviation(self, datadog, time_range, baseline_range):
         current_data = {
-            "series": [{
-                "metric": "mem",
-                "pointlist": [[1704067200000, 100.0], [1704067260000, 110.0]],
-                "tag_set": [],
-            }]
+            "series": [
+                {
+                    "metric": "mem",
+                    "pointlist": [[1704067200000, 100.0], [1704067260000, 110.0]],
+                    "tag_set": [],
+                }
+            ]
         }
         baseline_data = {
-            "series": [{
-                "metric": "mem",
-                "pointlist": [[1704067200000, 50.0], [1704067260000, 50.0]],
-                "tag_set": [],
-            }]
+            "series": [
+                {
+                    "metric": "mem",
+                    "pointlist": [[1704067200000, 50.0], [1704067260000, 50.0]],
+                    "tag_set": [],
+                }
+            ]
         }
 
         responses = [_mock_response(current_data), _mock_response(baseline_data)]
@@ -362,22 +323,14 @@ class TestDatadogSource:
 
     @pytest.mark.asyncio
     async def test_detect_anomalies_no_data(self, datadog, time_range, baseline_range):
-        datadog._client.get = AsyncMock(
-            return_value=_mock_response({"series": []})
-        )
+        datadog._client.get = AsyncMock(return_value=_mock_response({"series": []}))
         results = await datadog.detect_anomalies("cpu", {}, time_range, baseline_range)
         assert results == []
 
     @pytest.mark.asyncio
-    async def test_detect_anomalies_zero_baseline(
-        self, datadog, time_range, baseline_range
-    ):
-        current_data = {
-            "series": [{"pointlist": [[1704067200000, 10.0]], "tag_set": []}]
-        }
-        baseline_data = {
-            "series": [{"pointlist": [[1704067200000, 0.0]], "tag_set": []}]
-        }
+    async def test_detect_anomalies_zero_baseline(self, datadog, time_range, baseline_range):
+        current_data = {"series": [{"pointlist": [[1704067200000, 10.0]], "tag_set": []}]}
+        baseline_data = {"series": [{"pointlist": [[1704067200000, 0.0]], "tag_set": []}]}
         responses = [_mock_response(current_data), _mock_response(baseline_data)]
         datadog._client.get = AsyncMock(side_effect=responses)
 
@@ -408,12 +361,16 @@ class TestDatadogSource:
     @pytest.mark.asyncio
     async def test_query_metric_null_points_skipped(self, datadog, time_range):
         datadog._client.get = AsyncMock(
-            return_value=_mock_response({
-                "series": [{
-                    "pointlist": [[1704067200000, None], [1704067260000, 42.0]],
-                    "tag_set": [],
-                }]
-            })
+            return_value=_mock_response(
+                {
+                    "series": [
+                        {
+                            "pointlist": [[1704067200000, None], [1704067260000, 42.0]],
+                            "tag_set": [],
+                        }
+                    ]
+                }
+            )
         )
         results = await datadog.query_metric("cpu", {}, time_range)
         assert len(results) == 1
@@ -467,9 +424,7 @@ class TestJaegerSource:
                             "processID": "p2",
                             "duration": 3000000,  # 3s
                             "tags": [],
-                            "references": [
-                                {"refType": "CHILD_OF", "spanID": "span-1"}
-                            ],
+                            "references": [{"refType": "CHILD_OF", "spanID": "span-1"}],
                         },
                         {
                             "spanID": "span-3",
@@ -477,9 +432,7 @@ class TestJaegerSource:
                             "processID": "p3",
                             "duration": 2500000,  # 2.5s
                             "tags": [{"key": "error", "value": True}],
-                            "references": [
-                                {"refType": "CHILD_OF", "spanID": "span-2"}
-                            ],
+                            "references": [{"refType": "CHILD_OF", "spanID": "span-2"}],
                         },
                     ],
                 }
@@ -488,9 +441,7 @@ class TestJaegerSource:
 
     @pytest.mark.asyncio
     async def test_get_trace_parses_spans(self, jaeger, mock_jaeger_trace):
-        jaeger._client.get = AsyncMock(
-            return_value=_mock_response(mock_jaeger_trace)
-        )
+        jaeger._client.get = AsyncMock(return_value=_mock_response(mock_jaeger_trace))
 
         result = await jaeger.get_trace("abc123")
 
@@ -512,17 +463,13 @@ class TestJaegerSource:
 
     @pytest.mark.asyncio
     async def test_get_trace_not_found(self, jaeger):
-        jaeger._client.get = AsyncMock(
-            return_value=_mock_response({"data": []})
-        )
+        jaeger._client.get = AsyncMock(return_value=_mock_response({"data": []}))
         result = await jaeger.get_trace("nonexistent")
         assert result is None
 
     @pytest.mark.asyncio
     async def test_get_trace_connection_error(self, jaeger):
-        jaeger._client.get = AsyncMock(
-            side_effect=httpx.ConnectError("Connection refused")
-        )
+        jaeger._client.get = AsyncMock(side_effect=httpx.ConnectError("Connection refused"))
         result = await jaeger.get_trace("abc123")
         assert result is None
 
@@ -537,12 +484,8 @@ class TestJaegerSource:
         assert result is None
 
     @pytest.mark.asyncio
-    async def test_search_traces_returns_summaries(
-        self, jaeger, time_range, mock_jaeger_trace
-    ):
-        jaeger._client.get = AsyncMock(
-            return_value=_mock_response(mock_jaeger_trace)
-        )
+    async def test_search_traces_returns_summaries(self, jaeger, time_range, mock_jaeger_trace):
+        jaeger._client.get = AsyncMock(return_value=_mock_response(mock_jaeger_trace))
 
         results = await jaeger.search_traces("api-gateway", time_range)
 
@@ -555,9 +498,7 @@ class TestJaegerSource:
 
     @pytest.mark.asyncio
     async def test_search_traces_with_min_duration(self, jaeger, time_range):
-        jaeger._client.get = AsyncMock(
-            return_value=_mock_response({"data": []})
-        )
+        jaeger._client.get = AsyncMock(return_value=_mock_response({"data": []}))
 
         await jaeger.search_traces("api-gateway", time_range, min_duration_ms=1000)
 
@@ -567,9 +508,7 @@ class TestJaegerSource:
 
     @pytest.mark.asyncio
     async def test_search_traces_with_error_filter(self, jaeger, time_range):
-        jaeger._client.get = AsyncMock(
-            return_value=_mock_response({"data": []})
-        )
+        jaeger._client.get = AsyncMock(return_value=_mock_response({"data": []}))
 
         await jaeger.search_traces("api-gateway", time_range, status="error")
 
@@ -579,19 +518,13 @@ class TestJaegerSource:
 
     @pytest.mark.asyncio
     async def test_search_traces_connection_error(self, jaeger, time_range):
-        jaeger._client.get = AsyncMock(
-            side_effect=httpx.ConnectError("Connection refused")
-        )
+        jaeger._client.get = AsyncMock(side_effect=httpx.ConnectError("Connection refused"))
         results = await jaeger.search_traces("api-gateway", time_range)
         assert results == []
 
     @pytest.mark.asyncio
-    async def test_find_bottleneck_finds_slowest_span(
-        self, jaeger, time_range, mock_jaeger_trace
-    ):
-        jaeger._client.get = AsyncMock(
-            return_value=_mock_response(mock_jaeger_trace)
-        )
+    async def test_find_bottleneck_finds_slowest_span(self, jaeger, time_range, mock_jaeger_trace):
+        jaeger._client.get = AsyncMock(return_value=_mock_response(mock_jaeger_trace))
 
         result = await jaeger.find_bottleneck("api-gateway", time_range)
 
@@ -603,9 +536,7 @@ class TestJaegerSource:
 
     @pytest.mark.asyncio
     async def test_find_bottleneck_no_traces(self, jaeger, time_range):
-        jaeger._client.get = AsyncMock(
-            return_value=_mock_response({"data": []})
-        )
+        jaeger._client.get = AsyncMock(return_value=_mock_response({"data": []}))
         result = await jaeger.find_bottleneck("api-gateway", time_range)
         assert result is None
 
@@ -647,9 +578,7 @@ class TestJaegerSource:
 
     @pytest.mark.asyncio
     async def test_search_traces_uses_microseconds(self, jaeger, time_range):
-        jaeger._client.get = AsyncMock(
-            return_value=_mock_response({"data": []})
-        )
+        jaeger._client.get = AsyncMock(return_value=_mock_response({"data": []}))
 
         await jaeger.search_traces("svc", time_range)
 
@@ -659,9 +588,7 @@ class TestJaegerSource:
 
     @pytest.mark.asyncio
     async def test_get_trace_url_construction(self, jaeger):
-        jaeger._client.get = AsyncMock(
-            return_value=_mock_response({"data": []})
-        )
+        jaeger._client.get = AsyncMock(return_value=_mock_response({"data": []}))
         await jaeger.get_trace("trace-xyz")
 
         call_args = jaeger._client.get.call_args
@@ -677,12 +604,15 @@ class TestJaegerSource:
 class TestImports:
     def test_splunk_import(self):
         from shieldops.observability.splunk import SplunkSource as S
+
         assert S is SplunkSource
 
     def test_datadog_import(self):
         from shieldops.observability.datadog import DatadogSource as D
+
         assert D is DatadogSource
 
     def test_jaeger_import(self):
         from shieldops.observability.otel import JaegerSource as J
+
         assert J is JaegerSource

@@ -48,9 +48,7 @@ async def list_agents(
 
 
 @router.get("/agents/{agent_id}")
-async def get_agent(
-    agent_id: str, _user: UserResponse = Depends(get_current_user)
-) -> dict:
+async def get_agent(agent_id: str, _user: UserResponse = Depends(get_current_user)) -> dict:
     """Get detailed agent information including config and recent activity."""
     if _registry:
         result = await _registry.get_agent(agent_id)

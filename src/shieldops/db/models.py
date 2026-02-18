@@ -1,6 +1,6 @@
 """SQLAlchemy 2.x ORM models for ShieldOps persistence."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import uuid4
 
 from sqlalchemy import Boolean, DateTime, Index, Integer, String, Text, func
@@ -10,6 +10,7 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 class Base(DeclarativeBase):
     """Base class for all ORM models."""
+
     pass
 
 
@@ -26,9 +27,7 @@ class UserRecord(Base):
     password_hash: Mapped[str] = mapped_column(Text)
     role: Mapped[str] = mapped_column(String(32), default="viewer")
     is_active: Mapped[bool] = mapped_column(default=True)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now()
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
@@ -53,9 +52,7 @@ class InvestigationRecord(Base):
     recommended_action: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     error: Mapped[str | None] = mapped_column(Text, nullable=True)
     duration_ms: Mapped[int] = mapped_column(default=0)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now()
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
@@ -80,9 +77,7 @@ class RemediationRecord(Base):
     investigation_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
     error: Mapped[str | None] = mapped_column(Text, nullable=True)
     duration_ms: Mapped[int] = mapped_column(default=0)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now()
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
@@ -97,7 +92,7 @@ class AuditLog(Base):
         String(64), primary_key=True, default=lambda: f"aud-{uuid4().hex[:12]}"
     )
     timestamp: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), index=True
+        DateTime(timezone=True), default=lambda: datetime.now(UTC), index=True
     )
     agent_type: Mapped[str] = mapped_column(String(64))
     action: Mapped[str] = mapped_column(String(128), index=True)
@@ -109,13 +104,9 @@ class AuditLog(Base):
     outcome: Mapped[str] = mapped_column(String(32))
     reasoning: Mapped[str] = mapped_column(Text, default="")
     actor: Mapped[str] = mapped_column(String(128))
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now()
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
-    __table_args__ = (
-        Index("ix_audit_log_env_ts", "environment", "timestamp"),
-    )
+    __table_args__ = (Index("ix_audit_log_env_ts", "environment", "timestamp"),)
 
 
 class IncidentOutcomeRecord(Base):
@@ -137,13 +128,9 @@ class IncidentOutcomeRecord(Base):
     was_automated: Mapped[bool] = mapped_column(Boolean, default=False)
     was_correct: Mapped[bool] = mapped_column(Boolean, default=True)
     feedback: Mapped[str] = mapped_column(Text, default="")
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now()
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
-    __table_args__ = (
-        Index("ix_incident_outcomes_alert_env", "alert_type", "environment"),
-    )
+    __table_args__ = (Index("ix_incident_outcomes_alert_env", "alert_type", "environment"),)
 
 
 class SecurityScanRecord(Base):
@@ -180,16 +167,12 @@ class SecurityScanRecord(Base):
     reasoning_chain: Mapped[dict] = mapped_column(JSONB, default=list)
     error: Mapped[str | None] = mapped_column(Text, nullable=True)
     duration_ms: Mapped[int] = mapped_column(Integer, default=0)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now()
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
 
-    __table_args__ = (
-        Index("ix_security_scans_env_created", "environment", "created_at"),
-    )
+    __table_args__ = (Index("ix_security_scans_env_created", "environment", "created_at"),)
 
 
 class AgentSession(Base):
@@ -204,9 +187,7 @@ class AgentSession(Base):
     input_data: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     result_data: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     duration_ms: Mapped[int] = mapped_column(default=0)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now()
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
@@ -224,12 +205,8 @@ class AgentRegistration(Base):
     environment: Mapped[str] = mapped_column(String(32), default="production")
     status: Mapped[str] = mapped_column(String(32), default="idle", index=True)
     config: Mapped[dict] = mapped_column(JSONB, default=dict)
-    last_heartbeat: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now()
-    )
+    last_heartbeat: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )

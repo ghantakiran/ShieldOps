@@ -1,7 +1,7 @@
 """FastAPI application entry point."""
 
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from typing import AsyncIterator
 
 import structlog
 from fastapi import FastAPI
@@ -47,9 +47,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         from shieldops.db.repository import Repository
         from shieldops.db.session import create_async_engine, get_session_factory
 
-        engine = create_async_engine(
-            settings.database_url, pool_size=settings.database_pool_size
-        )
+        engine = create_async_engine(settings.database_url, pool_size=settings.database_pool_size)
         session_factory = get_session_factory()
         # Verify DB connectivity with a test query
         async with session_factory() as session:
@@ -64,7 +62,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
             try:
                 await engine.dispose()
             except Exception:
-                pass
+                logger.debug("engine_dispose_failed_on_fallback")
             engine = None
 
     # Store on app.state for readiness checks and analytics
@@ -76,18 +74,24 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     if session_factory:
         try:
             from shieldops.agents.registry import AgentRegistry
+
             agent_registry = AgentRegistry(session_factory)
             agents.set_registry(agent_registry)
             # Auto-register the 6 agent types
             for atype in (
-                "investigation", "remediation", "security", "cost", "learning", "supervisor"
+                "investigation",
+                "remediation",
+                "security",
+                "cost",
+                "learning",
+                "supervisor",
             ):
                 try:
                     await agent_registry.register(
                         agent_type=atype, environment=settings.environment
                     )
                 except Exception:
-                    pass  # Individual failures are non-fatal
+                    logger.debug("agent_register_skipped", agent_type=atype)
             logger.info("agent_registry_initialized")
         except Exception as e:
             logger.warning("agent_registry_init_failed", error=str(e))
@@ -95,6 +99,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     # ── Analytics engine ───────────────────────────────────────────
     if session_factory:
         from shieldops.analytics.engine import AnalyticsEngine
+
         analytics_engine = AnalyticsEngine(session_factory)
         analytics.set_engine(analytics_engine)
         logger.info("analytics_engine_initialized")
@@ -168,22 +173,24 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     learning.set_runner(learn_runner)
 
     # Supervisor — orchestrates all specialist agents
-    sup_runner = SupervisorRunner(agent_runners={
-        "investigation": inv_runner,
-        "remediation": rem_runner,
-        "security": sec_runner,
-        "cost": cost_runner,
-        "learning": learn_runner,
-    }, playbook_loader=playbook_loader)
+    sup_runner = SupervisorRunner(
+        agent_runners={
+            "investigation": inv_runner,
+            "remediation": rem_runner,
+            "security": sec_runner,
+            "cost": cost_runner,
+            "learning": learn_runner,
+        },
+        playbook_loader=playbook_loader,
+    )
     supervisor.set_runner(sup_runner)
 
     # Register playbooks router
     try:
         from shieldops.api.routes import playbooks
+
         playbooks.set_loader(playbook_loader)
-        app.include_router(
-            playbooks.router, prefix=settings.api_prefix, tags=["Playbooks"]
-        )
+        app.include_router(playbooks.router, prefix=settings.api_prefix, tags=["Playbooks"])
     except Exception as e:
         logger.warning("playbooks_router_failed", error=str(e))
 
@@ -223,6 +230,7 @@ def create_app() -> FastAPI:
         RequestIDMiddleware,
         RequestLoggingMiddleware,
     )
+
     app.add_middleware(ErrorHandlerMiddleware)
     app.add_middleware(RateLimitMiddleware)
     app.add_middleware(RequestLoggingMiddleware)
@@ -230,16 +238,13 @@ def create_app() -> FastAPI:
 
     # Auth router (no prefix — routes are /auth/*)
     from shieldops.api.auth.routes import router as auth_router
+
     app.include_router(auth_router, prefix=settings.api_prefix, tags=["Auth"])
 
     # Register route modules
     app.include_router(agents.router, prefix=settings.api_prefix, tags=["Agents"])
-    app.include_router(
-        investigations.router, prefix=settings.api_prefix, tags=["Investigations"]
-    )
-    app.include_router(
-        remediations.router, prefix=settings.api_prefix, tags=["Remediations"]
-    )
+    app.include_router(investigations.router, prefix=settings.api_prefix, tags=["Investigations"])
+    app.include_router(remediations.router, prefix=settings.api_prefix, tags=["Remediations"])
     app.include_router(analytics.router, prefix=settings.api_prefix, tags=["Analytics"])
     app.include_router(security.router, prefix=settings.api_prefix, tags=["Security"])
     app.include_router(cost.router, prefix=settings.api_prefix, tags=["Cost"])
@@ -248,6 +253,7 @@ def create_app() -> FastAPI:
 
     # WebSocket routes
     from shieldops.api.ws.routes import router as ws_router
+
     app.include_router(ws_router, tags=["WebSocket"])
 
     @app.get("/health")
@@ -267,6 +273,7 @@ def create_app() -> FastAPI:
         if sf:
             try:
                 from sqlalchemy import text
+
                 async with sf() as session:
                     await session.execute(text("SELECT 1"))
                 checks["database"] = "ok"
@@ -280,6 +287,7 @@ def create_app() -> FastAPI:
         # Redis check
         try:
             import redis.asyncio as aioredis
+
             r = aioredis.from_url(settings.redis_url, socket_connect_timeout=2)
             await r.ping()
             await r.aclose()
@@ -300,6 +308,7 @@ def create_app() -> FastAPI:
             all_ok = False
 
         from fastapi.responses import JSONResponse
+
         status_code = 200 if all_ok else 503
         return JSONResponse(
             status_code=status_code,

@@ -6,7 +6,7 @@ investigation agent workflows.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
@@ -98,7 +98,7 @@ async def trigger_investigation(
         resource_id=request.resource_id,
         labels=request.labels,
         annotations=request.annotations,
-        triggered_at=datetime.now(timezone.utc),
+        triggered_at=datetime.now(UTC),
         description=request.description,
     )
 
@@ -132,7 +132,7 @@ async def trigger_investigation_sync(
         resource_id=request.resource_id,
         labels=request.labels,
         annotations=request.annotations,
-        triggered_at=datetime.now(timezone.utc),
+        triggered_at=datetime.now(UTC),
         description=request.description,
     )
 
@@ -153,9 +153,7 @@ async def list_investigations(
     Queries from PostgreSQL when available, falls back to in-memory.
     """
     if _repository:
-        items = await _repository.list_investigations(
-            status=status, limit=limit, offset=offset
-        )
+        items = await _repository.list_investigations(status=status, limit=limit, offset=offset)
         total = await _repository.count_investigations(status=status)
         return {
             "investigations": items,
@@ -168,9 +166,7 @@ async def list_investigations(
     runner = get_runner()
     all_investigations = runner.list_investigations()
     if status:
-        all_investigations = [
-            inv for inv in all_investigations if inv["status"] == status
-        ]
+        all_investigations = [inv for inv in all_investigations if inv["status"] == status]
     total = len(all_investigations)
     paginated = all_investigations[offset : offset + limit]
     return {

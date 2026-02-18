@@ -4,7 +4,7 @@ Bridges specialist agent runners, notification channels, and
 event classification into the supervisor orchestration workflow.
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 from uuid import uuid4
 
@@ -104,7 +104,7 @@ class SupervisorToolkit:
         """
         agent_name = _task_type_to_agent(task_type)
         task_id = f"sup-{uuid4().hex[:12]}"
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
 
         task = DelegatedTask(
             task_id=task_id,
@@ -121,13 +121,13 @@ class SupervisorToolkit:
                 result = await runner.run(input_data)
                 task.status = TaskStatus.COMPLETED
                 task.result = result if isinstance(result, dict) else {"data": str(result)}
-                task.completed_at = datetime.now(timezone.utc)
+                task.completed_at = datetime.now(UTC)
                 task.duration_ms = int((task.completed_at - now).total_seconds() * 1000)
             except Exception as e:
                 logger.error("agent_dispatch_failed", agent=agent_name, error=str(e))
                 task.status = TaskStatus.FAILED
                 task.error = str(e)
-                task.completed_at = datetime.now(timezone.utc)
+                task.completed_at = datetime.now(UTC)
                 task.duration_ms = int((task.completed_at - now).total_seconds() * 1000)
         else:
             # Simulated completion when no runner configured
@@ -137,7 +137,7 @@ class SupervisorToolkit:
                 "agent": agent_name,
                 "message": f"No runner configured for {agent_name}. Task simulated as complete.",
             }
-            task.completed_at = datetime.now(timezone.utc)
+            task.completed_at = datetime.now(UTC)
             task.duration_ms = int((task.completed_at - now).total_seconds() * 1000)
 
         return task
@@ -171,7 +171,7 @@ class SupervisorToolkit:
             "delivered": True,
             "channel": channel,
             "simulated": notifier is None,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
         }
 
     def evaluate_chain_rules(
@@ -183,7 +183,11 @@ class SupervisorToolkit:
         Returns chaining recommendation based on task outcome.
         """
         if completed_task.status != TaskStatus.COMPLETED or not completed_task.result:
-            return {"should_chain": False, "chain_task_type": "none", "reasoning": "Task did not complete successfully"}
+            return {
+                "should_chain": False,
+                "chain_task_type": "none",
+                "reasoning": "Task did not complete successfully",
+            }
 
         result = completed_task.result
 
@@ -195,7 +199,9 @@ class SupervisorToolkit:
                 return {
                     "should_chain": True,
                     "chain_task_type": "remediate",
-                    "reasoning": f"Investigation confidence {confidence:.0%} with recommended action",
+                    "reasoning": (
+                        f"Investigation confidence {confidence:.0%} with recommended action"
+                    ),
                 }
 
         # Remediation → Learning to record outcome
@@ -245,7 +251,9 @@ class SupervisorToolkit:
             if confidence < 0.5 and priority in ("critical", "high"):
                 return {
                     "needs_escalation": True,
-                    "reason": f"Low confidence ({confidence:.0%}) classification on {priority} event",
+                    "reason": (
+                        f"Low confidence ({confidence:.0%}) classification on {priority} event"
+                    ),
                     "channel": "slack",
                     "urgency": "soon",
                 }

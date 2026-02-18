@@ -1,6 +1,6 @@
 """Action rate limiter using Redis for OPA rate-limit context enrichment."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import structlog
 
@@ -25,7 +25,7 @@ class ActionRateLimiter:
         return self._client
 
     def _key(self, environment: str) -> str:
-        hour = datetime.now(timezone.utc).strftime("%Y%m%d%H")
+        hour = datetime.now(UTC).strftime("%Y%m%d%H")
         return f"shieldops:rate:{environment}:{hour}"
 
     async def count_recent_actions(self, environment: str) -> int:

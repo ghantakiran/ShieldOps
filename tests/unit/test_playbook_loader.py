@@ -2,10 +2,7 @@
 
 from pathlib import Path
 
-import pytest
-
 from shieldops.playbooks.loader import Playbook, PlaybookLoader, PlaybookTrigger
-
 
 PLAYBOOKS_DIR = Path(__file__).resolve().parent.parent.parent / "playbooks"
 

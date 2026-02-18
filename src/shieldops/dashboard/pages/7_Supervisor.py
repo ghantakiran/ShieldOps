@@ -59,10 +59,12 @@ if st.session_state.selected_session:
         with col_l:
             event_type = detail.get("event_type", detail.get("type", "unknown"))
             st.subheader(f"Session: {st.session_state.selected_session}")
-            badges = " ".join([
-                render_status_badge(detail.get("status", "unknown")),
-                render_severity_badge(detail.get("severity", "medium")),
-            ])
+            badges = " ".join(
+                [
+                    render_status_badge(detail.get("status", "unknown")),
+                    render_severity_badge(detail.get("severity", "medium")),
+                ]
+            )
             st.markdown(badges, unsafe_allow_html=True)
         with col_r:
             st.markdown(f"**Event type:** `{event_type}`")
@@ -77,9 +79,14 @@ if st.session_state.selected_session:
 
         st.divider()
 
-        tab_tasks, tab_chains, tab_esc, tab_reason = st.tabs([
-            "Delegated Tasks", "Chained Workflows", "Escalations", "Reasoning",
-        ])
+        tab_tasks, tab_chains, tab_esc, tab_reason = st.tabs(
+            [
+                "Delegated Tasks",
+                "Chained Workflows",
+                "Escalations",
+                "Reasoning",
+            ]
+        )
 
         # Delegated tasks
         with tab_tasks:
@@ -91,8 +98,14 @@ if st.session_state.selected_session:
                 if tasks:
                     render_data_table(
                         tasks,
-                        columns=["task_id", "agent_type", "action", "status",
-                                 "result_summary", "duration_ms"],
+                        columns=[
+                            "task_id",
+                            "agent_type",
+                            "action",
+                            "status",
+                            "result_summary",
+                            "duration_ms",
+                        ],
                     )
                 else:
                     render_empty_state("No delegated tasks")
@@ -122,8 +135,14 @@ if st.session_state.selected_session:
                 if escalations:
                     render_data_table(
                         escalations,
-                        columns=["escalation_id", "reason", "severity", "target",
-                                 "status", "created_at"],
+                        columns=[
+                            "escalation_id",
+                            "reason",
+                            "severity",
+                            "target",
+                            "status",
+                            "created_at",
+                        ],
                     )
                 else:
                     render_empty_state("No escalations")
@@ -143,8 +162,15 @@ else:
     with col_filter:
         event_filter = st.selectbox(
             "Event Type",
-            ["All", "alert", "incident", "cve_alert", "remediation_request",
-             "security_event", "cost_anomaly"],
+            [
+                "All",
+                "alert",
+                "incident",
+                "cve_alert",
+                "remediation_request",
+                "security_event",
+                "cost_anomaly",
+            ],
             key="sup_event_filter",
         )
     with col_submit:
@@ -179,8 +205,10 @@ else:
                     )
                 with c5:
                     st.button(
-                        "View", key=f"view_sess_{sid}",
-                        on_click=show_detail, args=(sid,),
+                        "View",
+                        key=f"view_sess_{sid}",
+                        on_click=show_detail,
+                        args=(sid,),
                     )
                 st.divider()
         else:
@@ -192,8 +220,14 @@ else:
             st.markdown("#### Submit Event to Supervisor")
             event_type = st.selectbox(
                 "Event Type",
-                ["alert", "incident", "cve_alert", "remediation_request",
-                 "security_event", "cost_anomaly"],
+                [
+                    "alert",
+                    "incident",
+                    "cve_alert",
+                    "remediation_request",
+                    "security_event",
+                    "cost_anomaly",
+                ],
                 key="submit_event_type",
             )
             severity = st.selectbox("Severity", ["critical", "high", "medium", "low"])

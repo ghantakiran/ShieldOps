@@ -58,11 +58,15 @@ async def get_current_user(
 
 def require_role(*roles: UserRole):
     """Factory that returns a dependency enforcing one or more roles."""
+
     async def _check(user: UserResponse = Depends(get_current_user)) -> UserResponse:
         if user.role not in roles:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"Role '{user.role.value}' not authorized. Required: {[r.value for r in roles]}",
+                detail=(
+                    f"Role '{user.role.value}' not authorized. Required: {[r.value for r in roles]}"
+                ),
             )
         return user
+
     return _check

@@ -1,7 +1,6 @@
 """Tests for WebSocket real-time updates."""
 
 import pytest
-from httpx import ASGITransport, AsyncClient
 from starlette.testclient import TestClient
 
 from shieldops.api.app import app
@@ -26,10 +25,8 @@ class TestWebSocketRoutes:
     def test_ws_requires_auth(self):
         """WebSocket connection without token should be rejected."""
         client = TestClient(app)
-        with pytest.raises(Exception):
-            # Without token, the WS should close with 4001
-            with client.websocket_connect("/ws/events"):
-                pass
+        with pytest.raises(Exception), client.websocket_connect("/ws/events"):  # noqa: B017
+            pass
 
     def test_ws_connects_with_valid_token(self):
         """WebSocket connection with valid token should succeed."""
@@ -41,28 +38,22 @@ class TestWebSocketRoutes:
 
     def test_ws_investigation_channel_requires_auth(self):
         client = TestClient(app)
-        with pytest.raises(Exception):
-            with client.websocket_connect("/ws/investigations/inv-123"):
-                pass
+        with pytest.raises(Exception), client.websocket_connect("/ws/investigations/inv-123"):  # noqa: B017
+            pass
 
     def test_ws_remediation_channel_requires_auth(self):
         client = TestClient(app)
-        with pytest.raises(Exception):
-            with client.websocket_connect("/ws/remediations/rem-123"):
-                pass
+        with pytest.raises(Exception), client.websocket_connect("/ws/remediations/rem-123"):  # noqa: B017
+            pass
 
     def test_ws_investigation_channel_with_token(self):
         token = create_access_token(subject="test-user", role="operator")
         client = TestClient(app)
-        with client.websocket_connect(
-            f"/ws/investigations/inv-123?token={token}"
-        ) as ws:
+        with client.websocket_connect(f"/ws/investigations/inv-123?token={token}") as ws:
             assert ws is not None
 
     def test_ws_remediation_channel_with_token(self):
         token = create_access_token(subject="test-user", role="viewer")
         client = TestClient(app)
-        with client.websocket_connect(
-            f"/ws/remediations/rem-456?token={token}"
-        ) as ws:
+        with client.websocket_connect(f"/ws/remediations/rem-456?token={token}") as ws:
             assert ws is not None

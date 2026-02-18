@@ -6,7 +6,7 @@ integration.
 """
 
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 import structlog
@@ -54,9 +54,7 @@ class KubernetesLogSource(LogSource):
         namespace = parts[0] if len(parts) == 2 else "default"
         pod_name = parts[1] if len(parts) == 2 else parts[0]
 
-        since_seconds = int(
-            (time_range.end - time_range.start).total_seconds()
-        )
+        since_seconds = int((time_range.end - time_range.start).total_seconds())
 
         try:
             log_text = await self._core_api.read_namespaced_pod_log(
@@ -79,12 +77,14 @@ class KubernetesLogSource(LogSource):
             if not line:
                 continue
             level = _detect_log_level(line)
-            entries.append({
-                "timestamp": datetime.now(timezone.utc).isoformat(),
-                "message": line,
-                "level": level,
-                "source": f"{namespace}/{pod_name}",
-            })
+            entries.append(
+                {
+                    "timestamp": datetime.now(UTC).isoformat(),
+                    "message": line,
+                    "level": level,
+                    "source": f"{namespace}/{pod_name}",
+                }
+            )
 
         return entries
 
@@ -117,14 +117,14 @@ class KubernetesLogSource(LogSource):
 def _detect_log_level(line: str) -> str:
     """Heuristic log level detection from log line content."""
     line_upper = line.upper()
-    if re.search(r'\b(FATAL|PANIC)\b', line_upper):
+    if re.search(r"\b(FATAL|PANIC)\b", line_upper):
         return "fatal"
-    if re.search(r'\b(ERROR|ERR)\b', line_upper):
+    if re.search(r"\b(ERROR|ERR)\b", line_upper):
         return "error"
-    if re.search(r'\b(WARN|WARNING)\b', line_upper):
+    if re.search(r"\b(WARN|WARNING)\b", line_upper):
         return "warning"
-    if re.search(r'\b(INFO)\b', line_upper):
+    if re.search(r"\b(INFO)\b", line_upper):
         return "info"
-    if re.search(r'\b(DEBUG|TRACE)\b', line_upper):
+    if re.search(r"\b(DEBUG|TRACE)\b", line_upper):
         return "debug"
     return "info"

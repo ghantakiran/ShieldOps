@@ -1,7 +1,6 @@
 """Unit tests for OPA policy rules and the rate limiter."""
 
-from datetime import datetime, timezone
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -54,7 +53,9 @@ class TestPolicyEngineWithRateLimiter:
 
         # Verify the POST was called with enriched context
         call_args = engine._client.post.call_args
-        input_data = call_args.kwargs.get("json", call_args.args[1] if len(call_args.args) > 1 else {})
+        input_data = call_args.kwargs.get(
+            "json", call_args.args[1] if len(call_args.args) > 1 else {}
+        )
         assert input_data["input"]["context"]["actions_this_hour"] == 5
 
         # Verify rate limiter was incremented

@@ -8,15 +8,15 @@ Tests cover:
 - API endpoints (routes/security.py)
 """
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
 from shieldops.agents.security.models import (
-    CVEFinding,
     ComplianceControl,
     CredentialStatus,
+    CVEFinding,
     SecurityPosture,
     SecurityScanState,
     SecurityStep,
@@ -29,7 +29,6 @@ from shieldops.agents.security.prompts import (
 )
 from shieldops.agents.security.tools import SecurityToolkit
 from shieldops.models.base import Environment
-
 
 # --- Fixtures ---
 
@@ -48,7 +47,7 @@ def scan_state():
 @pytest.fixture
 def state_with_cves(scan_state):
     """State after vulnerability scanning."""
-    scan_state.scan_start = datetime.now(timezone.utc)
+    scan_state.scan_start = datetime.now(UTC)
     scan_state.cve_findings = [
         CVEFinding(
             cve_id="CVE-2024-1234",
@@ -74,16 +73,20 @@ def state_with_cves(scan_state):
     scan_state.patches_available = 2
     scan_state.reasoning_chain = [
         SecurityStep(
-            step_number=1, action="scan_vulnerabilities",
+            step_number=1,
+            action="scan_vulnerabilities",
             input_summary="Scanning 1 resource",
             output_summary="2 CVEs found, 1 critical",
-            duration_ms=100, tool_used="cve_scanner",
+            duration_ms=100,
+            tool_used="cve_scanner",
         ),
         SecurityStep(
-            step_number=2, action="assess_findings",
+            step_number=2,
+            action="assess_findings",
             input_summary="Assessing 2 CVEs",
             output_summary="Critical: openssl CVE",
-            duration_ms=200, tool_used="llm",
+            duration_ms=200,
+            tool_used="llm",
         ),
     ]
     return scan_state
@@ -98,7 +101,7 @@ def state_with_credentials(state_with_cves):
             credential_type="database_password",
             service="postgresql",
             environment=Environment.PRODUCTION,
-            expires_at=datetime.now(timezone.utc) + timedelta(days=3),
+            expires_at=datetime.now(UTC) + timedelta(days=3),
             days_until_expiry=3,
             needs_rotation=True,
         ),
@@ -106,10 +109,12 @@ def state_with_credentials(state_with_cves):
     state_with_cves.credentials_needing_rotation = 1
     state_with_cves.reasoning_chain.append(
         SecurityStep(
-            step_number=3, action="check_credentials",
+            step_number=3,
+            action="check_credentials",
             input_summary="Checking production credentials",
             output_summary="1 credential expiring soon",
-            duration_ms=50, tool_used="credential_store + llm",
+            duration_ms=50,
+            tool_used="credential_store + llm",
         ),
     )
     return state_with_cves
@@ -119,18 +124,20 @@ def state_with_credentials(state_with_cves):
 def mock_cve_source():
     source = AsyncMock()
     source.source_name = "nvd"
-    source.scan = AsyncMock(return_value=[
-        {
-            "cve_id": "CVE-2024-1234",
-            "severity": "critical",
-            "cvss_score": 9.8,
-            "package_name": "openssl",
-            "installed_version": "1.1.1",
-            "fixed_version": "1.1.1w",
-            "affected_resource": "default/api-server",
-            "description": "Buffer overflow",
-        },
-    ])
+    source.scan = AsyncMock(
+        return_value=[
+            {
+                "cve_id": "CVE-2024-1234",
+                "severity": "critical",
+                "cvss_score": 9.8,
+                "package_name": "openssl",
+                "installed_version": "1.1.1",
+                "fixed_version": "1.1.1w",
+                "affected_resource": "default/api-server",
+                "description": "Buffer overflow",
+            },
+        ]
+    )
     return source
 
 
@@ -138,23 +145,25 @@ def mock_cve_source():
 def mock_credential_store():
     store = AsyncMock()
     store.store_name = "vault"
-    now = datetime.now(timezone.utc)
-    store.list_credentials = AsyncMock(return_value=[
-        {
-            "credential_id": "db-prod-password",
-            "credential_type": "database_password",
-            "service": "postgresql",
-            "expires_at": now + timedelta(days=3),
-            "last_rotated": now - timedelta(days=83),
-        },
-        {
-            "credential_id": "api-key-stripe",
-            "credential_type": "api_key",
-            "service": "stripe",
-            "expires_at": now + timedelta(days=30),
-            "last_rotated": now - timedelta(days=60),
-        },
-    ])
+    now = datetime.now(UTC)
+    store.list_credentials = AsyncMock(
+        return_value=[
+            {
+                "credential_id": "db-prod-password",
+                "credential_type": "database_password",
+                "service": "postgresql",
+                "expires_at": now + timedelta(days=3),
+                "last_rotated": now - timedelta(days=83),
+            },
+            {
+                "credential_id": "api-key-stripe",
+                "credential_type": "api_key",
+                "service": "stripe",
+                "expires_at": now + timedelta(days=30),
+                "last_rotated": now - timedelta(days=60),
+            },
+        ]
+    )
     return store
 
 
@@ -307,8 +316,11 @@ class TestAssessFindingsNode:
 
         scan_state.reasoning_chain = [
             SecurityStep(
-                step_number=1, action="scan", input_summary="",
-                output_summary="", duration_ms=0,
+                step_number=1,
+                action="scan",
+                input_summary="",
+                output_summary="",
+                duration_ms=0,
             ),
         ]
         result = await assess_findings(scan_state)
@@ -536,7 +548,7 @@ class TestSecurityRunner:
             scan_type="full",
             target_environment=Environment.PRODUCTION,
             current_step="complete",
-            scan_start=datetime.now(timezone.utc),
+            scan_start=datetime.now(UTC),
             posture=SecurityPosture(overall_score=85.0),
         )
         runner._app = AsyncMock()
@@ -651,15 +663,16 @@ class TestSecurityAPI:
 
         def _mock_admin_user():
             return UserResponse(
-                id="test-admin", email="admin@test.com", name="Test Admin",
-                role=UserRole.ADMIN, is_active=True,
+                id="test-admin",
+                email="admin@test.com",
+                name="Test Admin",
+                role=UserRole.ADMIN,
+                is_active=True,
             )
 
         app.dependency_overrides[get_current_user] = _mock_admin_user
 
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as ac:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
             yield ac
 
         set_runner(None)

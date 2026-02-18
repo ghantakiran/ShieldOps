@@ -4,7 +4,7 @@ Queries Datadog via its API for metric data, anomaly detection,
 and instant queries used by investigation agents.
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 import httpx
@@ -70,13 +70,15 @@ class DatadogSource(MetricSource):
                 for point in point_list:
                     if len(point) >= 2 and point[1] is not None:
                         ts_ms = point[0]
-                        results.append({
-                            "timestamp": datetime.fromtimestamp(
-                                ts_ms / 1000, tz=timezone.utc
-                            ).isoformat(),
-                            "value": float(point[1]),
-                            "labels": series_labels,
-                        })
+                        results.append(
+                            {
+                                "timestamp": datetime.fromtimestamp(
+                                    ts_ms / 1000, tz=UTC
+                                ).isoformat(),
+                                "value": float(point[1]),
+                                "labels": series_labels,
+                            }
+                        )
             return results
 
         except httpx.HTTPError as e:
@@ -88,7 +90,7 @@ class DatadogSource(MetricSource):
 
     async def query_instant(self, query: str) -> list[dict[str, Any]]:
         """Execute an instant query (latest 5 minutes)."""
-        now = int(datetime.now(timezone.utc).timestamp())
+        now = int(datetime.now(UTC).timestamp())
         from_ts = now - 300  # 5 minutes ago
 
         try:
@@ -111,14 +113,14 @@ class DatadogSource(MetricSource):
                 # Take the last data point as the "instant" value
                 if point_list and point_list[-1][1] is not None:
                     last = point_list[-1]
-                    results.append({
-                        "metric": series.get("metric", query),
-                        "value": float(last[1]),
-                        "labels": series_labels,
-                        "timestamp": datetime.fromtimestamp(
-                            last[0] / 1000, tz=timezone.utc
-                        ).isoformat(),
-                    })
+                    results.append(
+                        {
+                            "metric": series.get("metric", query),
+                            "value": float(last[1]),
+                            "labels": series_labels,
+                            "timestamp": datetime.fromtimestamp(last[0] / 1000, tz=UTC).isoformat(),
+                        }
+                    )
             return results
 
         except httpx.HTTPError as e:
@@ -157,14 +159,16 @@ class DatadogSource(MetricSource):
                 continue
             deviation = ((point["value"] - baseline_avg) / baseline_avg) * 100
             if abs(deviation) >= threshold_percent:
-                anomalies.append({
-                    "timestamp": point["timestamp"],
-                    "current_value": point["value"],
-                    "baseline_value": baseline_avg,
-                    "deviation_percent": round(deviation, 2),
-                    "labels": point.get("labels", {}),
-                    "metric_name": metric_name,
-                })
+                anomalies.append(
+                    {
+                        "timestamp": point["timestamp"],
+                        "current_value": point["value"],
+                        "baseline_value": baseline_avg,
+                        "deviation_percent": round(deviation, 2),
+                        "labels": point.get("labels", {}),
+                        "metric_name": metric_name,
+                    }
+                )
 
         logger.info(
             "datadog_anomaly_detection",

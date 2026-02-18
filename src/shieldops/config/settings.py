@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     environment: str = "development"  # development, staging, production
 
     # API
-    api_host: str = "0.0.0.0"
+    api_host: str = "0.0.0.0"  # noqa: S104
     api_port: int = 8000
     api_prefix: str = "/api/v1"
     cors_origins: list[str] = ["http://localhost:3000"]
@@ -93,7 +93,7 @@ class Settings(BaseSettings):
     linux_private_key_path: str = ""
 
     # Security
-    jwt_secret_key: str = "change-me-in-production"
+    jwt_secret_key: str = "change-me-in-production"  # noqa: S105
     jwt_algorithm: str = "HS256"
     jwt_expire_minutes: int = 60
 

@@ -4,7 +4,7 @@ Takes a RemediationAction, constructs the LangGraph, runs it end-to-end,
 and returns the completed remediation state.
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import uuid4
 
 import structlog
@@ -123,8 +123,7 @@ class RemediationRunner:
             # Calculate total duration
             if final_state.remediation_start:
                 final_state.remediation_duration_ms = int(
-                    (datetime.now(timezone.utc) - final_state.remediation_start).total_seconds()
-                    * 1000
+                    (datetime.now(UTC) - final_state.remediation_start).total_seconds() * 1000
                 )
 
             logger.info(
@@ -205,7 +204,7 @@ class RemediationRunner:
 
             entry = AuditEntry(
                 id=f"aud-{remediation_id}",
-                timestamp=datetime.now(timezone.utc),
+                timestamp=datetime.now(UTC),
                 agent_type="remediation",
                 action=state.action.action_type,
                 target_resource=state.action.target_resource,
@@ -252,7 +251,7 @@ class RemediationRunner:
         Returns ActionResult with FAILED status if the remediation is not found
         or has no snapshot.
         """
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         state = self._remediations.get(remediation_id)
 
         if state is None:

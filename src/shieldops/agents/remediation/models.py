@@ -1,7 +1,6 @@
 """State models for the Remediation Agent."""
 
 from datetime import datetime
-from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -9,8 +8,6 @@ from shieldops.models.base import (
     ActionResult,
     AlertContext,
     ApprovalStatus,
-    AuditEntry,
-    ExecutionStatus,
     RemediationAction,
     RiskLevel,
     Snapshot,

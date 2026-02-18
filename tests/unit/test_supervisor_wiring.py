@@ -33,28 +33,14 @@ class TestSupervisorWiring:
                 patch("shieldops.api.app.create_connector_router", return_value=mock_router)
             )
 
-            mock_inv = stack.enter_context(
-                patch("shieldops.api.app.InvestigationRunner")
-            )
-            stack.enter_context(
-                patch("shieldops.api.app.PolicyEngine", return_value=mock_policy)
-            )
+            mock_inv = stack.enter_context(patch("shieldops.api.app.InvestigationRunner"))
+            stack.enter_context(patch("shieldops.api.app.PolicyEngine", return_value=mock_policy))
             stack.enter_context(patch("shieldops.api.app.ApprovalWorkflow"))
-            mock_rem = stack.enter_context(
-                patch("shieldops.api.app.RemediationRunner")
-            )
-            mock_sec = stack.enter_context(
-                patch("shieldops.api.app.SecurityRunner")
-            )
-            mock_cost = stack.enter_context(
-                patch("shieldops.api.app.CostRunner")
-            )
-            mock_learn = stack.enter_context(
-                patch("shieldops.api.app.LearningRunner")
-            )
-            mock_sup_cls = stack.enter_context(
-                patch("shieldops.api.app.SupervisorRunner")
-            )
+            mock_rem = stack.enter_context(patch("shieldops.api.app.RemediationRunner"))
+            mock_sec = stack.enter_context(patch("shieldops.api.app.SecurityRunner"))
+            mock_cost = stack.enter_context(patch("shieldops.api.app.CostRunner"))
+            mock_learn = stack.enter_context(patch("shieldops.api.app.LearningRunner"))
+            mock_sup_cls = stack.enter_context(patch("shieldops.api.app.SupervisorRunner"))
 
             from shieldops.api.app import create_app
             from shieldops.api.routes import supervisor

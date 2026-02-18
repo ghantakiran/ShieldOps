@@ -1,5 +1,7 @@
 """Tests for the analytics engine and API endpoints."""
 
+from datetime import UTC
+
 import pytest
 from httpx import ASGITransport, AsyncClient
 
@@ -8,9 +10,7 @@ from shieldops.api.app import app
 
 @pytest.fixture
 async def client():
-    async with AsyncClient(
-        transport=ASGITransport(app=app), base_url="http://test"
-    ) as ac:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
         yield ac
 
 
@@ -63,9 +63,7 @@ class TestAnalyticsEndpoints:
 
     @pytest.mark.asyncio
     async def test_cost_savings_custom_rate(self, client):
-        response = await client.get(
-            "/api/v1/analytics/cost-savings?engineer_hourly_rate=100"
-        )
+        response = await client.get("/api/v1/analytics/cost-savings?engineer_hourly_rate=100")
         assert response.status_code == 200
         data = response.json()
         assert data["engineer_hourly_rate"] == 100.0
@@ -82,21 +80,27 @@ class TestAnalyticsEngineParsing:
 
     def test_parse_period_default(self):
         from shieldops.analytics.engine import _parse_period
+
         cutoff = _parse_period("30d")
-        from datetime import datetime, timezone, timedelta
-        expected = datetime.now(timezone.utc) - timedelta(days=30)
+        from datetime import datetime, timedelta
+
+        expected = datetime.now(UTC) - timedelta(days=30)
         assert abs((cutoff - expected).total_seconds()) < 2
 
     def test_parse_period_7d(self):
         from shieldops.analytics.engine import _parse_period
+
         cutoff = _parse_period("7d")
-        from datetime import datetime, timezone, timedelta
-        expected = datetime.now(timezone.utc) - timedelta(days=7)
+        from datetime import datetime, timedelta
+
+        expected = datetime.now(UTC) - timedelta(days=7)
         assert abs((cutoff - expected).total_seconds()) < 2
 
     def test_parse_period_invalid_defaults_30(self):
         from shieldops.analytics.engine import _parse_period
+
         cutoff = _parse_period("invalid")
-        from datetime import datetime, timezone, timedelta
-        expected = datetime.now(timezone.utc) - timedelta(days=30)
+        from datetime import datetime, timedelta
+
+        expected = datetime.now(UTC) - timedelta(days=30)
         assert abs((cutoff - expected).total_seconds()) < 2

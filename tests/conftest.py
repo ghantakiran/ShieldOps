@@ -46,4 +46,5 @@ def _mock_admin_user():
 
 # Apply override to the FastAPI app so all endpoint tests bypass auth
 from shieldops.api.app import app as _app  # noqa: E402
+
 _app.dependency_overrides[get_current_user] = _mock_admin_user

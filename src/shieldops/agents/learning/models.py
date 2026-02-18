@@ -1,7 +1,6 @@
 """State models for the Learning Agent LangGraph workflow."""
 
 from datetime import datetime
-from typing import Any
 
 from pydantic import BaseModel, Field
 

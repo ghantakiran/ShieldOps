@@ -4,7 +4,7 @@ Queries Jaeger via its HTTP API for distributed trace data used by
 investigation agents for latency analysis and bottleneck detection.
 """
 
-from datetime import timezone
+from datetime import UTC
 from typing import Any
 
 import httpx
@@ -66,8 +66,8 @@ class JaegerSource(TraceSource):
     ) -> list[dict[str, Any]]:
         """Search traces by service, duration, or error status."""
         # Jaeger uses microseconds for timestamps
-        start_us = int(time_range.start.astimezone(timezone.utc).timestamp() * 1_000_000)
-        end_us = int(time_range.end.astimezone(timezone.utc).timestamp() * 1_000_000)
+        start_us = int(time_range.start.astimezone(UTC).timestamp() * 1_000_000)
+        end_us = int(time_range.end.astimezone(UTC).timestamp() * 1_000_000)
 
         params: dict[str, Any] = {
             "service": service,
@@ -92,19 +92,19 @@ class JaegerSource(TraceSource):
             for trace in data.get("data", []):
                 spans = self._parse_spans(trace)
                 root_service = self._find_root_service(trace)
-                total_duration = max(
-                    (s["duration_ms"] for s in spans), default=0
-                )
+                total_duration = max((s["duration_ms"] for s in spans), default=0)
                 has_error = any(s.get("status") == "error" for s in spans)
 
-                summaries.append({
-                    "trace_id": trace.get("traceID", ""),
-                    "root_service": root_service,
-                    "span_count": len(spans),
-                    "total_duration_ms": total_duration,
-                    "has_error": has_error,
-                    "services": list({s["service"] for s in spans}),
-                })
+                summaries.append(
+                    {
+                        "trace_id": trace.get("traceID", ""),
+                        "root_service": root_service,
+                        "span_count": len(spans),
+                        "total_duration_ms": total_duration,
+                        "has_error": has_error,
+                        "services": list({s["service"] for s in spans}),
+                    }
+                )
             return summaries
 
         except httpx.HTTPError as e:
@@ -164,14 +164,16 @@ class JaegerSource(TraceSource):
                     parent_span_id = ref.get("spanID")
                     break
 
-            spans.append({
-                "span_id": span.get("spanID", ""),
-                "service": process_map.get(span.get("processID", ""), "unknown"),
-                "operation": span.get("operationName", ""),
-                "duration_ms": round(duration_us / 1000, 2),
-                "status": "error" if has_error else "ok",
-                "parent_span_id": parent_span_id,
-            })
+            spans.append(
+                {
+                    "span_id": span.get("spanID", ""),
+                    "service": process_map.get(span.get("processID", ""), "unknown"),
+                    "operation": span.get("operationName", ""),
+                    "duration_ms": round(duration_us / 1000, 2),
+                    "status": "error" if has_error else "ok",
+                    "parent_span_id": parent_span_id,
+                }
+            )
         return spans
 
     @staticmethod

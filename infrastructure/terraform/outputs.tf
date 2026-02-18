@@ -85,3 +85,12 @@ output "public_subnet_ids" {
   description = "IDs of the public subnets"
   value       = aws_subnet.public[*].id
 }
+
+# ---------------------------------------------------------------------------
+# CI/CD
+# ---------------------------------------------------------------------------
+
+output "github_actions_deploy_role_arn" {
+  description = "ARN of the IAM role for GitHub Actions OIDC deploy (set as AWS_DEPLOY_ROLE_ARN secret)"
+  value       = aws_iam_role.github_actions_deploy.arn
+}

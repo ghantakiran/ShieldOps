@@ -7,7 +7,7 @@ Each node is an async function that:
 4. Records its reasoning step in the audit trail
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 import structlog
@@ -57,7 +57,7 @@ async def gather_context(state: InvestigationState) -> dict:
 
     Queries Kubernetes events and resource health for the affected resource.
     """
-    start = datetime.now(timezone.utc)
+    start = datetime.now(UTC)
     toolkit = _get_toolkit()
     resource_id = state.alert_context.resource_id or ""
 
@@ -97,7 +97,7 @@ async def gather_context(state: InvestigationState) -> dict:
 
 async def analyze_logs(state: InvestigationState) -> dict:
     """Query and analyze logs using the LLM to identify error patterns."""
-    start = datetime.now(timezone.utc)
+    start = datetime.now(UTC)
     toolkit = _get_toolkit()
     resource_id = state.alert_context.resource_id or ""
 
@@ -115,7 +115,9 @@ async def analyze_logs(state: InvestigationState) -> dict:
 
     # LLM analysis of log data
     findings: list[LogFinding] = []
-    output_summary = f"Queried logs: {log_data['total_entries']} entries, {log_data['error_count']} errors"
+    output_summary = (
+        f"Queried logs: {log_data['total_entries']} entries, {log_data['error_count']} errors"
+    )
 
     if log_data["total_entries"] > 0:
         try:
@@ -126,41 +128,48 @@ async def analyze_logs(state: InvestigationState) -> dict:
             )
             output_summary = analysis.summary
 
-            for i, pattern in enumerate(analysis.error_patterns):
-                match_count = sum(
-                    len(v) for v in log_data["pattern_matches"].values()
+            for _i, pattern in enumerate(analysis.error_patterns):
+                match_count = sum(len(v) for v in log_data["pattern_matches"].values())
+                findings.append(
+                    LogFinding(
+                        source=", ".join(log_data["sources_queried"]),
+                        query=resource_id,
+                        summary=pattern,
+                        severity=analysis.severity,
+                        sample_entries=[
+                            e.get("message", "") for e in log_data["error_entries"][:5]
+                        ],
+                        count=match_count,
+                    )
                 )
-                findings.append(LogFinding(
-                    source=", ".join(log_data["sources_queried"]),
-                    query=resource_id,
-                    summary=pattern,
-                    severity=analysis.severity,
-                    sample_entries=[
-                        e.get("message", "")
-                        for e in log_data["error_entries"][:5]
-                    ],
-                    count=match_count,
-                ))
         except Exception as e:
             logger.error("llm_log_analysis_failed", error=str(e))
-            output_summary = f"LLM analysis failed: {e}. Raw: {log_data['error_count']} errors found."
+            output_summary = (
+                f"LLM analysis failed: {e}. Raw: {log_data['error_count']} errors found."
+            )
             # Fallback: create findings from raw data
             if log_data["error_count"] > 0:
-                findings.append(LogFinding(
-                    source=", ".join(log_data["sources_queried"]),
-                    query=resource_id,
-                    summary=f"{log_data['error_count']} error log entries found",
-                    severity="error",
-                    sample_entries=[
-                        e.get("message", "") for e in log_data["error_entries"][:5]
-                    ],
-                    count=log_data["error_count"],
-                ))
+                findings.append(
+                    LogFinding(
+                        source=", ".join(log_data["sources_queried"]),
+                        query=resource_id,
+                        summary=f"{log_data['error_count']} error log entries found",
+                        severity="error",
+                        sample_entries=[
+                            e.get("message", "") for e in log_data["error_entries"][:5]
+                        ],
+                        count=log_data["error_count"],
+                    )
+                )
 
     step = ReasoningStep(
         step_number=len(state.reasoning_chain) + 1,
         action="analyze_logs",
-        input_summary=f"Querying logs for {resource_id}: {log_data['total_entries']} entries from {log_data['sources_queried']}",
+        input_summary=(
+            f"Querying logs for {resource_id}: "
+            f"{log_data['total_entries']} entries "
+            f"from {log_data['sources_queried']}"
+        ),
         output_summary=output_summary,
         duration_ms=_elapsed_ms(start),
         tool_used="query_logs + llm",
@@ -175,7 +184,7 @@ async def analyze_logs(state: InvestigationState) -> dict:
 
 async def analyze_metrics(state: InvestigationState) -> dict:
     """Analyze metrics for anomalies using the LLM to interpret results."""
-    start = datetime.now(timezone.utc)
+    start = datetime.now(UTC)
     toolkit = _get_toolkit()
     resource_id = state.alert_context.resource_id or ""
 
@@ -184,19 +193,24 @@ async def analyze_metrics(state: InvestigationState) -> dict:
     metric_data = await toolkit.query_metrics(resource_id=resource_id)
 
     anomalies: list[MetricAnomaly] = []
-    output_summary = f"Checked {len(metric_data['metrics_checked'])} metrics, {metric_data['anomaly_count']} anomalies"
+    output_summary = (
+        f"Checked {len(metric_data['metrics_checked'])} metrics, "
+        f"{metric_data['anomaly_count']} anomalies"
+    )
 
     # Convert raw anomalies to MetricAnomaly models
     for raw in metric_data["anomalies"]:
-        anomalies.append(MetricAnomaly(
-            metric_name=raw.get("metric_name", "unknown"),
-            source=", ".join(metric_data["sources_queried"]),
-            current_value=raw.get("current_value", 0),
-            baseline_value=raw.get("baseline_value", 0),
-            deviation_percent=raw.get("deviation_percent", 0),
-            started_at=datetime.now(timezone.utc),
-            labels=raw.get("labels", {}),
-        ))
+        anomalies.append(
+            MetricAnomaly(
+                metric_name=raw.get("metric_name", "unknown"),
+                source=", ".join(metric_data["sources_queried"]),
+                current_value=raw.get("current_value", 0),
+                baseline_value=raw.get("baseline_value", 0),
+                deviation_percent=raw.get("deviation_percent", 0),
+                started_at=datetime.now(UTC),
+                labels=raw.get("labels", {}),
+            )
+        )
 
     # LLM analysis if we have data
     if metric_data["current_values"] or anomalies:
@@ -233,7 +247,7 @@ async def analyze_metrics(state: InvestigationState) -> dict:
 
 async def analyze_traces(state: InvestigationState) -> dict:
     """Analyze distributed traces to find bottleneck services."""
-    start = datetime.now(timezone.utc)
+    start = datetime.now(UTC)
     toolkit = _get_toolkit()
 
     # Extract service name from resource_id or alert labels
@@ -248,7 +262,10 @@ async def analyze_traces(state: InvestigationState) -> dict:
     trace_data = await toolkit.query_traces(service_name=service_name)
 
     trace_result: TraceResult | None = None
-    output_summary = f"Found {len(trace_data['traces'])} slow traces, {len(trace_data['error_traces'])} error traces"
+    output_summary = (
+        f"Found {len(trace_data['traces'])} slow traces, "
+        f"{len(trace_data['error_traces'])} error traces"
+    )
 
     if trace_data["bottleneck"]:
         bn = trace_data["bottleneck"]
@@ -280,7 +297,7 @@ async def analyze_traces(state: InvestigationState) -> dict:
 
 async def correlate_findings(state: InvestigationState) -> dict:
     """Correlate findings across logs, metrics, and traces using the LLM."""
-    start = datetime.now(timezone.utc)
+    start = datetime.now(UTC)
 
     logger.info(
         "investigation_correlating",
@@ -302,14 +319,16 @@ async def correlate_findings(state: InvestigationState) -> dict:
                 schema=CorrelationResult,
             )
 
-            for i, event_desc in enumerate(result.correlated_events):
-                correlated.append(CorrelatedEvent(
-                    timestamp=datetime.now(timezone.utc),
-                    source="cross-correlation",
-                    event_type="correlated",
-                    description=event_desc,
-                    correlation_score=0.8,
-                ))
+            for _i, event_desc in enumerate(result.correlated_events):
+                correlated.append(
+                    CorrelatedEvent(
+                        timestamp=datetime.now(UTC),
+                        source="cross-correlation",
+                        event_type="correlated",
+                        description=event_desc,
+                        correlation_score=0.8,
+                    )
+                )
 
             output_summary = (
                 f"Causal chain: {result.causal_chain[:200]}. "
@@ -340,7 +359,7 @@ async def correlate_findings(state: InvestigationState) -> dict:
 
 async def generate_hypotheses(state: InvestigationState) -> dict:
     """Generate ranked root cause hypotheses using the LLM."""
-    start = datetime.now(timezone.utc)
+    start = datetime.now(UTC)
 
     logger.info("investigation_generating_hypotheses", alert_id=state.alert_id)
 
@@ -356,15 +375,17 @@ async def generate_hypotheses(state: InvestigationState) -> dict:
         )
 
         for i, h in enumerate(result.hypotheses):
-            hypotheses.append(Hypothesis(
-                id=f"hyp-{state.alert_id}-{i+1}",
-                description=h.description,
-                confidence=h.confidence,
-                evidence=h.evidence,
-                affected_resources=h.affected_resources,
-                recommended_action=h.recommended_action,
-                reasoning_chain=h.reasoning,
-            ))
+            hypotheses.append(
+                Hypothesis(
+                    id=f"hyp-{state.alert_id}-{i + 1}",
+                    description=h.description,
+                    confidence=h.confidence,
+                    evidence=h.evidence,
+                    affected_resources=h.affected_resources,
+                    recommended_action=h.recommended_action,
+                    reasoning_chain=h.reasoning,
+                )
+            )
 
         # Top hypothesis confidence is the overall confidence score
         if hypotheses:
@@ -400,25 +421,25 @@ async def generate_hypotheses(state: InvestigationState) -> dict:
 
 
 def _elapsed_ms(start: datetime) -> int:
-    return int((datetime.now(timezone.utc) - start).total_seconds() * 1000)
+    return int((datetime.now(UTC) - start).total_seconds() * 1000)
 
 
 def _format_log_context(state: InvestigationState, log_data: dict[str, Any]) -> str:
     """Format log data into a prompt for LLM analysis."""
     lines = [
-        f"## Alert Context",
+        "## Alert Context",
         f"Alert: {state.alert_context.alert_name}",
         f"Severity: {state.alert_context.severity}",
         f"Resource: {state.alert_context.resource_id}",
         f"Description: {state.alert_context.description or 'N/A'}",
-        f"",
-        f"## Log Summary",
+        "",
+        "## Log Summary",
         f"Total entries: {log_data['total_entries']}",
         f"Errors: {log_data['error_count']}",
         f"Warnings: {log_data['warning_count']}",
         f"Sources: {', '.join(log_data['sources_queried'])}",
-        f"",
-        f"## Error Log Entries (most recent)",
+        "",
+        "## Error Log Entries (most recent)",
     ]
     for entry in log_data["error_entries"][:20]:
         lines.append(f"[{entry.get('level', '?')}] {entry.get('message', '')[:300]}")
@@ -436,11 +457,11 @@ def _format_log_context(state: InvestigationState, log_data: dict[str, Any]) -> 
 def _format_metric_context(state: InvestigationState, metric_data: dict[str, Any]) -> str:
     """Format metric data into a prompt for LLM analysis."""
     lines = [
-        f"## Alert Context",
+        "## Alert Context",
         f"Alert: {state.alert_context.alert_name}",
         f"Resource: {state.alert_context.resource_id}",
-        f"",
-        f"## Current Metric Values",
+        "",
+        "## Current Metric Values",
     ]
     for metric, value in metric_data["current_values"].items():
         lines.append(f"- {metric}: {value}")
@@ -467,12 +488,12 @@ def _format_metric_context(state: InvestigationState, metric_data: dict[str, Any
 def _format_all_findings(state: InvestigationState) -> str:
     """Format all findings for cross-source correlation."""
     lines = [
-        f"## Alert",
+        "## Alert",
         f"Name: {state.alert_context.alert_name}",
         f"Severity: {state.alert_context.severity}",
         f"Resource: {state.alert_context.resource_id}",
         f"Triggered: {state.alert_context.triggered_at}",
-        f"",
+        "",
         f"## Log Findings ({len(state.log_findings)})",
     ]
     for f in state.log_findings:
@@ -480,7 +501,7 @@ def _format_all_findings(state: InvestigationState) -> str:
         for sample in f.sample_entries[:3]:
             lines.append(f"  > {sample[:200]}")
 
-    lines.append(f"")
+    lines.append("")
     lines.append(f"## Metric Anomalies ({len(state.metric_anomalies)})")
     for a in state.metric_anomalies:
         lines.append(
@@ -490,8 +511,8 @@ def _format_all_findings(state: InvestigationState) -> str:
 
     if state.trace_analysis:
         t = state.trace_analysis
-        lines.append(f"")
-        lines.append(f"## Trace Analysis")
+        lines.append("")
+        lines.append("## Trace Analysis")
         lines.append(f"Root service: {t.root_service}")
         lines.append(f"Bottleneck: {t.bottleneck_service or 'none'}")
         lines.append(f"Error service: {t.error_service or 'none'}")

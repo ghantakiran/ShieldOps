@@ -1,7 +1,7 @@
 """Security page — posture score, CVEs, compliance, credential rotation."""
 
-import streamlit as st
 import plotly.graph_objects as go
+import streamlit as st
 
 from shieldops.dashboard.api_client import ShieldOpsAPIClient
 from shieldops.dashboard.components import (
@@ -10,7 +10,6 @@ from shieldops.dashboard.components import (
     render_empty_state,
     render_metric_row,
     render_page_header,
-    render_severity_badge,
 )
 from shieldops.dashboard.config import SUPPORTED_ENVIRONMENTS
 
@@ -40,21 +39,23 @@ else:
 
     col_gauge, col_metrics = st.columns([1, 2])
     with col_gauge:
-        fig = go.Figure(go.Indicator(
-            mode="gauge+number",
-            value=score * 100 if score <= 1 else score,
-            number={"suffix": ""},
-            title={"text": "Posture Score"},
-            gauge={
-                "axis": {"range": [0, 100]},
-                "bar": {"color": "#10B981"},
-                "steps": [
-                    {"range": [0, 40], "color": "rgba(239,68,68,0.19)"},
-                    {"range": [40, 70], "color": "rgba(245,158,11,0.19)"},
-                    {"range": [70, 100], "color": "rgba(16,185,129,0.19)"},
-                ],
-            },
-        ))
+        fig = go.Figure(
+            go.Indicator(
+                mode="gauge+number",
+                value=score * 100 if score <= 1 else score,
+                number={"suffix": ""},
+                title={"text": "Posture Score"},
+                gauge={
+                    "axis": {"range": [0, 100]},
+                    "bar": {"color": "#10B981"},
+                    "steps": [
+                        {"range": [0, 40], "color": "rgba(239,68,68,0.19)"},
+                        {"range": [40, 70], "color": "rgba(245,158,11,0.19)"},
+                        {"range": [70, 100], "color": "rgba(16,185,129,0.19)"},
+                    ],
+                },
+            )
+        )
         fig.update_layout(
             template="plotly_dark",
             height=250,
@@ -63,18 +64,25 @@ else:
         st.plotly_chart(fig, use_container_width=True)
 
     with col_metrics:
-        render_metric_row([
-            ("Critical CVEs", critical_cves, None),
-            ("Pending Patches", pending_patches, None),
-            ("Credentials Expiring", creds_expiring, None),
-        ])
+        render_metric_row(
+            [
+                ("Critical CVEs", critical_cves, None),
+                ("Pending Patches", pending_patches, None),
+                ("Credentials Expiring", creds_expiring, None),
+            ]
+        )
 
 st.divider()
 
 # --- Tabs ---
-tab_cves, tab_compliance, tab_scans, tab_trigger = st.tabs([
-    "CVEs", "Compliance", "Scan History", "Trigger Scan",
-])
+tab_cves, tab_compliance, tab_scans, tab_trigger = st.tabs(
+    [
+        "CVEs",
+        "Compliance",
+        "Scan History",
+        "Trigger Scan",
+    ]
+)
 
 # --- CVEs ---
 with tab_cves:
@@ -93,8 +101,14 @@ with tab_cves:
         if cves:
             render_data_table(
                 cves,
-                columns=["cve_id", "severity", "package", "affected_resource",
-                         "cvss_score", "patch_available"],
+                columns=[
+                    "cve_id",
+                    "severity",
+                    "package",
+                    "affected_resource",
+                    "cvss_score",
+                    "patch_available",
+                ],
             )
         else:
             render_empty_state("No CVEs found. Run a security scan to detect vulnerabilities.")
@@ -103,20 +117,22 @@ with tab_cves:
 with tab_compliance:
     FRAMEWORKS = ["SOC2", "PCI-DSS", "HIPAA", "CIS"]
     cols = st.columns(len(FRAMEWORKS))
-    for col, fw in zip(cols, FRAMEWORKS):
+    for col, fw in zip(cols, FRAMEWORKS, strict=False):
         with col:
             comp = client.get_compliance(fw)
             score = comp.get("score", 0)
-            fig = go.Figure(go.Indicator(
-                mode="gauge+number",
-                value=score * 100 if score <= 1 else score,
-                number={"suffix": "%"},
-                title={"text": fw},
-                gauge={
-                    "axis": {"range": [0, 100]},
-                    "bar": {"color": "#3B82F6"},
-                },
-            ))
+            fig = go.Figure(
+                go.Indicator(
+                    mode="gauge+number",
+                    value=score * 100 if score <= 1 else score,
+                    number={"suffix": "%"},
+                    title={"text": fw},
+                    gauge={
+                        "axis": {"range": [0, 100]},
+                        "bar": {"color": "#3B82F6"},
+                    },
+                )
+            )
             fig.update_layout(
                 template="plotly_dark",
                 height=200,
@@ -138,39 +154,44 @@ with tab_scans:
         if scans:
             render_data_table(
                 scans,
-                columns=["scan_id", "scan_type", "status", "environment",
-                         "posture_score", "critical_cves"],
+                columns=[
+                    "scan_id",
+                    "scan_type",
+                    "status",
+                    "environment",
+                    "posture_score",
+                    "critical_cves",
+                ],
             )
         else:
             render_empty_state("No scans yet.")
 
 # --- Trigger scan ---
-with tab_trigger:
-    with st.form("trigger_scan"):
-        st.markdown("#### Trigger Security Scan")
-        environment = st.selectbox("Environment", SUPPORTED_ENVIRONMENTS, key="scan_env")
-        scan_type = st.selectbox(
-            "Scan Type",
-            ["full", "cve_only", "credentials_only", "compliance_only"],
-        )
-        target_resources = st.text_input(
-            "Target Resources (comma-separated)",
-            placeholder="service-a, service-b",
-        )
-        frameworks = st.multiselect(
-            "Compliance Frameworks",
-            ["SOC2", "PCI-DSS", "HIPAA", "CIS"],
-        )
+with tab_trigger, st.form("trigger_scan"):
+    st.markdown("#### Trigger Security Scan")
+    environment = st.selectbox("Environment", SUPPORTED_ENVIRONMENTS, key="scan_env")
+    scan_type = st.selectbox(
+        "Scan Type",
+        ["full", "cve_only", "credentials_only", "compliance_only"],
+    )
+    target_resources = st.text_input(
+        "Target Resources (comma-separated)",
+        placeholder="service-a, service-b",
+    )
+    frameworks = st.multiselect(
+        "Compliance Frameworks",
+        ["SOC2", "PCI-DSS", "HIPAA", "CIS"],
+    )
 
-        if st.form_submit_button("Start Scan"):
-            targets = [t.strip() for t in target_resources.split(",") if t.strip()]
-            result = client.trigger_scan(
-                environment=environment,
-                scan_type=scan_type,
-                target_resources=targets or None,
-                compliance_frameworks=frameworks or None,
-            )
-            if "error" in result:
-                st.error(result["error"])
-            else:
-                st.success(f"Scan triggered: {result.get('message', 'OK')}")
+    if st.form_submit_button("Start Scan"):
+        targets = [t.strip() for t in target_resources.split(",") if t.strip()]
+        result = client.trigger_scan(
+            environment=environment,
+            scan_type=scan_type,
+            target_resources=targets or None,
+            compliance_frameworks=frameworks or None,
+        )
+        if "error" in result:
+            st.error(result["error"])
+        else:
+            st.success(f"Scan triggered: {result.get('message', 'OK')}")

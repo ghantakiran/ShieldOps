@@ -2,7 +2,7 @@
 
 import asyncio
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 from uuid import uuid4
 
@@ -97,9 +97,7 @@ class LinuxConnector(InfraConnector):
         resource_id: service name (e.g. "nginx", "postgresql")
         """
         try:
-            stdout, _, exit_code = await self._run_command(
-                f"systemctl is-active {resource_id}"
-            )
+            stdout, _, exit_code = await self._run_command(f"systemctl is-active {resource_id}")
             active = stdout.strip() == "active"
 
             # Get additional info
@@ -117,7 +115,7 @@ class LinuxConnector(InfraConnector):
                 healthy=active,
                 status=props.get("ActiveState", stdout.strip()),
                 message=f"SubState={props.get('SubState', 'unknown')}",
-                last_checked=datetime.now(timezone.utc),
+                last_checked=datetime.now(UTC),
                 metrics={
                     "restarts": float(props.get("NRestarts", "0")),
                 },
@@ -129,7 +127,7 @@ class LinuxConnector(InfraConnector):
                 healthy=False,
                 status="error",
                 message=str(e),
-                last_checked=datetime.now(timezone.utc),
+                last_checked=datetime.now(UTC),
             )
 
     async def list_resources(
@@ -165,9 +163,7 @@ class LinuxConnector(InfraConnector):
             logger.error("linux_list_resources_failed", error=str(e))
             return []
 
-    async def get_events(
-        self, resource_id: str, time_range: TimeRange
-    ) -> list[dict[str, Any]]:
+    async def get_events(self, resource_id: str, time_range: TimeRange) -> list[dict[str, Any]]:
         """Get journalctl events for a service."""
         try:
             since = time_range.start.strftime("%Y-%m-%d %H:%M:%S")
@@ -183,12 +179,14 @@ class LinuxConnector(InfraConnector):
                 if line.strip():
                     try:
                         entry = json.loads(line)
-                        events.append({
-                            "timestamp": entry.get("__REALTIME_TIMESTAMP"),
-                            "message": entry.get("MESSAGE", ""),
-                            "priority": entry.get("PRIORITY"),
-                            "unit": entry.get("_SYSTEMD_UNIT"),
-                        })
+                        events.append(
+                            {
+                                "timestamp": entry.get("__REALTIME_TIMESTAMP"),
+                                "message": entry.get("MESSAGE", ""),
+                                "priority": entry.get("PRIORITY"),
+                                "unit": entry.get("_SYSTEMD_UNIT"),
+                            }
+                        )
                     except json.JSONDecodeError:
                         continue
             return events
@@ -198,7 +196,7 @@ class LinuxConnector(InfraConnector):
 
     async def execute_action(self, action: RemediationAction) -> ActionResult:
         """Execute a remediation action on a Linux service."""
-        started_at = datetime.now(timezone.utc)
+        started_at = datetime.now(UTC)
 
         logger.info(
             "linux_execute_action",
@@ -221,7 +219,7 @@ class LinuxConnector(InfraConnector):
                     status=ExecutionStatus.FAILED,
                     message=f"Unsupported action type: {action.action_type}",
                     started_at=started_at,
-                    completed_at=datetime.now(timezone.utc),
+                    completed_at=datetime.now(UTC),
                 )
         except ValueError as e:
             # Security guardrail triggered
@@ -230,7 +228,7 @@ class LinuxConnector(InfraConnector):
                 status=ExecutionStatus.FAILED,
                 message=f"Security guardrail: {e}",
                 started_at=started_at,
-                completed_at=datetime.now(timezone.utc),
+                completed_at=datetime.now(UTC),
                 error=str(e),
             )
         except Exception as e:
@@ -240,7 +238,7 @@ class LinuxConnector(InfraConnector):
                 status=ExecutionStatus.FAILED,
                 message=f"SSH error: {e}",
                 started_at=started_at,
-                completed_at=datetime.now(timezone.utc),
+                completed_at=datetime.now(UTC),
                 error=str(e),
             )
 
@@ -255,7 +253,7 @@ class LinuxConnector(InfraConnector):
                 status=ExecutionStatus.FAILED,
                 message=f"Failed to restart {service}: {stderr.strip()}",
                 started_at=started_at,
-                completed_at=datetime.now(timezone.utc),
+                completed_at=datetime.now(UTC),
                 error=stderr.strip(),
             )
         return ActionResult(
@@ -263,12 +261,10 @@ class LinuxConnector(InfraConnector):
             status=ExecutionStatus.SUCCESS,
             message=f"Service {service} restarted successfully",
             started_at=started_at,
-            completed_at=datetime.now(timezone.utc),
+            completed_at=datetime.now(UTC),
         )
 
-    async def _stop_service(
-        self, action: RemediationAction, started_at: datetime
-    ) -> ActionResult:
+    async def _stop_service(self, action: RemediationAction, started_at: datetime) -> ActionResult:
         service = action.target_resource
         _, stderr, exit_code = await self._run_command(f"systemctl stop {service}")
         if exit_code != 0:
@@ -277,7 +273,7 @@ class LinuxConnector(InfraConnector):
                 status=ExecutionStatus.FAILED,
                 message=f"Failed to stop {service}: {stderr.strip()}",
                 started_at=started_at,
-                completed_at=datetime.now(timezone.utc),
+                completed_at=datetime.now(UTC),
                 error=stderr.strip(),
             )
         return ActionResult(
@@ -285,12 +281,10 @@ class LinuxConnector(InfraConnector):
             status=ExecutionStatus.SUCCESS,
             message=f"Service {service} stopped",
             started_at=started_at,
-            completed_at=datetime.now(timezone.utc),
+            completed_at=datetime.now(UTC),
         )
 
-    async def _start_service(
-        self, action: RemediationAction, started_at: datetime
-    ) -> ActionResult:
+    async def _start_service(self, action: RemediationAction, started_at: datetime) -> ActionResult:
         service = action.target_resource
         _, stderr, exit_code = await self._run_command(f"systemctl start {service}")
         if exit_code != 0:
@@ -299,7 +293,7 @@ class LinuxConnector(InfraConnector):
                 status=ExecutionStatus.FAILED,
                 message=f"Failed to start {service}: {stderr.strip()}",
                 started_at=started_at,
-                completed_at=datetime.now(timezone.utc),
+                completed_at=datetime.now(UTC),
                 error=stderr.strip(),
             )
         return ActionResult(
@@ -307,7 +301,7 @@ class LinuxConnector(InfraConnector):
             status=ExecutionStatus.SUCCESS,
             message=f"Service {service} started",
             started_at=started_at,
-            completed_at=datetime.now(timezone.utc),
+            completed_at=datetime.now(UTC),
         )
 
     async def _update_package(
@@ -315,16 +309,14 @@ class LinuxConnector(InfraConnector):
     ) -> ActionResult:
         package = action.target_resource
         pkg_manager = action.parameters.get("package_manager", "apt-get")
-        _, stderr, exit_code = await self._run_command(
-            f"{pkg_manager} install -y {package}"
-        )
+        _, stderr, exit_code = await self._run_command(f"{pkg_manager} install -y {package}")
         if exit_code != 0:
             return ActionResult(
                 action_id=action.id,
                 status=ExecutionStatus.FAILED,
                 message=f"Failed to update {package}: {stderr.strip()}",
                 started_at=started_at,
-                completed_at=datetime.now(timezone.utc),
+                completed_at=datetime.now(UTC),
                 error=stderr.strip(),
             )
         return ActionResult(
@@ -332,7 +324,7 @@ class LinuxConnector(InfraConnector):
             status=ExecutionStatus.SUCCESS,
             message=f"Package {package} updated",
             started_at=started_at,
-            completed_at=datetime.now(timezone.utc),
+            completed_at=datetime.now(UTC),
         )
 
     async def create_snapshot(self, resource_id: str) -> Snapshot:
@@ -355,21 +347,21 @@ class LinuxConnector(InfraConnector):
             resource_id=resource_id,
             snapshot_type="linux_service",
             state=state,
-            created_at=datetime.now(timezone.utc),
+            created_at=datetime.now(UTC),
         )
         self._snapshots[snapshot_id] = state
         return snapshot
 
     async def rollback(self, snapshot_id: str) -> ActionResult:
         """Rollback to a captured snapshot state."""
-        started_at = datetime.now(timezone.utc)
+        started_at = datetime.now(UTC)
         if snapshot_id not in self._snapshots:
             return ActionResult(
                 action_id=f"rollback-{snapshot_id}",
                 status=ExecutionStatus.FAILED,
                 message=f"Snapshot {snapshot_id} not found",
                 started_at=started_at,
-                completed_at=datetime.now(timezone.utc),
+                completed_at=datetime.now(UTC),
             )
 
         logger.info("linux_rollback", snapshot_id=snapshot_id)
@@ -378,14 +370,14 @@ class LinuxConnector(InfraConnector):
             status=ExecutionStatus.SUCCESS,
             message=f"Rolled back to snapshot {snapshot_id}",
             started_at=started_at,
-            completed_at=datetime.now(timezone.utc),
+            completed_at=datetime.now(UTC),
             snapshot_id=snapshot_id,
         )
 
     async def validate_health(self, resource_id: str, timeout_seconds: int = 300) -> bool:
         """Poll systemctl is-active until healthy or timeout."""
-        deadline = datetime.now(timezone.utc).timestamp() + timeout_seconds
-        while datetime.now(timezone.utc).timestamp() < deadline:
+        deadline = datetime.now(UTC).timestamp() + timeout_seconds
+        while datetime.now(UTC).timestamp() < deadline:
             health = await self.get_health(resource_id)
             if health.healthy:
                 return True

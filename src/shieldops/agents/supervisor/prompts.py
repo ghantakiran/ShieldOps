@@ -2,7 +2,6 @@
 
 from pydantic import BaseModel, Field
 
-
 # --- Response schemas for structured LLM output ---
 
 
@@ -10,54 +9,39 @@ class EventClassificationResult(BaseModel):
     """Structured output from LLM event classification."""
 
     task_type: str = Field(
-        description="Task type to delegate: investigate, remediate, security_scan, cost_analysis, learn"
+        description="Task type to delegate: investigate, remediate, "
+        "security_scan, cost_analysis, learn"
     )
-    priority: str = Field(
-        description="Priority level: critical, high, medium, low"
-    )
-    confidence: float = Field(
-        ge=0.0, le=1.0,
-        description="Confidence in the classification (0-1)"
-    )
-    reasoning: str = Field(
-        description="Brief explanation of why this classification was chosen"
-    )
+    priority: str = Field(description="Priority level: critical, high, medium, low")
+    confidence: float = Field(ge=0.0, le=1.0, description="Confidence in the classification (0-1)")
+    reasoning: str = Field(description="Brief explanation of why this classification was chosen")
 
 
 class ChainDecisionResult(BaseModel):
     """Structured output from LLM chaining decision."""
 
-    should_chain: bool = Field(
-        description="Whether to chain a follow-up task"
-    )
+    should_chain: bool = Field(description="Whether to chain a follow-up task")
     chain_task_type: str = Field(
         description="Task type for the chained task: remediate, security_scan, learn, or none"
     )
-    reasoning: str = Field(
-        description="Brief explanation of the chaining decision"
-    )
+    reasoning: str = Field(description="Brief explanation of the chaining decision")
 
 
 class EscalationDecisionResult(BaseModel):
     """Structured output from LLM escalation assessment."""
 
-    needs_escalation: bool = Field(
-        description="Whether this situation requires human escalation"
-    )
-    reason: str = Field(
-        description="Reason for escalation or why escalation is not needed"
-    )
-    channel: str = Field(
-        description="Recommended escalation channel: slack, pagerduty, email"
-    )
-    urgency: str = Field(
-        description="Urgency level: immediate, soon, informational"
-    )
+    needs_escalation: bool = Field(description="Whether this situation requires human escalation")
+    reason: str = Field(description="Reason for escalation or why escalation is not needed")
+    channel: str = Field(description="Recommended escalation channel: slack, pagerduty, email")
+    urgency: str = Field(description="Urgency level: immediate, soon, informational")
 
 
 # --- Prompt templates ---
 
-SYSTEM_EVENT_CLASSIFICATION = """You are an expert SRE supervisor classifying incoming events to determine which specialist agent should handle them.
+SYSTEM_EVENT_CLASSIFICATION = """\
+You are an expert SRE supervisor classifying incoming \
+events to determine which specialist agent should \
+handle them.
 
 Given an event, determine:
 1. The task type (which specialist agent should handle it)
@@ -79,7 +63,9 @@ Priority guidelines:
 
 Be decisive. Default to 'investigate' when uncertain about the event type."""
 
-SYSTEM_CHAIN_DECISION = """You are an expert SRE supervisor deciding whether to chain a follow-up task after a specialist agent completes.
+SYSTEM_CHAIN_DECISION = """\
+You are an expert SRE supervisor deciding whether to \
+chain a follow-up task after a specialist agent completes.
 
 Common chaining patterns:
 - Investigation with high confidence + recommended action → Remediation
@@ -94,7 +80,9 @@ Only chain if:
 
 If no chaining is needed, set should_chain to false and chain_task_type to 'none'."""
 
-SYSTEM_ESCALATION_DECISION = """You are an expert SRE supervisor deciding whether a situation requires human escalation.
+SYSTEM_ESCALATION_DECISION = """\
+You are an expert SRE supervisor deciding whether a \
+situation requires human escalation.
 
 Escalate when:
 1. Agent confidence is below threshold (<0.5) for critical issues
