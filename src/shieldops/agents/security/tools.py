@@ -9,7 +9,11 @@ from typing import Any
 
 import structlog
 
-from shieldops.agents.security.protocols import CredentialStore, CVESource
+from shieldops.agents.security.protocols import (
+    CredentialStore,
+    CVESource,
+    SecurityScanner,
+)
 from shieldops.connectors.base import ConnectorRouter
 from shieldops.models.base import Environment, RemediationAction, RiskLevel
 
@@ -27,14 +31,18 @@ class SecurityToolkit:
         connector_router: ConnectorRouter | None = None,
         cve_sources: list[CVESource] | None = None,
         credential_stores: list[CredentialStore] | None = None,
+        security_scanners: list[SecurityScanner] | None = None,
         policy_engine: Any | None = None,
         approval_workflow: Any | None = None,
+        repository: Any | None = None,
     ) -> None:
         self._router = connector_router
         self._cve_sources = cve_sources or []
         self._credential_stores = credential_stores or []
+        self._security_scanners = security_scanners or []
         self._policy_engine = policy_engine
         self._approval_workflow = approval_workflow
+        self._repository = repository
 
     # ── Scan tools (existing) ─────────────────────────────────────
 
@@ -79,6 +87,199 @@ class SecurityToolkit:
             "high_findings": high[:30],
             "patches_available": sum(1 for f in all_findings if f.get("fixed_version")),
             "sources_queried": [getattr(s, "source_name", "unknown") for s in self._cve_sources],
+        }
+
+    async def scan_containers(
+        self,
+        image_refs: list[str],
+        severity_threshold: str = "medium",
+    ) -> dict[str, Any]:
+        """Scan container images for CVEs using container-specific sources (Trivy)."""
+
+        container_sources = [
+            s for s in self._cve_sources if getattr(s, "source_name", "") == "trivy"
+        ]
+        if not container_sources:
+            return {"total_findings": 0, "findings": [], "sources_queried": []}
+
+        all_findings: list[dict[str, Any]] = []
+        for source in container_sources:
+            for image in image_refs:
+                try:
+                    findings = await source.scan(image, severity_threshold)
+                    all_findings.extend(findings)
+                except Exception as e:
+                    logger.error("container_scan_failed", image=image, error=str(e))
+
+        return {
+            "total_findings": len(all_findings),
+            "findings": all_findings[:100],
+            "critical_count": sum(1 for f in all_findings if f.get("severity") == "critical"),
+            "sources_queried": [getattr(s, "source_name", "unknown") for s in container_sources],
+        }
+
+    async def scan_repositories(
+        self,
+        repo_paths: list[str],
+        scan_type: str = "secrets",
+    ) -> dict[str, Any]:
+        """Scan git repositories for secrets or vulnerable dependencies."""
+        from shieldops.agents.security.protocols import ScannerType
+
+        target_type = ScannerType.SECRET if scan_type == "secrets" else ScannerType.CVE
+        scanners = [s for s in self._security_scanners if s.scanner_type == target_type]
+        if not scanners:
+            return {"total_findings": 0, "findings": [], "scanners_queried": []}
+
+        all_findings: list[dict[str, Any]] = []
+        for scanner in scanners:
+            for path in repo_paths:
+                try:
+                    findings = await scanner.scan(path)
+                    all_findings.extend(findings)
+                except Exception as e:
+                    logger.error(
+                        "repo_scan_failed",
+                        scanner=scanner.scanner_name,
+                        path=path,
+                        error=str(e),
+                    )
+
+        return {
+            "total_findings": len(all_findings),
+            "findings": all_findings[:100],
+            "scanners_queried": [s.scanner_name for s in scanners],
+        }
+
+    async def scan_iac(
+        self,
+        targets: list[str],
+    ) -> dict[str, Any]:
+        """Scan IaC configurations for misconfigurations."""
+        from shieldops.agents.security.protocols import ScannerType
+
+        iac_scanners = [s for s in self._security_scanners if s.scanner_type == ScannerType.IAC]
+        if not iac_scanners:
+            return {"total_findings": 0, "findings": [], "scanners_queried": []}
+
+        all_findings: list[dict[str, Any]] = []
+        for scanner in iac_scanners:
+            for target in targets:
+                try:
+                    findings = await scanner.scan(target)
+                    all_findings.extend(findings)
+                except Exception as e:
+                    logger.error(
+                        "iac_scan_failed",
+                        scanner=scanner.scanner_name,
+                        target=target,
+                        error=str(e),
+                    )
+
+        return {
+            "total_findings": len(all_findings),
+            "findings": all_findings[:100],
+            "scanners_queried": [s.scanner_name for s in iac_scanners],
+        }
+
+    async def scan_network(
+        self,
+        environment: Environment,
+    ) -> dict[str, Any]:
+        """Scan network security configurations."""
+        from shieldops.agents.security.protocols import ScannerType
+
+        net_scanners = [s for s in self._security_scanners if s.scanner_type == ScannerType.NETWORK]
+        if not net_scanners:
+            return {"total_findings": 0, "findings": [], "scanners_queried": []}
+
+        all_findings: list[dict[str, Any]] = []
+        for scanner in net_scanners:
+            try:
+                findings = await scanner.scan(environment.value)
+                all_findings.extend(findings)
+            except Exception as e:
+                logger.error(
+                    "network_scan_failed",
+                    scanner=scanner.scanner_name,
+                    error=str(e),
+                )
+
+        return {
+            "total_findings": len(all_findings),
+            "findings": all_findings[:100],
+            "scanners_queried": [s.scanner_name for s in net_scanners],
+        }
+
+    async def scan_k8s_security(
+        self,
+        environment: Environment,
+    ) -> dict[str, Any]:
+        """Scan Kubernetes clusters for security misconfigurations."""
+        from shieldops.agents.security.protocols import ScannerType
+
+        k8s_scanners = [
+            s for s in self._security_scanners if s.scanner_type == ScannerType.K8S_SECURITY
+        ]
+        if not k8s_scanners:
+            return {"total_findings": 0, "findings": [], "scanners_queried": []}
+
+        all_findings: list[dict[str, Any]] = []
+        for scanner in k8s_scanners:
+            try:
+                findings = await scanner.scan(environment.value)
+                all_findings.extend(findings)
+            except Exception as e:
+                logger.error(
+                    "k8s_security_scan_failed",
+                    scanner=scanner.scanner_name,
+                    error=str(e),
+                )
+
+        return {
+            "total_findings": len(all_findings),
+            "findings": all_findings[:100],
+            "scanners_queried": [s.scanner_name for s in k8s_scanners],
+        }
+
+    async def persist_vulnerabilities(
+        self,
+        findings: list[dict[str, Any]],
+        scan_id: str,
+        source: str,
+        scanner_type: str,
+    ) -> dict[str, Any]:
+        """Deduplicate and persist vulnerability findings to the lifecycle DB."""
+        if self._repository is None:
+            return {"persisted": 0, "deduplicated": 0, "error": "no repository"}
+
+        persisted = 0
+        for finding in findings:
+            vuln_data = {
+                "cve_id": finding.get("cve_id", finding.get("finding_id", "")),
+                "scan_id": scan_id,
+                "source": source,
+                "scanner_type": scanner_type,
+                "severity": finding.get("severity", "medium"),
+                "cvss_score": finding.get("cvss_score", 0.0),
+                "title": finding.get("title", ""),
+                "description": finding.get("description", ""),
+                "package_name": finding.get("package_name", ""),
+                "affected_resource": finding.get("affected_resource", "unknown"),
+                "remediation_steps": (
+                    [{"step": finding["remediation"]}] if finding.get("remediation") else []
+                ),
+                "scan_metadata": finding.get("metadata", {}),
+            }
+            try:
+                await self._repository.save_vulnerability(vuln_data)
+                persisted += 1
+            except Exception as e:
+                logger.error("persist_vulnerability_failed", error=str(e))
+
+        return {
+            "persisted": persisted,
+            "total": len(findings),
         }
 
     async def check_credentials(

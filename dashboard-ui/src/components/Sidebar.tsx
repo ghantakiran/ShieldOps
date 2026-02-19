@@ -9,6 +9,7 @@ import {
   BarChart3,
   Settings,
   LayoutDashboard,
+  Bug,
 } from "lucide-react";
 import clsx from "clsx";
 
@@ -17,6 +18,7 @@ const NAV_ITEMS = [
   { to: "/investigations", icon: Search, label: "Investigations" },
   { to: "/remediations", icon: Wrench, label: "Remediations" },
   { to: "/security", icon: ShieldAlert, label: "Security" },
+  { to: "/vulnerabilities", icon: Bug, label: "Vulnerabilities" },
   { to: "/cost", icon: DollarSign, label: "Cost" },
   { to: "/learning", icon: Brain, label: "Learning" },
   { to: "/analytics", icon: BarChart3, label: "Analytics" },

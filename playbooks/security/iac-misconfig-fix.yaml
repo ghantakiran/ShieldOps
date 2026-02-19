@@ -1,0 +1,113 @@
+# ShieldOps Security Playbook: IaC Misconfiguration Remediation
+# Triggered when: Infrastructure as Code misconfigurations detected by checkov
+
+name: iac-misconfig-fix
+version: "1.0"
+description: "Remediate IaC misconfigurations — encryption, public access, IAM, logging"
+trigger:
+  scanner_type: ["iac"]
+  severity: ["critical", "high", "medium"]
+
+investigation:
+  steps:
+    - name: classify_misconfiguration
+      action: analyze_finding
+      description: "Determine the category and severity of the IaC issue"
+      extract:
+        - check_id
+        - check_type  # encryption, public_access, iam, logging, network
+        - resource_type  # aws_s3_bucket, aws_security_group, etc.
+        - file_path
+        - is_deployed  # Whether this config is live in production
+
+    - name: check_current_state
+      action: query_cloud
+      description: "Verify if the misconfiguration exists in the live environment"
+      extract:
+        - live_resource_state
+        - matches_iac_finding
+        - last_modified
+
+    - name: assess_impact
+      action: classify_risk
+      description: "Determine the security impact of the misconfiguration"
+      extract:
+        - data_exposure_risk
+        - compliance_frameworks_affected
+        - is_internet_facing
+
+remediation:
+  decision_tree:
+    - condition: "check_type == 'encryption' AND resource_type contains 'storage'"
+      action: enable_encryption
+      risk_level: medium
+      params:
+        steps:
+          - "Update IaC template to enable encryption at rest"
+          - "Specify KMS key or use default encryption"
+          - "Run terraform plan to verify changes"
+          - "Apply via CI/CD pipeline"
+          - "Verify encryption enabled on live resource"
+
+    - condition: "check_type == 'public_access'"
+      action: restrict_access
+      risk_level: high
+      params:
+        steps:
+          - "Update IaC to disable public access"
+          - "Add explicit deny for public access in bucket/resource policy"
+          - "Run terraform plan to verify no unintended changes"
+          - "Apply and verify resource is no longer public"
+
+    - condition: "check_type == 'iam' AND finding contains 'wildcard'"
+      action: restrict_iam
+      risk_level: critical
+      params:
+        steps:
+          - "Replace wildcard (*) with specific resource ARNs"
+          - "Replace wildcard actions with specific API actions"
+          - "Test that workloads still function with restricted policy"
+          - "Apply via terraform"
+
+    - condition: "check_type == 'logging'"
+      action: enable_logging
+      risk_level: low
+      params:
+        steps:
+          - "Add logging configuration to IaC template"
+          - "Configure log destination (S3, CloudWatch, etc.)"
+          - "Apply via CI/CD pipeline"
+
+    - condition: "default"
+      action: fix_iac_template
+      risk_level: medium
+      params:
+        steps:
+          - "Review checkov documentation for the specific check"
+          - "Update IaC template to pass the check"
+          - "Run checkov locally to verify fix"
+          - "Submit PR with fix and apply via CI/CD"
+
+validation:
+  checks:
+    - name: checkov_passes
+      description: "Re-run checkov to verify the fix"
+      action: run_checkov
+      expected: "check passes"
+      timeout_seconds: 120
+
+    - name: terraform_plan_clean
+      description: "Verify terraform plan shows expected changes only"
+      action: terraform_plan
+      expected: "only expected resource changes"
+      timeout_seconds: 180
+
+    - name: live_resource_compliant
+      description: "Verify the live resource matches the fixed configuration"
+      action: cloud_audit
+      expected: "resource compliant"
+      timeout_seconds: 120
+
+  on_failure:
+    action: revert_iac_change
+    escalation_channel: "#cloud-security"

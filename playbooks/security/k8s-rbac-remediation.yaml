@@ -1,0 +1,106 @@
+# ShieldOps Security Playbook: Kubernetes RBAC Remediation
+# Triggered when: Overly permissive RBAC roles or pod security violations detected
+
+name: k8s-rbac-remediation
+version: "1.0"
+description: "Remediate Kubernetes RBAC misconfigurations and pod security violations"
+trigger:
+  scanner_type: ["k8s_security"]
+  severity: ["critical", "high", "medium"]
+
+investigation:
+  steps:
+    - name: identify_rbac_issue
+      action: query_k8s
+      description: "Determine the specific RBAC misconfiguration"
+      extract:
+        - role_type  # ClusterRole, Role
+        - role_name
+        - subject_type  # ServiceAccount, User, Group
+        - permissions  # verbs + resources
+        - has_wildcard_permissions
+        - namespace
+
+    - name: check_usage_patterns
+      action: query_audit_logs
+      description: "Check what actions the subject actually performs"
+      extract:
+        - actual_api_calls
+        - unused_permissions
+        - last_activity
+
+    - name: assess_blast_radius
+      action: query_k8s
+      description: "Determine what resources are accessible with current permissions"
+      extract:
+        - accessible_namespaces
+        - accessible_secrets
+        - can_create_pods
+        - can_exec_into_pods
+
+remediation:
+  decision_tree:
+    - condition: "has_wildcard_permissions AND role_type == 'ClusterRole'"
+      action: restrict_cluster_role
+      risk_level: critical
+      params:
+        steps:
+          - "Create new ClusterRole with minimum required permissions"
+          - "Update ClusterRoleBinding to use new role"
+          - "Test affected workloads still function"
+          - "Delete overly permissive ClusterRole"
+
+    - condition: "subject can create privileged pods"
+      action: restrict_pod_security
+      risk_level: high
+      params:
+        steps:
+          - "Apply PodSecurity admission (restricted profile)"
+          - "Remove privileged container capability from role"
+          - "Add securityContext constraints to affected deployments"
+          - "Verify pods restart without privileged access"
+
+    - condition: "service_account has unnecessary permissions"
+      action: apply_least_privilege
+      risk_level: medium
+      params:
+        steps:
+          - "Analyze actual API call patterns from audit logs"
+          - "Create tailored Role with only needed permissions"
+          - "Bind the new Role to the ServiceAccount"
+          - "Remove old overly broad RoleBinding"
+          - "Monitor for permission-denied errors"
+
+    - condition: "default"
+      action: review_and_tighten
+      risk_level: medium
+      params:
+        steps:
+          - "Review current permissions against principle of least privilege"
+          - "Remove any unused permissions"
+          - "Document remaining permissions with justification"
+          - "Set up periodic RBAC audit schedule"
+
+validation:
+  checks:
+    - name: permissions_restricted
+      description: "Verify wildcard/excessive permissions are removed"
+      action: rbac_audit
+      expected: "no wildcard verbs or resources"
+      timeout_seconds: 60
+
+    - name: workloads_healthy
+      description: "Verify affected workloads still function"
+      action: health_check
+      expected: "all pods running, no permission-denied errors"
+      timeout_seconds: 300
+
+    - name: pod_security_enforced
+      description: "Verify PodSecurity admission is active"
+      action: test_privileged_pod
+      expected: "privileged pod creation denied"
+      timeout_seconds: 60
+
+  on_failure:
+    action: rollback_rbac_changes
+    escalation_channel: "#k8s-security"

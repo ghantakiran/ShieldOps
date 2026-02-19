@@ -1,10 +1,72 @@
 """State models for the Security Agent."""
 
 from datetime import datetime
+from typing import Any
 
 from pydantic import BaseModel, Field
 
 from shieldops.models.base import Environment
+
+
+class SecretFinding(BaseModel):
+    """A hardcoded secret detected in source code."""
+
+    finding_id: str
+    severity: str  # critical, high, medium, low
+    title: str
+    description: str = ""
+    affected_resource: str  # repo:file_path
+    remediation: str = ""
+    rule_id: str = ""
+    file_path: str = ""
+    line_number: int | None = None
+    commit: str = ""
+    author: str = ""
+
+
+class IaCFinding(BaseModel):
+    """An IaC misconfiguration finding."""
+
+    finding_id: str
+    severity: str
+    title: str
+    description: str = ""
+    affected_resource: str
+    remediation: str = ""
+    check_id: str = ""
+    check_type: str = ""  # terraform, kubernetes, dockerfile
+    file_path: str = ""
+    resource_name: str = ""
+
+
+class NetworkFinding(BaseModel):
+    """A network security finding."""
+
+    finding_id: str
+    severity: str
+    title: str
+    description: str = ""
+    affected_resource: str
+    remediation: str = ""
+    provider: str = ""
+    port: int | None = None
+    protocol: str = ""
+    cidr: str = ""
+
+
+class K8sSecurityFinding(BaseModel):
+    """A Kubernetes security finding."""
+
+    finding_id: str
+    severity: str
+    title: str
+    description: str = ""
+    affected_resource: str
+    remediation: str = ""
+    check_type: str = ""  # rbac, pod_security, resource_limits, service_accounts
+    namespace: str = ""
+    resource_name: str = ""
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class CVEFinding(BaseModel):
@@ -105,7 +167,9 @@ class SecurityScanState(BaseModel):
 
     # Input
     scan_id: str = ""
-    scan_type: str = "full"  # full, cve_only, credentials_only, compliance_only
+    scan_type: str = "full"
+    # Scan types: full, cve_only, credentials_only, compliance_only,
+    #   container, git_secrets, git_deps, iac, network, k8s_security
     target_resources: list[str] = Field(default_factory=list)
     target_environment: Environment = Environment.PRODUCTION
     compliance_frameworks: list[str] = Field(default_factory=list)
@@ -114,6 +178,12 @@ class SecurityScanState(BaseModel):
     cve_findings: list[CVEFinding] = Field(default_factory=list)
     critical_cve_count: int = 0
     patches_available: int = 0
+
+    # Extended scanner findings
+    secret_findings: list[SecretFinding] = Field(default_factory=list)
+    iac_findings: list[IaCFinding] = Field(default_factory=list)
+    network_findings: list[NetworkFinding] = Field(default_factory=list)
+    k8s_security_findings: list[K8sSecurityFinding] = Field(default_factory=list)
 
     # Credential status
     credential_statuses: list[CredentialStatus] = Field(default_factory=list)
@@ -134,6 +204,9 @@ class SecurityScanState(BaseModel):
     action_policy_result: SecurityPolicyResult | None = None
     action_approval_status: str | None = None
     execute_actions: bool = False  # Opt-in flag (backward compatible)
+
+    # Persistence
+    persist_findings: bool = True  # Save findings to vulnerability lifecycle DB
 
     # Metadata
     scan_start: datetime | None = None

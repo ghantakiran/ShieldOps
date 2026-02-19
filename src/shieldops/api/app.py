@@ -23,7 +23,10 @@ from shieldops.api.routes import (
     learning,
     remediations,
     security,
+    security_chat,
     supervisor,
+    teams,
+    vulnerabilities,
 )
 from shieldops.config import settings
 from shieldops.connectors.factory import create_connector_router
@@ -159,14 +162,73 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     remediations.set_runner(rem_runner)
     remediations.set_repository(repository)
 
-    # Security runner — cve_sources/credential_stores left empty until integrations land
+    # Security runner — wire CVE sources and security scanners
+    cve_sources: list[Any] = []
+    security_scanners: list[Any] = []
+    credential_stores: list[Any] = []
+
+    # NVD CVE source
+    try:
+        from shieldops.integrations.cve.nvd import NVDCVESource
+
+        cve_sources.append(NVDCVESource(api_key=settings.nvd_api_key))
+        logger.info("nvd_cve_source_initialized")
+    except Exception as e:
+        logger.warning("nvd_cve_source_init_failed", error=str(e))
+
+    # Trivy container scanner
+    if settings.trivy_server_url:
+        try:
+            from shieldops.integrations.scanners.trivy import TrivyCVESource
+
+            cve_sources.append(
+                TrivyCVESource(
+                    server_url=settings.trivy_server_url,
+                    timeout=settings.trivy_timeout,
+                )
+            )
+            logger.info("trivy_cve_source_initialized")
+        except Exception as e:
+            logger.warning("trivy_cve_source_init_failed", error=str(e))
+
+    # HashiCorp Vault credential store
+    try:
+        from shieldops.integrations.credentials.vault import VaultCredentialStore
+
+        credential_stores.append(VaultCredentialStore())
+        logger.info("vault_credential_store_initialized")
+    except Exception as e:
+        logger.debug("vault_credential_store_skipped", error=str(e))
+
     sec_runner = SecurityRunner(
         connector_router=router,
+        cve_sources=cve_sources or None,
+        credential_stores=credential_stores or None,
+        security_scanners=security_scanners or None,
         policy_engine=policy_engine,
         approval_workflow=approval_workflow,
         repository=repository,
     )
     security.set_runner(sec_runner)
+
+    # Vulnerability management route wiring
+    vulnerabilities.set_repository(repository)
+    teams.set_repository(repository)
+
+    # Security chat — build chat agent from runner + repository
+    try:
+        from shieldops.agents.security.chat import SecurityChatAgent
+
+        chat_agent = SecurityChatAgent(
+            repository=repository,
+            security_runner=sec_runner,
+            policy_engine=policy_engine,
+        )
+        security_chat.set_chat_agent(chat_agent)
+        security_chat.set_repository(repository)
+        logger.info("security_chat_agent_initialized")
+    except Exception as e:
+        logger.warning("security_chat_init_failed", error=str(e))
 
     # Cost runner — wire billing sources when credentials are available
     billing_sources: list[Any] = []
@@ -268,9 +330,27 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     from shieldops.scheduler import JobScheduler
     from shieldops.scheduler.jobs import (
         daily_cost_analysis,
+        daily_security_newsletter,
+        escalation_check_job,
         nightly_learning_cycle,
         periodic_security_scan,
+        sla_check_job,
+        vulnerability_dedup_job,
+        weekly_security_newsletter,
     )
+
+    # Build notification dispatcher for newsletter/escalation
+    notification_dispatcher = None
+    try:
+        from shieldops.integrations.notifications.dispatcher import (
+            NotificationDispatcher,
+        )
+
+        notification_dispatcher = NotificationDispatcher(
+            channels=notification_channels,
+        )
+    except Exception as e:
+        logger.warning("notification_dispatcher_init_failed", error=str(e))
 
     scheduler = JobScheduler(redis_url=settings.redis_url)
     scheduler.add_job(
@@ -293,9 +373,58 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         cost_runner=cost_runner,
         environment=settings.environment,
     )
+    scheduler.add_job(
+        "sla_check",
+        sla_check_job,
+        interval_seconds=3600,  # 1 hour
+        repository=repository,
+    )
+    scheduler.add_job(
+        "vuln_dedup",
+        vulnerability_dedup_job,
+        interval_seconds=86400,  # 24 hours
+        repository=repository,
+    )
+    scheduler.add_job(
+        "daily_newsletter",
+        daily_security_newsletter,
+        interval_seconds=86400,  # 24 hours
+        repository=repository,
+        notification_dispatcher=notification_dispatcher,
+    )
+    scheduler.add_job(
+        "weekly_newsletter",
+        weekly_security_newsletter,
+        interval_seconds=604800,  # 7 days
+        repository=repository,
+        notification_dispatcher=notification_dispatcher,
+    )
+    scheduler.add_job(
+        "escalation_check",
+        escalation_check_job,
+        interval_seconds=3600,  # 1 hour
+        repository=repository,
+        notification_dispatcher=notification_dispatcher,
+    )
     await scheduler.start()
     app.state.scheduler = scheduler
     logger.info("scheduler_initialized", jobs=len(scheduler.list_jobs()))
+
+    # ── Newsletter service ─────────────────────────────────────────
+    try:
+        from shieldops.api.routes import newsletters
+        from shieldops.vulnerability.newsletter import SecurityNewsletterService
+
+        newsletter_service = SecurityNewsletterService(
+            repository=repository,
+            notification_dispatcher=notification_dispatcher,
+        )
+        newsletters.set_service(newsletter_service)
+        newsletters.set_repository(repository)
+        app.include_router(newsletters.router, prefix=settings.api_prefix, tags=["Newsletters"])
+        logger.info("newsletter_service_initialized")
+    except Exception as e:
+        logger.warning("newsletter_init_failed", error=str(e))
 
     # Register playbooks router
     try:
@@ -407,6 +536,9 @@ def create_app() -> FastAPI:
     app.include_router(remediations.router, prefix=settings.api_prefix, tags=["Remediations"])
     app.include_router(analytics.router, prefix=settings.api_prefix, tags=["Analytics"])
     app.include_router(security.router, prefix=settings.api_prefix, tags=["Security"])
+    app.include_router(vulnerabilities.router, prefix=settings.api_prefix, tags=["Vulnerabilities"])
+    app.include_router(teams.router, prefix=settings.api_prefix, tags=["Teams"])
+    app.include_router(security_chat.router, prefix=settings.api_prefix, tags=["Security Chat"])
     app.include_router(cost.router, prefix=settings.api_prefix, tags=["Cost"])
     app.include_router(learning.router, prefix=settings.api_prefix, tags=["Learning"])
     app.include_router(supervisor.router, prefix=settings.api_prefix, tags=["Supervisor"])

@@ -4,8 +4,45 @@ Follows the protocol-based connector abstraction pattern from
 connectors/base.py (ADR-002).
 """
 
+import enum
 from abc import ABC, abstractmethod
 from typing import Any
+
+
+class ScannerType(str, enum.Enum):
+    """Categories of security scanner."""
+
+    CVE = "cve"
+    SECRET = "secret"
+    IAC = "iac"
+    NETWORK = "network"
+    K8S_SECURITY = "k8s_security"
+    CONTAINER = "container"
+
+
+class SecurityScanner(ABC):
+    """Abstract interface for non-CVE security scanners.
+
+    Unlike CVESource which returns CVE-specific findings, SecurityScanner
+    returns general security findings (misconfigurations, secrets, network issues).
+    """
+
+    scanner_name: str
+    scanner_type: ScannerType
+
+    @abstractmethod
+    async def scan(self, target: str, **options: Any) -> list[dict[str, Any]]:
+        """Scan a target for security issues.
+
+        Args:
+            target: Scanner-specific target (repo path, env name, directory, etc.).
+            **options: Scanner-specific keyword options.
+
+        Returns:
+            List of finding dicts with keys:
+                finding_id, scanner_type, severity, title, description,
+                affected_resource, remediation, metadata
+        """
 
 
 class CVESource(ABC):

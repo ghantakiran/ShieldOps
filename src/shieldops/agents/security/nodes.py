@@ -16,8 +16,12 @@ from shieldops.agents.security.models import (
     ComplianceControl,
     CredentialStatus,
     CVEFinding,
+    IaCFinding,
+    K8sSecurityFinding,
+    NetworkFinding,
     PatchResult,
     RotationResult,
+    SecretFinding,
     SecurityPolicyResult,
     SecurityPosture,
     SecurityScanState,
@@ -439,6 +443,354 @@ async def synthesize_posture(state: SecurityScanState) -> dict[str, Any]:
         "scan_duration_ms": int((datetime.now(UTC) - state.scan_start).total_seconds() * 1000)
         if state.scan_start
         else 0,
+    }
+
+
+# ── Extended scanner nodes ─────────────────────────────────────────
+
+
+async def scan_containers(state: SecurityScanState) -> dict[str, Any]:
+    """Scan container images for CVEs using Trivy."""
+    start = datetime.now(UTC)
+    toolkit = _get_toolkit()
+
+    logger.info("security_scanning_containers", scan_id=state.scan_id)
+
+    resources = state.target_resources or ["*"]
+    scan_data = await toolkit.scan_containers(resources)
+
+    findings: list[CVEFinding] = []
+    for raw in scan_data.get("findings", [])[:100]:
+        findings.append(
+            CVEFinding(
+                cve_id=raw.get("cve_id", "UNKNOWN"),
+                severity=raw.get("severity", "medium"),
+                cvss_score=raw.get("cvss_score", 0.0),
+                package_name=raw.get("package_name", "unknown"),
+                installed_version=raw.get("installed_version", "unknown"),
+                fixed_version=raw.get("fixed_version"),
+                affected_resource=raw.get("affected_resource", "unknown"),
+                description=raw.get("description", ""),
+            )
+        )
+
+    step = SecurityStep(
+        step_number=len(state.reasoning_chain) + 1,
+        action="scan_containers",
+        input_summary=f"Scanning {len(resources)} container images",
+        output_summary=f"Found {scan_data['total_findings']} container CVEs",
+        duration_ms=_elapsed_ms(start),
+        tool_used="trivy",
+    )
+
+    return {
+        "cve_findings": [*state.cve_findings, *findings],
+        "critical_cve_count": state.critical_cve_count + scan_data.get("critical_count", 0),
+        "reasoning_chain": [*state.reasoning_chain, step],
+        "current_step": "scan_containers",
+    }
+
+
+async def scan_secrets(state: SecurityScanState) -> dict[str, Any]:
+    """Scan git repositories for hardcoded secrets."""
+    start = datetime.now(UTC)
+    toolkit = _get_toolkit()
+
+    logger.info("security_scanning_secrets", scan_id=state.scan_id)
+
+    targets = state.target_resources or ["."]
+    scan_data = await toolkit.scan_repositories(targets, scan_type="secrets")
+
+    findings: list[SecretFinding] = []
+    for raw in scan_data.get("findings", [])[:100]:
+        meta = raw.get("metadata", {})
+        findings.append(
+            SecretFinding(
+                finding_id=raw.get("finding_id", "unknown"),
+                severity=raw.get("severity", "high"),
+                title=raw.get("title", ""),
+                description=raw.get("description", ""),
+                affected_resource=raw.get("affected_resource", ""),
+                remediation=raw.get("remediation", ""),
+                rule_id=meta.get("rule_id", ""),
+                file_path=meta.get("file", ""),
+                line_number=meta.get("start_line"),
+                commit=meta.get("commit", ""),
+                author=meta.get("author", ""),
+            )
+        )
+
+    step = SecurityStep(
+        step_number=len(state.reasoning_chain) + 1,
+        action="scan_secrets",
+        input_summary=f"Scanning {len(targets)} repositories for secrets",
+        output_summary=f"Found {scan_data['total_findings']} secret(s)",
+        duration_ms=_elapsed_ms(start),
+        tool_used="gitleaks",
+    )
+
+    return {
+        "secret_findings": findings,
+        "reasoning_chain": [*state.reasoning_chain, step],
+        "current_step": "scan_secrets",
+    }
+
+
+async def scan_iac(state: SecurityScanState) -> dict[str, Any]:
+    """Scan IaC configurations for misconfigurations."""
+    start = datetime.now(UTC)
+    toolkit = _get_toolkit()
+
+    logger.info("security_scanning_iac", scan_id=state.scan_id)
+
+    targets = state.target_resources or ["."]
+    scan_data = await toolkit.scan_iac(targets)
+
+    findings: list[IaCFinding] = []
+    for raw in scan_data.get("findings", [])[:100]:
+        meta = raw.get("metadata", {})
+        findings.append(
+            IaCFinding(
+                finding_id=raw.get("finding_id", "unknown"),
+                severity=raw.get("severity", "medium"),
+                title=raw.get("title", ""),
+                description=raw.get("description", ""),
+                affected_resource=raw.get("affected_resource", ""),
+                remediation=raw.get("remediation", ""),
+                check_id=meta.get("check_id", ""),
+                check_type=meta.get("check_type", ""),
+                file_path=meta.get("file_path", ""),
+                resource_name=meta.get("resource", ""),
+            )
+        )
+
+    step = SecurityStep(
+        step_number=len(state.reasoning_chain) + 1,
+        action="scan_iac",
+        input_summary=f"Scanning {len(targets)} IaC target(s)",
+        output_summary=f"Found {scan_data['total_findings']} misconfig(s)",
+        duration_ms=_elapsed_ms(start),
+        tool_used="checkov",
+    )
+
+    return {
+        "iac_findings": findings,
+        "reasoning_chain": [*state.reasoning_chain, step],
+        "current_step": "scan_iac",
+    }
+
+
+async def scan_network(state: SecurityScanState) -> dict[str, Any]:
+    """Scan network security configurations."""
+    start = datetime.now(UTC)
+    toolkit = _get_toolkit()
+
+    logger.info("security_scanning_network", scan_id=state.scan_id)
+
+    scan_data = await toolkit.scan_network(state.target_environment)
+
+    findings: list[NetworkFinding] = []
+    for raw in scan_data.get("findings", [])[:100]:
+        meta = raw.get("metadata", {})
+        findings.append(
+            NetworkFinding(
+                finding_id=raw.get("finding_id", "unknown"),
+                severity=raw.get("severity", "medium"),
+                title=raw.get("title", ""),
+                description=raw.get("description", ""),
+                affected_resource=raw.get("affected_resource", ""),
+                remediation=raw.get("remediation", ""),
+                provider=meta.get("provider", ""),
+                port=meta.get("port"),
+                protocol=meta.get("protocol", ""),
+                cidr=meta.get("cidr", ""),
+            )
+        )
+
+    step = SecurityStep(
+        step_number=len(state.reasoning_chain) + 1,
+        action="scan_network",
+        input_summary=(f"Scanning network security in {state.target_environment.value}"),
+        output_summary=f"Found {scan_data['total_findings']} network issue(s)",
+        duration_ms=_elapsed_ms(start),
+        tool_used="network-security",
+    )
+
+    return {
+        "network_findings": findings,
+        "reasoning_chain": [*state.reasoning_chain, step],
+        "current_step": "scan_network",
+    }
+
+
+async def scan_k8s_security(state: SecurityScanState) -> dict[str, Any]:
+    """Scan Kubernetes security configurations."""
+    start = datetime.now(UTC)
+    toolkit = _get_toolkit()
+
+    logger.info("security_scanning_k8s", scan_id=state.scan_id)
+
+    scan_data = await toolkit.scan_k8s_security(state.target_environment)
+
+    findings: list[K8sSecurityFinding] = []
+    for raw in scan_data.get("findings", [])[:100]:
+        meta = raw.get("metadata", {})
+        findings.append(
+            K8sSecurityFinding(
+                finding_id=raw.get("finding_id", "unknown"),
+                severity=raw.get("severity", "medium"),
+                title=raw.get("title", ""),
+                description=raw.get("description", ""),
+                affected_resource=raw.get("affected_resource", ""),
+                remediation=raw.get("remediation", ""),
+                check_type=meta.get("check", ""),
+                namespace=meta.get("namespace", ""),
+                resource_name=meta.get("pod", meta.get("binding_name", "")),
+                metadata=meta,
+            )
+        )
+
+    step = SecurityStep(
+        step_number=len(state.reasoning_chain) + 1,
+        action="scan_k8s_security",
+        input_summary=(f"Scanning K8s security in {state.target_environment.value}"),
+        output_summary=f"Found {scan_data['total_findings']} K8s issue(s)",
+        duration_ms=_elapsed_ms(start),
+        tool_used="k8s-security",
+    )
+
+    return {
+        "k8s_security_findings": findings,
+        "reasoning_chain": [*state.reasoning_chain, step],
+        "current_step": "scan_k8s_security",
+    }
+
+
+async def persist_findings(state: SecurityScanState) -> dict[str, Any]:
+    """Persist all findings to the vulnerability lifecycle DB."""
+    start = datetime.now(UTC)
+    toolkit = _get_toolkit()
+
+    logger.info(
+        "security_persisting_findings",
+        scan_id=state.scan_id,
+        cve_count=len(state.cve_findings),
+        secret_count=len(state.secret_findings),
+        iac_count=len(state.iac_findings),
+        network_count=len(state.network_findings),
+        k8s_count=len(state.k8s_security_findings),
+    )
+
+    total_persisted = 0
+
+    # Persist CVE findings
+    if state.cve_findings:
+        cve_dicts = [
+            {
+                "cve_id": f.cve_id,
+                "severity": f.severity,
+                "cvss_score": f.cvss_score,
+                "title": f"{f.cve_id}: {f.package_name}",
+                "description": f.description,
+                "package_name": f.package_name,
+                "affected_resource": f.affected_resource,
+            }
+            for f in state.cve_findings
+        ]
+        result = await toolkit.persist_vulnerabilities(
+            cve_dicts, state.scan_id, "cve_scanner", "cve"
+        )
+        total_persisted += result.get("persisted", 0)
+
+    # Persist secret findings
+    if state.secret_findings:
+        secret_dicts = [
+            {
+                "finding_id": f.finding_id,
+                "severity": f.severity,
+                "title": f.title,
+                "description": f.description,
+                "affected_resource": f.affected_resource,
+                "remediation": f.remediation,
+                "metadata": {"rule_id": f.rule_id, "file": f.file_path},
+            }
+            for f in state.secret_findings
+        ]
+        result = await toolkit.persist_vulnerabilities(
+            secret_dicts, state.scan_id, "gitleaks", "secret"
+        )
+        total_persisted += result.get("persisted", 0)
+
+    # Persist IaC findings
+    if state.iac_findings:
+        iac_dicts = [
+            {
+                "finding_id": f.finding_id,
+                "severity": f.severity,
+                "title": f.title,
+                "description": f.description,
+                "affected_resource": f.affected_resource,
+                "remediation": f.remediation,
+                "metadata": {
+                    "check_id": f.check_id,
+                    "check_type": f.check_type,
+                },
+            }
+            for f in state.iac_findings
+        ]
+        result = await toolkit.persist_vulnerabilities(iac_dicts, state.scan_id, "checkov", "iac")
+        total_persisted += result.get("persisted", 0)
+
+    # Persist network findings
+    if state.network_findings:
+        net_dicts = [
+            {
+                "finding_id": f.finding_id,
+                "severity": f.severity,
+                "title": f.title,
+                "description": f.description,
+                "affected_resource": f.affected_resource,
+                "remediation": f.remediation,
+                "metadata": {"provider": f.provider, "port": f.port},
+            }
+            for f in state.network_findings
+        ]
+        result = await toolkit.persist_vulnerabilities(
+            net_dicts, state.scan_id, "network-security", "network"
+        )
+        total_persisted += result.get("persisted", 0)
+
+    # Persist K8s findings
+    if state.k8s_security_findings:
+        k8s_dicts = [
+            {
+                "finding_id": f.finding_id,
+                "severity": f.severity,
+                "title": f.title,
+                "description": f.description,
+                "affected_resource": f.affected_resource,
+                "remediation": f.remediation,
+                "metadata": f.metadata,
+            }
+            for f in state.k8s_security_findings
+        ]
+        result = await toolkit.persist_vulnerabilities(
+            k8s_dicts, state.scan_id, "k8s-security", "k8s_security"
+        )
+        total_persisted += result.get("persisted", 0)
+
+    step = SecurityStep(
+        step_number=len(state.reasoning_chain) + 1,
+        action="persist_findings",
+        input_summary="Persisting findings to vulnerability lifecycle DB",
+        output_summary=f"Persisted {total_persisted} vulnerabilities",
+        duration_ms=_elapsed_ms(start),
+        tool_used="repository",
+    )
+
+    return {
+        "reasoning_chain": [*state.reasoning_chain, step],
+        "current_step": "persist_findings",
     }
 
 
