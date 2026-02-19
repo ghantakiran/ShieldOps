@@ -821,9 +821,11 @@ class TestInvestigationAPI:
         from httpx import ASGITransport, AsyncClient
 
         from shieldops.api.app import create_app
-        from shieldops.api.routes.investigations import set_runner
+        from shieldops.api.routes.investigations import (
+            set_repository,
+            set_runner,
+        )
 
-        set_runner(mock_runner)
         app = create_app()
 
         from shieldops.api.auth.dependencies import get_current_user
@@ -841,9 +843,14 @@ class TestInvestigationAPI:
         app.dependency_overrides[get_current_user] = _mock_admin_user
 
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+            # Set mock runner and clear repository AFTER lifespan runs,
+            # so the app uses in-memory fallback instead of hitting the DB.
+            set_runner(mock_runner)
+            set_repository(None)
             yield ac
 
         set_runner(None)
+        set_repository(None)
 
     @pytest.mark.asyncio
     async def test_list_investigations(self, client):
