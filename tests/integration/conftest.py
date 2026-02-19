@@ -23,6 +23,8 @@ from shieldops.models.base import (
 )
 from shieldops.policy.approval.workflow import ApprovalWorkflow
 from shieldops.policy.opa.client import PolicyDecision
+from tests.integration.fakes.azure_fake import FakeAzureConnector
+from tests.integration.fakes.gcp_fake import FakeGCPConnector
 
 # ── Mock Connector ────────────────────────────────────────────────
 
@@ -363,3 +365,41 @@ def security_llm_responses():
             recommended_actions=["Patch OpenSSL", "Rotate DB password"],
         ),
     }
+
+
+# ── Fake Connectors ─────────────────────────────────────────────
+
+
+@pytest.fixture
+def fake_gcp_connector():
+    """Fake GCP connector with pre-seeded test resources."""
+    connector = FakeGCPConnector(project_id="test-project", region="us-central1")
+    connector.add_instance("web-server-1", status="RUNNING", labels={"app": "web", "env": "prod"})
+    connector.add_instance("worker-1", status="RUNNING", labels={"app": "worker", "env": "prod"})
+    connector.add_service("api-service", min_instances=2, max_instances=10)
+    return connector
+
+
+@pytest.fixture
+def fake_azure_connector():
+    """Fake Azure connector with pre-seeded test resources."""
+    connector = FakeAzureConnector(subscription_id="test-sub", resource_group="test-rg")
+    connector.add_vm("web-vm-1", power_state="running", tags={"app": "web", "env": "prod"})
+    connector.add_vm("db-vm-1", power_state="running", tags={"app": "database", "env": "prod"})
+    connector.add_container_app("api-app", min_replicas=2, max_replicas=5)
+    return connector
+
+
+@pytest.fixture
+def fake_connector_router(mock_connector, fake_gcp_connector, fake_azure_connector):
+    """ConnectorRouter with all fake connectors registered."""
+    from shieldops.connectors.base import ConnectorRouter
+
+    router = ConnectorRouter()
+    router.register(fake_gcp_connector)
+    router.register(fake_azure_connector)
+    # mock_connector is already available from existing fixtures for kubernetes
+    # Register it as kubernetes provider
+    mock_connector.provider = "kubernetes"
+    router.register(mock_connector)
+    return router
