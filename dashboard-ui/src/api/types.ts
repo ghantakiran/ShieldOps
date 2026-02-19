@@ -140,6 +140,146 @@ export interface Vulnerability {
   affected_resource: string;
 }
 
+// ── Vulnerability Management ─────────────────────────────────────
+
+export type VulnerabilityStatus =
+  | "new"
+  | "triaged"
+  | "in_progress"
+  | "remediated"
+  | "verified"
+  | "closed"
+  | "accepted_risk";
+
+export interface VulnerabilityDetail {
+  id: string;
+  cve_id: string | null;
+  scan_id: string | null;
+  source: string;
+  scanner_type: string;
+  severity: string;
+  cvss_score: number;
+  title: string;
+  description: string;
+  package_name: string;
+  affected_resource: string;
+  status: VulnerabilityStatus;
+  assigned_team_id: string | null;
+  assigned_user_id: string | null;
+  sla_due_at: string | null;
+  sla_breached: boolean;
+  first_seen_at: string;
+  last_seen_at: string;
+  remediated_at: string | null;
+  closed_at: string | null;
+  remediation_steps: Array<{ step: string }>;
+  scan_metadata: Record<string, unknown>;
+  comments?: VulnerabilityComment[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface VulnerabilityListItem {
+  id: string;
+  cve_id: string | null;
+  source: string;
+  scanner_type: string;
+  severity: string;
+  cvss_score: number;
+  title: string;
+  affected_resource: string;
+  status: VulnerabilityStatus;
+  assigned_team_id: string | null;
+  sla_breached: boolean;
+  first_seen_at: string;
+  created_at: string;
+}
+
+export interface VulnerabilityFilter {
+  status?: VulnerabilityStatus;
+  severity?: string;
+  scanner_type?: string;
+  team_id?: string;
+  sla_breached?: boolean;
+}
+
+export interface VulnerabilityStats {
+  total: number;
+  by_severity: Record<string, number>;
+  by_status: Record<string, number>;
+  sla_breaches: number;
+}
+
+export interface VulnerabilityComment {
+  id: string;
+  vulnerability_id: string;
+  user_id: string | null;
+  content: string;
+  comment_type: string;
+  metadata: Record<string, unknown>;
+  created_at: string;
+}
+
+export interface RiskAcceptance {
+  id: string;
+  vulnerability_id: string;
+  accepted_by: string;
+  reason: string;
+  expires_at: string | null;
+  created_at: string;
+}
+
+export interface Team {
+  id: string;
+  name: string;
+  description: string;
+  slack_channel: string;
+  pagerduty_service_id: string;
+  email: string;
+  members?: TeamMember[];
+  vulnerability_count?: number;
+  created_at: string;
+}
+
+export interface TeamMember {
+  id: string;
+  team_id: string;
+  user_id: string;
+  role: string;
+  created_at: string;
+}
+
+export interface SecurityPostureSummary {
+  overall_score: number;
+  critical_cves: number;
+  high_cves: number;
+  pending_patches: number;
+  credentials_expiring_soon: number;
+  compliance_scores: Record<string, number>;
+  top_risks: string[];
+}
+
+export interface ChatMessage {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  timestamp: string;
+  actions?: ChatAction[];
+}
+
+export interface ChatAction {
+  type: string;
+  label: string;
+  data: Record<string, unknown>;
+}
+
+export interface ChatSession {
+  id: string;
+  title: string;
+  created_at: string;
+  message_count: number;
+}
+
 // ── Cost ──────────────────────────────────────────────────────────────
 
 export interface CostSummary {

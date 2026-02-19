@@ -1,0 +1,96 @@
+# ShieldOps Security Playbook: Network Exposure Remediation
+# Triggered when: Open ports or publicly accessible services detected
+
+name: network-exposure-fix
+version: "1.0"
+description: "Remediate network exposure issues — open ports, public databases, missing segmentation"
+trigger:
+  scanner_type: ["network"]
+  severity: ["critical", "high", "medium"]
+
+investigation:
+  steps:
+    - name: identify_exposure
+      action: query_network
+      description: "Determine what is exposed and from where"
+      extract:
+        - exposed_port
+        - exposed_service
+        - source_cidr  # 0.0.0.0/0 = public
+        - security_group_id
+        - is_production
+
+    - name: check_legitimate_access
+      action: query_access_patterns
+      description: "Determine if public access is intentional"
+      extract:
+        - has_load_balancer
+        - is_api_endpoint
+        - expected_public_access
+
+    - name: assess_data_sensitivity
+      action: classify_service
+      description: "Check if exposed service handles sensitive data"
+      extract:
+        - data_classification  # public, internal, confidential, restricted
+        - pii_present
+        - compliance_requirements
+
+remediation:
+  decision_tree:
+    - condition: "exposed_service in ['postgresql', 'mysql', 'redis', 'mongodb'] AND source_cidr == '0.0.0.0/0'"
+      action: restrict_database_access
+      risk_level: critical
+      params:
+        steps:
+          - "Immediately restrict security group to VPC CIDR only"
+          - "Add VPN/bastion requirement for admin access"
+          - "Enable encryption in transit (TLS)"
+          - "Audit connection logs for unauthorized access"
+
+    - condition: "exposed_port in [3389, 5900] AND source_cidr == '0.0.0.0/0'"
+      action: restrict_remote_access
+      risk_level: critical
+      params:
+        steps:
+          - "Restrict RDP/VNC to corporate IP ranges"
+          - "Require VPN for remote access"
+          - "Enable MFA on remote access"
+          - "Review access logs"
+
+    - condition: "exposed_port == 22 AND source_cidr == '0.0.0.0/0'"
+      action: restrict_ssh_access
+      risk_level: high
+      params:
+        steps:
+          - "Restrict SSH to bastion host or VPN CIDR"
+          - "Disable password authentication (key-only)"
+          - "Enable fail2ban or equivalent"
+
+    - condition: "default"
+      action: review_and_restrict
+      risk_level: medium
+      params:
+        steps:
+          - "Review if public access is required"
+          - "Restrict to minimum required source CIDRs"
+          - "Add to firewall allowlist documentation"
+          - "Set up monitoring for the port"
+
+validation:
+  checks:
+    - name: port_restricted
+      description: "Verify port is no longer publicly accessible"
+      action: port_scan
+      expected: "port filtered or closed from external"
+      timeout_seconds: 60
+
+    - name: service_still_reachable
+      description: "Verify legitimate traffic still works"
+      action: internal_connectivity_test
+      expected: "service reachable from allowed CIDRs"
+      timeout_seconds: 120
+
+  on_failure:
+    action: rollback_security_group
+    escalation_channel: "#network-security"

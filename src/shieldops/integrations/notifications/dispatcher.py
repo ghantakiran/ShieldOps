@@ -19,8 +19,15 @@ class NotificationDispatcher:
     ``broadcast`` to fan-out to every registered channel concurrently.
     """
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        channels: dict[str, Any] | None = None,
+    ) -> None:
         self._channels: dict[str, NotificationChannel] = {}
+        if channels:
+            for name, ch in channels.items():
+                if isinstance(ch, NotificationChannel):
+                    self._channels[name] = ch
 
     # ------------------------------------------------------------------
     # Channel management
@@ -107,3 +114,65 @@ class NotificationDispatcher:
         tasks = [_send_one(name, ch) for name, ch in self._channels.items()]
         results = await asyncio.gather(*tasks)
         return dict(results)
+
+    async def send_notification(
+        self,
+        channel: str,
+        subject: str,
+        body: str,
+        recipients: list[str] | None = None,
+        metadata: dict[str, Any] | None = None,
+    ) -> bool:
+        """High-level send used by newsletter and escalation services.
+
+        Routes to the named channel with subject/body semantics.
+        Falls back to ``send`` if the channel has no ``send_notification``.
+        """
+        notifier = self._channels.get(channel)
+        if notifier is None:
+            logger.warning("notification_channel_not_found", channel=channel)
+            return False
+
+        # Try the richer send_notification if the channel supports it
+        if hasattr(notifier, "send_notification"):
+            return await notifier.send_notification(
+                subject=subject,
+                body=body,
+                recipients=recipients,
+                metadata=metadata,
+            )
+
+        # Fallback to basic send
+        message = f"{subject}\n\n{body}"
+        return await notifier.send(message=message, severity="info", details=metadata)
+
+    async def send_to_team(
+        self,
+        team_id: str,
+        message: str,
+        severity: str = "info",
+        channel: str | None = None,
+    ) -> bool:
+        """Send notification to a specific team's preferred channel.
+
+        If *channel* is not specified, broadcasts to all channels.
+        """
+        logger.info(
+            "send_to_team",
+            team_id=team_id,
+            severity=severity,
+            channel=channel or "all",
+        )
+        if channel:
+            return await self.send(
+                channel=channel,
+                message=f"[Team: {team_id}] {message}",
+                severity=severity,
+                details={"team_id": team_id},
+            )
+        results = await self.broadcast(
+            message=f"[Team: {team_id}] {message}",
+            severity=severity,
+            details={"team_id": team_id},
+        )
+        return any(results.values())

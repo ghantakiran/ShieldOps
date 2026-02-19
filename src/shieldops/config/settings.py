@@ -116,6 +116,17 @@ class Settings(BaseSettings):
     # NVD CVE Source
     nvd_api_key: str = ""
 
+    # Trivy Scanner
+    trivy_server_url: str = ""
+    trivy_timeout: int = 300
+
+    # Git Security Scanners
+    gitleaks_path: str = "gitleaks"
+    osv_scanner_path: str = "osv-scanner"
+
+    # IaC Scanner
+    checkov_path: str = "checkov"
+
     # HashiCorp Vault
     vault_addr: str = ""
     vault_token: str = ""

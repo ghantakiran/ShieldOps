@@ -13,7 +13,11 @@ import structlog
 from shieldops.agents.security.graph import create_security_graph
 from shieldops.agents.security.models import SecurityScanState
 from shieldops.agents.security.nodes import set_toolkit
-from shieldops.agents.security.protocols import CredentialStore, CVESource
+from shieldops.agents.security.protocols import (
+    CredentialStore,
+    CVESource,
+    SecurityScanner,
+)
 from shieldops.agents.security.tools import SecurityToolkit
 from shieldops.connectors.base import ConnectorRouter
 from shieldops.models.base import Environment
@@ -41,6 +45,7 @@ class SecurityRunner:
         connector_router: ConnectorRouter | None = None,
         cve_sources: list[CVESource] | None = None,
         credential_stores: list[CredentialStore] | None = None,
+        security_scanners: list[SecurityScanner] | None = None,
         policy_engine: Any | None = None,
         approval_workflow: Any | None = None,
         repository: Any | None = None,
@@ -49,8 +54,10 @@ class SecurityRunner:
             connector_router=connector_router,
             cve_sources=cve_sources or [],
             credential_stores=credential_stores or [],
+            security_scanners=security_scanners or [],
             policy_engine=policy_engine,
             approval_workflow=approval_workflow,
+            repository=repository,
         )
         self._repository = repository
         set_toolkit(self._toolkit)

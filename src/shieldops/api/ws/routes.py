@@ -85,3 +85,43 @@ async def ws_remediation_events(
             await websocket.receive_text()
     except WebSocketDisconnect:
         manager.disconnect(websocket, channel=channel)
+
+
+@router.websocket("/ws/vulnerabilities")
+async def ws_vulnerability_events(
+    websocket: WebSocket,
+    token: str | None = Query(default=None),
+) -> None:
+    """Stream vulnerability lifecycle events."""
+    payload = await _authenticate_ws(websocket, token)
+    if payload is None:
+        await websocket.close(code=4001, reason="Authentication required")
+        return
+
+    await manager.connect(websocket, channel="vulnerabilities")
+    try:
+        while True:
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        manager.disconnect(websocket, channel="vulnerabilities")
+
+
+@router.websocket("/ws/security-chat/{session_id}")
+async def ws_security_chat(
+    websocket: WebSocket,
+    session_id: str,
+    token: str | None = Query(default=None),
+) -> None:
+    """WebSocket for AI security chat sessions."""
+    payload = await _authenticate_ws(websocket, token)
+    if payload is None:
+        await websocket.close(code=4001, reason="Authentication required")
+        return
+
+    channel = f"security-chat:{session_id}"
+    await manager.connect(websocket, channel=channel)
+    try:
+        while True:
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        manager.disconnect(websocket, channel=channel)

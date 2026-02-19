@@ -236,3 +236,112 @@ class AgentRegistration(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
+
+
+class VulnerabilityRecord(Base):
+    """Individual vulnerability with lifecycle tracking."""
+
+    __tablename__ = "vulnerabilities"
+
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    cve_id: Mapped[str | None] = mapped_column(String(64), index=True, nullable=True)
+    scan_id: Mapped[str | None] = mapped_column(String(64), index=True, nullable=True)
+    source: Mapped[str] = mapped_column(String(32))
+    scanner_type: Mapped[str] = mapped_column(String(32), index=True)
+    severity: Mapped[str] = mapped_column(String(16), index=True)
+    cvss_score: Mapped[float] = mapped_column(default=0.0)
+    title: Mapped[str] = mapped_column(Text, default="")
+    description: Mapped[str] = mapped_column(Text, default="")
+    package_name: Mapped[str] = mapped_column(String(256), default="")
+    affected_resource: Mapped[str] = mapped_column(String(512))
+    status: Mapped[str] = mapped_column(String(32), default="new", index=True)
+    assigned_team_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    assigned_user_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    sla_due_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    sla_breached: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
+    first_seen_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+    last_seen_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+    remediated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    closed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    remediation_steps: Mapped[list[dict[str, Any]]] = mapped_column(JSONB, default=list)
+    scan_metadata: Mapped[dict[str, Any]] = mapped_column(JSONB, default=dict)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+    __table_args__ = (
+        Index("ix_vulns_cve_resource", "cve_id", "affected_resource"),
+        Index("ix_vulns_status_severity", "status", "severity"),
+        Index("ix_vulns_team", "assigned_team_id"),
+        Index("ix_vulns_sla", "sla_breached", "sla_due_at"),
+    )
+
+
+class TeamRecord(Base):
+    """Team definition for vulnerability assignment."""
+
+    __tablename__ = "teams"
+
+    id: Mapped[str] = mapped_column(
+        String(64), primary_key=True, default=lambda: f"team-{uuid4().hex[:12]}"
+    )
+    name: Mapped[str] = mapped_column(String(256), unique=True)
+    description: Mapped[str] = mapped_column(Text, default="")
+    slack_channel: Mapped[str] = mapped_column(String(128), default="")
+    pagerduty_service_id: Mapped[str] = mapped_column(String(128), default="")
+    email: Mapped[str] = mapped_column(String(256), default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+
+class TeamMemberRecord(Base):
+    """User-to-team mapping."""
+
+    __tablename__ = "team_members"
+
+    id: Mapped[str] = mapped_column(
+        String(64), primary_key=True, default=lambda: f"tm-{uuid4().hex[:12]}"
+    )
+    team_id: Mapped[str] = mapped_column(String(64), index=True)
+    user_id: Mapped[str] = mapped_column(String(64), index=True)
+    role: Mapped[str] = mapped_column(String(32), default="member")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class VulnerabilityCommentRecord(Base):
+    """Comment thread entry on a vulnerability."""
+
+    __tablename__ = "vulnerability_comments"
+
+    id: Mapped[str] = mapped_column(
+        String(64), primary_key=True, default=lambda: f"vc-{uuid4().hex[:12]}"
+    )
+    vulnerability_id: Mapped[str] = mapped_column(String(64), index=True)
+    user_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    content: Mapped[str] = mapped_column(Text)
+    comment_type: Mapped[str] = mapped_column(String(32), default="comment")
+    comment_metadata: Mapped[dict[str, Any]] = mapped_column("metadata", JSONB, default=dict)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class RiskAcceptanceRecord(Base):
+    """Risk acceptance record for a vulnerability."""
+
+    __tablename__ = "vulnerability_risk_acceptances"
+
+    id: Mapped[str] = mapped_column(
+        String(64), primary_key=True, default=lambda: f"ra-{uuid4().hex[:12]}"
+    )
+    vulnerability_id: Mapped[str] = mapped_column(String(64), index=True)
+    accepted_by: Mapped[str] = mapped_column(String(64))
+    reason: Mapped[str] = mapped_column(Text)
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    approved_by: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

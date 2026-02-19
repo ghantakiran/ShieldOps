@@ -114,3 +114,117 @@ async def daily_cost_analysis(
         "daily_cost_analysis_completed",
         analysis_id=result.analysis_id,
     )
+
+
+async def sla_check_job(
+    repository: Any | None = None,
+    **kwargs: Any,
+) -> None:
+    """Check SLA compliance for all open vulnerabilities -- hourly."""
+    if repository is None:
+        logger.warning("sla_check_skipped", reason="no repository")
+        return
+
+    from shieldops.vulnerability.sla_engine import SLAEngine
+
+    logger.info("sla_check_started")
+    engine = SLAEngine(repository=repository)
+    result = await engine.check_all_sla_compliance()
+    logger.info(
+        "sla_check_completed",
+        checked=result.get("checked", 0),
+        newly_breached=result.get("newly_breached", 0),
+    )
+
+
+async def vulnerability_dedup_job(
+    repository: Any | None = None,
+    **kwargs: Any,
+) -> None:
+    """Deduplicate vulnerability records -- daily."""
+    if repository is None:
+        logger.warning("vuln_dedup_skipped", reason="no repository")
+        return
+
+    from shieldops.vulnerability.lifecycle import VulnerabilityLifecycleManager
+
+    logger.info("vuln_dedup_started")
+    mgr = VulnerabilityLifecycleManager(repository=repository)
+    result = await mgr.deduplicate_findings()
+    logger.info("vuln_dedup_completed", deduplicated=result.get("deduplicated", 0))
+
+
+async def daily_security_newsletter(
+    repository: Any | None = None,
+    notification_dispatcher: Any | None = None,
+    **kwargs: Any,
+) -> None:
+    """Send daily security digest -- runs every 24 hours."""
+    if repository is None:
+        logger.warning("daily_newsletter_skipped", reason="no repository")
+        return
+
+    from shieldops.vulnerability.newsletter import SecurityNewsletterService
+
+    logger.info("daily_newsletter_started")
+    service = SecurityNewsletterService(
+        repository=repository,
+        notification_dispatcher=notification_dispatcher,
+    )
+    digest = await service.generate_daily_digest()
+    result = await service.send_digest(digest)
+    logger.info(
+        "daily_newsletter_completed",
+        sent=result.get("sent", False),
+        recipients=result.get("recipients", 0),
+    )
+
+
+async def weekly_security_newsletter(
+    repository: Any | None = None,
+    notification_dispatcher: Any | None = None,
+    **kwargs: Any,
+) -> None:
+    """Send weekly security summary -- runs every 7 days."""
+    if repository is None:
+        logger.warning("weekly_newsletter_skipped", reason="no repository")
+        return
+
+    from shieldops.vulnerability.newsletter import SecurityNewsletterService
+
+    logger.info("weekly_newsletter_started")
+    service = SecurityNewsletterService(
+        repository=repository,
+        notification_dispatcher=notification_dispatcher,
+    )
+    digest = await service.generate_weekly_digest()
+    result = await service.send_digest(digest)
+    logger.info(
+        "weekly_newsletter_completed",
+        sent=result.get("sent", False),
+        recipients=result.get("recipients", 0),
+    )
+
+
+async def escalation_check_job(
+    repository: Any | None = None,
+    notification_dispatcher: Any | None = None,
+    **kwargs: Any,
+) -> None:
+    """Check escalation conditions -- runs hourly with SLA check."""
+    if repository is None:
+        logger.warning("escalation_check_skipped", reason="no repository")
+        return
+
+    from shieldops.vulnerability.escalation import EscalationEngine
+
+    logger.info("escalation_check_started")
+    engine = EscalationEngine(
+        repository=repository,
+        notification_dispatcher=notification_dispatcher,
+    )
+    result = await engine.check_and_escalate()
+    logger.info(
+        "escalation_check_completed",
+        escalations=result.get("escalations_triggered", 0),
+    )

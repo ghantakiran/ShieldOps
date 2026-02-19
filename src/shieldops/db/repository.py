@@ -21,8 +21,13 @@ from shieldops.db.models import (
     InvestigationRecord,
     LearningCycleRecord,
     RemediationRecord,
+    RiskAcceptanceRecord,
     SecurityScanRecord,
+    TeamMemberRecord,
+    TeamRecord,
     UserRecord,
+    VulnerabilityCommentRecord,
+    VulnerabilityRecord,
 )
 from shieldops.models.base import AuditEntry
 
@@ -582,3 +587,354 @@ class Repository:
                 }
                 for r in records
             ]
+
+    # ── Vulnerabilities ───────────────────────────────────────────
+
+    async def save_vulnerability(self, vuln_data: dict[str, Any]) -> str:
+        """Save or deduplicate a vulnerability.
+
+        Dedup key: (cve_id + affected_resource + package_name).
+        If a matching record exists, update last_seen_at instead of creating a new one.
+        """
+        async with self._sf() as session:
+            # Check for existing vulnerability (deduplication)
+            dedup_key_cve = vuln_data.get("cve_id")
+            dedup_key_resource = vuln_data.get("affected_resource", "")
+            dedup_key_pkg = vuln_data.get("package_name", "")
+
+            if dedup_key_cve and dedup_key_resource:
+                stmt = select(VulnerabilityRecord).where(
+                    VulnerabilityRecord.cve_id == dedup_key_cve,
+                    VulnerabilityRecord.affected_resource == dedup_key_resource,
+                    VulnerabilityRecord.package_name == dedup_key_pkg,
+                )
+                result = await session.execute(stmt)
+                existing = result.scalar_one_or_none()
+
+                if existing:
+                    existing.last_seen_at = datetime.now(UTC)
+                    existing.scan_id = vuln_data.get("scan_id", existing.scan_id)
+                    if vuln_data.get("severity"):
+                        existing.severity = vuln_data["severity"]
+                    if vuln_data.get("cvss_score"):
+                        existing.cvss_score = vuln_data["cvss_score"]
+                    await session.commit()
+                    logger.info("vulnerability_deduped", vuln_id=existing.id)
+                    return existing.id
+
+            from uuid import uuid4
+
+            vuln_id = vuln_data.get("id", f"vuln-{uuid4().hex[:12]}")
+            record = VulnerabilityRecord(
+                id=vuln_id,
+                cve_id=vuln_data.get("cve_id"),
+                scan_id=vuln_data.get("scan_id"),
+                source=vuln_data.get("source", "unknown"),
+                scanner_type=vuln_data.get("scanner_type", "cve"),
+                severity=vuln_data.get("severity", "medium"),
+                cvss_score=vuln_data.get("cvss_score", 0.0),
+                title=vuln_data.get("title", ""),
+                description=vuln_data.get("description", ""),
+                package_name=vuln_data.get("package_name", ""),
+                affected_resource=vuln_data.get("affected_resource", "unknown"),
+                status="new",
+                sla_due_at=vuln_data.get("sla_due_at"),
+                remediation_steps=vuln_data.get("remediation_steps", []),
+                scan_metadata=vuln_data.get("scan_metadata", {}),
+            )
+            session.add(record)
+            await session.commit()
+            logger.info("vulnerability_saved", vuln_id=vuln_id)
+            return vuln_id
+
+    async def get_vulnerability(self, vuln_id: str) -> dict[str, Any] | None:
+        async with self._sf() as session:
+            record = await session.get(VulnerabilityRecord, vuln_id)
+            if record is None:
+                return None
+            return self._vulnerability_to_dict(record)
+
+    async def list_vulnerabilities(
+        self,
+        status: str | None = None,
+        severity: str | None = None,
+        scanner_type: str | None = None,
+        team_id: str | None = None,
+        sla_breached: bool | None = None,
+        limit: int = 50,
+        offset: int = 0,
+    ) -> list[dict[str, Any]]:
+        async with self._sf() as session:
+            stmt = select(VulnerabilityRecord).order_by(VulnerabilityRecord.created_at.desc())
+            if status:
+                stmt = stmt.where(VulnerabilityRecord.status == status)
+            if severity:
+                stmt = stmt.where(VulnerabilityRecord.severity == severity)
+            if scanner_type:
+                stmt = stmt.where(VulnerabilityRecord.scanner_type == scanner_type)
+            if team_id:
+                stmt = stmt.where(VulnerabilityRecord.assigned_team_id == team_id)
+            if sla_breached is not None:
+                stmt = stmt.where(VulnerabilityRecord.sla_breached == sla_breached)
+            stmt = stmt.offset(offset).limit(limit)
+            result = await session.execute(stmt)
+            return [self._vulnerability_to_dict(r) for r in result.scalars().all()]
+
+    async def count_vulnerabilities(
+        self,
+        status: str | None = None,
+        severity: str | None = None,
+        sla_breached: bool | None = None,
+    ) -> int:
+        from sqlalchemy import func as sa_func
+
+        async with self._sf() as session:
+            stmt = select(sa_func.count(VulnerabilityRecord.id))
+            if status:
+                stmt = stmt.where(VulnerabilityRecord.status == status)
+            if severity:
+                stmt = stmt.where(VulnerabilityRecord.severity == severity)
+            if sla_breached is not None:
+                stmt = stmt.where(VulnerabilityRecord.sla_breached == sla_breached)
+            result = await session.execute(stmt)
+            return result.scalar_one()
+
+    async def update_vulnerability_status(self, vuln_id: str, status: str, **fields: Any) -> bool:
+        async with self._sf() as session:
+            record = await session.get(VulnerabilityRecord, vuln_id)
+            if record is None:
+                return False
+            record.status = status
+            if status == "remediated":
+                record.remediated_at = datetime.now(UTC)
+            if status == "closed":
+                record.closed_at = datetime.now(UTC)
+            for key, value in fields.items():
+                if hasattr(record, key):
+                    setattr(record, key, value)
+            await session.commit()
+            return True
+
+    async def assign_vulnerability(
+        self, vuln_id: str, team_id: str | None = None, user_id: str | None = None
+    ) -> bool:
+        async with self._sf() as session:
+            record = await session.get(VulnerabilityRecord, vuln_id)
+            if record is None:
+                return False
+            if team_id is not None:
+                record.assigned_team_id = team_id
+            if user_id is not None:
+                record.assigned_user_id = user_id
+            await session.commit()
+            return True
+
+    async def get_vulnerability_stats(self) -> dict[str, Any]:
+        from sqlalchemy import func as sa_func
+
+        async with self._sf() as session:
+            # By severity
+            sev_stmt = select(
+                VulnerabilityRecord.severity,
+                sa_func.count(VulnerabilityRecord.id),
+            ).group_by(VulnerabilityRecord.severity)
+            sev_result = await session.execute(sev_stmt)
+            by_severity = {row[0]: row[1] for row in sev_result.all()}
+
+            # By status
+            status_stmt = select(
+                VulnerabilityRecord.status,
+                sa_func.count(VulnerabilityRecord.id),
+            ).group_by(VulnerabilityRecord.status)
+            status_result = await session.execute(status_stmt)
+            by_status = {row[0]: row[1] for row in status_result.all()}
+
+            # SLA breaches
+            sla_stmt = select(sa_func.count(VulnerabilityRecord.id)).where(
+                VulnerabilityRecord.sla_breached == True  # noqa: E712
+            )
+            sla_result = await session.execute(sla_stmt)
+            sla_breaches = sla_result.scalar_one()
+
+            # Total
+            total_stmt = select(sa_func.count(VulnerabilityRecord.id))
+            total_result = await session.execute(total_stmt)
+            total = total_result.scalar_one()
+
+            return {
+                "total": total,
+                "by_severity": by_severity,
+                "by_status": by_status,
+                "sla_breaches": sla_breaches,
+            }
+
+    @staticmethod
+    def _vulnerability_to_dict(record: VulnerabilityRecord) -> dict[str, Any]:
+        return {
+            "id": record.id,
+            "cve_id": record.cve_id,
+            "scan_id": record.scan_id,
+            "source": record.source,
+            "scanner_type": record.scanner_type,
+            "severity": record.severity,
+            "cvss_score": record.cvss_score,
+            "title": record.title,
+            "description": record.description,
+            "package_name": record.package_name,
+            "affected_resource": record.affected_resource,
+            "status": record.status,
+            "assigned_team_id": record.assigned_team_id,
+            "assigned_user_id": record.assigned_user_id,
+            "sla_due_at": record.sla_due_at.isoformat() if record.sla_due_at else None,
+            "sla_breached": record.sla_breached,
+            "first_seen_at": record.first_seen_at.isoformat() if record.first_seen_at else None,
+            "last_seen_at": record.last_seen_at.isoformat() if record.last_seen_at else None,
+            "remediated_at": record.remediated_at.isoformat() if record.remediated_at else None,
+            "closed_at": record.closed_at.isoformat() if record.closed_at else None,
+            "remediation_steps": record.remediation_steps,
+            "scan_metadata": record.scan_metadata,
+            "created_at": record.created_at.isoformat() if record.created_at else None,
+            "updated_at": record.updated_at.isoformat() if record.updated_at else None,
+        }
+
+    # ── Teams ──────────────────────────────────────────────────────
+
+    async def create_team(self, name: str, **fields: Any) -> dict[str, Any]:
+        async with self._sf() as session:
+            record = TeamRecord(name=name)
+            for key, value in fields.items():
+                if hasattr(record, key):
+                    setattr(record, key, value)
+            session.add(record)
+            await session.commit()
+            await session.refresh(record)
+            return self._team_to_dict(record)
+
+    async def get_team(self, team_id: str) -> dict[str, Any] | None:
+        async with self._sf() as session:
+            record = await session.get(TeamRecord, team_id)
+            if record is None:
+                return None
+            return self._team_to_dict(record)
+
+    async def list_teams(self) -> list[dict[str, Any]]:
+        async with self._sf() as session:
+            stmt = select(TeamRecord).order_by(TeamRecord.name)
+            result = await session.execute(stmt)
+            return [self._team_to_dict(r) for r in result.scalars().all()]
+
+    async def add_team_member(self, team_id: str, user_id: str, role: str = "member") -> str:
+        async with self._sf() as session:
+            record = TeamMemberRecord(team_id=team_id, user_id=user_id, role=role)
+            session.add(record)
+            await session.commit()
+            return record.id
+
+    async def remove_team_member(self, team_id: str, user_id: str) -> bool:
+        async with self._sf() as session:
+            stmt = select(TeamMemberRecord).where(
+                TeamMemberRecord.team_id == team_id,
+                TeamMemberRecord.user_id == user_id,
+            )
+            result = await session.execute(stmt)
+            record = result.scalar_one_or_none()
+            if record is None:
+                return False
+            await session.delete(record)
+            await session.commit()
+            return True
+
+    async def list_team_members(self, team_id: str) -> list[dict[str, Any]]:
+        async with self._sf() as session:
+            stmt = select(TeamMemberRecord).where(TeamMemberRecord.team_id == team_id)
+            result = await session.execute(stmt)
+            return [
+                {
+                    "id": r.id,
+                    "team_id": r.team_id,
+                    "user_id": r.user_id,
+                    "role": r.role,
+                    "created_at": r.created_at.isoformat() if r.created_at else None,
+                }
+                for r in result.scalars().all()
+            ]
+
+    @staticmethod
+    def _team_to_dict(record: TeamRecord) -> dict[str, Any]:
+        return {
+            "id": record.id,
+            "name": record.name,
+            "description": record.description,
+            "slack_channel": record.slack_channel,
+            "pagerduty_service_id": record.pagerduty_service_id,
+            "email": record.email,
+            "created_at": record.created_at.isoformat() if record.created_at else None,
+            "updated_at": record.updated_at.isoformat() if record.updated_at else None,
+        }
+
+    # ── Vulnerability Comments ─────────────────────────────────────
+
+    async def add_vulnerability_comment(
+        self,
+        vulnerability_id: str,
+        content: str,
+        user_id: str | None = None,
+        comment_type: str = "comment",
+        metadata: dict[str, Any] | None = None,
+    ) -> str:
+        async with self._sf() as session:
+            record = VulnerabilityCommentRecord(
+                vulnerability_id=vulnerability_id,
+                user_id=user_id,
+                content=content,
+                comment_type=comment_type,
+                comment_metadata=metadata or {},
+            )
+            session.add(record)
+            await session.commit()
+            return record.id
+
+    async def list_vulnerability_comments(self, vulnerability_id: str) -> list[dict[str, Any]]:
+        async with self._sf() as session:
+            stmt = (
+                select(VulnerabilityCommentRecord)
+                .where(VulnerabilityCommentRecord.vulnerability_id == vulnerability_id)
+                .order_by(VulnerabilityCommentRecord.created_at.asc())
+            )
+            result = await session.execute(stmt)
+            return [
+                {
+                    "id": r.id,
+                    "vulnerability_id": r.vulnerability_id,
+                    "user_id": r.user_id,
+                    "content": r.content,
+                    "comment_type": r.comment_type,
+                    "metadata": r.comment_metadata,
+                    "created_at": r.created_at.isoformat() if r.created_at else None,
+                }
+                for r in result.scalars().all()
+            ]
+
+    # ── Risk Acceptance ────────────────────────────────────────────
+
+    async def create_risk_acceptance(
+        self,
+        vulnerability_id: str,
+        accepted_by: str,
+        reason: str,
+        expires_at: datetime | None = None,
+    ) -> str:
+        async with self._sf() as session:
+            record = RiskAcceptanceRecord(
+                vulnerability_id=vulnerability_id,
+                accepted_by=accepted_by,
+                reason=reason,
+                expires_at=expires_at,
+            )
+            session.add(record)
+            # Also update the vulnerability status
+            vuln = await session.get(VulnerabilityRecord, vulnerability_id)
+            if vuln:
+                vuln.status = "accepted_risk"
+            await session.commit()
+            return record.id
