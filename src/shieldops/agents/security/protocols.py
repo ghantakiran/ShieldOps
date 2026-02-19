@@ -9,11 +9,11 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 
-class ScannerType(str, enum.Enum):
+class ScannerType(enum.StrEnum):
     """Categories of security scanner."""
 
     CVE = "cve"
-    SECRET = "secret"
+    SECRET = "secret"  # noqa: S105
     IAC = "iac"
     NETWORK = "network"
     K8S_SECURITY = "k8s_security"

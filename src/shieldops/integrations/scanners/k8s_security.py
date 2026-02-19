@@ -284,7 +284,9 @@ class K8sSecurityScanner(SecurityScanner):
                             f"Pod '{pod.id}' shares the {ns_display} namespace with the host."
                         ),
                         affected_resource=f"kubernetes:pod/{pod.id}",
-                        remediation=f"Disable {host_ns} unless absolutely required by the workload.",
+                        remediation=(
+                            f"Disable {host_ns} unless absolutely required by the workload."
+                        ),
                         metadata={"pod": pod.id, "check": host_ns},
                     )
                 )

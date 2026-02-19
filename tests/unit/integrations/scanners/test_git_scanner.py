@@ -23,7 +23,7 @@ from shieldops.integrations.scanners.git_scanner import (
 def _make_gitleaks_finding(
     rule_id: str = "generic-api-key",
     file: str = "config.py",
-    secret: str = "sk_live_abc123",
+    secret: str = "sk_live_abc123",  # noqa: S107
     match: str = "API_KEY=sk_live_abc123",
 ) -> dict[str, Any]:
     return {

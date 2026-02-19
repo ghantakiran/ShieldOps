@@ -166,13 +166,13 @@ class NetworkSecurityScanner(SecurityScanner):
                 if not isinstance(rule, dict):
                     continue
 
-                cidr: str = rule.get("cidr", rule.get("source", ""))
+                cidr: str = rule.get("cidr", rule.get("source", ""))  # type: ignore[assignment]
                 if cidr not in OPEN_CIDR_BLOCKS:
                     continue
 
                 raw_port = rule.get("port", rule.get("from_port", 0))
                 try:
-                    port = int(raw_port)
+                    port = int(raw_port)  # type: ignore[arg-type]
                 except (ValueError, TypeError):
                     port = 0
 
@@ -227,7 +227,10 @@ class NetworkSecurityScanner(SecurityScanner):
         for resource_type in ("load_balancer", "storage_bucket", "database"):
             try:
                 resources = await connector.list_resources(resource_type, env)
-            except Exception:
+            except Exception as exc:
+                logger.debug(
+                    "resource_type_unsupported", resource_type=resource_type, error=str(exc)
+                )
                 continue
 
             for resource in resources:
@@ -274,7 +277,7 @@ class NetworkSecurityScanner(SecurityScanner):
         (string ``"true"`` / ``"false"``) on namespace resources.
         """
         findings: list[dict[str, Any]] = []
-        _SYSTEM_NAMESPACES = frozenset(
+        system_namespaces = frozenset(
             {
                 "kube-system",
                 "kube-public",
@@ -292,7 +295,7 @@ class NetworkSecurityScanner(SecurityScanner):
 
         for ns in namespaces:
             ns_name: str = ns.id
-            if ns_name in _SYSTEM_NAMESPACES:
+            if ns_name in system_namespaces:
                 continue
 
             has_netpol = ns.labels.get("has_network_policy", "false")
