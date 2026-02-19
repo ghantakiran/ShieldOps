@@ -81,6 +81,9 @@ class Settings(BaseSettings):
     slack_signing_secret: str = ""
     slack_approval_channel: str = "#shieldops-approvals"
 
+    # PagerDuty
+    pagerduty_routing_key: str = ""
+
     # AWS
     aws_region: str = ""
     aws_access_key_id: str = ""

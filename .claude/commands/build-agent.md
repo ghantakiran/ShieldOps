@@ -18,7 +18,7 @@ Build a new ShieldOps agent or extend an existing one.
    - Wire OPA policy checks in `policy.py`
 5. **Add playbooks**: Create YAML playbook in `playbooks/`
 6. **Write tests**: Unit tests + agent simulation tests
-7. **Update orchestration**: Register agent with supervisor in `src/shieldops/orchestration/`
+7. **Update orchestration**: Register agent with supervisor in `src/shieldops/agents/supervisor/`
 
 ## Agent Template Structure
 ```

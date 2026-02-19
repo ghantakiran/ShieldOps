@@ -71,7 +71,9 @@ class TestCostRunnerWiring:
 
             app = create_app()
             async with app.router.lifespan_context(app):
-                mock_cost_cls.assert_called_once_with(connector_router=mock_router)
+                mock_cost_cls.assert_called_once_with(
+                    connector_router=mock_router, billing_sources=None
+                )
                 assert cost._runner is mock_cost_cls.return_value
 
 

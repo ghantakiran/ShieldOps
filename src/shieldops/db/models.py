@@ -134,6 +134,31 @@ class IncidentOutcomeRecord(Base):
     __table_args__ = (Index("ix_incident_outcomes_alert_env", "alert_type", "environment"),)
 
 
+class LearningCycleRecord(Base):
+    """Persisted learning cycle result."""
+
+    __tablename__ = "learning_cycles"
+
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    learning_type: Mapped[str] = mapped_column(String(32), index=True)
+    target_period: Mapped[str] = mapped_column(String(16), default="30d")
+    status: Mapped[str] = mapped_column(String(32), default="init", index=True)
+    total_incidents_analyzed: Mapped[int] = mapped_column(Integer, default=0)
+    recurring_pattern_count: Mapped[int] = mapped_column(Integer, default=0)
+    improvement_score: Mapped[float] = mapped_column(default=0.0)
+    automation_accuracy: Mapped[float] = mapped_column(default=0.0)
+
+    # JSON fields for complex data
+    pattern_insights: Mapped[list[dict[str, Any]]] = mapped_column(JSONB, default=list)
+    playbook_updates: Mapped[list[dict[str, Any]]] = mapped_column(JSONB, default=list)
+    threshold_adjustments: Mapped[list[dict[str, Any]]] = mapped_column(JSONB, default=list)
+    reasoning_chain: Mapped[list[dict[str, Any]]] = mapped_column(JSONB, default=list)
+
+    error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    duration_ms: Mapped[int] = mapped_column(Integer, default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
 class SecurityScanRecord(Base):
     """Persisted security scan result."""
 

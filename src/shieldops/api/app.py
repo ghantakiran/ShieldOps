@@ -106,6 +106,11 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         analytics.set_engine(analytics_engine)
         logger.info("analytics_engine_initialized")
 
+    # ── WebSocket manager (singleton shared with routes) ──────
+    from shieldops.api.ws.manager import get_ws_manager
+
+    ws_manager = get_ws_manager()
+
     # ── Infrastructure layer ────────────────────────────────────
     obs_sources = create_observability_sources(settings)
     router = create_connector_router(settings)
@@ -117,6 +122,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         metric_sources=obs_sources.metric_sources,
         trace_sources=obs_sources.trace_sources,
         repository=repository,
+        ws_manager=ws_manager,
     )
     investigations.set_runner(inv_runner)
     investigations.set_repository(repository)
@@ -139,6 +145,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         policy_engine=policy_engine,
         approval_workflow=approval_workflow,
         repository=repository,
+        ws_manager=ws_manager,
     )
     remediations.set_runner(rem_runner)
     remediations.set_repository(repository)
@@ -152,8 +159,23 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     )
     security.set_runner(sec_runner)
 
-    # Cost runner — billing_sources left empty until integrations land
-    cost_runner = CostRunner(connector_router=router)
+    # Cost runner — wire billing sources when credentials are available
+    billing_sources: list[Any] = []
+    if settings.aws_region:
+        try:
+            from shieldops.integrations.billing.aws_cost_explorer import (
+                AWSCostExplorerSource,
+            )
+
+            billing_sources.append(AWSCostExplorerSource(region=settings.aws_region))
+            logger.info("aws_billing_source_initialized")
+        except Exception as e:
+            logger.warning("aws_billing_init_failed", error=str(e))
+
+    cost_runner = CostRunner(
+        connector_router=router,
+        billing_sources=billing_sources or None,
+    )
     cost.set_runner(cost_runner)
 
     # ── Playbook loader ─────────────────────────────────────────
@@ -174,6 +196,16 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     )
     learning.set_runner(learn_runner)
 
+    # ── Notification channels ─────────────────────────────────────
+    notification_channels: dict[str, Any] = {}
+    if settings.pagerduty_routing_key:
+        from shieldops.integrations.notifications.pagerduty import PagerDutyNotifier
+
+        notification_channels["pagerduty"] = PagerDutyNotifier(
+            routing_key=settings.pagerduty_routing_key,
+        )
+        logger.info("pagerduty_notifier_initialized")
+
     # Supervisor — orchestrates all specialist agents
     sup_runner = SupervisorRunner(
         agent_runners={
@@ -184,8 +216,42 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
             "learning": learn_runner,
         },
         playbook_loader=playbook_loader,
+        notification_channels=notification_channels,
     )
     supervisor.set_runner(sup_runner)
+
+    # ── Scheduler ─────────────────────────────────────────────────
+    from shieldops.scheduler import JobScheduler
+    from shieldops.scheduler.jobs import (
+        daily_cost_analysis,
+        nightly_learning_cycle,
+        periodic_security_scan,
+    )
+
+    scheduler = JobScheduler()
+    scheduler.add_job(
+        "nightly_learning",
+        nightly_learning_cycle,
+        interval_seconds=86400,  # 24 hours
+        learning_runner=learn_runner,
+    )
+    scheduler.add_job(
+        "security_scan",
+        periodic_security_scan,
+        interval_seconds=21600,  # 6 hours
+        security_runner=sec_runner,
+        environment=settings.environment,
+    )
+    scheduler.add_job(
+        "cost_analysis",
+        daily_cost_analysis,
+        interval_seconds=86400,  # 24 hours
+        cost_runner=cost_runner,
+        environment=settings.environment,
+    )
+    await scheduler.start()
+    app.state.scheduler = scheduler
+    logger.info("scheduler_initialized", jobs=len(scheduler.list_jobs()))
 
     # Register playbooks router
     try:
@@ -199,6 +265,9 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     yield
 
     logger.info("shieldops_shutting_down")
+    _scheduler = getattr(getattr(app, "state", None), "scheduler", None)
+    if _scheduler:
+        await _scheduler.stop()
     await obs_sources.close_all()
     await policy_engine.close()
     if engine:

@@ -1,7 +1,7 @@
 # ShieldOps — Feature Implementation Tracker
 
 **Last Updated:** 2026-02-18
-**Platform Completeness:** ~95%
+**Platform Completeness:** ~98%
 
 ---
 
@@ -78,6 +78,81 @@
 
 ---
 
+## Phase 3 — Event-Driven Architecture & Production Hardening
+
+### P0 — Critical (Core Infrastructure)
+
+- [x] **Kafka Event Bus** — Producer/consumer framework for agent event streaming
+  - New module: `src/shieldops/messaging/` (bus.py, producer.py, consumer.py, topics.py)
+  - aiokafka-based async producer + consumer with topic routing
+  - Topics: `shieldops.events`, `shieldops.agent.results`, `shieldops.audit`
+  - EventEnvelope Pydantic model with serialize/deserialize helpers
+  - Tests: `tests/unit/test_kafka_event_bus.py` — 43 tests
+
+- [x] **WebSocket Broadcasting Wiring** — Connect ws_manager to agent runners
+  - Singleton `get_ws_manager()` in `src/shieldops/api/ws/manager.py`
+  - Injected into InvestigationRunner + RemediationRunner in app.py lifespan
+  - WS routes now share the same ConnectionManager instance
+  - Tests: `tests/unit/test_ws_broadcasting.py` — 15 tests
+
+### P1 — High (Agent Completeness)
+
+- [x] **GCP Cloud Audit Log Events** — Real `get_events()` for GCP connector
+  - File: `src/shieldops/connectors/gcp/connector.py` — Cloud Logging API integration
+  - Compute Engine + Cloud Run resource-scoped audit log queries
+  - Structured event parsing with actor, severity, details
+  - Tests: 6 new tests in `tests/unit/test_gcp_connector.py`
+
+- [x] **Azure Activity Log Events** — Real `get_events()` for Azure connector
+  - File: `src/shieldops/connectors/azure/connector.py` — Activity Log API integration
+  - VM + Container App resource-scoped activity queries via azure-mgmt-monitor
+  - OData filtering, structured event parsing, null-field robustness
+  - Tests: 7 new tests in `tests/unit/test_azure_connector.py`
+
+- [x] **Learning Agent Persistence** — Persist learning cycles to DB
+  - New ORM model: `LearningCycleRecord` in `src/shieldops/db/models.py`
+  - New repo methods: `save_learning_cycle()`, `query_learning_cycles()` in repository.py
+  - `LearningRunner.learn()` now persists completed cycles (graceful on failure)
+  - Tests: `tests/unit/test_learning_persistence.py` — 23 tests
+
+- [x] **Notification Service** — PagerDuty + unified notification dispatch
+  - New module: `src/shieldops/integrations/notifications/` (base.py, pagerduty.py, dispatcher.py)
+  - PagerDuty Events API v2 with severity mapping, summary truncation
+  - `NotificationDispatcher` with register/send/broadcast + channel routing
+  - Wired into SupervisorRunner notification_channels in app.py
+  - Tests: `tests/unit/test_notification_service.py` — 34 tests
+
+### P2 — Medium (Operational Maturity)
+
+- [x] **Scheduled Job Framework** — Periodic task triggers for agents
+  - New module: `src/shieldops/scheduler/` (scheduler.py, jobs.py)
+  - Lightweight asyncio-based scheduler (no APScheduler dependency)
+  - Jobs: nightly learning (24h), security scan (6h), cost analysis (24h)
+  - Wired into app.py lifespan with graceful shutdown
+  - Tests: `tests/unit/test_scheduler.py` — 42 tests
+
+- [x] **AWS Cost Explorer Billing Source** — Real billing data for cost agent
+  - New module: `src/shieldops/integrations/billing/` (base.py, aws_cost_explorer.py)
+  - Protocol: `BillingSource.query(environment, period) -> BillingData`
+  - AWS Cost Explorer: GetCostAndUsage with service grouping + daily breakdown
+  - Wired into CostRunner.billing_sources in app.py
+  - Tests: `tests/unit/test_aws_billing_source.py` — 33 tests
+
+- [x] **Cleanup Legacy Supervisor Stub** — Remove dead orchestration/supervisor.py
+  - Deleted `src/shieldops/orchestration/supervisor.py` and its test file
+  - Verified no imports reference it (agents/supervisor/ is the real impl)
+  - Updated README.md and build-agent.md referencing the old path
+
+### P3 — Low (Developer Experience)
+
+- [x] **New Claude Code Skills** — Workspace-specific development skills
+  - `add-connector` — Scaffold a new infrastructure connector following InfraConnector protocol
+  - `add-integration` — Scaffold a new integration (billing, notification, etc.)
+  - `run-agent` — Test-run an agent workflow locally with mock data
+  - `check-health` — Run health checks on all platform dependencies
+
+---
+
 ## Completed
 
 - [x] Multi-cloud Terraform infrastructure (AWS/GCP/Azure)
@@ -110,3 +185,13 @@
 - [x] GCP Fake Connector + E2E Tests — 347 LOC, 17 tests
 - [x] Azure Fake Connector + E2E Tests — 153 LOC, 16 tests
 - [x] Cross-Connector E2E Tests (multi-provider, rollback, isolation) — 9 tests
+- [x] Kafka Event Bus (producer, consumer, bus, topics, EventEnvelope) — 43 tests
+- [x] WebSocket Broadcasting Wiring (singleton manager, runner injection) — 15 tests
+- [x] GCP Cloud Audit Log Events (Cloud Logging API integration) — 6 tests
+- [x] Azure Activity Log Events (Monitor Activity Log integration) — 7 tests
+- [x] Learning Agent Persistence (LearningCycleRecord ORM + repository) — 23 tests
+- [x] Notification Service (PagerDuty + NotificationDispatcher) — 34 tests
+- [x] Scheduled Job Framework (asyncio scheduler, 3 periodic jobs) — 42 tests
+- [x] AWS Cost Explorer Billing Source (GetCostAndUsage integration) — 33 tests
+- [x] Cleanup Legacy Supervisor Stub (deleted dead orchestration/supervisor.py)
+- [x] New Claude Code Skills (add-connector, add-integration, run-agent, check-health)

@@ -67,6 +67,7 @@ class LearningRunner:
         self._app = graph.compile()
 
         self._cycles: dict[str, LearningState] = {}
+        self._repository = repository
 
     async def learn(
         self,
@@ -128,6 +129,18 @@ class LearningRunner:
             )
 
             self._cycles[learning_id] = final_state
+
+            # Persist to database if repository available
+            if self._repository is not None:
+                try:
+                    await self._repository.save_learning_cycle(final_state)
+                except Exception as persist_err:
+                    logger.warning(
+                        "learning_cycle_persist_failed",
+                        learning_id=learning_id,
+                        error=str(persist_err),
+                    )
+
             return final_state
 
         except Exception as e:

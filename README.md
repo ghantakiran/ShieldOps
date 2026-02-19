@@ -178,7 +178,7 @@ ShieldOps/
 │   │   ├── opa/client.py              #   OPA policy evaluation
 │   │   ├── approval/workflow.py       #   Human approval workflows
 │   │   └── rollback/                  #   Rollback mechanisms
-│   ├── orchestration/supervisor.py    # Supervisor agent
+│   ├── orchestration/                  # Agent orchestration utilities
 │   ├── api/                           # FastAPI application
 │   │   ├── app.py                     #   App factory & middleware
 │   │   └── routes/                    #   API endpoints
