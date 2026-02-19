@@ -122,6 +122,7 @@ module = [
     "google.cloud.*",
     "azure.identity",
     "azure.mgmt.*",
+    "aiosmtplib",
 ]
 ignore_missing_imports = true
 
