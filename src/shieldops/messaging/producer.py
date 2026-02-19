@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 import structlog
-from aiokafka import AIOKafkaProducer
+from aiokafka import AIOKafkaProducer  # type: ignore[import-untyped]
 
 from shieldops.messaging.topics import (
     AGENT_RESULTS_TOPIC,

@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Awaitable, Callable
 
 import structlog
-from aiokafka import AIOKafkaConsumer
+from aiokafka import AIOKafkaConsumer  # type: ignore[import-untyped]
 
 from shieldops.messaging.topics import EventEnvelope, deserialize_event
 
