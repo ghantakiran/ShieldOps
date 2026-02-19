@@ -1,7 +1,7 @@
 # ShieldOps — Feature Implementation Tracker
 
-**Last Updated:** 2026-02-19
-**Platform Completeness:** ~88%
+**Last Updated:** 2026-02-18
+**Platform Completeness:** ~95%
 
 ---
 
@@ -65,15 +65,16 @@
 
 ### P3 — Low (Polish)
 
-- [ ] **Additional OPA Policies** — Expand policy coverage
-  - Compliance mapping rules (SOC2, PCI-DSS control IDs)
-  - Per-team action scoping
-  - Time-based rate limiting refinements
+- [x] **Additional OPA Policies** — Expand policy coverage
+  - Compliance mapping Rego policy (SOC2, PCI-DSS, HIPAA, CIS controls) — `playbooks/policies/compliance.rego`, 13 tests
+  - Per-team action scoping policy — `playbooks/policies/team_scoping.rego`, 10 tests
+  - Extended rate limiting (per-minute burst + per-team hourly) — `playbooks/policies/rate_limits.rego`, 26 tests
+  - PolicyEngine enrichment: team, resource_labels, actions_this_minute, team_actions_this_hour
 
-- [ ] **Integration Tests** — E2E flows for new connectors
-  - GCP connector integration tests (requires emulator)
-  - Azure connector integration tests (requires emulator)
-  - Cross-connector remediation flow tests
+- [x] **Integration Tests** — E2E flows for new connectors
+  - GCP fake connector + integration tests — `tests/integration/fakes/gcp_fake.py`, 17 tests
+  - Azure fake connector + integration tests — `tests/integration/fakes/azure_fake.py`, 16 tests
+  - Cross-connector remediation flow tests — 9 tests (multi-provider routing, rollback, failure isolation)
 
 ---
 
@@ -103,3 +104,9 @@
 - [x] Compliance Framework Integration — 12 control evaluators, 23 tests
 - [x] Playbook Wiring — resolve_playbook node + validation checks, 16 tests
 - [x] CI fixes — ruff version alignment, mypy stubs, dependency audit (CVE fix)
+- [x] OPA Compliance Mapping Policy (SOC2, PCI-DSS, HIPAA, CIS) — 115 LOC, 13 tests
+- [x] OPA Team Scoping Policy (ownership, blast radius, env restrictions) — ~50 LOC, 10 tests
+- [x] Extended Rate Limiter (per-minute burst, per-team hourly) — 52 LOC + Rego, 26 tests
+- [x] GCP Fake Connector + E2E Tests — 347 LOC, 17 tests
+- [x] Azure Fake Connector + E2E Tests — 153 LOC, 16 tests
+- [x] Cross-Connector E2E Tests (multi-provider, rollback, isolation) — 9 tests
