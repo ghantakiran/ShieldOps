@@ -19,6 +19,7 @@ logger = structlog.get_logger()
 _EXEMPT_PATHS: set[str] = {
     "/health",
     "/ready",
+    "/metrics",
     f"{settings.api_prefix}/docs",
     f"{settings.api_prefix}/openapi.json",
     f"{settings.api_prefix}/redoc",

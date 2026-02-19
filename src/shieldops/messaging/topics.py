@@ -13,8 +13,14 @@ from pydantic import BaseModel, Field
 EVENTS_TOPIC = "shieldops.events"
 AGENT_RESULTS_TOPIC = "shieldops.agent.results"
 AUDIT_TOPIC = "shieldops.audit"
+DLQ_TOPIC = "shieldops.dlq"
 
-ALL_TOPICS: list[str] = [EVENTS_TOPIC, AGENT_RESULTS_TOPIC, AUDIT_TOPIC]
+ALL_TOPICS: list[str] = [
+    EVENTS_TOPIC,
+    AGENT_RESULTS_TOPIC,
+    AUDIT_TOPIC,
+    DLQ_TOPIC,
+]
 
 
 # ── Event envelope ───────────────────────────────────────────────────────────
@@ -33,6 +39,24 @@ class EventEnvelope(BaseModel):
     timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
     payload: dict = Field(default_factory=dict)  # type: ignore[type-arg]
     correlation_id: str | None = None
+
+
+# ── DLQ envelope ────────────────────────────────────────────────────────────
+
+
+class DLQEnvelope(BaseModel):
+    """Wraps a failed event with error metadata for the dead letter queue."""
+
+    original_event: EventEnvelope
+    error_message: str
+    error_type: str
+    source_topic: str
+    retry_count: int = 0
+    max_retries: int = 3
+    failed_at: datetime = Field(
+        default_factory=lambda: datetime.now(UTC),
+    )
+    dlq_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
 
 
 # ── Serialization helpers ────────────────────────────────────────────────────

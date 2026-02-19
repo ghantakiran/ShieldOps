@@ -84,6 +84,20 @@ class Settings(BaseSettings):
     # PagerDuty
     pagerduty_routing_key: str = ""
 
+    # Webhooks
+    webhook_url: str = ""
+    webhook_secret: str = ""
+    webhook_timeout: float = 10.0
+
+    # Email / SMTP
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_username: str = ""
+    smtp_password: str = ""
+    smtp_use_tls: bool = True
+    smtp_from_address: str = "shieldops@localhost"
+    smtp_to_addresses: list[str] = []
+
     # AWS
     aws_region: str = ""
     aws_access_key_id: str = ""

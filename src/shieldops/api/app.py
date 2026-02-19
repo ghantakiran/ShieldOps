@@ -7,7 +7,7 @@ from typing import Any
 import structlog
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, PlainTextResponse
 
 from shieldops.agents.cost.runner import CostRunner
 from shieldops.agents.investigation.runner import InvestigationRunner
@@ -206,6 +206,41 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         )
         logger.info("pagerduty_notifier_initialized")
 
+    if settings.slack_bot_token:
+        from shieldops.integrations.notifications.slack import SlackNotifier
+
+        notification_channels["slack"] = SlackNotifier(
+            bot_token=settings.slack_bot_token,
+            default_channel=settings.slack_approval_channel,
+        )
+        logger.info("slack_notifier_initialized")
+
+    if settings.webhook_url:
+        from shieldops.integrations.notifications.webhook import (
+            WebhookNotifier,
+        )
+
+        notification_channels["webhook"] = WebhookNotifier(
+            url=settings.webhook_url,
+            secret=settings.webhook_secret,
+            timeout=settings.webhook_timeout,
+        )
+        logger.info("webhook_notifier_initialized")
+
+    if settings.smtp_host and settings.smtp_to_addresses:
+        from shieldops.integrations.notifications.email import EmailNotifier
+
+        notification_channels["email"] = EmailNotifier(
+            smtp_host=settings.smtp_host,
+            smtp_port=settings.smtp_port,
+            username=settings.smtp_username,
+            password=settings.smtp_password,
+            use_tls=settings.smtp_use_tls,
+            from_address=settings.smtp_from_address,
+            to_addresses=settings.smtp_to_addresses,
+        )
+        logger.info("email_notifier_initialized")
+
     # Supervisor — orchestrates all specialist agents
     sup_runner = SupervisorRunner(
         agent_runners={
@@ -228,7 +263,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         periodic_security_scan,
     )
 
-    scheduler = JobScheduler()
+    scheduler = JobScheduler(redis_url=settings.redis_url)
     scheduler.add_job(
         "nightly_learning",
         nightly_learning_cycle,
@@ -265,6 +300,24 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     yield
 
     logger.info("shieldops_shutting_down")
+
+    # ── Graceful request draining ──────────────────────────────
+    from shieldops.api.middleware.shutdown import get_shutdown_state
+
+    shutdown_state = get_shutdown_state()
+    shutdown_state.signal_shutdown()
+    logger.info("shutdown_signaled", in_flight=shutdown_state.in_flight)
+
+    drained = await shutdown_state.wait_for_drain(timeout=30.0)
+    if drained:
+        logger.info("shutdown_drain_complete")
+    else:
+        logger.warning(
+            "shutdown_drain_timeout",
+            remaining=shutdown_state.in_flight,
+        )
+
+    # ── Resource cleanup ───────────────────────────────────────
     _scheduler = getattr(getattr(app, "state", None), "scheduler", None)
     if _scheduler:
         await _scheduler.stop()
@@ -297,6 +350,8 @@ def create_app() -> FastAPI:
     # Middleware stack (order matters: outermost first)
     from shieldops.api.middleware import (
         ErrorHandlerMiddleware,
+        GracefulShutdownMiddleware,
+        MetricsMiddleware,
         RateLimitMiddleware,
         RequestIDMiddleware,
         RequestLoggingMiddleware,
@@ -306,6 +361,12 @@ def create_app() -> FastAPI:
     app.add_middleware(RateLimitMiddleware)
     app.add_middleware(RequestLoggingMiddleware)
     app.add_middleware(RequestIDMiddleware)
+    # MetricsMiddleware is added last so it wraps all other
+    # middleware (Starlette processes add_middleware in LIFO order).
+    app.add_middleware(MetricsMiddleware)
+    # GracefulShutdownMiddleware outermost: rejects requests early
+    # during shutdown and tracks in-flight count for draining.
+    app.add_middleware(GracefulShutdownMiddleware)
 
     # Auth router (no prefix — routes are /auth/*)
     from shieldops.api.auth.routes import router as auth_router
@@ -330,6 +391,19 @@ def create_app() -> FastAPI:
     @app.get("/health")
     async def health_check() -> dict[str, str]:
         return {"status": "healthy", "version": settings.app_version}
+
+    @app.get("/metrics", response_class=PlainTextResponse)
+    async def prometheus_metrics() -> PlainTextResponse:
+        """Expose collected metrics in Prometheus text format."""
+        from shieldops.api.middleware.metrics import (
+            get_metrics_registry,
+        )
+
+        body = get_metrics_registry().collect()
+        return PlainTextResponse(
+            content=body,
+            media_type="text/plain; version=0.0.4; charset=utf-8",
+        )
 
     @app.get("/ready", response_model=None)
     async def readiness_check() -> dict[str, Any] | JSONResponse:

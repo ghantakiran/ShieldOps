@@ -54,7 +54,7 @@ class TestTopicConstants:
         assert EVENTS_TOPIC in ALL_TOPICS
         assert AGENT_RESULTS_TOPIC in ALL_TOPICS
         assert AUDIT_TOPIC in ALL_TOPICS
-        assert len(ALL_TOPICS) == 3
+        assert len(ALL_TOPICS) == 4
 
 
 # ── EventEnvelope ────────────────────────────────────────────────────────────

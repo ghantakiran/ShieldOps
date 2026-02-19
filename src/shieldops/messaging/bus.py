@@ -7,6 +7,7 @@ from typing import Any
 import structlog
 
 from shieldops.messaging.consumer import EventConsumer
+from shieldops.messaging.dlq import DeadLetterQueue
 from shieldops.messaging.producer import EventProducer
 from shieldops.messaging.topics import ALL_TOPICS, EventEnvelope
 
@@ -25,14 +26,25 @@ class EventBus:
             await bus.consumer.consume(my_handler)
         finally:
             await bus.stop()
+
+    Set *enable_dlq* to ``True`` (the default) to route failed
+    consumer messages to a dead letter queue after retry exhaustion.
     """
 
-    def __init__(self, brokers: str, group_id: str) -> None:
+    def __init__(
+        self,
+        brokers: str,
+        group_id: str,
+        *,
+        enable_dlq: bool = True,
+    ) -> None:
         self._producer = EventProducer(brokers=brokers)
+        self._dlq: DeadLetterQueue | None = DeadLetterQueue(self._producer) if enable_dlq else None
         self._consumer = EventConsumer(
             brokers=brokers,
             group_id=group_id,
             topics=ALL_TOPICS,
+            dlq=self._dlq,
         )
 
     # ── Properties ───────────────────────────────────────────────────────
@@ -46,6 +58,11 @@ class EventBus:
     def consumer(self) -> EventConsumer:
         """Return the underlying :class:`EventConsumer`."""
         return self._consumer
+
+    @property
+    def dlq(self) -> DeadLetterQueue | None:
+        """Return the :class:`DeadLetterQueue`, or ``None``."""
+        return self._dlq
 
     # ── Lifecycle ────────────────────────────────────────────────────────
 
