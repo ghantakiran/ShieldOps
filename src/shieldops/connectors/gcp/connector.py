@@ -211,8 +211,93 @@ class GCPConnector(InfraConnector):
     # ------------------------------------------------------------------
 
     async def get_events(self, resource_id: str, time_range: TimeRange) -> list[dict[str, Any]]:
-        """Get events for a resource (stub -- requires Cloud Audit Logs integration)."""
-        return []
+        """Get audit log events for a GCP resource via Cloud Logging API.
+
+        Uses the google-cloud-logging library to query Admin Activity
+        and Data Access audit logs scoped to the specific resource.
+        """
+        try:
+            from google.cloud import logging as gcloud_logging
+        except ImportError:
+            logger.warning(
+                "gcp_logging_not_installed",
+                detail="pip install google-cloud-logging",
+            )
+            return []
+
+        try:
+            client = gcloud_logging.Client(project=self._project_id)
+
+            # Build filter for resource-scoped audit logs
+            if resource_id.startswith("run:"):
+                service_name = resource_id[4:]
+                resource_filter = (
+                    f'resource.type="cloud_run_revision" '
+                    f'resource.labels.service_name="{service_name}" '
+                    f'resource.labels.location="{self._region}"'
+                )
+            else:
+                resource_filter = (
+                    f'resource.type="gce_instance" '
+                    f'resource.labels.instance_id="{resource_id}" '
+                    f'resource.labels.zone="{self._region}-a"'
+                )
+
+            time_filter = (
+                f'timestamp>="{time_range.start.isoformat()}" '
+                f'AND timestamp<="{time_range.end.isoformat()}"'
+            )
+            full_filter = f"{resource_filter} AND {time_filter}"
+
+            # Run synchronous Cloud Logging call in executor
+            entries = await self._run_sync(
+                lambda: list(
+                    client.list_entries(
+                        filter_=full_filter,
+                        order_by="timestamp desc",
+                        max_results=100,
+                        page_size=50,
+                    )
+                ),
+            )
+
+            events: list[dict[str, Any]] = []
+            for entry in entries:
+                payload = entry.payload
+                is_dict = isinstance(payload, dict)
+                event_type = payload.get("methodName", "") if is_dict else str(payload)
+                actor = (
+                    payload.get("authenticationInfo", {}).get("principalEmail", "")
+                    if is_dict
+                    else ""
+                )
+                events.append(
+                    {
+                        "event_id": entry.insert_id or "",
+                        "timestamp": (entry.timestamp.isoformat() if entry.timestamp else ""),
+                        "severity": entry.severity or "DEFAULT",
+                        "event_type": event_type,
+                        "resource_id": resource_id,
+                        "actor": actor,
+                        "details": (payload if is_dict else {"message": str(payload)}),
+                        "source": "gcp_audit_log",
+                    }
+                )
+
+            logger.info(
+                "gcp_events_fetched",
+                resource_id=resource_id,
+                count=len(events),
+            )
+            return events
+
+        except Exception as e:
+            logger.error(
+                "gcp_events_error",
+                resource_id=resource_id,
+                error=str(e),
+            )
+            return []
 
     # ------------------------------------------------------------------
     # Execute action

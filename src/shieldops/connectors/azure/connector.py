@@ -259,12 +259,103 @@ class AzureConnector(InfraConnector):
         return resources
 
     # ------------------------------------------------------------------
-    # Events (stub)
+    # Events
     # ------------------------------------------------------------------
 
     async def get_events(self, resource_id: str, time_range: TimeRange) -> list[dict[str, Any]]:
-        """Get events for a resource (stub -- requires Azure Activity Log integration)."""
-        return []
+        """Get activity log events for an Azure resource via Monitor.
+
+        Uses ``azure-mgmt-monitor`` to query activity events scoped to the
+        resource.  For Container Apps, use the ``containerapp:<app-name>``
+        prefix; all other IDs are treated as VM names.
+        """
+        try:
+            from azure.mgmt.monitor import MonitorManagementClient
+        except ImportError:
+            logger.warning(
+                "azure_monitor_not_installed",
+                detail="pip install azure-mgmt-monitor",
+            )
+            return []
+
+        try:
+            from azure.identity import DefaultAzureCredential
+
+            credential = DefaultAzureCredential()
+            monitor_client = MonitorManagementClient(credential, self._subscription_id)
+
+            # Build OData filter for time range
+            start_str = time_range.start.strftime("%Y-%m-%dT%H:%M:%SZ")
+            end_str = time_range.end.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+            # Determine resource URI for filtering
+            if resource_id.startswith("containerapp:"):
+                app_name = resource_id.split(":", 1)[1]
+                resource_uri = (
+                    f"/subscriptions/{self._subscription_id}"
+                    f"/resourceGroups/{self._resource_group}"
+                    f"/providers/Microsoft.App"
+                    f"/containerApps/{app_name}"
+                )
+            else:
+                resource_uri = (
+                    f"/subscriptions/{self._subscription_id}"
+                    f"/resourceGroups/{self._resource_group}"
+                    f"/providers/Microsoft.Compute"
+                    f"/virtualMachines/{resource_id}"
+                )
+
+            odata_filter = (
+                f"eventTimestamp ge '{start_str}'"
+                f" and eventTimestamp le '{end_str}'"
+                f" and resourceUri eq '{resource_uri}'"
+            )
+
+            # Run synchronous SDK call in executor
+            loop = asyncio.get_running_loop()
+            raw_events = await loop.run_in_executor(
+                None,
+                lambda: list(monitor_client.activity_logs.list(filter=odata_filter)),
+            )
+
+            events: list[dict[str, Any]] = []
+            for ev in raw_events:
+                events.append(
+                    {
+                        "event_id": (ev.event_data_id or ev.correlation_id or ""),
+                        "timestamp": (ev.event_timestamp.isoformat() if ev.event_timestamp else ""),
+                        "severity": (ev.level.value if ev.level else "Informational"),
+                        "event_type": (
+                            ev.operation_name.localized_value if ev.operation_name else ""
+                        ),
+                        "resource_id": resource_id,
+                        "status": (ev.status.localized_value if ev.status else ""),
+                        "actor": ev.caller or "",
+                        "details": {
+                            "category": (ev.category.localized_value if ev.category else ""),
+                            "description": ev.description or "",
+                            "resource_type": (
+                                ev.resource_type.localized_value if ev.resource_type else ""
+                            ),
+                        },
+                        "source": "azure_activity_log",
+                    }
+                )
+
+            logger.info(
+                "azure_events_fetched",
+                resource_id=resource_id,
+                count=len(events),
+            )
+            return events
+
+        except Exception as e:
+            logger.error(
+                "azure_events_error",
+                resource_id=resource_id,
+                error=str(e),
+            )
+            return []
 
     # ------------------------------------------------------------------
     # Execute action

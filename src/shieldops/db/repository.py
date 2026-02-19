@@ -19,6 +19,7 @@ from shieldops.db.models import (
     AuditLog,
     IncidentOutcomeRecord,
     InvestigationRecord,
+    LearningCycleRecord,
     RemediationRecord,
     SecurityScanRecord,
     UserRecord,
@@ -520,3 +521,64 @@ class Repository:
             await session.commit()
             logger.info("incident_feedback_saved", incident_id=incident_id)
             return True
+
+    # ── Learning Cycles ────────────────────────────────────────────
+
+    async def save_learning_cycle(self, state: Any) -> str:
+        """Persist a completed learning cycle from LearningState."""
+        record = LearningCycleRecord(
+            id=state.learning_id,
+            learning_type=state.learning_type,
+            target_period=state.target_period,
+            status=state.current_step or "completed",
+            total_incidents_analyzed=state.total_incidents_analyzed,
+            recurring_pattern_count=state.recurring_pattern_count,
+            improvement_score=state.improvement_score,
+            automation_accuracy=state.automation_accuracy,
+            pattern_insights=[
+                p.model_dump() if hasattr(p, "model_dump") else p for p in state.pattern_insights
+            ],
+            playbook_updates=[
+                u.model_dump() if hasattr(u, "model_dump") else u for u in state.playbook_updates
+            ],
+            threshold_adjustments=[
+                t.model_dump() if hasattr(t, "model_dump") else t
+                for t in state.threshold_adjustments
+            ],
+            reasoning_chain=[
+                r.model_dump() if hasattr(r, "model_dump") else r for r in state.reasoning_chain
+            ],
+            error=state.error,
+            duration_ms=state.learning_duration_ms or 0,
+        )
+        async with self._sf() as session:
+            session.add(record)
+            await session.commit()
+        learning_id: str = state.learning_id
+        logger.info("learning_cycle_saved", learning_id=learning_id)
+        return learning_id
+
+    async def query_learning_cycles(
+        self, limit: int = 20, learning_type: str | None = None
+    ) -> list[dict[str, Any]]:
+        """Query recent learning cycles."""
+        async with self._sf() as session:
+            stmt = select(LearningCycleRecord).order_by(LearningCycleRecord.created_at.desc())
+            if learning_type:
+                stmt = stmt.where(LearningCycleRecord.learning_type == learning_type)
+            stmt = stmt.limit(limit)
+            result = await session.execute(stmt)
+            records = result.scalars().all()
+            return [
+                {
+                    "id": r.id,
+                    "learning_type": r.learning_type,
+                    "target_period": r.target_period,
+                    "status": r.status,
+                    "total_incidents_analyzed": r.total_incidents_analyzed,
+                    "improvement_score": r.improvement_score,
+                    "duration_ms": r.duration_ms,
+                    "created_at": (r.created_at.isoformat() if r.created_at else None),
+                }
+                for r in records
+            ]

@@ -44,3 +44,15 @@ class ConnectionManager:
     @property
     def active_connections(self) -> int:
         return sum(len(subs) for subs in self._channels.values())
+
+
+# Module-level singleton for cross-module access
+_default_manager: ConnectionManager | None = None
+
+
+def get_ws_manager() -> ConnectionManager:
+    """Get or create the default WebSocket connection manager."""
+    global _default_manager
+    if _default_manager is None:
+        _default_manager = ConnectionManager()
+    return _default_manager

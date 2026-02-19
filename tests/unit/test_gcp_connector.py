@@ -447,14 +447,195 @@ class TestValidateHealth:
 
 
 # ============================================================================
-# get_events (stub)
+# get_events (Cloud Audit Logs)
 # ============================================================================
 
 
-class TestGetEvents:
+def _make_log_entry(
+    insert_id: str = "entry-1",
+    timestamp: datetime | None = None,
+    severity: str = "INFO",
+    payload: dict[str, Any] | str | None = None,
+) -> MagicMock:
+    """Build a mock Cloud Logging entry."""
+    entry = MagicMock()
+    entry.insert_id = insert_id
+    entry.timestamp = timestamp or datetime.now(UTC)
+    entry.severity = severity
+    entry.payload = (
+        payload
+        if payload is not None
+        else {
+            "methodName": "v1.compute.instances.stop",
+            "authenticationInfo": {
+                "principalEmail": "admin@example.com",
+            },
+            "resourceName": "projects/test-project/zones/us-central1-a/instances/web-01",
+        }
+    )
+    return entry
+
+
+def _patch_gcloud_logging(mock_client: MagicMock):  # type: ignore[type-arg]
+    """Context manager that patches the lazy ``from google.cloud import logging``
+    inside ``get_events`` so it resolves to a mock module whose ``Client``
+    returns *mock_client*.
+
+    The ``from google.cloud import logging`` statement requires:
+    1. ``google`` in ``sys.modules``
+    2. ``google.cloud`` in ``sys.modules`` with a ``logging`` attribute
+    3. ``google.cloud.logging`` in ``sys.modules``
+    """
+    mock_logging_mod = MagicMock()
+    mock_logging_mod.Client.return_value = mock_client
+
+    mock_cloud = MagicMock()
+    mock_cloud.logging = mock_logging_mod
+
+    mock_google = MagicMock()
+    mock_google.cloud = mock_cloud
+
+    return patch.dict(
+        "sys.modules",
+        {
+            "google": mock_google,
+            "google.cloud": mock_cloud,
+            "google.cloud.logging": mock_logging_mod,
+        },
+    )
+
+
+class TestGCPConnectorGetEvents:
+    """Tests for the real Cloud Audit Logs get_events implementation."""
+
     @pytest.mark.asyncio
-    async def test_returns_empty(self, connector: GCPConnector, time_range: TimeRange) -> None:
-        events = await connector.get_events("my-instance", time_range)
+    async def test_get_events_compute_instance(
+        self, connector: GCPConnector, time_range: TimeRange
+    ) -> None:
+        """Verify the filter targets gce_instance for bare resource IDs."""
+        mock_client = MagicMock()
+        mock_client.list_entries.return_value = []
+
+        with _patch_gcloud_logging(mock_client):
+            events = await connector.get_events("web-01", time_range)
+
+        assert events == []
+        call_kwargs = mock_client.list_entries.call_args
+        assert call_kwargs is not None
+        filter_str = call_kwargs.kwargs.get("filter_", "")
+        assert 'resource.type="gce_instance"' in filter_str
+        assert 'resource.labels.instance_id="web-01"' in filter_str
+        assert 'resource.labels.zone="us-central1-a"' in filter_str
+
+    @pytest.mark.asyncio
+    async def test_get_events_cloud_run(
+        self, connector: GCPConnector, time_range: TimeRange
+    ) -> None:
+        """Verify the filter targets cloud_run_revision for run: prefix."""
+        mock_client = MagicMock()
+        mock_client.list_entries.return_value = []
+
+        with _patch_gcloud_logging(mock_client):
+            events = await connector.get_events("run:api-service", time_range)
+
+        assert events == []
+        call_kwargs = mock_client.list_entries.call_args
+        assert call_kwargs is not None
+        filter_str = call_kwargs.kwargs.get("filter_", "")
+        assert 'resource.type="cloud_run_revision"' in filter_str
+        assert 'resource.labels.service_name="api-service"' in filter_str
+        assert 'resource.labels.location="us-central1"' in filter_str
+
+    @pytest.mark.asyncio
+    async def test_get_events_parses_entries(
+        self, connector: GCPConnector, time_range: TimeRange
+    ) -> None:
+        """Verify log entries are correctly parsed into event dicts."""
+        ts = datetime(2025, 1, 15, 12, 0, 0, tzinfo=UTC)
+        entries = [
+            _make_log_entry(
+                insert_id="entry-abc",
+                timestamp=ts,
+                severity="NOTICE",
+                payload={
+                    "methodName": "v1.compute.instances.stop",
+                    "authenticationInfo": {
+                        "principalEmail": "ops@example.com",
+                    },
+                    "extra": "data",
+                },
+            ),
+            _make_log_entry(
+                insert_id="entry-def",
+                timestamp=ts,
+                severity="WARNING",
+                payload="plain text log message",
+            ),
+        ]
+
+        mock_client = MagicMock()
+        mock_client.list_entries.return_value = entries
+
+        with _patch_gcloud_logging(mock_client):
+            events = await connector.get_events("web-01", time_range)
+
+        assert len(events) == 2
+
+        # First entry: dict payload
+        e0 = events[0]
+        assert e0["event_id"] == "entry-abc"
+        assert e0["timestamp"] == ts.isoformat()
+        assert e0["severity"] == "NOTICE"
+        assert e0["event_type"] == "v1.compute.instances.stop"
+        assert e0["resource_id"] == "web-01"
+        assert e0["actor"] == "ops@example.com"
+        assert e0["details"]["extra"] == "data"
+        assert e0["source"] == "gcp_audit_log"
+
+        # Second entry: string payload
+        e1 = events[1]
+        assert e1["event_type"] == "plain text log message"
+        assert e1["actor"] == ""
+        assert e1["details"] == {"message": "plain text log message"}
+
+    @pytest.mark.asyncio
+    async def test_get_events_empty_result(
+        self, connector: GCPConnector, time_range: TimeRange
+    ) -> None:
+        """Verify empty list when no log entries are returned."""
+        mock_client = MagicMock()
+        mock_client.list_entries.return_value = []
+
+        with _patch_gcloud_logging(mock_client):
+            events = await connector.get_events("web-01", time_range)
+
+        assert events == []
+
+    @pytest.mark.asyncio
+    async def test_get_events_error_handling(
+        self, connector: GCPConnector, time_range: TimeRange
+    ) -> None:
+        """Verify API errors return [] and are logged."""
+        mock_client = MagicMock()
+        mock_client.list_entries.side_effect = Exception("403 Permission Denied")
+
+        with _patch_gcloud_logging(mock_client):
+            events = await connector.get_events("web-01", time_range)
+
+        assert events == []
+
+    @pytest.mark.asyncio
+    async def test_get_events_no_logging_library(
+        self, connector: GCPConnector, time_range: TimeRange
+    ) -> None:
+        """Verify ImportError returns [] gracefully."""
+        # Setting a module to None in sys.modules causes ImportError
+        with patch.dict(
+            "sys.modules",
+            {"google.cloud.logging": None},
+        ):
+            events = await connector.get_events("web-01", time_range)
+
         assert events == []
 
 

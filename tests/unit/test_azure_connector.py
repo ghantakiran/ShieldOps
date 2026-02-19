@@ -790,15 +790,282 @@ class TestValidateHealth:
 # ============================================================================
 
 
-class TestGetEvents:
+def _make_activity_log_event(
+    event_data_id: str = "evt-001",
+    correlation_id: str = "corr-001",
+    timestamp: datetime | None = None,
+    level_value: str = "Warning",
+    operation_name: str = "Microsoft.Compute/virtualMachines/restart/action",
+    status_value: str = "Succeeded",
+    caller: str = "user@example.com",
+    category: str = "Administrative",
+    description: str = "VM restarted",
+    resource_type: str = "Microsoft.Compute/virtualMachines",
+) -> MagicMock:
+    """Create a mock Azure Activity Log event entry."""
+    ev = MagicMock()
+    ev.event_data_id = event_data_id
+    ev.correlation_id = correlation_id
+    ev.event_timestamp = timestamp or datetime.now(UTC)
+    ev.level = MagicMock()
+    ev.level.value = level_value
+    ev.operation_name = MagicMock()
+    ev.operation_name.localized_value = operation_name
+    ev.status = MagicMock()
+    ev.status.localized_value = status_value
+    ev.caller = caller
+    ev.category = MagicMock()
+    ev.category.localized_value = category
+    ev.description = description
+    ev.resource_type = MagicMock()
+    ev.resource_type.localized_value = resource_type
+    return ev
+
+
+class TestAzureConnectorGetEvents:
+    """Tests for the real Azure Activity Log get_events implementation.
+
+    Because ``azure-mgmt-monitor`` is not installed in the test environment,
+    we inject mock modules into ``sys.modules`` so the deferred ``import``
+    statements inside ``get_events`` resolve successfully.
+    """
+
+    @staticmethod
+    def _inject_azure_mocks(
+        monitor_client_instance: MagicMock,
+    ) -> tuple[dict[str, Any], MagicMock]:
+        """Create fake azure.* sys.modules entries that return *monitor_client_instance*.
+
+        Returns (modules_dict, MonitorManagementClientClass) so callers can
+        inspect the class mock after the test.
+        """
+        monitor_cls = MagicMock(return_value=monitor_client_instance)
+        mock_monitor_mod = MagicMock()
+        mock_monitor_mod.MonitorManagementClient = monitor_cls
+
+        mock_identity_mod = MagicMock()
+        mock_identity_mod.DefaultAzureCredential = MagicMock(return_value=MagicMock())
+
+        modules: dict[str, Any] = {
+            "azure": MagicMock(),
+            "azure.mgmt": MagicMock(),
+            "azure.mgmt.monitor": mock_monitor_mod,
+            "azure.identity": mock_identity_mod,
+        }
+        return modules, monitor_cls
+
+    @staticmethod
+    def _make_loop_mock() -> tuple[MagicMock, MagicMock]:
+        """Return (loop_instance, get_running_loop_mock) for executor tests."""
+        loop_instance = MagicMock()
+
+        async def fake_executor(executor, fn):
+            return fn()
+
+        loop_instance.run_in_executor = fake_executor
+        get_loop = MagicMock(return_value=loop_instance)
+        return loop_instance, get_loop
+
     @pytest.mark.asyncio
-    async def test_returns_empty_list(
+    async def test_get_events_virtual_machine(
         self, connector: AzureConnector, time_range: TimeRange
     ) -> None:
-        """get_events is currently a stub that returns an empty list."""
-        events = await connector.get_events("test-vm-01", time_range)
+        """VM resource ID generates a virtualMachines resource URI filter."""
+        mock_monitor = MagicMock()
+        mock_monitor.activity_logs.list.return_value = []
+        modules, _ = self._inject_azure_mocks(mock_monitor)
+        _, get_loop = self._make_loop_mock()
+
+        with (
+            patch.dict("sys.modules", modules),
+            patch(
+                "shieldops.connectors.azure.connector.asyncio.get_running_loop",
+                get_loop,
+            ),
+        ):
+            await connector.get_events("test-vm-01", time_range)
+
+        call_args = mock_monitor.activity_logs.list.call_args
+        odata_filter = call_args.kwargs.get("filter", call_args.args[0] if call_args.args else "")
+        assert "virtualMachines/test-vm-01" in odata_filter
+        assert "Microsoft.Compute" in odata_filter
+
+    @pytest.mark.asyncio
+    async def test_get_events_container_app(
+        self, connector: AzureConnector, time_range: TimeRange
+    ) -> None:
+        """containerapp: prefix generates a Container Apps resource URI."""
+        mock_monitor = MagicMock()
+        mock_monitor.activity_logs.list.return_value = []
+        modules, _ = self._inject_azure_mocks(mock_monitor)
+        _, get_loop = self._make_loop_mock()
+
+        with (
+            patch.dict("sys.modules", modules),
+            patch(
+                "shieldops.connectors.azure.connector.asyncio.get_running_loop",
+                get_loop,
+            ),
+        ):
+            await connector.get_events("containerapp:my-api", time_range)
+
+        call_args = mock_monitor.activity_logs.list.call_args
+        odata_filter = call_args.kwargs.get("filter", call_args.args[0] if call_args.args else "")
+        assert "containerApps/my-api" in odata_filter
+        assert "Microsoft.App" in odata_filter
+
+    @pytest.mark.asyncio
+    async def test_get_events_parses_entries(
+        self, connector: AzureConnector, time_range: TimeRange
+    ) -> None:
+        """Activity log entries are parsed into structured event dicts."""
+        ts = datetime(2026, 1, 15, 12, 0, 0, tzinfo=UTC)
+        mock_event = _make_activity_log_event(
+            event_data_id="evt-abc",
+            timestamp=ts,
+            level_value="Warning",
+            operation_name="Restart VM",
+            status_value="Succeeded",
+            caller="admin@corp.com",
+            category="Administrative",
+            description="VM restarted by automation",
+            resource_type="Microsoft.Compute/virtualMachines",
+        )
+
+        mock_monitor = MagicMock()
+        mock_monitor.activity_logs.list.return_value = [mock_event]
+        modules, _ = self._inject_azure_mocks(mock_monitor)
+        _, get_loop = self._make_loop_mock()
+
+        with (
+            patch.dict("sys.modules", modules),
+            patch(
+                "shieldops.connectors.azure.connector.asyncio.get_running_loop",
+                get_loop,
+            ),
+        ):
+            events = await connector.get_events("test-vm-01", time_range)
+
+        assert len(events) == 1
+        ev = events[0]
+        assert ev["event_id"] == "evt-abc"
+        assert ev["timestamp"] == ts.isoformat()
+        assert ev["severity"] == "Warning"
+        assert ev["event_type"] == "Restart VM"
+        assert ev["resource_id"] == "test-vm-01"
+        assert ev["status"] == "Succeeded"
+        assert ev["actor"] == "admin@corp.com"
+        assert ev["source"] == "azure_activity_log"
+        assert ev["details"]["category"] == "Administrative"
+        assert ev["details"]["description"] == "VM restarted by automation"
+        assert ev["details"]["resource_type"] == "Microsoft.Compute/virtualMachines"
+
+    @pytest.mark.asyncio
+    async def test_get_events_empty_result(
+        self, connector: AzureConnector, time_range: TimeRange
+    ) -> None:
+        """No activity log entries returns an empty list."""
+        mock_monitor = MagicMock()
+        mock_monitor.activity_logs.list.return_value = []
+        modules, _ = self._inject_azure_mocks(mock_monitor)
+        _, get_loop = self._make_loop_mock()
+
+        with (
+            patch.dict("sys.modules", modules),
+            patch(
+                "shieldops.connectors.azure.connector.asyncio.get_running_loop",
+                get_loop,
+            ),
+        ):
+            events = await connector.get_events("test-vm-01", time_range)
 
         assert events == []
+
+    @pytest.mark.asyncio
+    async def test_get_events_error_handling(
+        self, connector: AzureConnector, time_range: TimeRange
+    ) -> None:
+        """Azure API exception returns empty list without raising."""
+        # Make MonitorManagementClient constructor raise
+        mock_monitor_mod = MagicMock()
+        mock_monitor_mod.MonitorManagementClient = MagicMock(
+            side_effect=Exception("AuthorizationFailed")
+        )
+        mock_identity_mod = MagicMock()
+        mock_identity_mod.DefaultAzureCredential = MagicMock(return_value=MagicMock())
+        modules: dict[str, Any] = {
+            "azure": MagicMock(),
+            "azure.mgmt": MagicMock(),
+            "azure.mgmt.monitor": mock_monitor_mod,
+            "azure.identity": mock_identity_mod,
+        }
+
+        with patch.dict("sys.modules", modules):
+            events = await connector.get_events("test-vm-01", time_range)
+
+        assert events == []
+
+    @pytest.mark.asyncio
+    async def test_get_events_no_monitor_library(
+        self, connector: AzureConnector, time_range: TimeRange
+    ) -> None:
+        """Missing azure-mgmt-monitor package returns empty list."""
+        import builtins
+
+        real_import = builtins.__import__
+
+        def fake_import(name, *args, **kwargs):
+            if name == "azure.mgmt.monitor":
+                raise ImportError("No module named 'azure.mgmt.monitor'")
+            return real_import(name, *args, **kwargs)
+
+        with patch("builtins.__import__", side_effect=fake_import):
+            events = await connector.get_events("test-vm-01", time_range)
+
+        assert events == []
+
+    @pytest.mark.asyncio
+    async def test_get_events_null_fields(
+        self, connector: AzureConnector, time_range: TimeRange
+    ) -> None:
+        """Events with None fields are handled gracefully."""
+        ev = MagicMock()
+        ev.event_data_id = None
+        ev.correlation_id = None
+        ev.event_timestamp = None
+        ev.level = None
+        ev.operation_name = None
+        ev.status = None
+        ev.caller = None
+        ev.category = None
+        ev.description = None
+        ev.resource_type = None
+
+        mock_monitor = MagicMock()
+        mock_monitor.activity_logs.list.return_value = [ev]
+        modules, _ = self._inject_azure_mocks(mock_monitor)
+        _, get_loop = self._make_loop_mock()
+
+        with (
+            patch.dict("sys.modules", modules),
+            patch(
+                "shieldops.connectors.azure.connector.asyncio.get_running_loop",
+                get_loop,
+            ),
+        ):
+            events = await connector.get_events("test-vm-01", time_range)
+
+        assert len(events) == 1
+        parsed = events[0]
+        assert parsed["event_id"] == ""
+        assert parsed["timestamp"] == ""
+        assert parsed["severity"] == "Informational"
+        assert parsed["event_type"] == ""
+        assert parsed["status"] == ""
+        assert parsed["actor"] == ""
+        assert parsed["details"]["category"] == ""
+        assert parsed["details"]["description"] == ""
+        assert parsed["details"]["resource_type"] == ""
 
 
 # ============================================================================

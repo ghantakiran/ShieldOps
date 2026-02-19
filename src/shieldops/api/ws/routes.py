@@ -6,12 +6,12 @@ import structlog
 from fastapi import APIRouter, Query, WebSocket, WebSocketDisconnect
 
 from shieldops.api.auth.service import decode_token
-from shieldops.api.ws.manager import ConnectionManager
+from shieldops.api.ws.manager import ConnectionManager, get_ws_manager
 
 logger = structlog.get_logger()
 
 router = APIRouter()
-manager = ConnectionManager()
+manager = get_ws_manager()
 
 
 def get_manager() -> ConnectionManager:
