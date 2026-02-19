@@ -4,6 +4,8 @@ import sys
 from types import ModuleType
 from unittest.mock import MagicMock
 
+import pytest
+
 # Stub kubernetes_asyncio before any module imports it.
 # The real package isn't installed in the dev/test virtualenv; without this stub,
 # importing KubernetesConnector (and anything that transitively touches it) would
@@ -48,3 +50,22 @@ def _mock_admin_user():
 from shieldops.api.app import app as _app  # noqa: E402
 
 _app.dependency_overrides[get_current_user] = _mock_admin_user
+
+
+# ── Reset middleware singletons between tests ─────────────────────────
+# The GracefulShutdownMiddleware uses a process-wide singleton that gets
+# signal_shutdown() called during TestClient lifespan teardown.  Without
+# resetting it, subsequent tests see the "shutting down" flag and get 503.
+
+from shieldops.api.middleware.metrics import MetricsRegistry  # noqa: E402
+from shieldops.api.middleware.shutdown import reset_shutdown_state  # noqa: E402
+
+
+@pytest.fixture(autouse=True)
+def _reset_middleware_singletons():
+    """Reset shutdown state and metrics before each test."""
+    reset_shutdown_state()
+    MetricsRegistry.reset_instance()
+    yield
+    reset_shutdown_state()
+    MetricsRegistry.reset_instance()

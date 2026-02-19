@@ -40,18 +40,23 @@ class JobScheduler:
     Uses ``asyncio.create_task`` + sleep loops instead of heavy deps like
     APScheduler.
 
+    When *redis_url* is provided, each job execution is guarded by a
+    distributed lock so that only one instance across a cluster will run
+    the job at a time.
+
     Usage::
 
-        scheduler = JobScheduler()
+        scheduler = JobScheduler(redis_url="redis://localhost:6379/0")
         scheduler.add_job("nightly_learning", my_coro, interval_seconds=86400)
         await scheduler.start()
         ...
         await scheduler.stop()
     """
 
-    def __init__(self) -> None:
+    def __init__(self, redis_url: str = "") -> None:
         self._jobs: dict[str, ScheduledJob] = {}
         self._running = False
+        self._redis_url = redis_url
 
     # -- registration --------------------------------------------------------
 
@@ -142,15 +147,11 @@ class JobScheduler:
                 await asyncio.sleep(job.interval_seconds)
                 if not self._running:
                     break
-                logger.info("job_executing", name=job.name)
-                await job.func(**job.kwargs)
-                job.last_run = datetime.now(UTC)
-                job.run_count += 1
-                logger.info(
-                    "job_completed",
-                    name=job.name,
-                    run_count=job.run_count,
-                )
+
+                if self._redis_url:
+                    await self._run_with_lock(job)
+                else:
+                    await self._run_job(job)
             except asyncio.CancelledError:
                 logger.debug("job_loop_cancelled", name=job.name)
                 break
@@ -161,6 +162,36 @@ class JobScheduler:
                     name=job.name,
                     error_count=job.error_count,
                 )
+
+    async def _run_job(self, job: ScheduledJob) -> None:
+        """Execute a job and update bookkeeping."""
+        logger.info("job_executing", name=job.name)
+        await job.func(**job.kwargs)
+        job.last_run = datetime.now(UTC)
+        job.run_count += 1
+        logger.info(
+            "job_completed",
+            name=job.name,
+            run_count=job.run_count,
+        )
+
+    async def _run_with_lock(self, job: ScheduledJob) -> None:
+        """Execute a job under a distributed lock."""
+        from shieldops.utils.distributed_lock import DistributedLock
+
+        lock = DistributedLock(
+            self._redis_url,
+            f"scheduler:{job.name}",
+            ttl=max(job.interval_seconds, 300),
+        )
+        async with lock as acquired:
+            if not acquired:
+                logger.info(
+                    "job_skipped_lock_held",
+                    name=job.name,
+                )
+                return
+            await self._run_job(job)
 
     # -- introspection -------------------------------------------------------
 

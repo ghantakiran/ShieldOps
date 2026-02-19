@@ -7,6 +7,7 @@ import structlog
 
 from shieldops.config import settings
 from shieldops.models.base import Environment, RemediationAction, RiskLevel
+from shieldops.utils.resilience import CircuitBreaker, CircuitOpenError
 
 logger = structlog.get_logger()
 
@@ -33,10 +34,16 @@ class PolicyEngine:
         self,
         opa_url: str | None = None,
         rate_limiter: Any = None,
+        circuit_breaker: CircuitBreaker | None = None,
     ) -> None:
         self._opa_url = opa_url or settings.opa_endpoint
         self._client = httpx.AsyncClient(timeout=5.0)
         self._rate_limiter = rate_limiter
+        self._circuit_breaker = circuit_breaker or CircuitBreaker(
+            name="opa",
+            failure_threshold=5,
+            recovery_timeout=30.0,
+        )
 
     async def evaluate(
         self,
@@ -100,7 +107,8 @@ class PolicyEngine:
         }
 
         try:
-            response = await self._client.post(
+            response = await self._circuit_breaker.call(
+                self._client.post,
                 f"{self._opa_url}/v1/data/shieldops/allow",
                 json={"input": input_data},
             )
@@ -132,9 +140,26 @@ class PolicyEngine:
                     if team:
                         await self._rate_limiter.increment_team(team, action.environment.value)
                 except Exception as e:
-                    logger.warning("rate_limiter_extended_increment_failed", error=str(e))
+                    logger.warning(
+                        "rate_limiter_extended_increment_failed",
+                        error=str(e),
+                    )
 
             return PolicyDecision(allowed=allowed, reasons=reasons)
+
+        except CircuitOpenError as e:
+            logger.error(
+                "policy_evaluation_circuit_open",
+                breaker=e.name,
+                recovery_in=e.recovery_in,
+            )
+            return PolicyDecision(
+                allowed=False,
+                reasons=[
+                    f"OPA circuit breaker open — recovery in "
+                    f"{e.recovery_in:.1f}s. Defaulting to deny."
+                ],
+            )
 
         except httpx.HTTPError as e:
             logger.error("policy_evaluation_failed", error=str(e))
@@ -142,6 +167,13 @@ class PolicyEngine:
             return PolicyDecision(
                 allowed=False,
                 reasons=[f"Policy evaluation failed: {e}. Defaulting to deny."],
+            )
+
+        except Exception as e:
+            logger.error("policy_evaluation_error", error=str(e))
+            return PolicyDecision(
+                allowed=False,
+                reasons=[f"Policy evaluation error: {e}. Defaulting to deny."],
             )
 
     def classify_risk(
