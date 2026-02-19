@@ -20,6 +20,7 @@ from shieldops.agents.investigation.prompts import (
     SYSTEM_RECOMMEND_ACTION,
     RecommendedActionOutput,
 )
+from shieldops.agents.tracing import traced_node
 from shieldops.config import settings
 from shieldops.models.base import Environment, RemediationAction, RiskLevel
 from shieldops.utils.llm import llm_structured
@@ -155,14 +156,36 @@ def create_investigation_graph() -> StateGraph[InvestigationState]:
     """
     graph = StateGraph(InvestigationState)
 
-    # Add nodes
-    graph.add_node("gather_context", gather_context)
-    graph.add_node("analyze_logs", analyze_logs)
-    graph.add_node("analyze_metrics", analyze_metrics)
-    graph.add_node("analyze_traces", analyze_traces)
-    graph.add_node("correlate_findings", correlate_findings)
-    graph.add_node("generate_hypotheses", generate_hypotheses)
-    graph.add_node("recommend_action", recommend_action)
+    # Add nodes (wrapped with OTEL tracing spans)
+    _inv = "investigation"
+    graph.add_node(
+        "gather_context",
+        traced_node("investigation.gather_context", _inv)(gather_context),
+    )
+    graph.add_node(
+        "analyze_logs",
+        traced_node("investigation.analyze_logs", _inv)(analyze_logs),
+    )
+    graph.add_node(
+        "analyze_metrics",
+        traced_node("investigation.analyze_metrics", _inv)(analyze_metrics),
+    )
+    graph.add_node(
+        "analyze_traces",
+        traced_node("investigation.analyze_traces", _inv)(analyze_traces),
+    )
+    graph.add_node(
+        "correlate_findings",
+        traced_node("investigation.correlate_findings", _inv)(correlate_findings),
+    )
+    graph.add_node(
+        "generate_hypotheses",
+        traced_node("investigation.generate_hypotheses", _inv)(generate_hypotheses),
+    )
+    graph.add_node(
+        "recommend_action",
+        traced_node("investigation.recommend_action", _inv)(recommend_action),
+    )
 
     # Define edges
     graph.set_entry_point("gather_context")

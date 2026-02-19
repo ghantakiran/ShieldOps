@@ -42,7 +42,11 @@ dependencies = [
     # Observability
     "opentelemetry-api>=1.28.0",
     "opentelemetry-sdk>=1.28.0",
+    "opentelemetry-exporter-otlp-proto-grpc>=1.28.0",
     "opentelemetry-instrumentation-fastapi>=0.49b0",
+    "opentelemetry-instrumentation-sqlalchemy>=0.49b0",
+    "opentelemetry-instrumentation-redis>=0.49b0",
+    "opentelemetry-instrumentation-httpx>=0.49b0",
     "structlog>=24.4.0",
 
     # Policy Engine
@@ -64,10 +68,13 @@ dev = [
     "pytest-asyncio>=0.24.0",
     "pytest-cov>=6.0.0",
     "pytest-mock>=3.14.0",
+    "pytest-benchmark>=4.0.0",
     "ruff>=0.8.0",
     "mypy>=1.13.0",
     "pre-commit>=4.0.0",
     "faker>=33.0.0",
+    "moto[s3,ec2,ecs,cloudtrail]>=5.0.0",
+    "locust>=2.29.0",
 ]
 dashboard = [
     "streamlit>=1.41.0",
@@ -123,6 +130,12 @@ module = [
     "azure.identity",
     "azure.mgmt.*",
     "aiosmtplib",
+    "opentelemetry",
+    "opentelemetry.*",
+    "moto",
+    "moto.*",
+    "locust",
+    "locust.*",
 ]
 ignore_missing_imports = true
 

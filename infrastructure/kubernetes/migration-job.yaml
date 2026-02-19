@@ -1,0 +1,38 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: shieldops-migration
+  namespace: shieldops
+  labels:
+    app: shieldops
+    component: migration
+spec:
+  backoffLimit: 3
+  activeDeadlineSeconds: 300
+  template:
+    metadata:
+      labels:
+        app: shieldops
+        component: migration
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: migrate
+          image: shieldops/api:latest
+          command: ["alembic", "upgrade", "head"]
+          envFrom:
+            - secretRef:
+                name: shieldops-secrets
+            - configMapRef:
+                name: shieldops-config
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          securityContext:
+            runAsNonRoot: true
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false

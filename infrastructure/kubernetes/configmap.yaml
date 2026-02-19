@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: shieldops-config
+  namespace: shieldops
+  labels:
+    app: shieldops
+data:
+  SHIELDOPS_ENVIRONMENT: "production"
+  SHIELDOPS_API_PORT: "8000"
+  SHIELDOPS_CORS_ORIGINS: "https://dashboard.shieldops.io"
+  SHIELDOPS_OPA_ENDPOINT: "http://shieldops-opa:8181"
+  SHIELDOPS_KAFKA_BROKERS: "kafka-0.kafka-headless.kafka.svc.cluster.local:9092"
+  SHIELDOPS_LOG_LEVEL: "info"
+  SHIELDOPS_LOG_FORMAT: "json"

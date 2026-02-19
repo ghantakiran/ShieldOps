@@ -219,3 +219,53 @@ async def get_savings_summary(_user: UserResponse = Depends(get_current_user)) -
         "total_monthly_spend": completed[-1].get("monthly_spend", 0),
         "total_potential_savings": completed[-1].get("potential_savings", 0),
     }
+
+
+@router.get("/cost/summary")
+async def get_cost_summary(
+    _user: UserResponse = Depends(get_current_user),
+) -> dict[str, Any]:
+    """Get cost summary for the dashboard."""
+    runner = get_runner()
+    analyses = runner.list_analyses()
+
+    completed = [a for a in analyses if a["status"] == "complete"]
+    if not completed:
+        return {
+            "total_daily": 0,
+            "total_monthly": 0,
+            "change_percent": 0.0,
+            "top_services": [],
+            "anomalies": [],
+        }
+
+    state = runner.get_analysis(completed[-1]["analysis_id"])
+    if state is None:
+        return {
+            "total_daily": 0,
+            "total_monthly": 0,
+            "change_percent": 0.0,
+            "top_services": [],
+            "anomalies": [],
+        }
+
+    monthly = state.total_monthly_spend if hasattr(state, "total_monthly_spend") else 0
+    daily = round(monthly / 30, 2) if monthly else 0
+
+    top_services = []
+    if hasattr(state, "service_breakdown") and state.service_breakdown:
+        for svc in state.service_breakdown[:5]:
+            top_services.append(svc.model_dump(mode="json") if hasattr(svc, "model_dump") else svc)
+
+    anomalies = []
+    if state.cost_anomalies:
+        for a in state.cost_anomalies[:5]:
+            anomalies.append(a.model_dump(mode="json"))
+
+    return {
+        "total_daily": daily,
+        "total_monthly": monthly,
+        "change_percent": getattr(state, "change_percent", 0.0),
+        "top_services": top_services,
+        "anomalies": anomalies,
+    }

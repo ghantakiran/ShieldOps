@@ -22,6 +22,7 @@ from shieldops.models.base import (
     ExecutionStatus,
     RemediationAction,
 )
+from shieldops.observability.tracing import get_tracer
 from shieldops.playbooks.loader import PlaybookLoader
 from shieldops.policy.approval.workflow import ApprovalWorkflow
 from shieldops.policy.opa.client import PolicyEngine
@@ -114,23 +115,37 @@ class RemediationRunner:
         )
 
         try:
-            # Run the LangGraph workflow
-            final_state_dict = await self._app.ainvoke(
-                initial_state.model_dump(),  # type: ignore[arg-type]
-                config={
-                    "metadata": {
-                        "remediation_id": remediation_id,
-                        "action_type": action.action_type,
+            tracer = get_tracer("shieldops.agents")
+            with tracer.start_as_current_span("remediation.run") as span:
+                span.set_attribute("remediation.id", remediation_id)
+                span.set_attribute("remediation.action_type", action.action_type)
+                span.set_attribute("remediation.target_resource", action.target_resource)
+                span.set_attribute("remediation.risk_level", action.risk_level.value)
+
+                # Run the LangGraph workflow
+                final_state_dict = await self._app.ainvoke(
+                    initial_state.model_dump(),  # type: ignore[arg-type]
+                    config={
+                        "metadata": {
+                            "remediation_id": remediation_id,
+                            "action_type": action.action_type,
+                        },
                     },
-                },
-            )
+                )
 
-            final_state = RemediationState.model_validate(final_state_dict)
+                final_state = RemediationState.model_validate(final_state_dict)
 
-            # Calculate total duration
-            if final_state.remediation_start:
-                final_state.remediation_duration_ms = int(
-                    (datetime.now(UTC) - final_state.remediation_start).total_seconds() * 1000
+                # Calculate total duration
+                if final_state.remediation_start:
+                    final_state.remediation_duration_ms = int(
+                        (datetime.now(UTC) - final_state.remediation_start).total_seconds() * 1000
+                    )
+
+                span.set_attribute("remediation.duration_ms", final_state.remediation_duration_ms)
+                span.set_attribute("remediation.step", final_state.current_step or "")
+                span.set_attribute(
+                    "remediation.validation_passed",
+                    final_state.validation_passed or False,
                 )
 
             logger.info(

@@ -76,3 +76,23 @@ async def get_cost_savings(
         "estimated_savings_usd": 0.0,
         "engineer_hourly_rate": engineer_hourly_rate,
     }
+
+
+@router.get("/analytics/summary")
+async def get_analytics_summary(
+    _user: UserResponse = Depends(get_current_user),
+) -> dict[str, Any]:
+    """Get aggregated analytics summary for the dashboard."""
+    if _engine:
+        summary = await _engine.summary()
+        if summary:
+            return summary
+
+    return {
+        "total_investigations": 0,
+        "total_remediations": 0,
+        "auto_resolved_percent": 0.0,
+        "mean_time_to_resolve_seconds": 0,
+        "investigations_by_status": {},
+        "remediations_by_status": {},
+    }

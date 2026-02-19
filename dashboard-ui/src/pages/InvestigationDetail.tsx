@@ -1,7 +1,7 @@
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Wrench, Clock } from "lucide-react";
-import { format, parseISO, formatDistanceToNow } from "date-fns";
+import { format, parseISO } from "date-fns";
 import clsx from "clsx";
 import { get } from "../api/client";
 import type { InvestigationDetail as InvestigationDetailType, TimelineEvent } from "../api/types";

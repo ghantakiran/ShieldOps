@@ -24,6 +24,7 @@ from shieldops.agents.remediation.nodes import (
     resolve_playbook,
     validate_health,
 )
+from shieldops.agents.tracing import traced_node
 from shieldops.models.base import ApprovalStatus, ExecutionStatus
 
 logger = structlog.get_logger()
@@ -74,15 +75,40 @@ def create_remediation_graph() -> StateGraph[RemediationState]:
     """Build the Remediation Agent LangGraph workflow."""
     graph = StateGraph(RemediationState)
 
-    # Add nodes
-    graph.add_node("evaluate_policy", evaluate_policy)
-    graph.add_node("resolve_playbook", resolve_playbook)
-    graph.add_node("assess_risk", assess_risk)
-    graph.add_node("request_approval", request_approval)
-    graph.add_node("create_snapshot", create_snapshot)
-    graph.add_node("execute_action", execute_action)
-    graph.add_node("validate_health", validate_health)
-    graph.add_node("perform_rollback", perform_rollback)
+    # Add nodes (wrapped with OTEL tracing spans)
+    _rem = "remediation"
+    graph.add_node(
+        "evaluate_policy",
+        traced_node("remediation.evaluate_policy", _rem)(evaluate_policy),
+    )
+    graph.add_node(
+        "resolve_playbook",
+        traced_node("remediation.resolve_playbook", _rem)(resolve_playbook),
+    )
+    graph.add_node(
+        "assess_risk",
+        traced_node("remediation.assess_risk", _rem)(assess_risk),
+    )
+    graph.add_node(
+        "request_approval",
+        traced_node("remediation.request_approval", _rem)(request_approval),
+    )
+    graph.add_node(
+        "create_snapshot",
+        traced_node("remediation.create_snapshot", _rem)(create_snapshot),
+    )
+    graph.add_node(
+        "execute_action",
+        traced_node("remediation.execute_action", _rem)(execute_action),
+    )
+    graph.add_node(
+        "validate_health",
+        traced_node("remediation.validate_health", _rem)(validate_health),
+    )
+    graph.add_node(
+        "perform_rollback",
+        traced_node("remediation.perform_rollback", _rem)(perform_rollback),
+    )
 
     # Entry point
     graph.set_entry_point("evaluate_policy")
