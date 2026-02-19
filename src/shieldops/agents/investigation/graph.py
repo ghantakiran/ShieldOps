@@ -12,6 +12,7 @@ from shieldops.agents.investigation.nodes import (
     analyze_logs,
     analyze_metrics,
     analyze_traces,
+    check_historical_patterns,
     correlate_findings,
     gather_context,
     generate_hypotheses,
@@ -163,6 +164,10 @@ def create_investigation_graph() -> StateGraph[InvestigationState]:
         traced_node("investigation.gather_context", _inv)(gather_context),
     )
     graph.add_node(
+        "check_historical_patterns",
+        traced_node("investigation.check_historical_patterns", _inv)(check_historical_patterns),
+    )
+    graph.add_node(
         "analyze_logs",
         traced_node("investigation.analyze_logs", _inv)(analyze_logs),
     )
@@ -189,7 +194,8 @@ def create_investigation_graph() -> StateGraph[InvestigationState]:
 
     # Define edges
     graph.set_entry_point("gather_context")
-    graph.add_edge("gather_context", "analyze_logs")
+    graph.add_edge("gather_context", "check_historical_patterns")
+    graph.add_edge("check_historical_patterns", "analyze_logs")
     graph.add_edge("analyze_logs", "analyze_metrics")
     graph.add_conditional_edges(
         "analyze_metrics",

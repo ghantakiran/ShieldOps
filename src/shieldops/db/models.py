@@ -331,6 +331,31 @@ class VulnerabilityCommentRecord(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
+class TeamNotificationConfigRecord(Base):
+    """Notification configuration per team/channel."""
+
+    __tablename__ = "team_notification_configs"
+
+    id: Mapped[str] = mapped_column(
+        String(64), primary_key=True, default=lambda: f"tnc-{uuid4().hex[:12]}"
+    )
+    channel_type: Mapped[str] = mapped_column(
+        String(32), index=True
+    )  # slack, pagerduty, email, webhook
+    channel_name: Mapped[str] = mapped_column(String(256))
+    enabled: Mapped[bool] = mapped_column(Boolean, default=True)
+    config: Mapped[dict[str, Any]] = mapped_column(JSONB, default=dict)
+    # Optional alert threshold fields for learning agent
+    metric_name: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    threshold: Mapped[float | None] = mapped_column(nullable=True)
+    duration: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    severity: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+
 class RiskAcceptanceRecord(Base):
     """Risk acceptance record for a vulnerability."""
 

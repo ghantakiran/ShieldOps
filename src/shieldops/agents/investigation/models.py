@@ -65,6 +65,18 @@ class ReasoningStep(BaseModel):
     tool_used: str | None = None
 
 
+class HistoricalPattern(BaseModel):
+    """A pattern matched from historical incident data."""
+
+    incident_id: str
+    alert_type: str
+    root_cause: str
+    resolution_action: str
+    similarity_score: float = Field(ge=0.0, le=1.0)
+    was_correct: bool = True
+    environment: str = ""
+
+
 class InvestigationState(BaseModel):
     """Full state of an investigation workflow (LangGraph state)."""
 
@@ -77,6 +89,7 @@ class InvestigationState(BaseModel):
     metric_anomalies: list[MetricAnomaly] = Field(default_factory=list)
     trace_analysis: TraceResult | None = None
     correlated_events: list[CorrelatedEvent] = Field(default_factory=list)
+    historical_patterns: list[HistoricalPattern] = Field(default_factory=list)
 
     # Outputs
     hypotheses: list[Hypothesis] = Field(default_factory=list)

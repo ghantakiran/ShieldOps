@@ -39,6 +39,7 @@ class AzureConnector(InfraConnector):
         subscription_id: str,
         resource_group: str,
         location: str = "eastus",
+        repository: Any = None,
     ) -> None:
         self._subscription_id = subscription_id
         self._resource_group = resource_group
@@ -46,6 +47,7 @@ class AzureConnector(InfraConnector):
         self._compute_client: Any = None
         self._container_client: Any = None
         self._snapshots: dict[str, dict[str, Any]] = {}
+        self._repo = repository
 
     def _ensure_clients(self) -> None:
         """Lazily initialize Azure management clients.
@@ -623,7 +625,13 @@ class AzureConnector(InfraConnector):
         """Rollback to a captured snapshot state."""
         started_at = datetime.now(UTC)
 
-        if snapshot_id not in self._snapshots:
+        snapshot = self._snapshots.get(snapshot_id)
+        if snapshot is None and self._repo is not None:
+            snapshot = await self._repo.get_snapshot(snapshot_id)
+            if snapshot is not None:
+                self._snapshots[snapshot_id] = snapshot
+
+        if snapshot is None:
             return ActionResult(
                 action_id=f"rollback-{snapshot_id}",
                 status=ExecutionStatus.FAILED,

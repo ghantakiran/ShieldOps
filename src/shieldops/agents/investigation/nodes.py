@@ -14,6 +14,7 @@ import structlog
 
 from shieldops.agents.investigation.models import (
     CorrelatedEvent,
+    HistoricalPattern,
     InvestigationState,
     LogFinding,
     MetricAnomaly,
@@ -92,6 +93,63 @@ async def gather_context(state: InvestigationState) -> dict[str, Any]:
         "investigation_start": start,
         "reasoning_chain": [step],
         "current_step": "gather_context",
+    }
+
+
+async def check_historical_patterns(state: InvestigationState) -> dict[str, Any]:
+    """Query historical incidents to find similar past events."""
+    start = datetime.now(UTC)
+    toolkit = _get_toolkit()
+
+    alert_type = state.alert_context.alert_name
+    resource_id = state.alert_context.resource_id or ""
+
+    logger.info(
+        "investigation_checking_history",
+        alert_id=state.alert_id,
+        alert_type=alert_type,
+    )
+
+    raw_patterns = await toolkit.query_historical_patterns(
+        alert_type=alert_type,
+        resource_id=resource_id,
+    )
+
+    patterns: list[HistoricalPattern] = []
+    for p in raw_patterns:
+        patterns.append(
+            HistoricalPattern(
+                incident_id=p.get("incident_id", ""),
+                alert_type=p.get("alert_type", alert_type),
+                root_cause=p.get("root_cause", ""),
+                resolution_action=p.get("resolution_action", ""),
+                similarity_score=p.get("similarity_score", 0.5),
+                was_correct=p.get("was_correct", True),
+                environment=p.get("environment", ""),
+            )
+        )
+
+    output_summary = f"Found {len(patterns)} historical patterns"
+    if patterns:
+        top = patterns[0]
+        output_summary += (
+            f". Top match: {top.root_cause[:80]} "
+            f"(action: {top.resolution_action}, score: {top.similarity_score:.2f})"
+        )
+
+    step = ReasoningStep(
+        step_number=len(state.reasoning_chain) + 1,
+        action="check_historical_patterns",
+        input_summary=f"Querying history for alert_type={alert_type}, resource={resource_id}",
+        output_summary=output_summary,
+        duration_ms=_elapsed_ms(start),
+        tool_used="historical_db",
+    )
+
+    return {
+        "historical_patterns": patterns,
+        "reasoning_chain": [*state.reasoning_chain, step],
+        "current_step": "check_historical_patterns",
     }
 
 
@@ -541,6 +599,16 @@ def _format_full_investigation_context(state: InvestigationState) -> str:
     lines.append("## Correlated Events")
     for e in state.correlated_events:
         lines.append(f"- [{e.source}] {e.description} (score: {e.correlation_score})")
+
+    if state.historical_patterns:
+        lines.append("")
+        lines.append(f"## Historical Patterns ({len(state.historical_patterns)})")
+        for p in state.historical_patterns[:5]:
+            lines.append(
+                f"- [{p.incident_id}] root_cause={p.root_cause[:100]}, "
+                f"action={p.resolution_action}, "
+                f"correct={p.was_correct}, score={p.similarity_score:.2f}"
+            )
 
     lines.append("")
     lines.append("## Investigation Reasoning Chain")

@@ -140,41 +140,60 @@ function AgentsTab() {
 
 // ── Notifications Tab ────────────────────────────────────────────────────
 
-interface NotificationChannel {
-  name: string;
-  description: string;
-  configured: boolean;
-  icon: React.ReactNode;
+interface NotificationConfig {
+  id: string;
+  channel_type: string;
+  channel_name: string;
+  enabled: boolean;
+  config: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
 }
 
-const CHANNELS: NotificationChannel[] = [
-  {
-    name: "Slack",
-    description: "Send alerts and incident updates to Slack channels",
-    configured: true,
-    icon: <MessageSquare className="h-5 w-5" />,
-  },
-  {
-    name: "PagerDuty",
-    description: "Escalate critical incidents to on-call engineers",
-    configured: true,
-    icon: <Siren className="h-5 w-5" />,
-  },
-  {
-    name: "Email",
-    description: "Email notifications for daily digests and reports",
-    configured: false,
-    icon: <Mail className="h-5 w-5" />,
-  },
-  {
-    name: "Webhook",
-    description: "Custom HTTP webhooks for third-party integrations",
-    configured: false,
-    icon: <Webhook className="h-5 w-5" />,
-  },
-];
+const CHANNEL_ICONS: Record<string, React.ReactNode> = {
+  slack: <MessageSquare className="h-5 w-5" />,
+  pagerduty: <Siren className="h-5 w-5" />,
+  email: <Mail className="h-5 w-5" />,
+  webhook: <Webhook className="h-5 w-5" />,
+};
+
+const CHANNEL_DESCRIPTIONS: Record<string, string> = {
+  slack: "Send alerts and incident updates to Slack channels",
+  pagerduty: "Escalate critical incidents to on-call engineers",
+  email: "Email notifications for daily digests and reports",
+  webhook: "Custom HTTP webhooks for third-party integrations",
+};
 
 function NotificationsTab() {
+  const {
+    data: configs = [],
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["notification-configs"],
+    queryFn: () => get<NotificationConfig[]>("/notification-configs"),
+  });
+
+  if (isLoading) {
+    return <LoadingSpinner size="sm" className="py-12" />;
+  }
+
+  // Build channel list: merge API configs with known channel types
+  const knownTypes = ["slack", "pagerduty", "email", "webhook"];
+  const configuredTypes = new Set(configs.map((c) => c.channel_type));
+
+  const channels = knownTypes.map((type) => {
+    const cfg = configs.find((c) => c.channel_type === type);
+    return {
+      type,
+      name: cfg?.channel_name || type.charAt(0).toUpperCase() + type.slice(1),
+      configured: configuredTypes.has(type),
+      enabled: cfg?.enabled ?? false,
+      icon: CHANNEL_ICONS[type] || <Bell className="h-5 w-5" />,
+      description: CHANNEL_DESCRIPTIONS[type] || "",
+    };
+  });
+
   return (
     <div className="rounded-xl border border-gray-800 bg-gray-900">
       <div className="border-b border-gray-800 px-5 py-4">
@@ -182,10 +201,15 @@ function NotificationsTab() {
         <p className="mt-1 text-sm text-gray-500">
           Configure how ShieldOps alerts your team about incidents and agent actions.
         </p>
+        {error && (
+          <p className="mt-2 text-xs text-red-400">
+            Failed to load from API — showing defaults.
+          </p>
+        )}
       </div>
       <ul className="divide-y divide-gray-800">
-        {CHANNELS.map((channel) => (
-          <li key={channel.name} className="flex items-center gap-4 px-5 py-4">
+        {channels.map((channel) => (
+          <li key={channel.type} className="flex items-center gap-4 px-5 py-4">
             <div className="text-gray-400">{channel.icon}</div>
             <div className="flex-1">
               <p className="text-sm font-medium text-gray-200">{channel.name}</p>
@@ -195,11 +219,15 @@ function NotificationsTab() {
               <div
                 className={clsx(
                   "h-2 w-2 rounded-full",
-                  channel.configured ? "bg-green-400" : "bg-gray-600",
+                  channel.configured && channel.enabled ? "bg-green-400" : "bg-gray-600",
                 )}
               />
               <span className="text-xs text-gray-400">
-                {channel.configured ? "Configured" : "Not configured"}
+                {channel.configured
+                  ? channel.enabled
+                    ? "Enabled"
+                    : "Disabled"
+                  : "Not configured"}
               </span>
             </div>
           </li>

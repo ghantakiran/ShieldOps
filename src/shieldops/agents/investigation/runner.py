@@ -51,6 +51,7 @@ class InvestigationRunner:
             log_sources=log_sources or [],
             metric_sources=metric_sources or [],
             trace_sources=trace_sources or [],
+            repository=repository,
         )
         # Configure the module-level toolkit for nodes
         set_toolkit(self._toolkit)

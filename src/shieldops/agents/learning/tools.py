@@ -348,3 +348,21 @@ class PlaybookStoreAdapter:
             ],
             "total": len(playbooks),
         }
+
+
+class AlertConfigStoreAdapter:
+    """Adapts Repository into the alert_config_store interface LearningToolkit expects.
+
+    Queries alert threshold configuration from the database so the learning
+    agent can recommend threshold adjustments based on historical outcomes.
+    """
+
+    def __init__(self, repository: Repository) -> None:
+        self._repo = repository
+
+    async def get_thresholds(self) -> dict[str, Any]:
+        try:
+            return await self._repo.query_alert_thresholds()
+        except Exception as e:
+            logger.warning("alert_config_store_query_failed", error=str(e))
+            return {"thresholds": [], "total": 0}

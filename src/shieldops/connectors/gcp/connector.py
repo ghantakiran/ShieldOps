@@ -36,12 +36,15 @@ class GCPConnector(InfraConnector):
 
     provider = "gcp"
 
-    def __init__(self, project_id: str, region: str = "us-central1") -> None:
+    def __init__(
+        self, project_id: str, region: str = "us-central1", repository: Any = None
+    ) -> None:
         self._project_id = project_id
         self._region = region
         self._compute_client: Any = None
         self._run_client: Any = None
         self._snapshots: dict[str, dict[str, Any]] = {}
+        self._repo = repository
 
     def _ensure_clients(self) -> None:
         """Lazily initialize GCP API clients."""
@@ -556,7 +559,13 @@ class GCPConnector(InfraConnector):
         """Rollback to a captured snapshot state."""
         started_at = datetime.now(UTC)
 
-        if snapshot_id not in self._snapshots:
+        snapshot = self._snapshots.get(snapshot_id)
+        if snapshot is None and self._repo is not None:
+            snapshot = await self._repo.get_snapshot(snapshot_id)
+            if snapshot is not None:
+                self._snapshots[snapshot_id] = snapshot
+
+        if snapshot is None:
             return ActionResult(
                 action_id=f"rollback-{snapshot_id}",
                 status=ExecutionStatus.FAILED,

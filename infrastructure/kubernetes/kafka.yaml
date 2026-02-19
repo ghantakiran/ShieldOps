@@ -1,0 +1,130 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: shieldops-kafka
+  namespace: shieldops
+  labels:
+    app: shieldops
+    component: kafka
+spec:
+  serviceName: shieldops-kafka-headless
+  replicas: 3
+  selector:
+    matchLabels:
+      app: shieldops
+      component: kafka
+  template:
+    metadata:
+      labels:
+        app: shieldops
+        component: kafka
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: kafka
+          image: bitnami/kafka:3.7
+          ports:
+            - containerPort: 9092
+              name: client
+              protocol: TCP
+            - containerPort: 9093
+              name: inter-broker
+              protocol: TCP
+          env:
+            - name: KAFKA_CFG_NODE_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: KAFKA_CFG_PROCESS_ROLES
+              value: "broker,controller"
+            - name: KAFKA_CFG_LISTENERS
+              value: "PLAINTEXT://:9092,CONTROLLER://:9093"
+            - name: KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP
+              value: "PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT"
+            - name: KAFKA_CFG_CONTROLLER_LISTENER_NAMES
+              value: "CONTROLLER"
+            - name: KAFKA_CFG_INTER_BROKER_LISTENER_NAME
+              value: "PLAINTEXT"
+            - name: KAFKA_CFG_CONTROLLER_QUORUM_VOTERS
+              value: "shieldops-kafka-0@shieldops-kafka-0.shieldops-kafka-headless:9093:0,shieldops-kafka-1@shieldops-kafka-1.shieldops-kafka-headless:9093:1,shieldops-kafka-2@shieldops-kafka-2.shieldops-kafka-headless:9093:2"
+            - name: KAFKA_CFG_LOG_RETENTION_HOURS
+              value: "168"
+            - name: KAFKA_CFG_LOG_RETENTION_BYTES
+              value: "1073741824"
+            - name: KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE
+              value: "true"
+            - name: KAFKA_KRAFT_CLUSTER_ID
+              value: "shieldops-kafka-kraft"
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 2Gi
+          livenessProbe:
+            tcpSocket:
+              port: 9092
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          readinessProbe:
+            tcpSocket:
+              port: 9092
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          volumeMounts:
+            - name: data
+              mountPath: /bitnami/kafka
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 10Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: shieldops-kafka-headless
+  namespace: shieldops
+  labels:
+    app: shieldops
+    component: kafka
+spec:
+  clusterIP: None
+  selector:
+    app: shieldops
+    component: kafka
+  ports:
+    - port: 9092
+      targetPort: 9092
+      name: client
+      protocol: TCP
+    - port: 9093
+      targetPort: 9093
+      name: inter-broker
+      protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: shieldops-kafka
+  namespace: shieldops
+  labels:
+    app: shieldops
+    component: kafka
+spec:
+  selector:
+    app: shieldops
+    component: kafka
+  ports:
+    - port: 9092
+      targetPort: 9092
+      name: client
+      protocol: TCP
+  type: ClusterIP

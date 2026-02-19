@@ -16,6 +16,7 @@ from shieldops.agents.learning.graph import create_learning_graph
 from shieldops.agents.learning.models import LearningState
 from shieldops.agents.learning.nodes import set_toolkit
 from shieldops.agents.learning.tools import (
+    AlertConfigStoreAdapter,
     IncidentStoreAdapter,
     LearningToolkit,
     PlaybookStoreAdapter,
@@ -50,16 +51,19 @@ class LearningRunner:
         # Wire adapters when repository/loader are provided
         effective_incident_store = incident_store
         effective_playbook_store = playbook_store
+        effective_alert_config_store = alert_config_store
 
         if repository is not None and effective_incident_store is None:
             effective_incident_store = IncidentStoreAdapter(repository)
         if playbook_loader is not None and effective_playbook_store is None:
             effective_playbook_store = PlaybookStoreAdapter(playbook_loader)
+        if repository is not None and effective_alert_config_store is None:
+            effective_alert_config_store = AlertConfigStoreAdapter(repository)
 
         self._toolkit = LearningToolkit(
             incident_store=effective_incident_store,
             playbook_store=effective_playbook_store,
-            alert_config_store=alert_config_store,
+            alert_config_store=effective_alert_config_store,
         )
         set_toolkit(self._toolkit)
 
