@@ -1,0 +1,55 @@
+# ShieldOps Prometheus Configuration
+# Docs: https://prometheus.io/docs/prometheus/latest/configuration/configuration/
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  scrape_timeout: 10s
+
+  external_labels:
+    cluster: "shieldops"
+    environment: "production"
+
+# ── Rule files ──────────────────────────────────────────────────────
+rule_files:
+  - "recording_rules.yml"
+  - "alert_rules.yml"
+
+# ── Alertmanager ────────────────────────────────────────────────────
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - "alertmanager:9093"
+      scheme: http
+      timeout: 10s
+
+# ── Scrape targets ──────────────────────────────────────────────────
+scrape_configs:
+  # ShieldOps FastAPI application
+  - job_name: "shieldops-api"
+    metrics_path: "/metrics"
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    static_configs:
+      - targets:
+          - "localhost:8000"
+        labels:
+          service: "shieldops-api"
+          environment: "production"
+
+  # Node Exporter — host-level metrics (CPU, memory, disk, network)
+  - job_name: "node-exporter"
+    scrape_interval: 30s
+    static_configs:
+      - targets:
+          - "node-exporter:9100"
+        labels:
+          service: "node-exporter"
+
+  # Prometheus self-monitoring
+  - job_name: "prometheus"
+    scrape_interval: 30s
+    static_configs:
+      - targets:
+          - "localhost:9090"

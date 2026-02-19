@@ -1,0 +1,105 @@
+# ShieldOps Prometheus Recording Rules
+# Pre-compute frequently queried expressions for efficient dashboard rendering.
+# Imported via rule_files in prometheus.yml
+
+groups:
+  - name: shieldops.http.recording
+    interval: 30s
+    rules:
+      # ── Request rate (all status codes) ───────────────────────────
+      - record: shieldops:http_requests:rate5m
+        expr: >
+          sum by (method, path_template, status_code) (
+            rate(http_requests_total[5m])
+          )
+
+      # ── Aggregated request rate (total) ───────────────────────────
+      - record: shieldops:http_requests_total:rate5m
+        expr: >
+          sum(rate(http_requests_total[5m]))
+
+      # ── 5xx error rate ────────────────────────────────────────────
+      - record: shieldops:http_errors:rate5m
+        expr: >
+          sum by (method, path_template) (
+            rate(http_requests_total{status_code=~"5.."}[5m])
+          )
+
+      # ── Aggregated error rate (total) ─────────────────────────────
+      - record: shieldops:http_errors_total:rate5m
+        expr: >
+          sum(rate(http_requests_total{status_code=~"5.."}[5m]))
+
+      # ── Error percentage ──────────────────────────────────────────
+      - record: shieldops:http_error_percentage:rate5m
+        expr: >
+          (
+            sum(rate(http_requests_total{status_code=~"5.."}[5m]))
+            /
+            clamp_min(sum(rate(http_requests_total[5m])), 1e-10)
+          ) * 100
+
+      # ── P50 latency ──────────────────────────────────────────────
+      - record: shieldops:http_latency:p50
+        expr: >
+          histogram_quantile(0.50,
+            sum by (le) (rate(http_request_duration_seconds_bucket[5m]))
+          )
+
+      # ── P50 latency per endpoint ─────────────────────────────────
+      - record: shieldops:http_latency_by_endpoint:p50
+        expr: >
+          histogram_quantile(0.50,
+            sum by (le, method, path_template) (
+              rate(http_request_duration_seconds_bucket[5m])
+            )
+          )
+
+      # ── P95 latency ──────────────────────────────────────────────
+      - record: shieldops:http_latency:p95
+        expr: >
+          histogram_quantile(0.95,
+            sum by (le) (rate(http_request_duration_seconds_bucket[5m]))
+          )
+
+      # ── P95 latency per endpoint ─────────────────────────────────
+      - record: shieldops:http_latency_by_endpoint:p95
+        expr: >
+          histogram_quantile(0.95,
+            sum by (le, method, path_template) (
+              rate(http_request_duration_seconds_bucket[5m])
+            )
+          )
+
+      # ── P99 latency ──────────────────────────────────────────────
+      - record: shieldops:http_latency:p99
+        expr: >
+          histogram_quantile(0.99,
+            sum by (le) (rate(http_request_duration_seconds_bucket[5m]))
+          )
+
+      # ── P99 latency per endpoint ─────────────────────────────────
+      - record: shieldops:http_latency_by_endpoint:p99
+        expr: >
+          histogram_quantile(0.99,
+            sum by (le, method, path_template) (
+              rate(http_request_duration_seconds_bucket[5m])
+            )
+          )
+
+      # ── Average request duration ─────────────────────────────────
+      - record: shieldops:http_request_duration:avg
+        expr: >
+          sum(rate(http_request_duration_seconds_sum[5m]))
+          /
+          clamp_min(sum(rate(http_request_duration_seconds_count[5m])), 1e-10)
+
+      # ── Average request duration per endpoint ────────────────────
+      - record: shieldops:http_request_duration_by_endpoint:avg
+        expr: >
+          sum by (method, path_template) (rate(http_request_duration_seconds_sum[5m]))
+          /
+          clamp_min(
+            sum by (method, path_template) (rate(http_request_duration_seconds_count[5m])),
+            1e-10
+          )

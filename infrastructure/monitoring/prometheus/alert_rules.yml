@@ -1,0 +1,225 @@
+# ShieldOps Prometheus Alerting Rules
+# Imported via rule_files in prometheus.yml
+
+groups:
+  # ── API / HTTP Alerts ─────────────────────────────────────────────
+  - name: shieldops.api
+    rules:
+      - alert: HighErrorRate
+        expr: >
+          (
+            sum(rate(http_requests_total{status_code=~"5.."}[5m]))
+            /
+            sum(rate(http_requests_total[5m]))
+          ) * 100 > 5
+        for: 5m
+        labels:
+          severity: critical
+          team: platform
+          service: shieldops-api
+        annotations:
+          summary: "High HTTP 5xx error rate ({{ $value | printf \"%.1f\" }}%)"
+          description: >
+            The ShieldOps API is returning more than 5% server errors over the
+            last 5 minutes. Current 5xx rate is {{ $value | printf "%.1f" }}%.
+            This likely indicates an application-level failure requiring
+            immediate investigation.
+          runbook_url: "https://runbooks.shieldops.internal/api/high-error-rate"
+
+      - alert: HighLatencyP95
+        expr: >
+          histogram_quantile(0.95,
+            sum by (le) (rate(http_request_duration_seconds_bucket[5m]))
+          ) > 2
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+          service: shieldops-api
+        annotations:
+          summary: "P95 latency exceeds 2s ({{ $value | printf \"%.2f\" }}s)"
+          description: >
+            The 95th percentile HTTP request latency has exceeded 2 seconds for
+            5 minutes. Current P95 is {{ $value | printf "%.2f" }}s. Check for
+            slow database queries, upstream timeouts, or resource contention.
+          runbook_url: "https://runbooks.shieldops.internal/api/high-latency"
+
+      - alert: HighLatencyP99
+        expr: >
+          histogram_quantile(0.99,
+            sum by (le) (rate(http_request_duration_seconds_bucket[5m]))
+          ) > 5
+        for: 5m
+        labels:
+          severity: critical
+          team: platform
+          service: shieldops-api
+        annotations:
+          summary: "P99 latency exceeds 5s ({{ $value | printf \"%.2f\" }}s)"
+          description: >
+            The 99th percentile HTTP request latency has exceeded 5 seconds for
+            5 minutes. Current P99 is {{ $value | printf "%.2f" }}s. This
+            indicates severe degradation; long-tail requests are timing out.
+          runbook_url: "https://runbooks.shieldops.internal/api/high-latency"
+
+      - alert: ServiceDown
+        expr: >
+          up{job="shieldops-api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: platform
+          service: shieldops-api
+        annotations:
+          summary: "ShieldOps API is unreachable"
+          description: >
+            Prometheus has been unable to scrape the ShieldOps API /metrics
+            endpoint for over 1 minute. The service may have crashed, the
+            container may be restarting, or a network issue is preventing
+            connectivity.
+          runbook_url: "https://runbooks.shieldops.internal/api/service-down"
+
+      - alert: HighRequestRate
+        expr: >
+          sum(rate(http_requests_total[5m])) * 60 > 1000
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+          service: shieldops-api
+        annotations:
+          summary: "Request rate exceeds 1000 rpm ({{ $value | printf \"%.0f\" }} rpm)"
+          description: >
+            The ShieldOps API is receiving more than 1000 requests per minute
+            sustained over 5 minutes. Current rate is {{ $value | printf "%.0f" }}
+            rpm. This may indicate a traffic spike, bot activity, or a
+            misconfigured client retry loop. Verify rate limiting is engaged.
+          runbook_url: "https://runbooks.shieldops.internal/api/high-request-rate"
+
+  # ── Agent Alerts ──────────────────────────────────────────────────
+  - name: shieldops.agents
+    rules:
+      - alert: AgentOffline
+        expr: >
+          (time() - shieldops_agent_last_heartbeat_timestamp_seconds) > 300
+        for: 5m
+        labels:
+          severity: critical
+          team: agents
+          service: shieldops-agents
+        annotations:
+          summary: "Agent {{ $labels.agent_type }} has not sent a heartbeat in 5+ minutes"
+          description: >
+            The {{ $labels.agent_type }} agent (environment={{ $labels.environment }})
+            has not reported a heartbeat for over 5 minutes. Last heartbeat was
+            {{ $value | printf "%.0f" }} seconds ago. The agent process may have
+            crashed or lost connectivity to the control plane.
+          runbook_url: "https://runbooks.shieldops.internal/agents/offline"
+
+      - alert: InvestigationStuck
+        expr: >
+          (time() - shieldops_investigation_started_timestamp_seconds{status="in_progress"}) > 1800
+        for: 5m
+        labels:
+          severity: warning
+          team: agents
+          service: shieldops-agents
+        annotations:
+          summary: "Investigation {{ $labels.investigation_id }} stuck in_progress for 30+ minutes"
+          description: >
+            An investigation has been in the in_progress state for over 30
+            minutes without completing. This may indicate the investigation
+            agent is hung, waiting on an unresponsive external system, or
+            caught in an infinite loop in the LangGraph execution.
+          runbook_url: "https://runbooks.shieldops.internal/agents/investigation-stuck"
+
+      - alert: RemediationFailed
+        expr: >
+          increase(shieldops_remediation_total{status="failed"}[10m]) > 0
+        for: 0m
+        labels:
+          severity: critical
+          team: agents
+          service: shieldops-agents
+        annotations:
+          summary: "Remediation action failed ({{ $labels.agent_type }}, {{ $labels.environment }})"
+          description: >
+            A remediation action has failed in the {{ $labels.environment }}
+            environment. Failed remediations may leave infrastructure in a
+            partially modified state. Check the remediation audit log and
+            verify rollback completed successfully.
+          runbook_url: "https://runbooks.shieldops.internal/agents/remediation-failed"
+
+  # ── Infrastructure Alerts ─────────────────────────────────────────
+  - name: shieldops.infrastructure
+    rules:
+      - alert: DatabaseConnectionPoolExhausted
+        expr: >
+          shieldops_db_pool_active_connections
+          >=
+          shieldops_db_pool_max_connections * 0.9
+        for: 5m
+        labels:
+          severity: critical
+          team: platform
+          service: shieldops-database
+        annotations:
+          summary: "Database connection pool >90% utilized"
+          description: >
+            The PostgreSQL connection pool has {{ $value }} active connections,
+            which is at or above 90% of the configured maximum. New requests
+            will begin queuing or failing. Consider increasing pool_size in
+            settings or investigating long-running transactions.
+          runbook_url: "https://runbooks.shieldops.internal/infra/db-pool-exhausted"
+
+      - alert: RedisConnectionFailed
+        expr: >
+          redis_up{job="shieldops-api"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          team: platform
+          service: shieldops-redis
+        annotations:
+          summary: "Redis connection is down"
+          description: >
+            The ShieldOps API has lost connectivity to Redis for over 2 minutes.
+            This impacts rate limiting, agent coordination, caching, and the
+            job scheduler. Rate limiting will fail open, potentially exposing
+            the API to abuse.
+          runbook_url: "https://runbooks.shieldops.internal/infra/redis-down"
+
+      - alert: KafkaConsumerLag
+        expr: >
+          kafka_consumer_group_lag{group="shieldops-agents"} > 1000
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+          service: shieldops-kafka
+        annotations:
+          summary: "Kafka consumer lag exceeds 1000 messages ({{ $value | printf \"%.0f\" }})"
+          description: >
+            The shieldops-agents consumer group has a lag of {{ $value | printf "%.0f" }}
+            messages sustained over 10 minutes. Events (alerts, telemetry,
+            agent commands) are not being processed in a timely manner. This
+            may delay incident detection and remediation actions.
+          runbook_url: "https://runbooks.shieldops.internal/infra/kafka-consumer-lag"
+
+      - alert: OPAPolicyEvaluationFailed
+        expr: >
+          increase(shieldops_opa_evaluation_errors_total[5m]) > 0
+        for: 0m
+        labels:
+          severity: critical
+          team: security
+          service: shieldops-opa
+        annotations:
+          summary: "OPA policy evaluation errors detected"
+          description: >
+            OPA policy evaluation failures have been recorded in the last 5
+            minutes. This is a critical safety issue: if policy evaluation
+            fails, agent actions may be incorrectly blocked (fail-closed) or,
+            worse, allowed without proper authorization checks. Verify OPA
+            connectivity and policy bundle integrity.
+          runbook_url: "https://runbooks.shieldops.internal/infra/opa-evaluation-failed"
