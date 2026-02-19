@@ -1,7 +1,7 @@
 # ShieldOps — Feature Implementation Tracker
 
 **Last Updated:** 2026-02-19
-**Platform Completeness:** ~82%
+**Platform Completeness:** ~88%
 
 ---
 
@@ -48,17 +48,20 @@
 
 ### P2 — Medium (Production Readiness)
 
-- [ ] **AWS CloudTrail Integration** — Replace empty `get_events()` stub
+- [x] **AWS CloudTrail Integration** — Real `get_events()` via CloudTrail LookupEvents
   - File: `src/shieldops/connectors/aws/connector.py`
-  - Currently returns `[]` — needs CloudTrail LookupEvents integration
+  - Features: Pagination (2 pages), structured event parsing, error handling
+  - Tests: 6 new tests in `tests/unit/test_aws_connector.py`
 
-- [ ] **Compliance Framework Integration** — Replace hardcoded controls
+- [x] **Compliance Framework Integration** — Real infra checks per control
   - File: `src/shieldops/agents/security/tools.py`
-  - Currently all controls hardcoded to "passing" — needs real infra checks
+  - Supports: SOC2, PCI-DSS, HIPAA, CIS frameworks with 12 control evaluators
+  - Tests: 23 tests in `tests/unit/test_security_tools_compliance.py`
 
-- [ ] **Playbook Wiring** — Connect YAML playbooks to remediation agent
-  - 10 playbooks exist in `playbooks/` but are not loaded into agent workflow
-  - Wire playbook loader into remediation agent nodes
+- [x] **Playbook Wiring** — Playbooks loaded into remediation agent workflow
+  - Files: models.py, tools.py, nodes.py, graph.py, runner.py (remediation agent)
+  - Features: `resolve_playbook` node, playbook-driven validation checks
+  - Tests: 16 tests in `tests/unit/test_playbook_wiring.py`
 
 ### P3 — Low (Polish)
 
@@ -96,3 +99,7 @@
 - [x] NVD CVE Source (NIST API 2.0, CVSS v3.1) — 261 LOC, 22 tests
 - [x] AWS Secrets Manager Credential Store — 181 LOC, 15 tests
 - [x] HashiCorp Vault Credential Store — 271 LOC, 26 tests
+- [x] AWS CloudTrail Integration — real get_events() with pagination, 6 tests
+- [x] Compliance Framework Integration — 12 control evaluators, 23 tests
+- [x] Playbook Wiring — resolve_playbook node + validation checks, 16 tests
+- [x] CI fixes — ruff version alignment, mypy stubs, dependency audit (CVE fix)
