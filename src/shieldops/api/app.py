@@ -149,7 +149,22 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         logger.warning("rate_limiter_init_failed", error=str(e))
 
     policy_engine = PolicyEngine(opa_url=settings.opa_endpoint, rate_limiter=rate_limiter)
-    approval_workflow = ApprovalWorkflow()
+
+    # Build approval notifier for Slack (no-op when token is empty)
+    approval_notifier = None
+    try:
+        from shieldops.policy.approval.notifier import ApprovalNotifier
+
+        approval_notifier = ApprovalNotifier(
+            slack_bot_token=settings.slack_bot_token,
+            slack_channel=settings.slack_approval_channel,
+        )
+        if approval_notifier.enabled:
+            logger.info("approval_notifier_initialized", channel=settings.slack_approval_channel)
+    except Exception as e:
+        logger.warning("approval_notifier_init_failed", error=str(e))
+
+    approval_workflow = ApprovalWorkflow(notifier=approval_notifier)
 
     # Remediation runner
     rem_runner = RemediationRunner(
@@ -266,6 +281,21 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         playbook_loader=playbook_loader,
     )
     learning.set_runner(learn_runner)
+
+    # ── Notification config CRUD ──────────────────────────────────
+    if session_factory:
+        try:
+            from shieldops.api.routes import notification_config
+
+            notification_config.set_session_factory(session_factory)
+            app.include_router(
+                notification_config.router,
+                prefix=settings.api_prefix,
+                tags=["Notification Config"],
+            )
+            logger.info("notification_config_routes_initialized")
+        except Exception as e:
+            logger.warning("notification_config_routes_failed", error=str(e))
 
     # ── Notification channels ─────────────────────────────────────
     notification_channels: dict[str, Any] = {}
@@ -410,6 +440,27 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     app.state.scheduler = scheduler
     logger.info("scheduler_initialized", jobs=len(scheduler.list_jobs()))
 
+    # ── Kafka Event Bus ──────────────────────────────────────────────
+    event_bus = None
+    try:
+        from shieldops.messaging.alert_handler import AlertEventHandler
+        from shieldops.messaging.bus import EventBus
+
+        event_bus = EventBus(
+            brokers=settings.kafka_brokers,
+            group_id=settings.kafka_consumer_group,
+        )
+        alert_handler = AlertEventHandler(investigation_runner=inv_runner)
+        await event_bus.start()
+
+        import asyncio
+
+        asyncio.create_task(event_bus.consumer.consume(alert_handler.handle))
+        app.state.event_bus = event_bus
+        logger.info("event_bus_started")
+    except Exception as e:
+        logger.warning("event_bus_init_failed", error=str(e))
+
     # ── Newsletter service ─────────────────────────────────────────
     try:
         from shieldops.api.routes import newsletters
@@ -456,6 +507,9 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         )
 
     # ── Resource cleanup ───────────────────────────────────────
+    _event_bus = getattr(getattr(app, "state", None), "event_bus", None)
+    if _event_bus:
+        await _event_bus.stop()
     _scheduler = getattr(getattr(app, "state", None), "scheduler", None)
     if _scheduler:
         await _scheduler.stop()

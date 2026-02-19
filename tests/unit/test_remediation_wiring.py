@@ -50,8 +50,8 @@ class TestRemediationWiring:
                 call_kwargs = mock_pe_cls.call_args
                 assert "opa_url" in call_kwargs.kwargs or len(call_kwargs.args) > 0
 
-                # ApprovalWorkflow created with defaults
-                mock_aw_cls.assert_called_once_with()
+                # ApprovalWorkflow created (with optional notifier)
+                mock_aw_cls.assert_called_once()
 
                 # RemediationRunner receives all core deps
                 mock_rem_cls.assert_called_once()

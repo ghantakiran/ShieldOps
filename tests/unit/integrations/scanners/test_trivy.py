@@ -67,7 +67,7 @@ def _make_vuln(
 @pytest.fixture
 def cli_source() -> TrivyCVESource:
     """TrivyCVESource in CLI mode (no server URL)."""
-    return TrivyCVESource(timeout=10, trivy_path="/usr/bin/trivy", cache_dir="/tmp/trivy-cache")
+    return TrivyCVESource(timeout=10, trivy_path="/usr/bin/trivy", cache_dir="/tmp/trivy-cache")  # noqa: S108
 
 
 @pytest.fixture
@@ -98,7 +98,7 @@ class TestInit:
 
     def test_custom_cli_options(self, cli_source: TrivyCVESource) -> None:
         assert cli_source._trivy_path == "/usr/bin/trivy"
-        assert cli_source._cache_dir == "/tmp/trivy-cache"
+        assert cli_source._cache_dir == "/tmp/trivy-cache"  # noqa: S108
 
     def test_implements_cve_source(self) -> None:
         from shieldops.agents.security.protocols import CVESource
@@ -200,7 +200,7 @@ class TestScanViaCLI:
 
         call_args = mock_exec.call_args[0]
         assert "--cache-dir" in call_args
-        assert "/tmp/trivy-cache" in call_args
+        assert "/tmp/trivy-cache" in call_args  # noqa: S108
 
 
 # ============================================================================

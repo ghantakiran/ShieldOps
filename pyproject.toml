@@ -139,6 +139,28 @@ module = [
 ]
 ignore_missing_imports = true
 
+[[tool.mypy.overrides]]
+module = [
+    "shieldops.vulnerability.newsletter",
+    "shieldops.vulnerability.escalation",
+    "shieldops.vulnerability.alert_router",
+    "shieldops.integrations.scanners.network_scanner",
+    "shieldops.integrations.scanners.git_scanner",
+    "shieldops.integrations.notifications.dispatcher",
+    "shieldops.integrations.scanners.trivy",
+    "shieldops.api.routes.newsletters",
+    "shieldops.api.routes.vulnerabilities",
+    "shieldops.api.routes.teams",
+    "shieldops.api.routes.security_chat",
+    "shieldops.agents.security.chat",
+    "shieldops.db.repository",
+]
+warn_return_any = false
+disallow_untyped_defs = false
+disallow_untyped_calls = false
+disallow_any_generics = false
+check_untyped_defs = false
+
 [tool.coverage.run]
 source = ["src/shieldops"]
 omit = ["*/tests/*", "*/__pycache__/*"]

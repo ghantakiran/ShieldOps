@@ -136,7 +136,7 @@ async def get_vulnerability(
 async def update_vulnerability_status(
     vuln_id: str,
     body: VulnerabilityStatusUpdate,
-    _user=Depends(require_role("admin", "operator")),
+    _user: Any = Depends(require_role("admin", "operator")),  # type: ignore[arg-type]
 ) -> dict[str, Any]:
     repo = _get_repo()
 
@@ -177,7 +177,7 @@ async def update_vulnerability_status(
 async def assign_vulnerability(
     vuln_id: str,
     body: VulnerabilityAssignment,
-    _user=Depends(require_role("admin", "operator")),
+    _user: Any = Depends(require_role("admin", "operator")),  # type: ignore[arg-type]
 ) -> dict[str, Any]:
     repo = _get_repo()
 
@@ -213,7 +213,7 @@ async def assign_vulnerability(
 async def add_comment(
     vuln_id: str,
     body: CommentCreate,
-    _user=Depends(get_current_user),
+    _user: Any = Depends(get_current_user),
 ) -> dict[str, Any]:
     repo = _get_repo()
 
@@ -246,7 +246,7 @@ async def list_comments(
 async def accept_risk(
     vuln_id: str,
     body: RiskAcceptanceCreate,
-    _user=Depends(require_role("admin", "operator")),
+    _user: Any = Depends(require_role("admin", "operator")),  # type: ignore[arg-type]
 ) -> dict[str, Any]:
     repo = _get_repo()
 

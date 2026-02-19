@@ -1,0 +1,23 @@
+# OPA Policies ConfigMap — auto-generated from playbooks/policies/*.rego
+#
+# This ConfigMap is mounted by the OPA deployment at /policies.
+# To regenerate: kubectl create configmap shieldops-opa-policies \
+#   --from-file=playbooks/policies/ -n shieldops --dry-run=client -o yaml
+#
+# The CI pipeline syncs this automatically on changes to playbooks/policies/.
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: shieldops-opa-policies
+  namespace: shieldops
+  labels:
+    app: shieldops
+    component: opa
+  annotations:
+    description: "OPA Rego policies for ShieldOps agent action evaluation"
+data: {}
+# NOTE: The data section is populated by CI via:
+#   kubectl create configmap shieldops-opa-policies \
+#     --from-file=playbooks/policies/ \
+#     -n shieldops --dry-run=client -o yaml | kubectl apply -f -

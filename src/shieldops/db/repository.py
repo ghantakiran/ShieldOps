@@ -398,6 +398,24 @@ class Repository:
                 for r in result.scalars().all()
             ]
 
+    # ── Snapshot Retrieval (for durable connector rollback) ──────
+
+    async def get_snapshot(self, snapshot_id: str) -> dict[str, Any] | None:
+        """Retrieve snapshot data from RemediationRecord by snapshot_id.
+
+        Connectors store snapshots in-memory, but on restart they can
+        fall back to this DB lookup via the ``snapshot_data`` JSONB column.
+        """
+        async with self._sf() as session:
+            stmt = select(RemediationRecord).where(
+                RemediationRecord.snapshot_data["id"].as_string() == snapshot_id
+            )
+            result = await session.execute(stmt)
+            record = result.scalar_one_or_none()
+            if record and record.snapshot_data:
+                return record.snapshot_data
+            return None
+
     # ── Agent Sessions ──────────────────────────────────────────────
 
     async def save_agent_session(
@@ -461,6 +479,45 @@ class Repository:
 
             await session.commit()
             logger.info("incident_outcome_saved", incident_id=incident_id)
+
+    async def get_similar_incidents(
+        self,
+        alert_type: str,
+        resource_id: str = "",
+        limit: int = 10,
+    ) -> list[dict[str, Any]]:
+        """Find past incidents with matching alert_type for pattern matching.
+
+        Returns incidents ordered by most recent, with a simple text-based
+        similarity score (exact alert_type match = 0.8, same resource = 0.9).
+        """
+        async with self._sf() as session:
+            stmt = (
+                select(IncidentOutcomeRecord)
+                .where(IncidentOutcomeRecord.alert_type == alert_type)
+                .order_by(IncidentOutcomeRecord.created_at.desc())
+                .limit(limit)
+            )
+            result = await session.execute(stmt)
+            records = result.scalars().all()
+
+        patterns: list[dict[str, Any]] = []
+        for r in records:
+            score = 0.8
+            if resource_id and resource_id in (r.root_cause or ""):
+                score = 0.9
+            patterns.append(
+                {
+                    "incident_id": r.id,
+                    "alert_type": r.alert_type,
+                    "root_cause": r.root_cause,
+                    "resolution_action": r.resolution_action,
+                    "similarity_score": score,
+                    "was_correct": r.was_correct,
+                    "environment": r.environment,
+                }
+            )
+        return patterns
 
     async def query_incident_outcomes(
         self,
@@ -526,6 +583,37 @@ class Repository:
             await session.commit()
             logger.info("incident_feedback_saved", incident_id=incident_id)
             return True
+
+    # ── Alert Thresholds (Learning Agent) ─────────────────────────
+
+    async def query_alert_thresholds(self) -> dict[str, Any]:
+        """Query alert threshold config for learning agent analysis.
+
+        If a team_notification_configs table exists, reads from it;
+        otherwise returns an empty list so the learning agent falls
+        back to its built-in stub data.
+        """
+        try:
+            from shieldops.db.models import TeamNotificationConfigRecord
+
+            async with self._sf() as session:
+                stmt = select(TeamNotificationConfigRecord)
+                result = await session.execute(stmt)
+                records = result.scalars().all()
+                thresholds = [
+                    {
+                        "metric_name": r.metric_name,
+                        "threshold": r.threshold,
+                        "duration": r.duration,
+                        "severity": r.severity,
+                    }
+                    for r in records
+                    if hasattr(r, "metric_name")
+                ]
+                return {"thresholds": thresholds, "total": len(thresholds)}
+        except Exception:
+            # Table may not exist yet — graceful fallback
+            return {"thresholds": [], "total": 0}
 
     # ── Learning Cycles ────────────────────────────────────────────
 

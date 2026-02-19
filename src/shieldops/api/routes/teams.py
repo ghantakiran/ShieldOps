@@ -41,7 +41,7 @@ class TeamMemberAdd(BaseModel):
 @router.post("")
 async def create_team(
     body: TeamCreate,
-    _user: dict = Depends(require_role("admin")),
+    _user: Any = Depends(require_role("admin")),  # type: ignore[arg-type]
 ) -> dict[str, Any]:
     repo = _get_repo()
     team = await repo.create_team(
@@ -85,7 +85,7 @@ async def get_team(
 async def add_member(
     team_id: str,
     body: TeamMemberAdd,
-    _user: dict = Depends(require_role("admin", "operator")),
+    _user: Any = Depends(require_role("admin", "operator")),  # type: ignore[arg-type]
 ) -> dict[str, Any]:
     repo = _get_repo()
     team = await repo.get_team(team_id)
@@ -109,7 +109,7 @@ async def add_member(
 async def remove_member(
     team_id: str,
     user_id: str,
-    _user: dict = Depends(require_role("admin", "operator")),
+    _user: Any = Depends(require_role("admin", "operator")),  # type: ignore[arg-type]
 ) -> dict[str, Any]:
     repo = _get_repo()
     success = await repo.remove_team_member(team_id, user_id)

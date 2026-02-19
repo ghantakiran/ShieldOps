@@ -1,0 +1,108 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: shieldops-redis
+  namespace: shieldops
+  labels:
+    app: shieldops
+    component: redis
+spec:
+  serviceName: shieldops-redis-headless
+  replicas: 1
+  selector:
+    matchLabels:
+      app: shieldops
+      component: redis
+  template:
+    metadata:
+      labels:
+        app: shieldops
+        component: redis
+    spec:
+      terminationGracePeriodSeconds: 15
+      containers:
+        - name: redis
+          image: redis:7-alpine
+          command: ["redis-server"]
+          args:
+            - "--appendonly"
+            - "yes"
+            - "--maxmemory"
+            - "256mb"
+            - "--maxmemory-policy"
+            - "allkeys-lru"
+            - "--save"
+            - "60"
+            - "1000"
+          ports:
+            - containerPort: 6379
+              name: redis
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          livenessProbe:
+            exec:
+              command: ["redis-cli", "ping"]
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          readinessProbe:
+            exec:
+              command: ["redis-cli", "ping"]
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          securityContext:
+            runAsNonRoot: true
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 5Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: shieldops-redis-headless
+  namespace: shieldops
+  labels:
+    app: shieldops
+    component: redis
+spec:
+  clusterIP: None
+  selector:
+    app: shieldops
+    component: redis
+  ports:
+    - port: 6379
+      targetPort: 6379
+      protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: shieldops-redis
+  namespace: shieldops
+  labels:
+    app: shieldops
+    component: redis
+spec:
+  selector:
+    app: shieldops
+    component: redis
+  ports:
+    - port: 6379
+      targetPort: 6379
+      protocol: TCP
+  type: ClusterIP

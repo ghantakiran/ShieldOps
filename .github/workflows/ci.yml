@@ -224,6 +224,39 @@ jobs:
       - name: Terraform validate
         run: terraform -chdir=infrastructure/terraform/${{ matrix.provider }} validate
 
+  opa-policy-sync:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate Rego policies
+        run: |
+          # Download OPA binary for policy validation
+          curl -fsSL -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64_static
+          chmod +x opa
+          # Check all policy files parse correctly
+          for f in playbooks/policies/*.rego; do
+            echo "Checking $f..."
+            ./opa check "$f"
+          done
+
+      - name: Generate OPA ConfigMap
+        run: |
+          kubectl create configmap shieldops-opa-policies \
+            --from-file=playbooks/policies/ \
+            -n shieldops \
+            --dry-run=client -o yaml \
+            > infrastructure/kubernetes/opa-policies-configmap.yaml
+          echo "Generated ConfigMap with $(ls playbooks/policies/*.rego | wc -l) policy files"
+
+      - name: Upload ConfigMap artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: opa-policies-configmap
+          path: infrastructure/kubernetes/opa-policies-configmap.yaml
+          retention-days: 30
+
   security:
     runs-on: ubuntu-latest
     steps:

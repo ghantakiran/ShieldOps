@@ -149,7 +149,7 @@ Analyze the secret findings and determine:
 3. Immediate rotation requirements
 4. Code remediation steps (use env vars, secret managers)
 
-CRITICAL: Assume any detected secret is compromised. Rotation is always required."""
+CRITICAL: Assume any detected secret is compromised. Rotation is always required."""  # noqa: S105
 
 SYSTEM_IAC_ASSESSMENT = """\
 You are an expert cloud security engineer assessing \

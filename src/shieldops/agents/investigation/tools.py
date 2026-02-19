@@ -30,11 +30,13 @@ class InvestigationToolkit:
         log_sources: list[LogSource] | None = None,
         metric_sources: list[MetricSource] | None = None,
         trace_sources: list[TraceSource] | None = None,
+        repository: Any = None,
     ) -> None:
         self._router = connector_router
         self._log_sources = log_sources or []
         self._metric_sources = metric_sources or []
         self._trace_sources = trace_sources or []
+        self._repository = repository
 
     async def query_logs(
         self,
@@ -237,6 +239,32 @@ class InvestigationToolkit:
         except (ValueError, Exception) as e:
             logger.error("health_check_failed", resource_id=resource_id, error=str(e))
             return {"healthy": None, "status": "error", "message": str(e)}
+
+    async def query_historical_patterns(
+        self,
+        alert_type: str,
+        resource_id: str = "",
+        limit: int = 10,
+    ) -> list[dict[str, Any]]:
+        """Query historical incident outcomes that match the current alert.
+
+        Returns past incidents with similar alert_type for pattern matching,
+        ordered by recency.  Falls back to an empty list when no repository
+        is configured.
+        """
+        if self._repository is None:
+            return []
+
+        try:
+            results: list[dict[str, Any]] = await self._repository.get_similar_incidents(
+                alert_type=alert_type,
+                resource_id=resource_id,
+                limit=limit,
+            )
+            return results
+        except Exception as e:
+            logger.warning("historical_pattern_query_failed", error=str(e))
+            return []
 
     # --- Private helpers ---
 

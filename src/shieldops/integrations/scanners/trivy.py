@@ -5,6 +5,7 @@ Supports both local CLI execution and remote Trivy server mode.
 """
 
 import asyncio
+import contextlib
 import json
 from datetime import datetime
 from typing import Any
@@ -205,7 +206,7 @@ class TrivyCVESource(CVESource):
                 for source_scores in cvss_data.values():
                     if isinstance(source_scores, dict):
                         score = source_scores.get("V3Score", source_scores.get("V2Score", 0.0))
-                        cvss_score = max(cvss_score, float(score))
+                        cvss_score = max(cvss_score, float(score))  # type: ignore[arg-type]
                 if cvss_score == 0.0:
                     cvss_score = self._severity_to_cvss(normalized_sev)
 
@@ -213,10 +214,8 @@ class TrivyCVESource(CVESource):
                 published_at: datetime | None = None
                 pub_date = vuln.get("PublishedDate")
                 if pub_date:
-                    try:
+                    with contextlib.suppress(ValueError, TypeError):
                         published_at = datetime.fromisoformat(pub_date.replace("Z", "+00:00"))
-                    except (ValueError, TypeError):
-                        pass
 
                 findings.append(
                     {

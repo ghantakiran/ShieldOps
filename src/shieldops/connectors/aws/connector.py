@@ -28,12 +28,13 @@ class AWSConnector(InfraConnector):
 
     provider = "aws"
 
-    def __init__(self, region: str = "us-east-1") -> None:
+    def __init__(self, region: str = "us-east-1", repository: Any = None) -> None:
         self._region = region
         self._ec2_client: Any = None
         self._ecs_client: Any = None
         self._cloudtrail_client: Any = None
         self._snapshots: dict[str, dict[str, Any]] = {}
+        self._repo = repository
 
     def _ensure_clients(self) -> None:
         """Lazily initialize boto3 clients."""
@@ -384,7 +385,13 @@ class AWSConnector(InfraConnector):
         """Rollback to a captured snapshot state."""
         started_at = datetime.now(UTC)
 
-        if snapshot_id not in self._snapshots:
+        snapshot = self._snapshots.get(snapshot_id)
+        if snapshot is None and self._repo is not None:
+            snapshot = await self._repo.get_snapshot(snapshot_id)
+            if snapshot is not None:
+                self._snapshots[snapshot_id] = snapshot
+
+        if snapshot is None:
             return ActionResult(
                 action_id=f"rollback-{snapshot_id}",
                 status=ExecutionStatus.FAILED,

@@ -1,9 +1,10 @@
+import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Clock, RotateCcw, ShieldCheck, ShieldX } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { ArrowLeft, AlertTriangle, Clock, Loader2, RotateCcw, ShieldCheck, ShieldX } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import clsx from "clsx";
-import { get } from "../api/client";
+import { get, post } from "../api/client";
 import type { RemediationDetail as RemediationDetailType, TimelineEvent } from "../api/types";
 import StatusBadge from "../components/StatusBadge";
 import LoadingSpinner from "../components/LoadingSpinner";
@@ -41,6 +42,22 @@ function Timeline({ events }: { events: TimelineEvent[] }) {
 
 export default function RemediationDetail() {
   const { id } = useParams<{ id: string }>();
+  const queryClient = useQueryClient();
+  const [showRollbackConfirm, setShowRollbackConfirm] = useState(false);
+  const [rollbackError, setRollbackError] = useState<string | null>(null);
+
+  const rollbackMutation = useMutation({
+    mutationFn: () =>
+      post<Record<string, unknown>>(`/remediations/${id}/rollback`),
+    onSuccess: () => {
+      setShowRollbackConfirm(false);
+      setRollbackError(null);
+      queryClient.invalidateQueries({ queryKey: ["remediation", id] });
+    },
+    onError: (err: Error) => {
+      setRollbackError(err.message);
+    },
+  });
 
   const { data: remediation, isLoading, isError, error } = useQuery({
     queryKey: ["remediation", id],
@@ -206,11 +223,69 @@ export default function RemediationDetail() {
               Rollback Available
             </span>
           </div>
-          <div className="mt-3">
-            <p className="text-xs text-gray-500">Snapshot ID</p>
-            <p className="mt-0.5 font-mono text-sm text-gray-300">
-              {rem.rollback_snapshot_id}
+          <div className="mt-3 flex items-end justify-between">
+            <div>
+              <p className="text-xs text-gray-500">Snapshot ID</p>
+              <p className="mt-0.5 font-mono text-sm text-gray-300">
+                {rem.rollback_snapshot_id}
+              </p>
+            </div>
+            <button
+              onClick={() => {
+                setRollbackError(null);
+                setShowRollbackConfirm(true);
+              }}
+              disabled={rollbackMutation.isPending}
+              className="rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-600 disabled:opacity-50"
+            >
+              Rollback
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Rollback Confirmation Modal */}
+      {showRollbackConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+          <div className="w-full max-w-md rounded-xl border border-gray-700 bg-gray-900 p-6">
+            <h3 className="flex items-center gap-2 text-lg font-semibold text-gray-100">
+              <AlertTriangle className="h-5 w-5 text-orange-400" />
+              Confirm Rollback
+            </h3>
+            <p className="mt-2 text-sm text-gray-400">
+              This will revert the remediation to snapshot{" "}
+              <span className="font-mono text-gray-300">
+                {rem.rollback_snapshot_id}
+              </span>
+              . This action may affect running services.
             </p>
+            {rollbackError && (
+              <p className="mt-3 rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-400">
+                {rollbackError}
+              </p>
+            )}
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                onClick={() => {
+                  setShowRollbackConfirm(false);
+                  setRollbackError(null);
+                }}
+                disabled={rollbackMutation.isPending}
+                className="rounded-lg border border-gray-700 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => rollbackMutation.mutate()}
+                disabled={rollbackMutation.isPending}
+                className="inline-flex items-center gap-2 rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white hover:bg-red-600 disabled:opacity-50"
+              >
+                {rollbackMutation.isPending && (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                )}
+                Confirm Rollback
+              </button>
+            </div>
           </div>
         </div>
       )}
