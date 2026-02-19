@@ -85,5 +85,17 @@ services:
     volumes:
       - ../../playbooks/policies:/policies
 
+  dashboard:
+    build:
+      context: ../../dashboard-ui
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      api:
+        condition: service_started
+    environment:
+      - API_URL=http://api:8000
+
 volumes:
   pgdata:
