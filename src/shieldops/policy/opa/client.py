@@ -66,6 +66,25 @@ class PolicyEngine:
             except Exception as e:
                 logger.warning("rate_limiter_enrichment_failed", error=str(e))
 
+        if self._rate_limiter:
+            try:
+                actions_this_minute = await self._rate_limiter.count_recent_actions_minute(
+                    action.environment.value
+                )
+                ctx.setdefault("actions_this_minute", actions_this_minute)
+            except Exception as e:
+                logger.warning("rate_limiter_minute_enrichment_failed", error=str(e))
+
+            team = action.parameters.get("team") or ctx.get("team")
+            if team and self._rate_limiter:
+                try:
+                    team_actions = await self._rate_limiter.count_team_actions(
+                        team, action.environment.value
+                    )
+                    ctx.setdefault("team_actions_this_hour", team_actions)
+                except Exception as e:
+                    logger.warning("rate_limiter_team_enrichment_failed", error=str(e))
+
         input_data = {
             "action": action.action_type,
             "target_resource": action.target_resource,
@@ -73,6 +92,10 @@ class PolicyEngine:
             "risk_level": action.risk_level.value,
             "parameters": action.parameters,
             "agent_id": agent_id,
+            "team": action.parameters.get("team") or ctx.get("team"),
+            "resource_labels": action.parameters.get(
+                "resource_labels", ctx.get("resource_labels", {})
+            ),
             "context": ctx,
         }
 
@@ -102,6 +125,14 @@ class PolicyEngine:
                     await self._rate_limiter.increment(action.environment.value)
                 except Exception as e:
                     logger.warning("rate_limiter_increment_failed", error=str(e))
+
+                try:
+                    await self._rate_limiter.increment_minute(action.environment.value)
+                    team = action.parameters.get("team") or ctx.get("team")
+                    if team:
+                        await self._rate_limiter.increment_team(team, action.environment.value)
+                except Exception as e:
+                    logger.warning("rate_limiter_extended_increment_failed", error=str(e))
 
             return PolicyDecision(allowed=allowed, reasons=reasons)
 
