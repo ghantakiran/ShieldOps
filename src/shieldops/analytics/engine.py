@@ -29,6 +29,65 @@ class AnalyticsEngine:
     def __init__(self, session_factory: async_sessionmaker[AsyncSession]) -> None:
         self._sf = session_factory
 
+    async def summary(self) -> dict[str, Any]:
+        """Compute aggregated analytics summary for the dashboard."""
+        async with self._sf() as session:
+            inv_total = (
+                await session.execute(select(func.count(InvestigationRecord.id)))
+            ).scalar_one()
+
+            rem_total = (
+                await session.execute(select(func.count(RemediationRecord.id)))
+            ).scalar_one()
+
+            auto_resolved = (
+                await session.execute(
+                    select(func.count(RemediationRecord.id)).where(
+                        RemediationRecord.status.in_(["complete", "success", "validated"])
+                    )
+                )
+            ).scalar_one()
+
+            avg_duration = (
+                await session.execute(
+                    select(func.avg(RemediationRecord.duration_ms)).where(
+                        RemediationRecord.status.in_(["complete", "success", "validated"])
+                    )
+                )
+            ).scalar_one()
+
+            inv_rows = (
+                await session.execute(
+                    select(
+                        InvestigationRecord.status,
+                        func.count(InvestigationRecord.id),
+                    ).group_by(InvestigationRecord.status)
+                )
+            ).all()
+            inv_by_status: dict[str, int] = {str(r[0]): int(r[1]) for r in inv_rows}
+
+            rem_rows = (
+                await session.execute(
+                    select(
+                        RemediationRecord.status,
+                        func.count(RemediationRecord.id),
+                    ).group_by(RemediationRecord.status)
+                )
+            ).all()
+            rem_by_status: dict[str, int] = {str(r[0]): int(r[1]) for r in rem_rows}
+
+        auto_pct = round(auto_resolved / inv_total * 100, 1) if inv_total else 0.0
+        mttr_seconds = round(float(avg_duration) / 1000, 1) if avg_duration else 0
+
+        return {
+            "total_investigations": inv_total,
+            "total_remediations": rem_total,
+            "auto_resolved_percent": auto_pct,
+            "mean_time_to_resolve_seconds": mttr_seconds,
+            "investigations_by_status": inv_by_status,
+            "remediations_by_status": rem_by_status,
+        }
+
     async def mttr_trends(
         self,
         period: str = "30d",

@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Search } from "lucide-react";
 import { formatDistanceToNow, parseISO } from "date-fns";
 import { get } from "../api/client";
-import type { Investigation, InvestigationStatus } from "../api/types";
+import type { Investigation } from "../api/types";
 import DataTable, { type Column } from "../components/DataTable";
 import StatusBadge from "../components/StatusBadge";
 import LoadingSpinner from "../components/LoadingSpinner";

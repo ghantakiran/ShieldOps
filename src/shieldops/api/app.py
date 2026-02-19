@@ -39,6 +39,15 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     """Application startup and shutdown lifecycle."""
     logger.info("shieldops_starting", environment=settings.environment)
 
+    # ── OpenTelemetry tracing ────────────────────────────────────
+    try:
+        from shieldops.observability.tracing import init_tracing
+
+        init_tracing(settings)
+        logger.info("otel_tracing_started")
+    except Exception as e:
+        logger.warning("otel_tracing_init_failed", error=str(e))
+
     # ── Database layer ──────────────────────────────────────────
     repository = None
     session_factory = None
@@ -326,6 +335,14 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     if engine:
         await engine.dispose()
 
+    # Flush OTEL spans
+    try:
+        from shieldops.observability.tracing import shutdown_tracing
+
+        shutdown_tracing()
+    except Exception as exc:
+        logger.debug("otel_shutdown_error", error=str(exc))
+
 
 def create_app() -> FastAPI:
     """Create and configure the FastAPI application."""
@@ -338,14 +355,22 @@ def create_app() -> FastAPI:
         openapi_url=f"{settings.api_prefix}/openapi.json",
     )
 
-    # CORS
+    # CORS (restricted methods/headers for production security)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origins,
         allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
+        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allow_headers=["Authorization", "Content-Type", "X-Request-ID"],
     )
+
+    # OpenTelemetry automatic HTTP span creation
+    try:
+        from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+
+        FastAPIInstrumentor.instrument_app(app)
+    except Exception:  # noqa: S110
+        pass  # OTEL instrumentation is optional — may not be installed
 
     # Middleware stack (order matters: outermost first)
     from shieldops.api.middleware import (
@@ -355,12 +380,15 @@ def create_app() -> FastAPI:
         RateLimitMiddleware,
         RequestIDMiddleware,
         RequestLoggingMiddleware,
+        SecurityHeadersMiddleware,
     )
 
     app.add_middleware(ErrorHandlerMiddleware)
     app.add_middleware(RateLimitMiddleware)
     app.add_middleware(RequestLoggingMiddleware)
     app.add_middleware(RequestIDMiddleware)
+    # SecurityHeadersMiddleware adds HSTS, CSP, X-Frame-Options, etc.
+    app.add_middleware(SecurityHeadersMiddleware)
     # MetricsMiddleware is added last so it wraps all other
     # middleware (Starlette processes add_middleware in LIFO order).
     app.add_middleware(MetricsMiddleware)

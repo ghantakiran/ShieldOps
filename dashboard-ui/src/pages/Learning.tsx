@@ -29,12 +29,12 @@ export default function Learning() {
     error: playbooksError,
   } = useQuery({
     queryKey: ["learning", "playbooks"],
-    queryFn: () => get<Playbook[]>("/learning/playbooks"),
+    queryFn: () => get<Playbook[]>("/playbooks"),
   });
 
   // ── Trigger learning cycle ─────────────────────────────────────────
   const triggerCycle = useMutation({
-    mutationFn: () => post<LearningCycle>("/learning/cycle"),
+    mutationFn: () => post<LearningCycle>("/learning/cycles"),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["learning", "cycles"] });
     },

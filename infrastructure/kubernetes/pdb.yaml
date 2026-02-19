@@ -1,0 +1,44 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: shieldops-api-pdb
+  namespace: shieldops
+  labels:
+    app: shieldops
+    component: api
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: shieldops
+      component: api
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: shieldops-dashboard-pdb
+  namespace: shieldops
+  labels:
+    app: shieldops
+    component: dashboard
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: shieldops
+      component: dashboard
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: shieldops-opa-pdb
+  namespace: shieldops
+  labels:
+    app: shieldops
+    component: opa
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: shieldops
+      component: opa

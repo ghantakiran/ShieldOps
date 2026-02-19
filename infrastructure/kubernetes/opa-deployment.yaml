@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shieldops-opa
+  namespace: shieldops
+  labels:
+    app: shieldops
+    component: opa
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: shieldops
+      component: opa
+  template:
+    metadata:
+      labels:
+        app: shieldops
+        component: opa
+    spec:
+      containers:
+        - name: opa
+          image: openpolicyagent/opa:latest
+          args:
+            - "run"
+            - "--server"
+            - "--addr=0.0.0.0:8181"
+            - "--log-level=info"
+            - "/policies"
+          ports:
+            - containerPort: 8181
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8181
+            initialDelaySeconds: 5
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /health?bundles
+              port: 8181
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          securityContext:
+            runAsNonRoot: true
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+          volumeMounts:
+            - name: policies
+              mountPath: /policies
+              readOnly: true
+      volumes:
+        - name: policies
+          configMap:
+            name: shieldops-opa-policies
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: shieldops-opa
+  namespace: shieldops
+  labels:
+    app: shieldops
+    component: opa
+spec:
+  selector:
+    app: shieldops
+    component: opa
+  ports:
+    - port: 8181
+      targetPort: 8181
+      protocol: TCP
+  type: ClusterIP

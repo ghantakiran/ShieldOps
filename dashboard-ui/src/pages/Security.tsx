@@ -36,7 +36,7 @@ export default function Security() {
 
   // ── Run scan mutation ──────────────────────────────────────────────
   const runScan = useMutation({
-    mutationFn: () => post<SecurityScan>("/security/scan", { environment: "production" }),
+    mutationFn: () => post<SecurityScan>("/security/scans", { environment: "production" }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["security", "scans"] });
     },

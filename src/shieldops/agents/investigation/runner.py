@@ -17,6 +17,7 @@ from shieldops.agents.investigation.tools import InvestigationToolkit
 from shieldops.connectors.base import ConnectorRouter
 from shieldops.models.base import AlertContext
 from shieldops.observability.base import LogSource, MetricSource, TraceSource
+from shieldops.observability.tracing import get_tracer
 
 if __import__("typing").TYPE_CHECKING:
     from shieldops.db.repository import Repository
@@ -88,24 +89,37 @@ class InvestigationRunner:
         )
 
         try:
-            # Run the LangGraph workflow
-            final_state_dict = await self._app.ainvoke(
-                initial_state.model_dump(),  # type: ignore[arg-type]
-                config={
-                    "metadata": {
-                        "investigation_id": investigation_id,
-                        "alert_id": alert.alert_id,
+            tracer = get_tracer("shieldops.agents")
+            with tracer.start_as_current_span("investigation.run") as span:
+                span.set_attribute("investigation.id", investigation_id)
+                span.set_attribute("investigation.alert_id", alert.alert_id)
+                span.set_attribute("investigation.alert_name", alert.alert_name)
+                span.set_attribute("investigation.severity", alert.severity)
+
+                # Run the LangGraph workflow
+                final_state_dict = await self._app.ainvoke(
+                    initial_state.model_dump(),  # type: ignore[arg-type]
+                    config={
+                        "metadata": {
+                            "investigation_id": investigation_id,
+                            "alert_id": alert.alert_id,
+                        },
                     },
-                },
-            )
-
-            final_state = InvestigationState.model_validate(final_state_dict)
-
-            # Calculate total duration
-            if final_state.investigation_start:
-                final_state.investigation_duration_ms = int(
-                    (datetime.now(UTC) - final_state.investigation_start).total_seconds() * 1000
                 )
+
+                final_state = InvestigationState.model_validate(final_state_dict)
+
+                # Calculate total duration
+                if final_state.investigation_start:
+                    final_state.investigation_duration_ms = int(
+                        (datetime.now(UTC) - final_state.investigation_start).total_seconds() * 1000
+                    )
+
+                span.set_attribute(
+                    "investigation.duration_ms", final_state.investigation_duration_ms
+                )
+                span.set_attribute("investigation.hypotheses_count", len(final_state.hypotheses))
+                span.set_attribute("investigation.confidence", final_state.confidence_score)
 
             logger.info(
                 "investigation_completed",

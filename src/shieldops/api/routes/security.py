@@ -134,6 +134,25 @@ async def get_scan(scan_id: str, _user: UserResponse = Depends(get_current_user)
     return result.model_dump(mode="json")
 
 
+@router.get("/security/scans/{scan_id}/vulnerabilities")
+async def get_scan_vulnerabilities(
+    scan_id: str,
+    severity: str | None = None,
+    _user: UserResponse = Depends(get_current_user),
+) -> list[dict[str, Any]]:
+    """Get vulnerabilities (CVE findings) for a specific scan."""
+    runner = get_runner()
+    result = runner.get_scan(scan_id)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Scan not found")
+
+    cves = result.cve_findings
+    if severity:
+        cves = [c for c in cves if c.severity == severity]
+
+    return [c.model_dump(mode="json") for c in cves]
+
+
 @router.get("/security/posture")
 async def get_security_posture(_user: UserResponse = Depends(get_current_user)) -> dict[str, Any]:
     """Get overall security posture from the most recent full scan."""
