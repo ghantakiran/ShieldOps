@@ -51,6 +51,30 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     except Exception as e:
         logger.warning("otel_tracing_init_failed", error=str(e))
 
+    # ── OTel metrics pipeline ────────────────────────────────────
+    try:
+        from shieldops.observability.otel.metrics import init_metrics
+
+        init_metrics(settings.otel_exporter_endpoint)
+        logger.info("otel_metrics_started")
+    except Exception as e:
+        logger.warning("otel_metrics_init_failed", error=str(e))
+
+    # ── LangSmith agent tracing ──────────────────────────────────
+    if settings.langsmith_enabled and settings.langsmith_api_key:
+        try:
+            from shieldops.observability.langsmith import (
+                init_langsmith,
+            )
+
+            init_langsmith(
+                api_key=settings.langsmith_api_key,
+                project=settings.langsmith_project,
+                enabled=True,
+            )
+        except Exception as e:
+            logger.warning("langsmith_init_failed", error=str(e))
+
     # ── Database layer ──────────────────────────────────────────
     repository = None
     session_factory = None
@@ -215,6 +239,64 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     except Exception as e:
         logger.debug("vault_credential_store_skipped", error=str(e))
 
+    # IaC Scanner (Checkov)
+    if settings.iac_scanner_enabled:
+        try:
+            from shieldops.integrations.scanners.iac_scanner import (
+                IaCScanner,
+            )
+
+            security_scanners.append(IaCScanner(checkov_path=settings.checkov_path))
+            logger.info("iac_scanner_initialized")
+        except Exception as e:
+            logger.warning("iac_scanner_init_failed", error=str(e))
+
+    # Git Scanners (gitleaks + osv-scanner)
+    if settings.git_scanner_enabled:
+        try:
+            from shieldops.integrations.scanners.git_scanner import (
+                GitDependencyScanner,
+                GitSecretScanner,
+            )
+
+            security_scanners.append(
+                GitSecretScanner(
+                    gitleaks_path=settings.gitleaks_path,
+                )
+            )
+            security_scanners.append(
+                GitDependencyScanner(
+                    osv_scanner_path=settings.osv_scanner_path,
+                )
+            )
+            logger.info("git_scanners_initialized")
+        except Exception as e:
+            logger.warning("git_scanners_init_failed", error=str(e))
+
+    # Kubernetes Security Scanner
+    if settings.k8s_scanner_enabled:
+        try:
+            from shieldops.integrations.scanners.k8s_security import (
+                K8sSecurityScanner,
+            )
+
+            security_scanners.append(K8sSecurityScanner(connector_router=router))
+            logger.info("k8s_scanner_initialized")
+        except Exception as e:
+            logger.warning("k8s_scanner_init_failed", error=str(e))
+
+    # Network Scanner
+    if settings.network_scanner_enabled:
+        try:
+            from shieldops.integrations.scanners.network_scanner import (
+                NetworkSecurityScanner,
+            )
+
+            security_scanners.append(NetworkSecurityScanner(connector_router=router))
+            logger.info("network_scanner_initialized")
+        except Exception as e:
+            logger.warning("network_scanner_init_failed", error=str(e))
+
     sec_runner = SecurityRunner(
         connector_router=router,
         cve_sources=cve_sources or None,
@@ -257,6 +339,44 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
             logger.info("aws_billing_source_initialized")
         except Exception as e:
             logger.warning("aws_billing_init_failed", error=str(e))
+
+    # GCP Cloud Billing
+    if settings.gcp_project_id:
+        try:
+            from shieldops.integrations.billing.gcp_billing import (
+                GCPBillingSource,
+            )
+
+            billing_sources.append(
+                GCPBillingSource(
+                    project_id=settings.gcp_project_id,
+                    dataset=settings.gcp_billing_dataset,
+                    table=settings.gcp_billing_table,
+                )
+            )
+            logger.info("gcp_billing_source_initialized")
+        except Exception as e:
+            logger.warning("gcp_billing_init_failed", error=str(e))
+
+    # Azure Cost Management
+    if settings.azure_subscription_id:
+        try:
+            from shieldops.integrations.billing.azure_cost import (
+                AzureCostManagementSource,
+            )
+
+            billing_sources.append(
+                AzureCostManagementSource(
+                    subscription_id=settings.azure_subscription_id,
+                    resource_group=(settings.azure_resource_group or None),
+                )
+            )
+            logger.info("azure_billing_source_initialized")
+        except Exception as e:
+            logger.warning(
+                "azure_billing_init_failed",
+                error=str(e),
+            )
 
     cost_runner = CostRunner(
         connector_router=router,
@@ -477,14 +597,67 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     except Exception as e:
         logger.warning("newsletter_init_failed", error=str(e))
 
+    # Audit log routes
+    try:
+        from shieldops.api.routes import audit
+
+        audit.set_repository(repository)
+        app.include_router(audit.router, prefix=settings.api_prefix, tags=["Audit"])
+        logger.info("audit_routes_initialized")
+    except Exception as e:
+        logger.warning("audit_routes_failed", error=str(e))
+
     # Register playbooks router
     try:
         from shieldops.api.routes import playbooks
 
         playbooks.set_loader(playbook_loader)
-        app.include_router(playbooks.router, prefix=settings.api_prefix, tags=["Playbooks"])
+        app.include_router(
+            playbooks.router,
+            prefix=settings.api_prefix,
+            tags=["Playbooks"],
+        )
     except Exception as e:
         logger.warning("playbooks_router_failed", error=str(e))
+
+    # User management routes
+    try:
+        from shieldops.api.routes import users
+
+        app.include_router(
+            users.router,
+            prefix=settings.api_prefix,
+            tags=["Users"],
+        )
+        logger.info("user_management_routes_initialized")
+    except Exception as e:
+        logger.warning("user_routes_failed", error=str(e))
+
+    # OIDC / SSO authentication
+    if settings.oidc_enabled and settings.oidc_issuer_url:
+        try:
+            from shieldops.auth import routes as oidc_routes
+            from shieldops.auth.oidc import OIDCClient
+
+            oidc_client = OIDCClient(
+                issuer_url=settings.oidc_issuer_url,
+                client_id=settings.oidc_client_id,
+                client_secret=settings.oidc_client_secret,
+                redirect_uri=settings.oidc_redirect_uri,
+                scopes=settings.oidc_scopes,
+            )
+            oidc_routes.set_oidc_client(oidc_client)
+            app.include_router(
+                oidc_routes.router,
+                prefix=settings.api_prefix,
+                tags=["Auth"],
+            )
+            logger.info(
+                "oidc_authentication_initialized",
+                issuer=settings.oidc_issuer_url,
+            )
+        except Exception as e:
+            logger.warning("oidc_init_failed", error=str(e))
 
     yield
 

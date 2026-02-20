@@ -1,0 +1,106 @@
+{{- if .Values.opa.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "shieldops.fullname" . }}-opa
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "shieldops.labels" . | nindent 4 }}
+    app.kubernetes.io/component: opa
+spec:
+  replicas: {{ .Values.opa.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "shieldops.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: opa
+  template:
+    metadata:
+      annotations:
+        checksum/policies: {{ .Values.opa.policies | toJson | sha256sum }}
+      labels:
+        {{- include "shieldops.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: opa
+    spec:
+      containers:
+        - name: opa
+          image: "{{ .Values.opa.image.repository }}:{{ .Values.opa.image.tag }}"
+          args:
+            - "run"
+            - "--server"
+            - "--addr=0.0.0.0:8181"
+            - "--log-level=info"
+            - "/policies"
+          ports:
+            - name: http
+              containerPort: 8181
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 30
+            timeoutSeconds: 3
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health?bundles
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          {{- with .Values.opa.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          securityContext:
+            runAsNonRoot: true
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+          volumeMounts:
+            - name: policies
+              mountPath: /policies
+              readOnly: true
+      volumes:
+        - name: policies
+          configMap:
+            name: {{ include "shieldops.fullname" . }}-opa-policies
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "shieldops.fullname" . }}-opa
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "shieldops.labels" . | nindent 4 }}
+    app.kubernetes.io/component: opa
+spec:
+  type: ClusterIP
+  selector:
+    {{- include "shieldops.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: opa
+  ports:
+    - name: http
+      port: 8181
+      targetPort: http
+      protocol: TCP
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "shieldops.fullname" . }}-opa-policies
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "shieldops.labels" . | nindent 4 }}
+    app.kubernetes.io/component: opa
+  annotations:
+    description: "OPA Rego policies for ShieldOps agent action evaluation"
+data:
+  {{- if .Values.opa.policies }}
+  {{- range $filename, $content := .Values.opa.policies }}
+  {{ $filename }}: |
+    {{- $content | nindent 4 }}
+  {{- end }}
+  {{- end }}
+{{- end }}

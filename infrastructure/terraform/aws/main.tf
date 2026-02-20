@@ -19,7 +19,7 @@ terraform {
 
   backend "s3" {
     bucket         = "shieldops-terraform-state"
-    key            = "infrastructure/terraform.tfstate"
+    key            = "aws/terraform.tfstate"
     region         = "us-east-1"
     dynamodb_table = "shieldops-terraform-locks"
     encrypt        = true

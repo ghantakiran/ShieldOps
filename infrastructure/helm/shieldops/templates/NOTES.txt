@@ -1,0 +1,98 @@
+===========================================================================
+   _____ _     _      _     _  ___
+  / ____| |   (_)    | |   | |/ _ \
+ | (___ | |__  _  ___| | __| | | | |_ __  ___
+  \___ \| '_ \| |/ _ \ |/ _` | | | | '_ \/ __|
+  ____) | | | | |  __/ | (_| | |_| | |_) \__ \
+ |_____/|_| |_|_|\___|_|\__,_|\___/| .__/|___/
+                                    | |
+                                    |_|
+  AI-Powered Autonomous SRE Platform
+===========================================================================
+
+Chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+Release: {{ .Release.Name }}
+Namespace: {{ .Release.Namespace }}
+
+---------------------------------------------------------------------------
+COMPONENTS DEPLOYED:
+---------------------------------------------------------------------------
+
+1. API Server
+   Service: {{ include "shieldops.fullname" . }}-api:8000
+   Replicas: {{ if .Values.autoscaling.enabled }}{{ .Values.autoscaling.minReplicas }}-{{ .Values.autoscaling.maxReplicas }} (autoscaling){{ else }}{{ .Values.replicaCount }}{{ end }}
+
+{{- if .Values.frontend.enabled }}
+
+2. Dashboard (Frontend)
+   Service: {{ include "shieldops.fullname" . }}-frontend:80
+   Replicas: {{ .Values.frontend.replicaCount }}
+{{- end }}
+
+{{- if .Values.opa.enabled }}
+
+3. OPA Policy Engine
+   Service: {{ include "shieldops.fullname" . }}-opa:8181
+   Replicas: {{ .Values.opa.replicaCount }}
+{{- end }}
+
+{{- if .Values.migration.enabled }}
+
+4. Database Migration
+   Status: Ran as pre-install/pre-upgrade hook (alembic upgrade head)
+{{- end }}
+
+---------------------------------------------------------------------------
+ACCESS:
+---------------------------------------------------------------------------
+
+{{- if .Values.ingress.enabled }}
+{{- range .Values.ingress.hosts }}
+
+  Host: {{ .host }}
+  {{- range .paths }}
+  {{ .path }} -> {{ .service }}
+  {{- end }}
+{{- end }}
+
+{{- if .Values.ingress.tls }}
+  TLS: Enabled (cert-manager)
+{{- end }}
+
+{{- else }}
+
+  Ingress is disabled. Access the API via port-forward:
+
+  kubectl port-forward svc/{{ include "shieldops.fullname" . }}-api 8000:8000 -n {{ .Release.Namespace }}
+
+  {{- if .Values.frontend.enabled }}
+  kubectl port-forward svc/{{ include "shieldops.fullname" . }}-frontend 3000:80 -n {{ .Release.Namespace }}
+  {{- end }}
+{{- end }}
+
+---------------------------------------------------------------------------
+NEXT STEPS:
+---------------------------------------------------------------------------
+
+1. Verify all pods are running:
+   kubectl get pods -n {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }}
+
+2. Check API health:
+   kubectl exec -n {{ .Release.Namespace }} deploy/{{ include "shieldops.fullname" . }}-api -- curl -s localhost:8000/health
+
+3. View logs:
+   kubectl logs -n {{ .Release.Namespace }} -l app.kubernetes.io/component=api --tail=50 -f
+
+{{- if not .Values.existingSecret }}
+
+4. IMPORTANT: Set secrets before production use:
+   helm upgrade {{ .Release.Name }} shieldops/shieldops \
+     --set secrets.databaseUrl="postgresql://..." \
+     --set secrets.anthropicApiKey="sk-..." \
+     --set secrets.jwtSecretKey="$(openssl rand -hex 32)"
+{{- end }}
+
+---------------------------------------------------------------------------
+DOCUMENTATION: https://docs.shieldops.io
+SUPPORT: support@shieldops.io
+---------------------------------------------------------------------------

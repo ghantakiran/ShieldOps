@@ -50,6 +50,7 @@ def create_access_token(
     payload = {
         "sub": subject,
         "role": role,
+        "jti": secrets.token_urlsafe(16),
         "exp": int(expire.timestamp()),
         "iat": int(datetime.now(UTC).timestamp()),
     }

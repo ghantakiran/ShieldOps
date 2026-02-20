@@ -22,8 +22,8 @@ terraform {
   }
 
   backend "gcs" {
-    bucket = "shieldops-terraform-state-gcp"
-    prefix = "infrastructure/terraform.tfstate"
+    bucket = "shieldops-terraform-state"
+    prefix = "gcp/terraform.tfstate"
   }
 }
 

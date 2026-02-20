@@ -57,6 +57,7 @@ class Settings(BaseSettings):
     # Observability
     langsmith_api_key: str = ""
     langsmith_project: str = "shieldops"
+    langsmith_enabled: bool = False
     otel_exporter_endpoint: str = "http://localhost:4317"
 
     # Observability — Prometheus
@@ -113,6 +114,13 @@ class Settings(BaseSettings):
     azure_resource_group: str = ""
     azure_location: str = "eastus"
 
+    # GCP Billing
+    gcp_billing_dataset: str = "billing_export"
+    gcp_billing_table: str = "gcp_billing_export_v1"
+
+    # Azure Billing
+    azure_billing_enabled: bool = False
+
     # NVD CVE Source
     nvd_api_key: str = ""
 
@@ -126,6 +134,12 @@ class Settings(BaseSettings):
 
     # IaC Scanner
     checkov_path: str = "checkov"
+
+    # Scanner Activation (opt-in)
+    iac_scanner_enabled: bool = False
+    git_scanner_enabled: bool = False
+    k8s_scanner_enabled: bool = False
+    network_scanner_enabled: bool = False
 
     # HashiCorp Vault
     vault_addr: str = ""
@@ -143,7 +157,19 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     jwt_expire_minutes: int = 60
 
-    model_config = {"env_prefix": "SHIELDOPS_", "env_file": ".env", "extra": "ignore"}
+    # OIDC / SSO
+    oidc_enabled: bool = False
+    oidc_issuer_url: str = ""
+    oidc_client_id: str = ""
+    oidc_client_secret: str = ""
+    oidc_redirect_uri: str = "http://localhost:8000/api/v1/auth/oidc/callback"
+    oidc_scopes: str = "openid email profile"
+
+    model_config = {
+        "env_prefix": "SHIELDOPS_",
+        "env_file": ".env",
+        "extra": "ignore",
+    }
 
 
 settings = Settings()

@@ -1,0 +1,31 @@
+apiVersion: v2
+name: shieldops
+description: AI-Powered Autonomous SRE Platform
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - sre
+  - aiops
+  - incident-response
+  - security
+  - autonomous-agents
+  - site-reliability
+maintainers:
+  - name: ShieldOps Team
+home: https://shieldops.io
+sources:
+  - https://github.com/ghantakiran/ShieldOps
+dependencies:
+  - name: postgresql
+    version: "~15.0"
+    repository: https://charts.bitnami.com/bitnami
+    condition: postgresql.enabled
+  - name: redis
+    version: "~18.0"
+    repository: https://charts.bitnami.com/bitnami
+    condition: redis.enabled
+  - name: kafka
+    version: "~26.0"
+    repository: https://charts.bitnami.com/bitnami
+    condition: kafka.enabled
