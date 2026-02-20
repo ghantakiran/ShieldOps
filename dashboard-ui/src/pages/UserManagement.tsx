@@ -277,14 +277,12 @@ export default function UserManagement() {
     action: "activate" | "deactivate";
   } | null>(null);
 
-  // Redirect non-admins
-  if (currentUser?.role !== "admin") {
-    return <Navigate to="/" replace />;
-  }
+  const isAdmin = currentUser?.role === "admin";
 
   const { data, isLoading } = useQuery({
     queryKey: ["users"],
     queryFn: () => get<UsersResponse>("/users"),
+    enabled: isAdmin,
   });
 
   const roleMutation = useMutation({
@@ -316,6 +314,11 @@ export default function UserManagement() {
       setConfirmTarget(null);
     },
   });
+
+  // Redirect non-admins (after all hooks)
+  if (!isAdmin) {
+    return <Navigate to="/" replace />;
+  }
 
   const handleToggleActive = (user: UserItem) => {
     const action = user.is_active ? "deactivate" : "activate";
