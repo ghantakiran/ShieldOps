@@ -95,7 +95,7 @@ class StripeClient:
     def _ensure_stripe(self) -> Any:
         """Lazily import and configure the stripe SDK."""
         if self._stripe is None:
-            import stripe
+            import stripe  # type: ignore[import-not-found]
 
             stripe.api_key = self._api_key
             self._stripe = stripe
