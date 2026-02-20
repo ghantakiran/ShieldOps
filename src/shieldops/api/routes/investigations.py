@@ -9,7 +9,15 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    HTTPException,
+    Query,
+    Request,
+    status,
+)
 from pydantic import BaseModel, Field
 
 from shieldops.agents.investigation.runner import InvestigationRunner
@@ -193,3 +201,54 @@ async def get_investigation(
     if state is None:
         raise HTTPException(status_code=404, detail="Investigation not found")
     return state.model_dump(mode="json")
+
+
+@router.get("/investigations/{investigation_id}/timeline")
+async def get_investigation_timeline(
+    request: Request,
+    investigation_id: str,
+    event_type: str | None = Query(
+        None,
+        description="Filter by event type",
+    ),
+    _user: Any = Depends(
+        require_role(UserRole.VIEWER, UserRole.OPERATOR, UserRole.ADMIN),
+    ),
+) -> dict[str, Any]:
+    """Get unified timeline for an investigation.
+
+    Merges investigation, remediation, and audit events
+    into a single chronological timeline.
+    """
+    repo = _repository or getattr(
+        request.app.state,
+        "repository",
+        None,
+    )
+    if repo is None:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="DB unavailable",
+        )
+
+    # Verify the investigation exists
+    inv = await repo.get_investigation(investigation_id)
+    if inv is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Investigation not found",
+        )
+
+    events = await repo.get_investigation_timeline(
+        investigation_id,
+    )
+
+    # Optional event type filter
+    if event_type:
+        events = [e for e in events if e.get("type") == event_type]
+
+    return {
+        "investigation_id": investigation_id,
+        "events": events,
+        "total": len(events),
+    }

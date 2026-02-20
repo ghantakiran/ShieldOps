@@ -27,6 +27,8 @@ import MetricCard from "../components/MetricCard";
 import StatusBadge from "../components/StatusBadge";
 import DataTable, { type Column } from "../components/DataTable";
 import LoadingSpinner from "../components/LoadingSpinner";
+import LiveIndicator from "../components/LiveIndicator";
+import { useConnectionStatus } from "../hooks/useRealtimeUpdates";
 
 // ── Helpers ──────────────────────────────────────────────────────────
 
@@ -158,6 +160,8 @@ const remediationColumns: Column<Remediation>[] = [
 
 export default function FleetOverview() {
   const navigate = useNavigate();
+  const connectionStatus = useConnectionStatus();
+  const isLive = connectionStatus === "connected";
 
   const analyticsQuery = useQuery({
     queryKey: ["analytics", "summary"],
@@ -244,7 +248,10 @@ export default function FleetOverview() {
     <div className="space-y-8">
       {/* Page header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-100">Fleet Overview</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-gray-100">Fleet Overview</h1>
+          <LiveIndicator active={isLive} />
+        </div>
         <p className="mt-1 text-sm text-gray-500">
           Real-time status of agents, investigations, and remediations
         </p>
@@ -276,9 +283,12 @@ export default function FleetOverview() {
 
       {/* Section 2 — Agent Health Grid */}
       <div>
-        <h2 className="mb-4 text-lg font-semibold text-gray-100">
-          Agent Health
-        </h2>
+        <div className="mb-4 flex items-center gap-2">
+          <h2 className="text-lg font-semibold text-gray-100">
+            Agent Health
+          </h2>
+          <LiveIndicator active={isLive} />
+        </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {agentTypes.map((type) => {
             const agent = agentByType.get(type);
@@ -299,6 +309,7 @@ export default function FleetOverview() {
                     <span className="font-medium text-gray-100">
                       {AGENT_TYPE_LABELS[type]}
                     </span>
+                    {status === "running" && <LiveIndicator active={isLive} />}
                   </div>
                   <StatusBadge status={status} />
                 </div>
@@ -315,9 +326,12 @@ export default function FleetOverview() {
 
       {/* Section 3 — Recent Investigations */}
       <div>
-        <h2 className="mb-4 text-lg font-semibold text-gray-100">
-          Recent Investigations
-        </h2>
+        <div className="mb-4 flex items-center gap-2">
+          <h2 className="text-lg font-semibold text-gray-100">
+            Recent Investigations
+          </h2>
+          <LiveIndicator active={isLive} />
+        </div>
         <DataTable<Investigation>
           columns={investigationColumns}
           data={investigations}
@@ -329,9 +343,12 @@ export default function FleetOverview() {
 
       {/* Section 4 — Recent Remediations */}
       <div>
-        <h2 className="mb-4 text-lg font-semibold text-gray-100">
-          Recent Remediations
-        </h2>
+        <div className="mb-4 flex items-center gap-2">
+          <h2 className="text-lg font-semibold text-gray-100">
+            Recent Remediations
+          </h2>
+          <LiveIndicator active={isLive} />
+        </div>
         <DataTable<Remediation>
           columns={remediationColumns}
           data={remediations}

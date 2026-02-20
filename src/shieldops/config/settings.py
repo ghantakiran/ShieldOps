@@ -28,6 +28,7 @@ class Settings(BaseSettings):
     # Rate Limiting (HTTP API)
     rate_limit_enabled: bool = True
     rate_limit_window_seconds: int = 60
+    sliding_window_rate_limit_enabled: bool = False
     rate_limit_admin: int = 300
     rate_limit_operator: int = 120
     rate_limit_viewer: int = 60
@@ -120,6 +121,12 @@ class Settings(BaseSettings):
 
     # Azure Billing
     azure_billing_enabled: bool = False
+
+    # Stripe Billing (SaaS subscriptions)
+    stripe_api_key: str = ""
+    stripe_webhook_secret: str = ""
+    stripe_success_url: str = "http://localhost:5173/settings?billing=success"
+    stripe_cancel_url: str = "http://localhost:5173/settings?billing=cancel"
 
     # NVD CVE Source
     nvd_api_key: str = ""

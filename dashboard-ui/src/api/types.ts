@@ -338,6 +338,134 @@ export interface AnalyticsSummary {
   remediations_by_status: Record<string, number>;
 }
 
+// ── Billing ──────────────────────────────────────────────────────────
+
+export interface BillingPlan {
+  key: string;
+  name: string;
+  agent_limit: number;
+  api_calls_limit: number;
+  features: string[];
+  has_price: boolean;
+}
+
+export interface BillingSubscription {
+  org_id: string;
+  plan: string;
+  plan_name: string;
+  agent_limit: number;
+  api_calls_limit: number;
+  status: string;
+  stripe_subscription_id: string | null;
+  current_period_end: number | null;
+  cancel_at_period_end: boolean;
+}
+
+export interface BillingUsage {
+  org_id: string;
+  plan: string;
+  agents_used: number;
+  agents_limit: number;
+  agents_percent: number;
+  api_calls_used: number;
+  api_calls_limit: number;
+  api_calls_percent: number;
+}
+
+export interface CheckoutResponse {
+  session_id: string;
+  url: string;
+}
+
+// ── Incident Timeline ─────────────────────────────────────────────────
+
+export type IncidentTimelineEventType =
+  | "investigation"
+  | "remediation"
+  | "audit"
+  | "security";
+
+export interface IncidentTimelineEvent {
+  id: string;
+  timestamp: string;
+  type: IncidentTimelineEventType;
+  action: string;
+  actor: string;
+  severity?: string;
+  details: Record<string, unknown>;
+}
+
+export interface IncidentTimelineResponse {
+  investigation_id: string;
+  events: IncidentTimelineEvent[];
+  total: number;
+}
+
+// ── Agent Performance ─────────────────────────────────────────────────
+
+export interface AgentPerformanceTrend {
+  date: string;
+  executions: number;
+  success_rate: number;
+}
+
+export interface AgentPerformanceAgent {
+  agent_type: string;
+  total_executions: number;
+  success_rate: number;
+  avg_duration_seconds: number;
+  error_count: number;
+  p50_duration: number;
+  p95_duration: number;
+  p99_duration: number;
+  trend: AgentPerformanceTrend[];
+}
+
+export interface HeatmapCell {
+  hour: number;
+  day: string;
+  count: number;
+}
+
+// ── Global Search ─────────────────────────────────────────────────
+
+export type SearchEntityType =
+  | "investigation"
+  | "remediation"
+  | "vulnerability"
+  | "agent";
+
+export interface SearchResult {
+  entity_type: SearchEntityType;
+  id: string;
+  title: string;
+  description: string;
+  status: string;
+  relevance: number;
+  url: string;
+  created_at: string | null;
+}
+
+export interface SearchResponse {
+  query: string;
+  total: number;
+  results: SearchResult[];
+}
+
+export interface AgentPerformanceSummary {
+  total_executions: number;
+  avg_success_rate: number;
+  avg_duration_seconds: number;
+  total_errors: number;
+}
+
+export interface AgentPerformanceResponse {
+  period: string;
+  summary: AgentPerformanceSummary;
+  agents: AgentPerformanceAgent[];
+  hourly_heatmap: HeatmapCell[];
+}
+
 // ── Shared ────────────────────────────────────────────────────────────
 
 export interface TimelineEvent {

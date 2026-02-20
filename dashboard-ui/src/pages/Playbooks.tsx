@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
   BookOpen,
@@ -6,6 +7,7 @@ import {
   ChevronDown,
   ChevronUp,
   Play,
+  Pencil,
 } from "lucide-react";
 import clsx from "clsx";
 import { get, post } from "../api/client";
@@ -241,6 +243,7 @@ function PlaybookCard({ playbook }: { playbook: PlaybookItem }) {
 
 export default function Playbooks() {
   const [searchTerm, setSearchTerm] = useState("");
+  const navigate = useNavigate();
 
   const { data, isLoading } = useQuery({
     queryKey: ["playbooks"],
@@ -270,13 +273,27 @@ export default function Playbooks() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-100">
-          Playbooks
-        </h1>
-        <p className="mt-1 text-sm text-gray-400">
-          View and manage remediation playbooks
-        </p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-100">
+            Playbooks
+          </h1>
+          <p className="mt-1 text-sm text-gray-400">
+            View and manage remediation playbooks
+          </p>
+        </div>
+        <button
+          onClick={() => navigate("/playbooks/editor")}
+          className={clsx(
+            "flex items-center gap-2 rounded-lg",
+            "bg-brand-600 px-4 py-2",
+            "text-sm font-medium text-white",
+            "transition-colors hover:bg-brand-700"
+          )}
+        >
+          <Pencil className="h-4 w-4" />
+          Edit Playbooks
+        </button>
       </div>
 
       {/* Search */}

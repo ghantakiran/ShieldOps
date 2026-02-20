@@ -7,12 +7,15 @@ import {
   DollarSign,
   Brain,
   BarChart3,
+  Gauge,
   Settings,
   LayoutDashboard,
   Bug,
   FileText,
   BookOpen,
   Users,
+  CreditCard,
+  HeartPulse,
 } from "lucide-react";
 import clsx from "clsx";
 
@@ -26,7 +29,10 @@ const NAV_ITEMS = [
   { to: "/cost", icon: DollarSign, label: "Cost" },
   { to: "/learning", icon: Brain, label: "Learning" },
   { to: "/analytics", icon: BarChart3, label: "Analytics" },
+  { to: "/agent-performance", icon: Gauge, label: "Agent Performance" },
   { to: "/audit-log", icon: FileText, label: "Audit Log" },
+  { to: "/billing", icon: CreditCard, label: "Billing" },
+  { to: "/system-health", icon: HeartPulse, label: "System Health" },
   { to: "/settings", icon: Settings, label: "Settings" },
   { to: "/users", icon: Users, label: "Users" },
 ] as const;
