@@ -176,5 +176,5 @@ export function useRealtimeUpdates(): void {
 
       setStatus("disconnected");
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 }
