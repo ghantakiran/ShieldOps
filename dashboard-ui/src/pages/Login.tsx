@@ -1,9 +1,11 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import { Shield, Loader2 } from "lucide-react";
+import { Shield, Loader2, KeyRound } from "lucide-react";
 import { post, get, ApiError } from "../api/client";
 import type { TokenResponse, User } from "../api/types";
 import { useAuthStore } from "../store/auth";
+
+const API_BASE = "/api/v1";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -40,6 +42,10 @@ export default function Login() {
     } finally {
       setLoading(false);
     }
+  }
+
+  function handleSSOLogin() {
+    window.location.href = `${API_BASE}/auth/oidc/login`;
   }
 
   return (
@@ -114,6 +120,23 @@ export default function Login() {
               {loading ? "Signing in..." : "Sign In"}
             </button>
           </form>
+
+          {/* SSO Divider */}
+          <div className="my-4 flex items-center gap-3">
+            <div className="h-px flex-1 bg-gray-700" />
+            <span className="text-xs text-gray-500">or</span>
+            <div className="h-px flex-1 bg-gray-700" />
+          </div>
+
+          {/* SSO Button */}
+          <button
+            type="button"
+            onClick={handleSSOLogin}
+            className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-700 bg-gray-800 px-4 py-2.5 text-sm font-medium text-gray-300 transition-colors hover:border-gray-600 hover:bg-gray-750 hover:text-gray-100"
+          >
+            <KeyRound className="h-4 w-4" />
+            Sign in with SSO
+          </button>
         </div>
       </div>
     </div>

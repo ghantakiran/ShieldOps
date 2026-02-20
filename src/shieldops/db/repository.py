@@ -73,6 +73,40 @@ class Repository:
             await session.refresh(record)
             return self._user_to_dict(record)
 
+    async def list_users(self, limit: int = 50, offset: int = 0) -> list[dict[str, Any]]:
+        """List users ordered by creation date."""
+        async with self._sf() as session:
+            stmt = (
+                select(UserRecord)
+                .order_by(UserRecord.created_at.desc())
+                .offset(offset)
+                .limit(limit)
+            )
+            result = await session.execute(stmt)
+            return [self._user_to_dict(r) for r in result.scalars().all()]
+
+    async def update_user_role(self, user_id: str, role: str) -> dict[str, Any] | None:
+        """Update a user's role. Returns updated user or None."""
+        async with self._sf() as session:
+            record = await session.get(UserRecord, user_id)
+            if record is None:
+                return None
+            record.role = role
+            await session.commit()
+            await session.refresh(record)
+            return self._user_to_dict(record)
+
+    async def update_user_active(self, user_id: str, is_active: bool) -> dict[str, Any] | None:
+        """Toggle a user's active status. Returns updated user or None."""
+        async with self._sf() as session:
+            record = await session.get(UserRecord, user_id)
+            if record is None:
+                return None
+            record.is_active = is_active
+            await session.commit()
+            await session.refresh(record)
+            return self._user_to_dict(record)
+
     @staticmethod
     def _user_to_dict(record: UserRecord) -> dict[str, Any]:
         return {

@@ -224,6 +224,29 @@ jobs:
       - name: Terraform validate
         run: terraform -chdir=infrastructure/terraform/${{ matrix.provider }} validate
 
+  terraform-plan:
+    name: Terraform Plan
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        provider: [aws, gcp, azure]
+    defaults:
+      run:
+        working-directory: infrastructure/terraform/${{ matrix.provider }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.7"
+      - name: Terraform Init (no backend)
+        run: terraform init -backend=false
+      - name: Terraform Plan
+        run: terraform plan -no-color -input=false
+        continue-on-error: true
+        env:
+          TF_VAR_environment: ci
+
   opa-policy-sync:
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'

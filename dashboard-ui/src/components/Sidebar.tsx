@@ -10,6 +10,9 @@ import {
   Settings,
   LayoutDashboard,
   Bug,
+  FileText,
+  BookOpen,
+  Users,
 } from "lucide-react";
 import clsx from "clsx";
 
@@ -19,10 +22,13 @@ const NAV_ITEMS = [
   { to: "/remediations", icon: Wrench, label: "Remediations" },
   { to: "/security", icon: ShieldAlert, label: "Security" },
   { to: "/vulnerabilities", icon: Bug, label: "Vulnerabilities" },
+  { to: "/playbooks", icon: BookOpen, label: "Playbooks" },
   { to: "/cost", icon: DollarSign, label: "Cost" },
   { to: "/learning", icon: Brain, label: "Learning" },
   { to: "/analytics", icon: BarChart3, label: "Analytics" },
+  { to: "/audit-log", icon: FileText, label: "Audit Log" },
   { to: "/settings", icon: Settings, label: "Settings" },
+  { to: "/users", icon: Users, label: "Users" },
 ] as const;
 
 export default function Sidebar() {

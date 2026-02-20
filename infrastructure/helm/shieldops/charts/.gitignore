@@ -1,0 +1,2 @@
+# Downloaded subchart dependencies - regenerate with: helm dependency build
+*.tgz

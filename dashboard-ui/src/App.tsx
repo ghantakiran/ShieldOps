@@ -15,6 +15,9 @@ import Analytics from "./pages/Analytics";
 import Settings from "./pages/Settings";
 import VulnerabilityList from "./pages/VulnerabilityList";
 import VulnerabilityDetailPage from "./pages/VulnerabilityDetail";
+import AuditLog from "./pages/AuditLog";
+import Playbooks from "./pages/Playbooks";
+import UserManagement from "./pages/UserManagement";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuthStore();
@@ -53,7 +56,10 @@ export default function App() {
           <Route path="cost" element={<Cost />} />
           <Route path="learning" element={<Learning />} />
           <Route path="analytics" element={<Analytics />} />
+          <Route path="playbooks" element={<Playbooks />} />
+          <Route path="audit-log" element={<AuditLog />} />
           <Route path="settings" element={<Settings />} />
+          <Route path="users" element={<UserManagement />} />
         </Route>
       </Routes>
     </BrowserRouter>

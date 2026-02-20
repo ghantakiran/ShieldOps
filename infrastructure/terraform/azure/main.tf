@@ -18,10 +18,10 @@ terraform {
   }
 
   backend "azurerm" {
-    resource_group_name  = "shieldops-terraform-rg"
+    resource_group_name  = "shieldops-terraform"
     storage_account_name = "shieldopstfstate"
     container_name       = "tfstate"
-    key                  = "infrastructure/terraform.tfstate"
+    key                  = "azure/terraform.tfstate"
   }
 }
 

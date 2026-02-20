@@ -1,6 +1,6 @@
 # ShieldOps — Feature Implementation Tracker
 
-**Last Updated:** 2026-02-19
+**Last Updated:** 2026-02-20
 **Platform Completeness:** 100%
 
 ---
@@ -225,6 +225,103 @@
 
 ---
 
+## Phase 5.5 — Platform Hardening (12 Items)
+
+- [x] Wire ApprovalNotifier to ApprovalWorkflow (Slack notifications)
+- [x] Durable snapshot state for connectors (DB fallback on rollback)
+- [x] Wire Analytics dashboard to backend (MTTR, resolution rate, accuracy charts)
+- [x] Create AlertConfigStoreAdapter for Learning Agent
+- [x] Add rollback button + confirmation modal to RemediationDetail
+- [x] Wire Kafka EventBus in app lifespan (alert → investigation pipeline)
+- [x] Historical pattern matching for Investigation Agent
+- [x] Integration tests for Cost and Learning agents (9 tests)
+- [x] Settings notification config (full-stack: ORM + API + dashboard)
+- [x] Kafka and Redis K8s StatefulSet manifests
+- [x] ExternalSecrets CRD for AWS Secrets Manager
+- [x] OPA Policy ConfigMap + CI sync job
+- [x] Fix pre-existing ruff (12) and mypy (61) errors for CI
+
+---
+
+## Phase 6 — Enterprise Readiness & Scanner Activation
+
+### P0 — Critical (Core Value Prop & Enterprise Blockers)
+
+- [x] **Wire Security Scanners into Security Runner** — Activate IaC, git, k8s, network scanners
+  - Files: `src/shieldops/api/app.py`, `src/shieldops/config/settings.py`
+  - 4 scanner types: IaC, Git (secrets+deps), K8s, Network — all opt-in via settings
+  - Tests: `tests/unit/test_scanner_wiring.py` — 7 tests
+
+- [x] **Audit Log API + Dashboard Page** — Expose immutable audit trail
+  - Backend: `src/shieldops/api/routes/audit.py` — GET /audit-logs (paginated, filterable)
+  - Dashboard: `dashboard-ui/src/pages/AuditLog.tsx` — table with filters + pagination
+  - Tests: `tests/unit/api/test_audit_routes.py` — 4 tests
+
+- [x] **SSO / OIDC Authentication** — Enterprise identity provider support
+  - Module: `src/shieldops/auth/oidc.py` — OIDCClient (discovery, auth URL, exchange, userinfo)
+  - Routes: `GET /auth/oidc/login`, `GET /auth/oidc/callback` — redirect flow
+  - Auto-provision users on first OIDC login with viewer role
+  - Dashboard: "Sign in with SSO" button on Login page
+  - Tests: `tests/unit/auth/test_oidc.py` — 11 tests
+
+- [x] **Helm Chart** — Parameterized K8s deployment for enterprise customers
+  - Directory: `infrastructure/helm/shieldops/` — 15 templates
+  - Chart.yaml with Bitnami dependencies (PostgreSQL, Redis, Kafka)
+  - values.yaml (250+ lines), ingress, HPA, PDB, NetworkPolicy, ServiceMonitor
+  - `helm lint --strict` passes clean
+
+### P1 — High (Multi-Cloud Completeness & Data Isolation)
+
+- [x] **GCP Cloud Billing Source** — Cost agent support for GCP
+  - File: `src/shieldops/integrations/billing/gcp_billing.py` — BigQuery billing export
+  - Tests: `tests/unit/integrations/billing/test_gcp_billing.py` — 16 tests
+
+- [x] **Azure Cost Management Source** — Cost agent support for Azure
+  - File: `src/shieldops/integrations/billing/azure_cost.py` — Cost Management Query API
+  - Tests: `tests/unit/integrations/billing/test_azure_billing.py` — 24 tests
+
+- [x] **Playbooks Dashboard Page** — View, search, and trigger playbooks
+  - File: `dashboard-ui/src/pages/Playbooks.tsx` — card grid, search, YAML expansion, trigger
+
+- [ ] **Multi-Org / Tenant Isolation** — Organization-scoped data access
+  - New DB column: `organization_id` on users, investigations, remediations, vulnerabilities
+  - New ORM model: `OrganizationRecord` (id, name, slug, plan, created_at)
+  - Migration: Alembic migration adding `organizations` table + FK columns
+  - Middleware: Extract org from JWT claims, scope all queries
+  - API: `GET/POST /organizations` for org management
+
+- [x] **User Management API + Dashboard** — Full user lifecycle
+  - Routes: `src/shieldops/api/routes/users.py` — GET /users, PUT role, PUT active
+  - Dashboard: `dashboard-ui/src/pages/UserManagement.tsx` — table, role editor, invite modal
+
+### P2 — Medium (Observability & Polish)
+
+- [x] **OTel Metrics Pipeline** — Agent-level metrics via OpenTelemetry
+  - File: `src/shieldops/observability/otel/metrics.py` — MeterProvider + OTLP exporter
+  - AgentMetrics class: execution counter, error counter, duration histogram
+  - Tests: `tests/unit/observability/test_otel_metrics.py` — 5 tests
+
+- [x] **LangSmith Agent Tracing** — Debug and replay agent workflows
+  - File: `src/shieldops/observability/langsmith.py` — init_langsmith(), get_client()
+  - Conditional activation via `langsmith_enabled` setting
+  - Tests: `tests/unit/observability/test_langsmith.py` — 3 tests
+
+- [x] **Refresh Tokens + Revocation** — Secure token lifecycle
+  - Routes: `POST /auth/refresh`, `POST /auth/revoke` (Redis JTI blacklist)
+  - JTI field added to JWT payload in service.py
+  - Tests: `tests/unit/auth/test_refresh_revoke.py` — 4 tests
+
+- [x] **Terraform State Backend + CI** — Safe infrastructure-as-code workflow
+  - Updated S3/GCS/Azure backend blocks in all 3 main.tf files
+  - New CI job: `terraform-plan` on PRs (matrix: aws, gcp, azure)
+
+- [x] **Dashboard Page Tests** — Vitest coverage for all 13 pages
+  - 7 new test files: Analytics, Security, Cost, Learning, Settings, Investigations, Remediations
+  - ResizeObserver polyfill for recharts in jsdom
+  - 48 total dashboard tests passing (13 test files)
+
+---
+
 ## Completed
 
 - [x] Multi-cloud Terraform infrastructure (AWS/GCP/Azure)
@@ -280,3 +377,16 @@
 - [x] Makefile (27 targets for dev, test, build, deploy workflows)
 - [x] Grafana + Prometheus Monitoring (dashboards, 12 alerts, 12 recording rules)
 - [x] Seed Data Script (users, agents, investigations, remediations, scans)
+- [x] Wire Security Scanners (IaC, Git, K8s, Network) — opt-in settings, 7 tests
+- [x] Audit Log API + Dashboard Page — GET /audit-logs, AuditLog.tsx, 4 tests
+- [x] SSO / OIDC Authentication — OIDCClient, login/callback routes, 11 tests
+- [x] Helm Chart — 15 templates, Bitnami deps, helm lint passes
+- [x] GCP Cloud Billing Source (BigQuery billing export) — 16 tests
+- [x] Azure Cost Management Source (Cost Management Query API) — 24 tests
+- [x] Playbooks Dashboard Page — card grid, search, YAML expansion, trigger
+- [x] User Management API + Dashboard — CRUD routes, role editor, invite modal
+- [x] OTel Metrics Pipeline (MeterProvider + OTLP exporter, AgentMetrics) — 5 tests
+- [x] LangSmith Agent Tracing (conditional init, env var setup) — 3 tests
+- [x] Refresh Tokens + Revocation (JTI, Redis blacklist) — 4 tests
+- [x] Terraform State Backend + CI (S3/GCS/Azure backends, terraform-plan job)
+- [x] Dashboard Page Tests (7 new test files, 48 total vitest tests)

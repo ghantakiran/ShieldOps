@@ -1,0 +1,289 @@
+# =============================================================================
+# ShieldOps Helm Chart - Default Values
+# =============================================================================
+# AI-Powered Autonomous SRE Platform
+# Customize these values for your environment.
+# =============================================================================
+
+# -- Number of API server replicas
+replicaCount: 2
+
+# -- API server image configuration
+image:
+  repository: ghcr.io/shieldops/api
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+# -- Image pull secrets for private registries
+imagePullSecrets: []
+
+# -- Override the chart name
+nameOverride: ""
+
+# -- Override the full release name
+fullnameOverride: ""
+
+# =============================================================================
+# Frontend (React Dashboard served via nginx)
+# =============================================================================
+frontend:
+  # -- Enable the frontend dashboard deployment
+  enabled: true
+  image:
+    repository: ghcr.io/shieldops/dashboard
+    tag: "latest"
+    pullPolicy: IfNotPresent
+  # -- Number of frontend replicas
+  replicaCount: 2
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+  # -- Additional pod annotations for frontend
+  podAnnotations: {}
+  # -- Node selector for frontend pods
+  nodeSelector: {}
+  # -- Tolerations for frontend pods
+  tolerations: []
+  # -- Affinity rules for frontend pods
+  affinity: {}
+
+# =============================================================================
+# API Server Resources
+# =============================================================================
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    cpu: "1"
+    memory: 1Gi
+
+# =============================================================================
+# Environment Variables (non-secret)
+# =============================================================================
+env:
+  SHIELDOPS_ENVIRONMENT: production
+  SHIELDOPS_API_PORT: "8000"
+  SHIELDOPS_API_PREFIX: /api/v1
+  SHIELDOPS_OPA_ENDPOINT: ""  # Auto-resolved from chart fullname at render time
+  SHIELDOPS_LOG_LEVEL: info
+  SHIELDOPS_LOG_FORMAT: json
+
+# =============================================================================
+# Secrets (sensitive values - override in your deployment)
+# =============================================================================
+# WARNING: Do not commit real secret values to version control.
+# Use --set or a separate encrypted values file.
+secrets:
+  # -- PostgreSQL connection string
+  databaseUrl: ""
+  # -- Redis connection string
+  redisUrl: ""
+  # -- JWT signing key for API authentication
+  jwtSecretKey: ""
+  # -- Anthropic Claude API key (primary LLM)
+  anthropicApiKey: ""
+  # -- OpenAI API key (fallback LLM)
+  openaiApiKey: ""
+  # -- LangSmith API key (agent tracing)
+  langsmithApiKey: ""
+  # -- Slack bot token for notifications
+  slackBotToken: ""
+
+# -- Use an existing Kubernetes Secret instead of creating one
+existingSecret: ""
+
+# =============================================================================
+# Service Account
+# =============================================================================
+serviceAccount:
+  # -- Create a dedicated service account
+  create: true
+  # -- Service account name (auto-generated if empty)
+  name: ""
+  # -- Annotations for the service account (e.g., IAM role bindings)
+  annotations: {}
+
+# =============================================================================
+# RBAC (Kubernetes permissions for agent operations)
+# =============================================================================
+rbac:
+  # -- Create ClusterRole and ClusterRoleBinding for agent K8s access
+  create: true
+
+# =============================================================================
+# Pod Configuration
+# =============================================================================
+# -- Additional pod annotations
+podAnnotations: {}
+
+# -- Pod security context
+podSecurityContext: {}
+
+# -- Container security context (applied to all containers)
+securityContext:
+  runAsNonRoot: true
+  readOnlyRootFilesystem: true
+  allowPrivilegeEscalation: false
+
+# -- Node selector for API pods
+nodeSelector: {}
+
+# -- Tolerations for API pods
+tolerations: []
+
+# -- Affinity rules for API pods
+affinity: {}
+
+# =============================================================================
+# Ingress
+# =============================================================================
+ingress:
+  # -- Enable ingress resource creation
+  enabled: true
+  # -- Ingress class name
+  className: nginx
+  # -- Ingress annotations
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  # -- Ingress host rules
+  hosts:
+    - host: shieldops.example.com
+      paths:
+        - path: /api
+          pathType: Prefix
+          service: api
+        - path: /
+          pathType: Prefix
+          service: frontend
+  # -- TLS configuration
+  tls:
+    - secretName: shieldops-tls
+      hosts:
+        - shieldops.example.com
+
+# =============================================================================
+# Horizontal Pod Autoscaler
+# =============================================================================
+autoscaling:
+  # -- Enable HPA for API deployment
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUPercent: 70
+  targetMemoryPercent: 80
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 60
+
+# =============================================================================
+# Pod Disruption Budget
+# =============================================================================
+podDisruptionBudget:
+  # -- Enable PDB for API deployment
+  enabled: true
+  # -- Minimum number of available pods during disruption
+  minAvailable: 1
+
+# =============================================================================
+# Network Policies
+# =============================================================================
+networkPolicy:
+  # -- Enable network policies for zero-trust pod communication
+  enabled: true
+
+# =============================================================================
+# Dependencies - PostgreSQL (Bitnami subchart)
+# =============================================================================
+postgresql:
+  # -- Deploy PostgreSQL as a subchart
+  enabled: true
+  auth:
+    database: shieldops
+    username: shieldops
+    # -- Use an existing secret for PostgreSQL password
+    existingSecret: ""
+
+# =============================================================================
+# Dependencies - Redis (Bitnami subchart)
+# =============================================================================
+redis:
+  # -- Deploy Redis as a subchart
+  enabled: true
+  architecture: standalone
+  auth:
+    enabled: false
+
+# =============================================================================
+# Dependencies - Kafka (Bitnami subchart)
+# =============================================================================
+kafka:
+  # -- Deploy Kafka as a subchart (disabled by default, use external Kafka)
+  enabled: false
+
+# =============================================================================
+# OPA (Open Policy Agent) - Policy enforcement for agent actions
+# =============================================================================
+opa:
+  # -- Deploy OPA sidecar for policy evaluation
+  enabled: true
+  image:
+    repository: openpolicyagent/opa
+    tag: "latest-static"
+  # -- Number of OPA replicas
+  replicaCount: 2
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  # -- OPA Rego policy files (key=filename, value=policy content)
+  # Populated by CI from playbooks/policies/*.rego
+  policies: {}
+
+# =============================================================================
+# Database Migration Job
+# =============================================================================
+migration:
+  # -- Run Alembic migrations as a pre-install/pre-upgrade hook
+  enabled: true
+  image:
+    repository: ghcr.io/shieldops/api
+    tag: "latest"
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  # -- Maximum seconds before the migration job is killed
+  activeDeadlineSeconds: 300
+  # -- Number of retries on failure
+  backoffLimit: 3
+
+# =============================================================================
+# Monitoring (Prometheus ServiceMonitor)
+# =============================================================================
+monitoring:
+  serviceMonitor:
+    # -- Create a Prometheus ServiceMonitor resource
+    enabled: false
+    # -- Scrape interval
+    interval: 30s
+    # -- Metrics endpoint path
+    path: /metrics
+    # -- Additional labels for ServiceMonitor (e.g., release: prometheus)
+    additionalLabels: {}
