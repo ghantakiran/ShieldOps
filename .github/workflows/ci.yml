@@ -83,6 +83,7 @@ jobs:
           SHIELDOPS_DATABASE_URL: postgresql+asyncpg://shieldops:shieldops@localhost:5432/shieldops_test
           SHIELDOPS_REDIS_URL: redis://localhost:6379/0
           SHIELDOPS_ENVIRONMENT: test
+          SHIELDOPS_RATE_LIMIT_ENABLED: "false"
 
       - name: Publish test report
         uses: mikepenz/action-junit-report@v4

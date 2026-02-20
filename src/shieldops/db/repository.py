@@ -15,11 +15,16 @@ if TYPE_CHECKING:
 from shieldops.agents.investigation.models import InvestigationState
 from shieldops.agents.remediation.models import RemediationState
 from shieldops.db.models import (
+    AgentContextRecord,
     AgentSession,
+    APIKeyRecord,
     AuditLog,
     IncidentOutcomeRecord,
     InvestigationRecord,
     LearningCycleRecord,
+    NotificationPreferenceRecord,
+    OrganizationRecord,
+    PlaybookRecord,
     RemediationRecord,
     RiskAcceptanceRecord,
     SecurityScanRecord,
@@ -431,6 +436,132 @@ class Repository:
                 }
                 for r in result.scalars().all()
             ]
+
+    # ── Investigation Timeline ──────────────────────────────────
+
+    async def get_investigation_timeline(
+        self,
+        investigation_id: str,
+    ) -> list[dict[str, Any]]:
+        """Get merged timeline events for an investigation.
+
+        Queries investigations, remediations, and audit_log
+        tables, merges results sorted by timestamp (ascending).
+        """
+        events: list[dict[str, Any]] = []
+
+        async with self._sf() as session:
+            # 1. Investigation record itself
+            inv = await session.get(
+                InvestigationRecord,
+                investigation_id,
+            )
+            if inv is not None:
+                events.append(
+                    {
+                        "id": f"inv-{inv.id}",
+                        "timestamp": (inv.created_at.isoformat() if inv.created_at else None),
+                        "type": "investigation",
+                        "action": f"investigation_{inv.status or 'started'}",
+                        "actor": "agent:investigation",
+                        "severity": inv.severity,
+                        "details": {
+                            "alert_id": inv.alert_id,
+                            "alert_name": inv.alert_name,
+                            "confidence": inv.confidence,
+                            "duration_ms": inv.duration_ms,
+                            "error": inv.error,
+                        },
+                    }
+                )
+                if inv.updated_at and inv.created_at and inv.updated_at != inv.created_at:
+                    events.append(
+                        {
+                            "id": f"inv-{inv.id}-updated",
+                            "timestamp": (inv.updated_at.isoformat()),
+                            "type": "investigation",
+                            "action": f"investigation_{inv.status or 'updated'}",
+                            "actor": "agent:investigation",
+                            "severity": inv.severity,
+                            "details": {
+                                "alert_id": inv.alert_id,
+                                "confidence": inv.confidence,
+                            },
+                        }
+                    )
+
+            # 2. Related remediations
+            rem_stmt = (
+                select(RemediationRecord)
+                .where(
+                    RemediationRecord.investigation_id == investigation_id,
+                )
+                .order_by(
+                    RemediationRecord.created_at.asc(),
+                )
+            )
+            rem_result = await session.execute(rem_stmt)
+            for rem in rem_result.scalars().all():
+                events.append(
+                    {
+                        "id": f"rem-{rem.id}",
+                        "timestamp": (rem.created_at.isoformat() if rem.created_at else None),
+                        "type": "remediation",
+                        "action": (f"{rem.action_type}_{rem.status}"),
+                        "actor": "agent:remediation",
+                        "severity": rem.risk_level,
+                        "details": {
+                            "remediation_id": rem.id,
+                            "action_type": rem.action_type,
+                            "target_resource": (rem.target_resource),
+                            "environment": rem.environment,
+                            "validation_passed": (rem.validation_passed),
+                            "duration_ms": rem.duration_ms,
+                            "error": rem.error,
+                        },
+                    }
+                )
+
+            # 3. Audit log entries referencing this ID
+            audit_stmt = (
+                select(AuditLog)
+                .where(
+                    AuditLog.reasoning.ilike(
+                        f"%{investigation_id}%",
+                    ),
+                )
+                .order_by(AuditLog.timestamp.asc())
+            )
+            audit_result = await session.execute(
+                audit_stmt,
+            )
+            for aud in audit_result.scalars().all():
+                events.append(
+                    {
+                        "id": f"aud-{aud.id}",
+                        "timestamp": (aud.timestamp.isoformat() if aud.timestamp else None),
+                        "type": "audit",
+                        "action": aud.action,
+                        "actor": aud.actor,
+                        "severity": aud.risk_level,
+                        "details": {
+                            "audit_id": aud.id,
+                            "agent_type": aud.agent_type,
+                            "target_resource": (aud.target_resource),
+                            "environment": aud.environment,
+                            "policy_evaluation": (aud.policy_evaluation),
+                            "approval_status": (aud.approval_status),
+                            "outcome": aud.outcome,
+                            "reasoning": aud.reasoning,
+                        },
+                    }
+                )
+
+        # Sort all events chronologically
+        events.sort(
+            key=lambda e: e.get("timestamp") or "",
+        )
+        return events
 
     # ── Snapshot Retrieval (for durable connector rollback) ──────
 
@@ -1037,6 +1168,66 @@ class Repository:
                 for r in result.scalars().all()
             ]
 
+    # ── Organizations ─────────────────────────────────────────────
+
+    async def list_organizations(self, limit: int = 50, offset: int = 0) -> list[dict[str, Any]]:
+        """List organizations ordered by creation date."""
+        async with self._sf() as session:
+            stmt = (
+                select(OrganizationRecord)
+                .order_by(OrganizationRecord.created_at.desc())
+                .offset(offset)
+                .limit(limit)
+            )
+            result = await session.execute(stmt)
+            return [self._organization_to_dict(r) for r in result.scalars().all()]
+
+    async def create_organization(self, name: str, slug: str, plan: str = "free") -> dict[str, Any]:
+        """Create a new organization."""
+        async with self._sf() as session:
+            record = OrganizationRecord(name=name, slug=slug, plan=plan)
+            session.add(record)
+            await session.commit()
+            await session.refresh(record)
+            return self._organization_to_dict(record)
+
+    async def get_organization(self, org_id: str) -> dict[str, Any] | None:
+        """Get an organization by ID."""
+        async with self._sf() as session:
+            record = await session.get(OrganizationRecord, org_id)
+            if record is None:
+                return None
+            return self._organization_to_dict(record)
+
+    async def update_organization(self, org_id: str, **kwargs: Any) -> dict[str, Any] | None:
+        """Update mutable fields on an organization."""
+        async with self._sf() as session:
+            record = await session.get(OrganizationRecord, org_id)
+            if record is None:
+                return None
+            for key, value in kwargs.items():
+                if hasattr(record, key):
+                    setattr(record, key, value)
+            await session.commit()
+            await session.refresh(record)
+            return self._organization_to_dict(record)
+
+    @staticmethod
+    def _organization_to_dict(
+        record: OrganizationRecord,
+    ) -> dict[str, Any]:
+        return {
+            "id": record.id,
+            "name": record.name,
+            "slug": record.slug,
+            "plan": record.plan,
+            "is_active": record.is_active,
+            "settings": record.settings,
+            "rate_limit": record.rate_limit,
+            "created_at": (record.created_at.isoformat() if record.created_at else None),
+            "updated_at": (record.updated_at.isoformat() if record.updated_at else None),
+        }
+
     # ── Risk Acceptance ────────────────────────────────────────────
 
     async def create_risk_acceptance(
@@ -1060,3 +1251,570 @@ class Repository:
                 vuln.status = "accepted_risk"
             await session.commit()
             return record.id
+
+    # ── Agent Context ─────────────────────────────────────────────
+
+    async def get_agent_context(self, agent_type: str, key: str) -> dict[str, Any] | None:
+        """Fetch a single agent context entry by type + key."""
+        async with self._sf() as session:
+            stmt = select(AgentContextRecord).where(
+                AgentContextRecord.agent_type == agent_type,
+                AgentContextRecord.context_key == key,
+            )
+            result = await session.execute(stmt)
+            record = result.scalar_one_or_none()
+            if record is None:
+                return None
+            return self._agent_context_to_dict(record)
+
+    async def upsert_agent_context(
+        self,
+        agent_type: str,
+        key: str,
+        value: dict[str, Any],
+        ttl_hours: int | None = None,
+        expires_at: datetime | None = None,
+    ) -> dict[str, Any]:
+        """Insert or update an agent context entry."""
+        async with self._sf() as session:
+            stmt = select(AgentContextRecord).where(
+                AgentContextRecord.agent_type == agent_type,
+                AgentContextRecord.context_key == key,
+            )
+            result = await session.execute(stmt)
+            record = result.scalar_one_or_none()
+
+            if record is None:
+                record = AgentContextRecord(
+                    agent_type=agent_type,
+                    context_key=key,
+                )
+                session.add(record)
+
+            record.context_value = value
+            record.ttl_hours = ttl_hours
+            record.expires_at = expires_at
+            await session.commit()
+            await session.refresh(record)
+            return self._agent_context_to_dict(record)
+
+    async def delete_agent_context(self, agent_type: str, key: str) -> bool:
+        """Delete an agent context entry. Returns True if deleted."""
+        async with self._sf() as session:
+            stmt = select(AgentContextRecord).where(
+                AgentContextRecord.agent_type == agent_type,
+                AgentContextRecord.context_key == key,
+            )
+            result = await session.execute(stmt)
+            record = result.scalar_one_or_none()
+            if record is None:
+                return False
+            await session.delete(record)
+            await session.commit()
+            return True
+
+    async def search_agent_context(
+        self,
+        agent_type: str,
+        key_pattern: str | None = None,
+    ) -> list[dict[str, Any]]:
+        """Search context entries by agent type with optional key LIKE filter."""
+        async with self._sf() as session:
+            stmt = select(AgentContextRecord).where(
+                AgentContextRecord.agent_type == agent_type,
+            )
+            if key_pattern:
+                stmt = stmt.where(AgentContextRecord.context_key.ilike(f"%{key_pattern}%"))
+            stmt = stmt.order_by(AgentContextRecord.updated_at.desc())
+            result = await session.execute(stmt)
+            return [self._agent_context_to_dict(r) for r in result.scalars().all()]
+
+    async def cleanup_expired_context(self) -> int:
+        """Delete all expired context entries. Returns count deleted."""
+        from sqlalchemy import delete
+
+        async with self._sf() as session:
+            stmt = (
+                delete(AgentContextRecord)
+                .where(AgentContextRecord.expires_at.isnot(None))
+                .where(AgentContextRecord.expires_at < datetime.now(UTC))
+            )
+            result = await session.execute(stmt)
+            await session.commit()
+            return result.rowcount  # type: ignore[attr-defined,return-value]
+
+    @staticmethod
+    def _agent_context_to_dict(
+        record: AgentContextRecord,
+    ) -> dict[str, Any]:
+        return {
+            "id": record.id,
+            "agent_type": record.agent_type,
+            "context_key": record.context_key,
+            "context_value": record.context_value,
+            "ttl_hours": record.ttl_hours,
+            "expires_at": (record.expires_at.isoformat() if record.expires_at else None),
+            "created_at": (record.created_at.isoformat() if record.created_at else None),
+            "updated_at": (record.updated_at.isoformat() if record.updated_at else None),
+        }
+
+    # ── API Keys ─────────────────────────────────────────────────
+
+    async def create_api_key(
+        self,
+        user_id: str,
+        key_prefix: str,
+        key_hash: str,
+        name: str,
+        scopes: list[str] | None = None,
+        organization_id: str | None = None,
+        expires_at: datetime | None = None,
+    ) -> dict[str, Any]:
+        """Create a new API key record."""
+        async with self._sf() as session:
+            record = APIKeyRecord(
+                user_id=user_id,
+                key_prefix=key_prefix,
+                key_hash=key_hash,
+                name=name,
+                scopes=scopes or [],
+                organization_id=organization_id,
+                expires_at=expires_at,
+            )
+            session.add(record)
+            await session.commit()
+            await session.refresh(record)
+            logger.info(
+                "api_key_created",
+                key_id=record.id,
+                user_id=user_id,
+            )
+            return self._api_key_to_dict(record)
+
+    async def get_api_key_by_hash(self, key_hash: str) -> dict[str, Any] | None:
+        """Look up an API key by its SHA-256 hash."""
+        async with self._sf() as session:
+            stmt = select(APIKeyRecord).where(APIKeyRecord.key_hash == key_hash)
+            result = await session.execute(stmt)
+            record = result.scalar_one_or_none()
+            if record is None:
+                return None
+            return self._api_key_to_dict(record)
+
+    async def list_api_keys_for_user(
+        self,
+        user_id: str,
+        limit: int = 50,
+        offset: int = 0,
+    ) -> list[dict[str, Any]]:
+        """List API keys owned by a user (never returns key_hash)."""
+        async with self._sf() as session:
+            stmt = (
+                select(APIKeyRecord)
+                .where(APIKeyRecord.user_id == user_id)
+                .order_by(APIKeyRecord.created_at.desc())
+                .offset(offset)
+                .limit(limit)
+            )
+            result = await session.execute(stmt)
+            return [self._api_key_to_dict(r) for r in result.scalars().all()]
+
+    async def revoke_api_key(self, key_id: str, user_id: str) -> bool:
+        """Revoke an API key. Returns True if found and revoked."""
+        async with self._sf() as session:
+            record = await session.get(APIKeyRecord, key_id)
+            if record is None or record.user_id != user_id:
+                return False
+            record.is_active = False
+            await session.commit()
+            logger.info(
+                "api_key_revoked",
+                key_id=key_id,
+                user_id=user_id,
+            )
+            return True
+
+    async def update_api_key_last_used(self, key_id: str) -> None:
+        """Update the last_used_at timestamp for an API key."""
+        async with self._sf() as session:
+            record = await session.get(APIKeyRecord, key_id)
+            if record is not None:
+                record.last_used_at = datetime.now(UTC)
+                await session.commit()
+
+    @staticmethod
+    def _api_key_to_dict(
+        record: APIKeyRecord,
+    ) -> dict[str, Any]:
+        return {
+            "id": record.id,
+            "user_id": record.user_id,
+            "organization_id": record.organization_id,
+            "key_prefix": record.key_prefix,
+            "key_hash": record.key_hash,
+            "name": record.name,
+            "scopes": record.scopes,
+            "expires_at": (record.expires_at.isoformat() if record.expires_at else None),
+            "last_used_at": (record.last_used_at.isoformat() if record.last_used_at else None),
+            "is_active": record.is_active,
+            "created_at": (record.created_at.isoformat() if record.created_at else None),
+        }
+
+    # ── Playbooks ─────────────────────────────────────────────────
+
+    async def create_playbook(
+        self,
+        name: str,
+        content: str,
+        description: str = "",
+        tags: list[str] | None = None,
+        created_by: str | None = None,
+    ) -> dict[str, Any]:
+        """Create a new custom playbook."""
+        async with self._sf() as session:
+            record = PlaybookRecord(
+                name=name,
+                description=description,
+                content=content,
+                tags=tags or [],
+                created_by=created_by,
+            )
+            session.add(record)
+            await session.commit()
+            await session.refresh(record)
+            logger.info(
+                "playbook_created",
+                playbook_id=record.id,
+                name=name,
+            )
+            return self._playbook_to_dict(record)
+
+    async def get_playbook(self, playbook_id: str) -> dict[str, Any] | None:
+        """Get a playbook by ID."""
+        async with self._sf() as session:
+            record = await session.get(PlaybookRecord, playbook_id)
+            if record is None:
+                return None
+            return self._playbook_to_dict(record)
+
+    async def list_playbooks(
+        self,
+        active_only: bool = True,
+        limit: int = 50,
+        offset: int = 0,
+    ) -> list[dict[str, Any]]:
+        """List custom playbooks from the database."""
+        async with self._sf() as session:
+            stmt = select(PlaybookRecord).order_by(PlaybookRecord.created_at.desc())
+            if active_only:
+                stmt = stmt.where(
+                    PlaybookRecord.is_active == True  # noqa: E712
+                )
+            stmt = stmt.offset(offset).limit(limit)
+            result = await session.execute(stmt)
+            return [self._playbook_to_dict(r) for r in result.scalars().all()]
+
+    async def update_playbook(self, playbook_id: str, **fields: Any) -> dict[str, Any] | None:
+        """Update a custom playbook. Returns updated dict or None."""
+        async with self._sf() as session:
+            record = await session.get(PlaybookRecord, playbook_id)
+            if record is None:
+                return None
+            for key, value in fields.items():
+                if hasattr(record, key):
+                    setattr(record, key, value)
+            await session.commit()
+            await session.refresh(record)
+            logger.info(
+                "playbook_updated",
+                playbook_id=playbook_id,
+            )
+            return self._playbook_to_dict(record)
+
+    async def delete_playbook(self, playbook_id: str) -> bool:
+        """Soft-delete a playbook. Returns True if found."""
+        async with self._sf() as session:
+            record = await session.get(PlaybookRecord, playbook_id)
+            if record is None:
+                return False
+            record.is_active = False
+            await session.commit()
+            logger.info(
+                "playbook_deleted",
+                playbook_id=playbook_id,
+            )
+            return True
+
+    @staticmethod
+    def _playbook_to_dict(
+        record: PlaybookRecord,
+    ) -> dict[str, Any]:
+        return {
+            "id": record.id,
+            "name": record.name,
+            "description": record.description,
+            "content": record.content,
+            "tags": record.tags or [],
+            "is_active": record.is_active,
+            "created_by": record.created_by,
+            "created_at": (record.created_at.isoformat() if record.created_at else None),
+            "updated_at": (record.updated_at.isoformat() if record.updated_at else None),
+        }
+
+    # ── Notification Preferences ────────────────────────────────
+
+    async def get_notification_preferences(self, user_id: str) -> list[dict[str, Any]]:
+        """List all notification preferences for a user."""
+        async with self._sf() as session:
+            stmt = (
+                select(NotificationPreferenceRecord)
+                .where(NotificationPreferenceRecord.user_id == user_id)
+                .order_by(NotificationPreferenceRecord.created_at.desc())
+            )
+            result = await session.execute(stmt)
+            return [self._notif_pref_to_dict(r) for r in result.scalars().all()]
+
+    async def upsert_notification_preference(
+        self,
+        user_id: str,
+        channel: str,
+        event_type: str,
+        enabled: bool = True,
+        config: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        """Insert or update a notification preference.
+
+        Uses the (user_id, channel, event_type) unique constraint
+        to determine whether to insert or update.
+        """
+        async with self._sf() as session:
+            stmt = select(NotificationPreferenceRecord).where(
+                NotificationPreferenceRecord.user_id == user_id,
+                NotificationPreferenceRecord.channel == channel,
+                NotificationPreferenceRecord.event_type == event_type,
+            )
+            result = await session.execute(stmt)
+            record = result.scalar_one_or_none()
+
+            if record is None:
+                record = NotificationPreferenceRecord(
+                    user_id=user_id,
+                    channel=channel,
+                    event_type=event_type,
+                )
+                session.add(record)
+
+            record.enabled = enabled
+            record.config = config
+            await session.commit()
+            await session.refresh(record)
+            logger.info(
+                "notification_preference_upserted",
+                user_id=user_id,
+                channel=channel,
+                event_type=event_type,
+            )
+            return self._notif_pref_to_dict(record)
+
+    async def delete_notification_preference(self, preference_id: str, user_id: str) -> bool:
+        """Delete a preference. Returns False if not found or not owned."""
+        async with self._sf() as session:
+            record = await session.get(NotificationPreferenceRecord, preference_id)
+            if record is None or record.user_id != user_id:
+                return False
+            await session.delete(record)
+            await session.commit()
+            logger.info(
+                "notification_preference_deleted",
+                preference_id=preference_id,
+                user_id=user_id,
+            )
+            return True
+
+    async def get_subscribers_for_event(self, event_type: str) -> list[str]:
+        """Return user_ids that have an enabled pref for this event."""
+        async with self._sf() as session:
+            stmt = (
+                select(NotificationPreferenceRecord.user_id)
+                .where(
+                    NotificationPreferenceRecord.event_type == event_type,
+                    NotificationPreferenceRecord.enabled.is_(True),
+                )
+                .distinct()
+            )
+            result = await session.execute(stmt)
+            return [row[0] for row in result.all()]
+
+    @staticmethod
+    def _notif_pref_to_dict(
+        record: NotificationPreferenceRecord,
+    ) -> dict[str, Any]:
+        return {
+            "id": record.id,
+            "user_id": record.user_id,
+            "channel": record.channel,
+            "event_type": record.event_type,
+            "enabled": record.enabled,
+            "config": record.config,
+            "created_at": (record.created_at.isoformat() if record.created_at else None),
+            "updated_at": (record.updated_at.isoformat() if record.updated_at else None),
+        }
+
+    # ── Global Search ────────────────────────────────────────────
+
+    async def search_investigations(
+        self,
+        query: str,
+        limit: int = 20,
+    ) -> list[dict[str, Any]]:
+        """Search investigations by alert_name/alert_id using ILIKE.
+
+        Uses parameterized queries to prevent SQL injection.
+        """
+        pattern = f"%{query}%"
+        async with self._sf() as session:
+            from sqlalchemy import or_
+
+            stmt = (
+                select(InvestigationRecord)
+                .where(
+                    or_(
+                        InvestigationRecord.alert_name.ilike(pattern),
+                        InvestigationRecord.alert_id.ilike(pattern),
+                    )
+                )
+                .order_by(InvestigationRecord.created_at.desc())
+                .limit(limit)
+            )
+            result = await session.execute(stmt)
+            return [self._investigation_to_dict(r) for r in result.scalars().all()]
+
+    async def search_remediations(
+        self,
+        query: str,
+        limit: int = 20,
+    ) -> list[dict[str, Any]]:
+        """Search remediations by action_type/target_resource using ILIKE.
+
+        Uses parameterized queries to prevent SQL injection.
+        """
+        pattern = f"%{query}%"
+        async with self._sf() as session:
+            from sqlalchemy import or_
+
+            stmt = (
+                select(RemediationRecord)
+                .where(
+                    or_(
+                        RemediationRecord.action_type.ilike(pattern),
+                        RemediationRecord.target_resource.ilike(pattern),
+                    )
+                )
+                .order_by(RemediationRecord.created_at.desc())
+                .limit(limit)
+            )
+            result = await session.execute(stmt)
+            return [self._remediation_to_dict(r) for r in result.scalars().all()]
+
+    async def search_vulnerabilities(
+        self,
+        query: str,
+        limit: int = 20,
+    ) -> list[dict[str, Any]]:
+        """Search vulnerabilities by cve_id/title/package_name using ILIKE.
+
+        Uses parameterized queries to prevent SQL injection.
+        """
+        pattern = f"%{query}%"
+        async with self._sf() as session:
+            from sqlalchemy import or_
+
+            stmt = (
+                select(VulnerabilityRecord)
+                .where(
+                    or_(
+                        VulnerabilityRecord.cve_id.ilike(pattern),
+                        VulnerabilityRecord.title.ilike(pattern),
+                        VulnerabilityRecord.package_name.ilike(pattern),
+                    )
+                )
+                .order_by(VulnerabilityRecord.created_at.desc())
+                .limit(limit)
+            )
+            result = await session.execute(stmt)
+            return [self._vulnerability_to_dict(r) for r in result.scalars().all()]
+
+    # ── Data Export ───────────────────────────────────────────────
+
+    async def export_investigations(
+        self,
+        start_date: datetime | None = None,
+        end_date: datetime | None = None,
+        status: str | None = None,
+        severity: str | None = None,
+        limit: int = 1000,
+    ) -> list[dict[str, Any]]:
+        """Export investigation records with optional filters.
+
+        Returns flat dicts suitable for CSV/JSON export.
+        """
+        async with self._sf() as session:
+            stmt = select(InvestigationRecord).order_by(InvestigationRecord.created_at.desc())
+            if start_date:
+                stmt = stmt.where(InvestigationRecord.created_at >= start_date)
+            if end_date:
+                stmt = stmt.where(InvestigationRecord.created_at <= end_date)
+            if status:
+                stmt = stmt.where(InvestigationRecord.status == status)
+            if severity:
+                stmt = stmt.where(InvestigationRecord.severity == severity)
+            stmt = stmt.limit(limit)
+            result = await session.execute(stmt)
+            return [self._investigation_to_dict(r) for r in result.scalars().all()]
+
+    async def export_remediations(
+        self,
+        start_date: datetime | None = None,
+        end_date: datetime | None = None,
+        status: str | None = None,
+        severity: str | None = None,
+        limit: int = 1000,
+    ) -> list[dict[str, Any]]:
+        """Export remediation records with optional filters.
+
+        The *severity* filter maps to the ``risk_level`` column.
+        Returns flat dicts suitable for CSV/JSON export.
+        """
+        async with self._sf() as session:
+            stmt = select(RemediationRecord).order_by(RemediationRecord.created_at.desc())
+            if start_date:
+                stmt = stmt.where(RemediationRecord.created_at >= start_date)
+            if end_date:
+                stmt = stmt.where(RemediationRecord.created_at <= end_date)
+            if status:
+                stmt = stmt.where(RemediationRecord.status == status)
+            if severity:
+                stmt = stmt.where(RemediationRecord.risk_level == severity)
+            stmt = stmt.limit(limit)
+            result = await session.execute(stmt)
+            return [self._remediation_to_dict(r) for r in result.scalars().all()]
+
+    async def export_compliance_data(
+        self,
+        start_date: datetime | None = None,
+        end_date: datetime | None = None,
+        limit: int = 1000,
+    ) -> list[dict[str, Any]]:
+        """Export security scan records for compliance reporting.
+
+        Returns flat dicts with compliance scores and posture data.
+        """
+        async with self._sf() as session:
+            stmt = select(SecurityScanRecord).order_by(SecurityScanRecord.created_at.desc())
+            if start_date:
+                stmt = stmt.where(SecurityScanRecord.created_at >= start_date)
+            if end_date:
+                stmt = stmt.where(SecurityScanRecord.created_at <= end_date)
+            stmt = stmt.limit(limit)
+            result = await session.execute(stmt)
+            return [self._security_scan_to_dict(r) for r in result.scalars().all()]

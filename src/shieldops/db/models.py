@@ -4,8 +4,17 @@ from datetime import UTC, datetime
 from typing import Any
 from uuid import uuid4
 
-from sqlalchemy import Boolean, DateTime, Index, Integer, String, Text, func
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy import (
+    Boolean,
+    DateTime,
+    Index,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+    func,
+)
+from sqlalchemy.dialects.postgresql import JSON, JSONB
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -370,3 +379,134 @@ class RiskAcceptanceRecord(Base):
     expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     approved_by: Mapped[str | None] = mapped_column(String(64), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class AgentContextRecord(Base):
+    """Persistent agent context for cross-incident memory."""
+
+    __tablename__ = "agent_context"
+
+    id: Mapped[str] = mapped_column(
+        String(64),
+        primary_key=True,
+        default=lambda: f"ctx-{uuid4().hex[:12]}",
+    )
+    agent_type: Mapped[str] = mapped_column(String(64), index=True)
+    context_key: Mapped[str] = mapped_column(String(256), index=True)
+    context_value: Mapped[dict[str, Any]] = mapped_column(JSONB, default=dict)
+    ttl_hours: Mapped[int | None] = mapped_column(Integer, nullable=True)  # None = no expiry
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
+
+    __table_args__ = (
+        Index(
+            "ix_agent_context_type_key",
+            "agent_type",
+            "context_key",
+            unique=True,
+        ),
+    )
+
+
+class OrganizationRecord(Base):
+    """Multi-tenant organization."""
+
+    __tablename__ = "organizations"
+
+    id: Mapped[str] = mapped_column(
+        String(64), primary_key=True, default=lambda: f"org-{uuid4().hex[:12]}"
+    )
+    name: Mapped[str] = mapped_column(String(256), unique=True)
+    slug: Mapped[str] = mapped_column(String(128), unique=True, index=True)
+    plan: Mapped[str] = mapped_column(String(32), default="free")  # free, pro, enterprise
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    settings: Mapped[dict[str, Any]] = mapped_column(JSONB, default=dict)
+    rate_limit: Mapped[int] = mapped_column(Integer, default=1000)  # requests per minute
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+
+class PlaybookRecord(Base):
+    """Custom playbook stored in the database."""
+
+    __tablename__ = "playbooks"
+
+    id: Mapped[str] = mapped_column(
+        String(64),
+        primary_key=True,
+        default=lambda: f"pb-{uuid4().hex[:12]}",
+    )
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    description: Mapped[str] = mapped_column(Text, default="")
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+    tags: Mapped[list[Any]] = mapped_column(JSON, default=list)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    created_by: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
+
+    __table_args__ = (
+        Index("ix_playbooks_name", "name"),
+        Index("ix_playbooks_is_active", "is_active"),
+    )
+
+
+class APIKeyRecord(Base):
+    """API key for programmatic access."""
+
+    __tablename__ = "api_keys"
+
+    id: Mapped[str] = mapped_column(
+        String(64), primary_key=True, default=lambda: f"key-{uuid4().hex[:12]}"
+    )
+    user_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    organization_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    key_prefix: Mapped[str] = mapped_column(String(8), nullable=False)
+    key_hash: Mapped[str] = mapped_column(String(128), nullable=False, unique=True)
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    scopes: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class NotificationPreferenceRecord(Base):
+    """Per-user notification preference for a channel + event type."""
+
+    __tablename__ = "notification_preferences"
+
+    id: Mapped[str] = mapped_column(
+        String(64),
+        primary_key=True,
+        default=lambda: f"np-{uuid4().hex[:12]}",
+    )
+    user_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    channel: Mapped[str] = mapped_column(String(50), nullable=False)
+    event_type: Mapped[str] = mapped_column(String(100), nullable=False)
+    enabled: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    config: Mapped[dict[str, Any] | None] = mapped_column(JSONB, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), onupdate=func.now()
+    )
+
+    __table_args__ = (
+        UniqueConstraint(
+            "user_id",
+            "channel",
+            "event_type",
+            name="uq_user_channel_event",
+        ),
+    )

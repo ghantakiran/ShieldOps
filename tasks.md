@@ -1,7 +1,7 @@
 # ShieldOps — Feature Implementation Tracker
 
-**Last Updated:** 2026-02-20
-**Platform Completeness:** 100%
+**Last Updated:** 2026-02-19
+**Platform Completeness:** Phase 8 complete — 100% across all phases
 
 ---
 
@@ -283,12 +283,10 @@
 - [x] **Playbooks Dashboard Page** — View, search, and trigger playbooks
   - File: `dashboard-ui/src/pages/Playbooks.tsx` — card grid, search, YAML expansion, trigger
 
-- [ ] **Multi-Org / Tenant Isolation** — Organization-scoped data access
-  - New DB column: `organization_id` on users, investigations, remediations, vulnerabilities
-  - New ORM model: `OrganizationRecord` (id, name, slug, plan, created_at)
-  - Migration: Alembic migration adding `organizations` table + FK columns
-  - Middleware: Extract org from JWT claims, scope all queries
-  - API: `GET/POST /organizations` for org management
+- [x] **Multi-Org / Tenant Isolation** — Organization-scoped data access
+  - ORM: `OrganizationRecord`, Migration 009, `TenantMiddleware`
+  - API: `GET/POST /organizations`, `PUT /organizations/{id}` (admin only)
+  - Tests: 14 new tests (API CRUD + middleware), zero regressions
 
 - [x] **User Management API + Dashboard** — Full user lifecycle
   - Routes: `src/shieldops/api/routes/users.py` — GET /users, PUT role, PUT active
@@ -319,6 +317,149 @@
   - 7 new test files: Analytics, Security, Cost, Learning, Settings, Investigations, Remediations
   - ResizeObserver polyfill for recharts in jsdom
   - 48 total dashboard tests passing (13 test files)
+
+---
+
+## Phase 7 — Enterprise SaaS & Developer Platform
+
+### P0 — Critical (Enterprise SaaS Requirements)
+
+- [x] **Multi-Org / Tenant Isolation** — Organization-scoped data access
+  - ORM: `OrganizationRecord`, Migration 009, `TenantMiddleware`
+  - API: `GET/POST /organizations`, `PUT /organizations/{id}` (admin only)
+  - Tests: 14 new tests (API CRUD + middleware), zero regressions
+
+- [x] **Fine-grained RBAC / Permissions** — Resource-level access control
+  - Module: `src/shieldops/api/auth/permissions.py` — `require_permission(resource, action)`
+  - Seed permissions: admin (all), operator (CRUD), viewer (read-only)
+  - API: `GET /permissions`, `PUT /permissions/{id}` (admin only)
+  - Tests: Permission checks, role escalation prevention, default deny
+
+- [x] **API Rate Limiting v2** — Per-tenant sliding window with Redis
+  - Module: `src/shieldops/api/middleware/sliding_window.py` — sliding window algorithm
+  - Per-tenant limits, per-endpoint tiers, X-RateLimit-* headers
+  - Tests: Sliding window accuracy, tenant isolation, header correctness
+
+### P1 — High (Developer Platform & Quality)
+
+- [x] **Agent Context Store** — Persistent cross-incident memory for agents
+  - ORM: `AgentContextRecord`, Migration 010: `agent_context` table
+  - Module: `src/shieldops/agents/context_store.py` — get/set/search with TTL
+  - Tests: CRUD, TTL expiry, search by key pattern
+
+- [x] **Python SDK Client** — `shieldops-sdk` package for programmatic API access
+  - Directory: `sdk/` — sync `ShieldOpsClient` + async `AsyncShieldOpsClient`
+  - Resources: investigations, remediations, security_scans, vulnerabilities, agents
+  - Tests: 32 tests covering all resources, error handling, pagination
+
+- [x] **E2E Playwright Tests** — Coverage for new dashboard pages
+  - Specs: `audit-log.spec.ts`, `playbooks.spec.ts`, `user-management.spec.ts`, `analytics.spec.ts`
+  - Updated fixtures with mock data for new pages
+
+- [x] **CLI Tool** — Command-line interface for ShieldOps operations
+  - Module: `src/shieldops/cli/` — status, investigate, remediate, scan, agents commands
+  - Click-based with table/JSON output, auth support
+  - Tests: 31 tests (26 new + 5 legacy)
+
+### P2 — Medium (Operational Confidence & Documentation)
+
+- [x] **k6 Load Testing Suite** — Performance validation scripts
+  - Directory: `tests/load/` — smoke, API CRUD, auth flow, read-heavy, WebSocket scenarios
+  - Thresholds: p95 < 200ms reads, p95 < 500ms writes, error rate < 1%
+  - Makefile targets: `make load-test`, `load-test-full`, `load-test-stress`
+
+- [x] **MkDocs Documentation Site** — Structured docs from existing markdown
+  - `mkdocs.yml` with Material theme, 30+ pages across 7 sections
+  - Structure: Getting Started, Architecture, API Reference, Agents, Deployment, Contributing
+
+- [x] **OpenAPI Enhancement + API Versioning** — Production API contract
+  - Module: `src/shieldops/api/schemas/responses.py` — 10 typed Pydantic response models
+  - `APIVersionMiddleware` + `GET /api/v1/changelog`
+  - TypeScript generation script: `scripts/generate_types.sh`
+  - Tests: 32 tests (response models + versioning)
+
+---
+
+## Phase 8 — Revenue Readiness & Operational Excellence
+
+### P0 — Critical (Revenue & Demo Impact)
+
+- [x] **API Key Management** — Service account API keys for programmatic access
+  - ORM: `APIKeyRecord`, Migration 011, `src/shieldops/api/auth/api_keys.py`
+  - Auth middleware enhanced: `sk-` prefixed keys alongside JWT
+  - API: `POST /api-keys`, `GET /api-keys`, `DELETE /api-keys/{id}`
+  - Tests: 28 tests (key generation, scope validation, expiry, ownership)
+
+- [x] **Data Export / Compliance Reports** — CSV/PDF export for enterprise compliance
+  - Module: `src/shieldops/api/routes/exports.py` + `src/shieldops/utils/export_helpers.py`
+  - Endpoints: `/export/investigations`, `/export/remediations`, `/export/compliance`
+  - CSV streaming + JSON, OWASP CSV injection prevention
+  - Tests: 30 tests (format, filters, sanitization, auth)
+
+- [x] **Dashboard Real-time Updates** — WebSocket-powered live data refresh
+  - Hook: `useRealtimeUpdates.ts` with Zustand connection store
+  - Components: `ConnectionStatus`, `LiveIndicator` (pulse animation)
+  - Wired into: Layout, Header, FleetOverview, Investigations, Remediations
+  - Exponential backoff reconnection, React Query cache invalidation
+
+- [x] **Incident Timeline View** — Unified investigation lifecycle page
+  - Page: `IncidentTimeline.tsx` + reusable `Timeline.tsx` component
+  - API: `GET /investigations/{id}/timeline` — merged events
+  - Color-coded event types, expandable details, filter bar
+  - Tests: 10 tests
+
+### P1 — High (Monetization & Self-Service)
+
+- [x] **Stripe Billing Integration** — Subscription management for SaaS
+  - Module: `src/shieldops/integrations/billing/stripe_billing.py`
+  - Plans: Free (5 agents), Pro (25), Enterprise (unlimited)
+  - API: checkout, subscription, usage, webhook handler (4 event types)
+  - Dashboard: Billing page with usage meters + plan comparison cards
+  - Tests: 23 tests
+
+- [x] **Custom Playbook Editor** — In-dashboard YAML editor for playbooks
+  - Backend: `playbook_crud.py` — 7 endpoints with YAML validation + dangerous action blocking
+  - ORM: `PlaybookRecord`, Migration 012
+  - Dashboard: Split-pane editor with validate/dry-run preview
+  - Tests: 21 tests
+
+- [x] **Batch Operations API** — Bulk management for enterprise scale
+  - Module: `src/shieldops/api/routes/batch.py`
+  - 4 endpoints: bulk create investigations/remediations, update status, job polling
+  - 202 async processing, partial failure handling, 1-hour job expiry
+  - Tests: 26 tests
+
+- [x] **Agent Performance Dashboard** — Dedicated metrics visualization
+  - Page: `AgentPerformance.tsx` with line/bar/heatmap charts
+  - API: `GET /analytics/agent-performance` with deterministic demo data
+  - Sortable breakdown table with color-coded success rates
+  - Tests: 13 tests
+
+### P2 — Medium (Operational Maturity)
+
+- [x] **Health Check Dashboard** — System dependency status page
+  - API: `GET /health/detailed` — concurrent DB/Redis/Kafka/OPA checks with 2s timeout
+  - Dashboard: `SystemHealth.tsx` with status banner, 4 service cards, auto-refresh
+  - Overall status: healthy/degraded/unhealthy logic
+  - Tests: 16 tests
+
+- [x] **Notification Preferences API** — Per-user notification settings
+  - ORM: `NotificationPreferenceRecord`, Migration 013, unique constraint
+  - API: list/upsert/delete preferences + event types listing
+  - 12 event types x 4 channels, toggle grid in Settings page
+  - Tests: 15 tests
+
+- [x] **API Usage Analytics** — Per-tenant usage tracking and dashboard
+  - Middleware: `UsageTrackerMiddleware` — in-memory per-org/endpoint/hour tracking
+  - API: 4 endpoints (usage, top endpoints, hourly, by-org)
+  - Dashboard: API Usage section in Analytics page with charts + tables
+  - Tests: 33 tests
+
+- [x] **Global Search** — Unified search across all entities
+  - API: `GET /search` — parallel ILIKE across 3 entity types, relevance scoring
+  - Dashboard: `GlobalSearch.tsx` — Cmd+K command palette with keyboard nav
+  - Recent searches in localStorage, debounced, grouped results
+  - Tests: 25 tests
 
 ---
 
@@ -390,3 +531,25 @@
 - [x] Refresh Tokens + Revocation (JTI, Redis blacklist) — 4 tests
 - [x] Terraform State Backend + CI (S3/GCS/Azure backends, terraform-plan job)
 - [x] Dashboard Page Tests (7 new test files, 48 total vitest tests)
+- [x] Multi-Org / Tenant Isolation (OrganizationRecord, TenantMiddleware, 14 tests)
+- [x] Fine-grained RBAC / Permissions (require_permission dependency, seed roles)
+- [x] API Rate Limiting v2 (sliding window, per-tenant, X-RateLimit headers)
+- [x] Agent Context Store (AgentContextRecord, TTL, cross-incident memory)
+- [x] Python SDK Client (sync + async, 5 resources, 32 tests)
+- [x] E2E Playwright Tests (4 new specs: audit-log, playbooks, user-management, analytics)
+- [x] CLI Tool (Click-based, 6 command groups, 31 tests)
+- [x] k6 Load Testing Suite (5 scenarios, 3 Makefile targets)
+- [x] MkDocs Documentation Site (Material theme, 30+ pages, 7 sections)
+- [x] OpenAPI Enhancement + API Versioning (10 response models, changelog, 32 tests)
+- [x] API Key Management (SHA-256 hashed, sk- prefix auth, scope validation) — 28 tests
+- [x] Data Export / Compliance Reports (CSV streaming, JSON, OWASP sanitization) — 30 tests
+- [x] Dashboard Real-time Updates (WebSocket + Zustand + React Query invalidation)
+- [x] Incident Timeline View (merged events, color-coded, filter bar) — 10 tests
+- [x] Stripe Billing Integration (checkout, subscription, webhooks, usage) — 23 tests
+- [x] Custom Playbook Editor (7 CRUD endpoints, YAML validation, dry-run) — 21 tests
+- [x] Batch Operations API (async 202, partial failure, job polling) — 26 tests
+- [x] Agent Performance Dashboard (line/bar/heatmap charts, demo data) — 13 tests
+- [x] Health Check Dashboard (concurrent dep checks, 2s timeout, auto-refresh) — 16 tests
+- [x] Notification Preferences (12 events x 4 channels, upsert pattern) — 15 tests
+- [x] API Usage Analytics (per-org/endpoint/hour tracking middleware) — 33 tests
+- [x] Global Search (Cmd+K palette, parallel ILIKE, relevance scoring) — 25 tests

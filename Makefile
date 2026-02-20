@@ -162,6 +162,25 @@ test-agents: ## Run agent simulation tests
 	@echo "==> Running agent simulation tests..."
 	$(PYTEST) tests/agents/ -v
 
+.PHONY: load-test
+load-test: ## Run k6 load tests (smoke)
+	@echo "==> Running k6 smoke test..."
+	k6 run tests/load/smoke-test.js
+
+.PHONY: load-test-full
+load-test-full: ## Run k6 load tests (full load scenario)
+	@echo "==> Running k6 full load suite..."
+	k6 run tests/load/scenarios/api-crud.js
+	k6 run tests/load/scenarios/auth-flow.js
+	k6 run tests/load/scenarios/read-heavy.js
+	k6 run tests/load/scenarios/websocket.js
+
+.PHONY: load-test-stress
+load-test-stress: ## Run k6 stress tests (find breaking point)
+	@echo "==> Running k6 stress tests..."
+	k6 run tests/load/scenarios/api-crud.js -e PROFILE=stress
+	k6 run tests/load/scenarios/read-heavy.js -e PROFILE=stress
+
 # ---------------------------------------------------------------------------
 # Code Quality
 # ---------------------------------------------------------------------------

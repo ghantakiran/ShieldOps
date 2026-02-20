@@ -8,6 +8,8 @@ import type { Investigation } from "../api/types";
 import DataTable, { type Column } from "../components/DataTable";
 import StatusBadge from "../components/StatusBadge";
 import LoadingSpinner from "../components/LoadingSpinner";
+import LiveIndicator from "../components/LiveIndicator";
+import { useConnectionStatus } from "../hooks/useRealtimeUpdates";
 
 const STATUS_OPTIONS: Array<{ value: string; label: string }> = [
   { value: "all", label: "All Statuses" },
@@ -34,6 +36,8 @@ function formatDuration(seconds: number): string {
 
 export default function Investigations() {
   const navigate = useNavigate();
+  const connectionStatus = useConnectionStatus();
+  const isLive = connectionStatus === "connected";
   const [statusFilter, setStatusFilter] = useState("all");
   const [severityFilter, setSeverityFilter] = useState("all");
 
@@ -145,6 +149,7 @@ export default function Investigations() {
       {/* Header */}
       <div className="flex items-center gap-3">
         <h1 className="text-2xl font-bold text-gray-100">Investigations</h1>
+        <LiveIndicator active={isLive} />
         <span className="inline-flex items-center rounded-full bg-brand-500/10 px-2.5 py-0.5 text-xs font-medium text-brand-400 ring-1 ring-inset ring-brand-500/20">
           {filtered.length}
         </span>

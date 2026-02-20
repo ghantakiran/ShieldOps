@@ -50,10 +50,22 @@ async def client(mock_redis):
     async def _fake_ensure(self):
         return mock_redis
 
-    with patch(
-        "shieldops.api.middleware.rate_limiter.RateLimitMiddleware._ensure_client",
-        _fake_ensure,
+    with (
+        patch(
+            "shieldops.api.middleware.rate_limiter.RateLimitMiddleware._ensure_client",
+            _fake_ensure,
+        ),
+        patch("shieldops.api.middleware.rate_limiter.settings") as mock_settings,
     ):
+        mock_settings.rate_limit_enabled = True
+        mock_settings.rate_limit_window_seconds = 60
+        mock_settings.rate_limit_admin = 300
+        mock_settings.rate_limit_operator = 120
+        mock_settings.rate_limit_viewer = 60
+        mock_settings.rate_limit_default = 60
+        mock_settings.rate_limit_auth_login = 10
+        mock_settings.rate_limit_auth_register = 5
+        mock_settings.api_prefix = "/api/v1"
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
             yield ac
 

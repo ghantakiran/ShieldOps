@@ -18,14 +18,17 @@ from shieldops.agents.supervisor.runner import SupervisorRunner
 from shieldops.api.routes import (
     agents,
     analytics,
+    batch,
     cost,
     investigations,
     learning,
     remediations,
+    search,
     security,
     security_chat,
     supervisor,
     teams,
+    usage,
     vulnerabilities,
 )
 from shieldops.config import settings
@@ -312,6 +315,12 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     vulnerabilities.set_repository(repository)
     teams.set_repository(repository)
 
+    # Search route wiring
+    search.set_repository(repository)
+
+    # Batch operations route wiring
+    batch.set_repository(repository)
+
     # Security chat — build chat agent from runner + repository
     try:
         from shieldops.agents.security.chat import SecurityChatAgent
@@ -377,6 +386,28 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
                 "azure_billing_init_failed",
                 error=str(e),
             )
+
+    # Stripe SaaS billing
+    if settings.stripe_api_key:
+        try:
+            from shieldops.api.routes import billing as billing_routes
+            from shieldops.integrations.billing.stripe_billing import (
+                StripeClient,
+            )
+
+            stripe_client = StripeClient(
+                api_key=settings.stripe_api_key,
+                webhook_secret=settings.stripe_webhook_secret,
+            )
+            billing_routes.set_stripe_client(stripe_client)
+            app.include_router(
+                billing_routes.router,
+                prefix=settings.api_prefix,
+                tags=["Billing"],
+            )
+            logger.info("stripe_billing_initialized")
+        except Exception as e:
+            logger.warning("stripe_billing_init_failed", error=str(e))
 
     cost_runner = CostRunner(
         connector_router=router,
@@ -597,6 +628,23 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     except Exception as e:
         logger.warning("newsletter_init_failed", error=str(e))
 
+    # Agent context store
+    if repository:
+        try:
+            from shieldops.agents.context_store import AgentContextStore
+            from shieldops.api.routes import agent_context
+
+            ctx_store = AgentContextStore(repository=repository)
+            agent_context.set_store(ctx_store)
+            app.include_router(
+                agent_context.router,
+                prefix=settings.api_prefix,
+                tags=["Agent Context"],
+            )
+            logger.info("agent_context_store_initialized")
+        except Exception as e:
+            logger.warning("agent_context_init_failed", error=str(e))
+
     # Audit log routes
     try:
         from shieldops.api.routes import audit
@@ -606,6 +654,16 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         logger.info("audit_routes_initialized")
     except Exception as e:
         logger.warning("audit_routes_failed", error=str(e))
+
+    # Data export / compliance report routes
+    try:
+        from shieldops.api.routes import exports
+
+        exports.set_repository(repository)
+        app.include_router(exports.router, prefix=settings.api_prefix, tags=["Export"])
+        logger.info("export_routes_initialized")
+    except Exception as e:
+        logger.warning("export_routes_failed", error=str(e))
 
     # Register playbooks router
     try:
@@ -620,6 +678,23 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     except Exception as e:
         logger.warning("playbooks_router_failed", error=str(e))
 
+    # Playbook CRUD router (custom playbook editor)
+    try:
+        from shieldops.api.routes import playbook_crud
+
+        playbook_crud.set_repository(repository)
+        app.include_router(
+            playbook_crud.router,
+            prefix=settings.api_prefix,
+            tags=["Playbook Editor"],
+        )
+        logger.info("playbook_crud_routes_initialized")
+    except Exception as e:
+        logger.warning(
+            "playbook_crud_routes_failed",
+            error=str(e),
+        )
+
     # User management routes
     try:
         from shieldops.api.routes import users
@@ -632,6 +707,61 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         logger.info("user_management_routes_initialized")
     except Exception as e:
         logger.warning("user_routes_failed", error=str(e))
+
+    # API key management routes
+    try:
+        from shieldops.api.routes import api_keys as api_keys_routes
+
+        api_keys_routes.set_repository(repository)
+        app.include_router(
+            api_keys_routes.router,
+            prefix=settings.api_prefix,
+            tags=["API Keys"],
+        )
+        logger.info("api_key_routes_initialized")
+    except Exception as e:
+        logger.warning("api_key_routes_failed", error=str(e))
+
+    # Notification preferences routes (per-user)
+    try:
+        from shieldops.api.routes import notification_prefs
+
+        notification_prefs.set_repository(repository)
+        app.include_router(
+            notification_prefs.router,
+            prefix=settings.api_prefix,
+            tags=["Notification Preferences"],
+        )
+        logger.info("notification_prefs_routes_initialized")
+    except Exception as e:
+        logger.warning("notification_prefs_routes_failed", error=str(e))
+
+    # Permissions routes (RBAC matrix inspection)
+    try:
+        from shieldops.api.routes import permissions as permissions_routes
+
+        app.include_router(
+            permissions_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Permissions"],
+        )
+        logger.info("permissions_routes_initialized")
+    except Exception as e:
+        logger.warning("permissions_routes_failed", error=str(e))
+
+    # Organization management routes (multi-tenant)
+    try:
+        from shieldops.api.routes import organizations
+
+        organizations.set_repository(repository)
+        app.include_router(
+            organizations.router,
+            prefix=settings.api_prefix,
+            tags=["Organizations"],
+        )
+        logger.info("organization_routes_initialized")
+    except Exception as e:
+        logger.warning("organization_routes_failed", error=str(e))
 
     # OIDC / SSO authentication
     if settings.oidc_enabled and settings.oidc_issuer_url:
@@ -717,7 +847,12 @@ def create_app() -> FastAPI:
         allow_origins=settings.cors_origins,
         allow_credentials=True,
         allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        allow_headers=["Authorization", "Content-Type", "X-Request-ID"],
+        allow_headers=[
+            "Authorization",
+            "Content-Type",
+            "X-Request-ID",
+            "X-Organization-ID",
+        ],
     )
 
     # OpenTelemetry automatic HTTP span creation
@@ -730,6 +865,7 @@ def create_app() -> FastAPI:
 
     # Middleware stack (order matters: outermost first)
     from shieldops.api.middleware import (
+        APIVersionMiddleware,
         ErrorHandlerMiddleware,
         GracefulShutdownMiddleware,
         MetricsMiddleware,
@@ -737,12 +873,23 @@ def create_app() -> FastAPI:
         RequestIDMiddleware,
         RequestLoggingMiddleware,
         SecurityHeadersMiddleware,
+        SlidingWindowRateLimiter,
+        UsageTrackerMiddleware,
     )
 
     app.add_middleware(ErrorHandlerMiddleware)
     app.add_middleware(RateLimitMiddleware)
+    # Sliding window rate limiter (activated after the fixed-window limiter)
+    if settings.sliding_window_rate_limit_enabled:
+        app.add_middleware(SlidingWindowRateLimiter)
+    # UsageTrackerMiddleware records per-endpoint call counts and
+    # latencies.  Placed after auth/tenant so org_id is available
+    # on request.state.
+    app.add_middleware(UsageTrackerMiddleware)
     app.add_middleware(RequestLoggingMiddleware)
     app.add_middleware(RequestIDMiddleware)
+    # APIVersionMiddleware adds X-API-Version + X-Powered-By headers
+    app.add_middleware(APIVersionMiddleware)
     # SecurityHeadersMiddleware adds HSTS, CSP, X-Frame-Options, etc.
     app.add_middleware(SecurityHeadersMiddleware)
     # MetricsMiddleware is added last so it wraps all other
@@ -751,6 +898,14 @@ def create_app() -> FastAPI:
     # GracefulShutdownMiddleware outermost: rejects requests early
     # during shutdown and tracks in-flight count for draining.
     app.add_middleware(GracefulShutdownMiddleware)
+
+    # Tenant isolation middleware — extracts org_id for multi-tenant
+    try:
+        from shieldops.api.middleware.tenant import TenantMiddleware
+
+        app.add_middleware(TenantMiddleware)
+    except Exception as e:
+        logger.warning("tenant_middleware_init_failed", error=str(e))
 
     # Auth router (no prefix — routes are /auth/*)
     from shieldops.api.auth.routes import router as auth_router
@@ -769,6 +924,19 @@ def create_app() -> FastAPI:
     app.include_router(cost.router, prefix=settings.api_prefix, tags=["Cost"])
     app.include_router(learning.router, prefix=settings.api_prefix, tags=["Learning"])
     app.include_router(supervisor.router, prefix=settings.api_prefix, tags=["Supervisor"])
+    app.include_router(batch.router, prefix=settings.api_prefix, tags=["Batch"])
+    app.include_router(search.router, prefix=settings.api_prefix, tags=["Search"])
+    app.include_router(usage.router, prefix=settings.api_prefix, tags=["API Usage"])
+
+    # Health check (detailed, authenticated)
+    from shieldops.api.routes.health import router as health_router
+
+    app.include_router(health_router, prefix=settings.api_prefix, tags=["Health"])
+
+    # API changelog
+    from shieldops.api.routes.changelog import router as changelog_router
+
+    app.include_router(changelog_router, prefix=settings.api_prefix, tags=["Changelog"])
 
     # WebSocket routes
     from shieldops.api.ws.routes import router as ws_router

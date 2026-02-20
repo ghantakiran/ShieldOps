@@ -1,6 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Wrench, Clock } from "lucide-react";
+import { ArrowLeft, Wrench, Clock, ListOrdered } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import clsx from "clsx";
 import { get } from "../api/client";
@@ -120,6 +120,13 @@ export default function InvestigationDetail() {
           <h1 className="text-2xl font-bold text-gray-100">{inv.alert_name}</h1>
           <StatusBadge status={inv.severity} />
           <StatusBadge status={inv.status} />
+          <Link
+            to={`/investigations/${id}/timeline`}
+            className="ml-auto inline-flex items-center gap-1.5 rounded-lg border border-gray-700 bg-gray-800 px-3 py-1.5 text-sm font-medium text-gray-300 transition-colors hover:border-brand-500 hover:text-gray-100"
+          >
+            <ListOrdered className="h-4 w-4" />
+            View Timeline
+          </Link>
         </div>
       </div>
 

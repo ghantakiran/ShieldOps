@@ -133,7 +133,7 @@ async def revoke_token(
     try:
         import redis.asyncio as aioredis
 
-        r = aioredis.from_url(settings.redis_url)
+        r = aioredis.from_url(settings.redis_url)  # type: ignore[no-untyped-call]
         ttl = settings.jwt_expire_minutes * 60
         await r.setex(f"revoked:{jti}", ttl, "1")
         await r.aclose()

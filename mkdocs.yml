@@ -1,0 +1,77 @@
+site_name: ShieldOps Documentation
+site_description: AI-Powered Autonomous SRE Platform
+site_url: https://docs.shieldops.io
+
+theme:
+  name: material
+  palette:
+    - scheme: slate
+      primary: blue
+      accent: cyan
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+    - scheme: default
+      primary: blue
+      accent: cyan
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - search.suggest
+    - content.code.copy
+    - content.tabs.link
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Quick Start: getting-started/quickstart.md
+    - Installation: getting-started/installation.md
+    - Configuration: getting-started/configuration.md
+  - Architecture:
+    - Overview: architecture/overview.md
+    - Agent System: architecture/agents.md
+    - Connector Layer: architecture/connectors.md
+    - Policy Engine: architecture/policy-engine.md
+    - Safety Model: architecture/safety-model.md
+  - Agents:
+    - Investigation Agent: agents/investigation.md
+    - Remediation Agent: agents/remediation.md
+    - Security Agent: agents/security.md
+    - Learning Agent: agents/learning.md
+    - Supervisor Agent: agents/supervisor.md
+  - API Reference:
+    - Authentication: api/authentication.md
+    - Investigations: api/investigations.md
+    - Remediations: api/remediations.md
+    - Security: api/security.md
+    - Agents: api/agents.md
+    - Analytics: api/analytics.md
+  - Deployment:
+    - Local Development: deployment/local.md
+    - Kubernetes: deployment/kubernetes.md
+    - Helm Chart: deployment/helm.md
+    - Multi-Cloud: deployment/multi-cloud.md
+  - Contributing:
+    - Development Setup: contributing/setup.md
+    - Code Style: contributing/code-style.md
+    - Testing: contributing/testing.md
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - admonition
+  - pymdownx.details
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
+
+plugins:
+  - search

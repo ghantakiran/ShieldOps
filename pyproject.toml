@@ -82,7 +82,7 @@ dashboard = [
 ]
 
 [project.scripts]
-shieldops = "shieldops.cli:main"
+shieldops = "shieldops.cli.main:cli"
 
 [tool.ruff]
 line-length = 100

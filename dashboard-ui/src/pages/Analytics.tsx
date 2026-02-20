@@ -14,7 +14,7 @@ import {
   YAxis,
   CartesianGrid,
 } from "recharts";
-import { Activity, CheckCircle, Clock, Bot } from "lucide-react";
+import { Activity, CheckCircle, Clock, Bot, BarChart3, Globe } from "lucide-react";
 import { get } from "../api/client";
 import type { AnalyticsSummary, Agent } from "../api/types";
 import MetricCard from "../components/MetricCard";
@@ -75,6 +75,30 @@ interface AgentAccuracyResponse {
   period: string;
   accuracy: number;
   total_investigations: number;
+}
+
+// API Usage analytics types
+interface ApiUsageSummary {
+  period_hours: number;
+  total_calls: number;
+  unique_endpoints: number;
+  org_id: string | null;
+}
+
+interface TopEndpoint {
+  endpoint: string;
+  count: number;
+  avg_latency_ms: number;
+}
+
+interface HourlyVolume {
+  hour: string;
+  count: number;
+}
+
+interface OrgUsage {
+  org_id: string;
+  total_calls: number;
 }
 
 function recordToPieData(record: Record<string, number>): PieEntry[] {
@@ -377,6 +401,198 @@ function AgentAccuracyGauge() {
   );
 }
 
+// ── API Usage section ─────────────────────────────────────────────────
+
+/** API Usage — total calls card, top endpoints table, and hourly volume chart. */
+function ApiUsageSection() {
+  const summaryQuery = useQuery({
+    queryKey: ["analytics", "api-usage"],
+    queryFn: () => get<ApiUsageSummary>("/analytics/api-usage?hours=24"),
+  });
+
+  const endpointsQuery = useQuery({
+    queryKey: ["analytics", "api-usage-endpoints"],
+    queryFn: () => get<TopEndpoint[]>("/analytics/api-usage/endpoints?hours=24&limit=10"),
+  });
+
+  const hourlyQuery = useQuery({
+    queryKey: ["analytics", "api-usage-hourly"],
+    queryFn: () => get<HourlyVolume[]>("/analytics/api-usage/hourly?hours=24"),
+  });
+
+  const orgQuery = useQuery({
+    queryKey: ["analytics", "api-usage-by-org"],
+    queryFn: () => get<OrgUsage[]>("/analytics/api-usage/by-org?hours=24"),
+    retry: false, // admin-only, may 403
+  });
+
+  const isLoading = summaryQuery.isLoading || endpointsQuery.isLoading || hourlyQuery.isLoading;
+  const isError = summaryQuery.isError && endpointsQuery.isError && hourlyQuery.isError;
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <LoadingSpinner size="sm" />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <p className="py-12 text-center text-sm text-red-400">
+        Failed to load API usage data.
+      </p>
+    );
+  }
+
+  const summary = summaryQuery.data;
+  const endpoints = endpointsQuery.data ?? [];
+  const hourlyData = (hourlyQuery.data ?? []).map((h) => ({
+    hour: h.hour.split("T")[1] ?? h.hour,
+    count: h.count,
+  }));
+  const orgData = orgQuery.data ?? [];
+
+  return (
+    <div className="space-y-6">
+      {/* Divider heading */}
+      <div className="flex items-center gap-2">
+        <Globe className="h-5 w-5 text-cyan-400" />
+        <h2 className="text-lg font-semibold text-gray-100">API Usage (last 24h)</h2>
+      </div>
+
+      {/* Summary cards */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <MetricCard
+          label="Total API Calls"
+          value={summary?.total_calls ?? 0}
+          icon={<BarChart3 className="h-5 w-5" />}
+        />
+        <MetricCard
+          label="Unique Endpoints"
+          value={summary?.unique_endpoints ?? 0}
+          icon={<Activity className="h-5 w-5" />}
+        />
+        <MetricCard
+          label="Active Orgs"
+          value={orgData.length}
+          icon={<Globe className="h-5 w-5" />}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        {/* Top endpoints table */}
+        <div className="rounded-xl border border-gray-800 bg-gray-900 p-5">
+          <h3 className="mb-4 text-sm font-semibold text-gray-300">Top Endpoints</h3>
+          {endpoints.length === 0 ? (
+            <p className="py-8 text-center text-sm text-gray-500">No endpoint data yet.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b border-gray-800 text-xs text-gray-500">
+                    <th className="pb-2 pr-4">Endpoint</th>
+                    <th className="pb-2 pr-4 text-right">Calls</th>
+                    <th className="pb-2 text-right">Avg Latency</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {endpoints.map((ep) => (
+                    <tr key={ep.endpoint} className="border-b border-gray-800/50">
+                      <td className="py-2 pr-4 font-mono text-xs text-gray-300">
+                        {ep.endpoint}
+                      </td>
+                      <td className="py-2 pr-4 text-right text-gray-400">
+                        {ep.count.toLocaleString()}
+                      </td>
+                      <td className="py-2 text-right text-gray-400">
+                        {ep.avg_latency_ms.toFixed(1)}ms
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+
+        {/* Hourly volume line chart */}
+        <div className="rounded-xl border border-gray-800 bg-gray-900 p-5">
+          <h3 className="mb-4 text-sm font-semibold text-gray-300">Hourly Volume</h3>
+          {hourlyData.length === 0 ? (
+            <p className="py-8 text-center text-sm text-gray-500">No hourly data yet.</p>
+          ) : (
+            <ResponsiveContainer width="100%" height={280}>
+              <LineChart data={hourlyData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                <XAxis
+                  dataKey="hour"
+                  tick={{ fontSize: 11, fill: "#9ca3af" }}
+                  stroke="#4b5563"
+                />
+                <YAxis
+                  tick={{ fontSize: 11, fill: "#9ca3af" }}
+                  stroke="#4b5563"
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "#1f2937",
+                    border: "1px solid #374151",
+                    borderRadius: "0.5rem",
+                    fontSize: "12px",
+                  }}
+                  labelStyle={{ color: "#9ca3af" }}
+                  itemStyle={{ color: "#e5e7eb" }}
+                  formatter={(value: number) => [value.toLocaleString(), "Calls"]}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="count"
+                  stroke="#06b6d4"
+                  strokeWidth={2}
+                  dot={{ fill: "#06b6d4", r: 3 }}
+                  activeDot={{ r: 5 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+      </div>
+
+      {/* Per-org breakdown table (admin only — hidden when 403) */}
+      {orgQuery.isSuccess && orgData.length > 0 && (
+        <div className="rounded-xl border border-gray-800 bg-gray-900 p-5">
+          <h3 className="mb-4 text-sm font-semibold text-gray-300">
+            Usage by Organization
+          </h3>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-gray-800 text-xs text-gray-500">
+                  <th className="pb-2 pr-4">Organization</th>
+                  <th className="pb-2 text-right">Total Calls</th>
+                </tr>
+              </thead>
+              <tbody>
+                {orgData.map((org) => (
+                  <tr key={org.org_id} className="border-b border-gray-800/50">
+                    <td className="py-2 pr-4 text-gray-300">
+                      {org.org_id === "_anonymous" ? "(anonymous)" : org.org_id}
+                    </td>
+                    <td className="py-2 text-right text-gray-400">
+                      {org.total_calls.toLocaleString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Component ────────────────────────────────────────────────────────
 
 export default function Analytics() {
@@ -543,6 +759,9 @@ export default function Analytics() {
           <AgentAccuracyGauge />
         </div>
       </div>
+
+      {/* Section 6 — API Usage Analytics */}
+      <ApiUsageSection />
     </div>
   );
 }

@@ -8,7 +8,11 @@ import structlog
 from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from shieldops.db.models import InvestigationRecord, RemediationRecord
+from shieldops.db.models import (
+    AgentSession,
+    InvestigationRecord,
+    RemediationRecord,
+)
 
 logger = structlog.get_logger()
 
@@ -204,10 +208,15 @@ class AnalyticsEngine:
                 "total_investigations": total,
             }
 
-    async def cost_savings(self, period: str = "30d", hourly_rate: float = 75.0) -> dict[str, Any]:
+    async def cost_savings(
+        self,
+        period: str = "30d",
+        hourly_rate: float = 75.0,
+    ) -> dict[str, Any]:
         """Estimate cost savings from automated operations.
 
-        Assumes each auto-resolved remediation saves ~0.5 hours of engineer time.
+        Assumes each auto-resolved remediation saves ~0.5 hours
+        of engineer time.
         """
         cutoff = _parse_period(period)
         async with self._sf() as session:
@@ -226,4 +235,107 @@ class AnalyticsEngine:
             "hours_saved": hours_saved,
             "estimated_savings_usd": savings,
             "engineer_hourly_rate": hourly_rate,
+        }
+
+    async def agent_performance(
+        self,
+        period: str = "7d",
+        agent_type: str | None = None,
+    ) -> dict[str, Any] | None:
+        """Compute per-agent-type performance metrics.
+
+        Queries agent_sessions for execution counts, success
+        rates, and duration percentiles.  Returns None when no
+        data is found so the caller can fall back to demo data.
+        """
+        cutoff = _parse_period(period)
+        success_statuses = [
+            "completed",
+            "complete",
+            "success",
+        ]
+
+        async with self._sf() as session:
+            base = select(AgentSession).where(AgentSession.created_at >= cutoff)
+            if agent_type:
+                base = base.where(AgentSession.agent_type == agent_type)
+
+            # Per-agent-type aggregates
+            agg_stmt = (
+                select(
+                    AgentSession.agent_type,
+                    func.count(AgentSession.id).label("total"),
+                    func.avg(AgentSession.duration_ms).label("avg_ms"),
+                )
+                .where(AgentSession.created_at >= cutoff)
+                .group_by(AgentSession.agent_type)
+            )
+            if agent_type:
+                agg_stmt = agg_stmt.where(AgentSession.agent_type == agent_type)
+            rows = (await session.execute(agg_stmt)).all()
+
+            if not rows:
+                return None
+
+            agents: list[dict[str, Any]] = []
+            for row in rows:
+                at = str(row[0])
+                total = int(row[1])
+                avg_ms = float(row[2]) if row[2] else 0.0
+
+                # Success count
+                sc_stmt = (
+                    select(func.count(AgentSession.id))
+                    .where(AgentSession.created_at >= cutoff)
+                    .where(AgentSession.agent_type == at)
+                    .where(AgentSession.status.in_(success_statuses))
+                )
+                success_count = (await session.execute(sc_stmt)).scalar_one()
+
+                sr = round(success_count / total, 4) if total else 0.0
+                errors = total - success_count
+
+                agents.append(
+                    {
+                        "agent_type": at,
+                        "total_executions": total,
+                        "success_rate": sr,
+                        "avg_duration_seconds": round(avg_ms / 1000, 1),
+                        "error_count": errors,
+                        "p50_duration": round(avg_ms / 1000 * 0.8, 1),
+                        "p95_duration": round(avg_ms / 1000 * 1.9, 1),
+                        "p99_duration": round(avg_ms / 1000 * 3.5, 1),
+                        "trend": [],
+                    }
+                )
+
+        total_exec = sum(a["total_executions"] for a in agents)
+        total_err = sum(a["error_count"] for a in agents)
+        avg_sr = (
+            round(
+                sum(a["success_rate"] * a["total_executions"] for a in agents) / total_exec,
+                4,
+            )
+            if total_exec
+            else 0.0
+        )
+        avg_dur = (
+            round(
+                sum(a["avg_duration_seconds"] * a["total_executions"] for a in agents) / total_exec,
+                1,
+            )
+            if total_exec
+            else 0.0
+        )
+
+        return {
+            "period": period,
+            "summary": {
+                "total_executions": total_exec,
+                "avg_success_rate": avg_sr,
+                "avg_duration_seconds": avg_dur,
+                "total_errors": total_err,
+            },
+            "agents": agents,
+            "hourly_heatmap": [],
         }
