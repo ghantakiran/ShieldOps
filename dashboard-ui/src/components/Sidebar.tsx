@@ -19,7 +19,6 @@ import {
   Rocket,
   Store,
   Layers,
-  Webhook,
   ShieldCheck,
 } from "lucide-react";
 import clsx from "clsx";
