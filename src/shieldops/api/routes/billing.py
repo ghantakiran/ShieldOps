@@ -38,11 +38,22 @@ _org_subscriptions: dict[str, dict[str, Any]] = {}
 _org_usage: dict[str, dict[str, int]] = {}
 _payment_history: dict[str, list[dict[str, Any]]] = {}
 
+# Enforcement service -- wired from app.py when billing enforcement
+# is active.  When set, the /billing/usage endpoint returns live
+# agent counts and API quota from the enforcement layer.
+_enforcement_service: Any = None
+
 
 def set_stripe_client(client: StripeClient) -> None:
     """Override the Stripe client (used during app startup)."""
     global _stripe_client
     _stripe_client = client
+
+
+def set_enforcement_service(service: Any) -> None:
+    """Inject the PlanEnforcementService (called from app.py)."""
+    global _enforcement_service
+    _enforcement_service = service
 
 
 def _get_client() -> StripeClient:
@@ -205,10 +216,36 @@ async def cancel_subscription(
 
 @router.get("/billing/usage")
 async def get_usage(
+    request: Request,
     user: UserResponse = Depends(get_current_user),
 ) -> dict[str, Any]:
-    """Get current billing-period usage for the organisation."""
-    org_id = _get_org_id(user)
+    """Get current billing-period usage vs plan limits.
+
+    When the ``PlanEnforcementService`` is available, returns live
+    agent counts and API call totals.  Otherwise falls back to the
+    in-memory subscription store.
+    """
+    org_id: str = getattr(request.state, "organization_id", None) or _get_org_id(user)
+
+    # Prefer the enforcement service for accurate, DB-backed data
+    if _enforcement_service is not None:
+        summary = await _enforcement_service.get_usage_summary(org_id)
+        agent_limit = summary["agent_limit"]
+        api_limit = summary["api_calls_limit"]
+        return {
+            "org_id": org_id,
+            "plan": summary["plan"],
+            "plan_name": summary["plan_name"],
+            "agent_count": summary["agent_count"],
+            "agent_limit": agent_limit,
+            "agent_limit_reached": summary["agent_limit_reached"],
+            "api_calls_used": summary["api_calls_used"],
+            "api_calls_limit": api_limit,
+            "api_quota_exceeded": summary["api_quota_exceeded"],
+            "upgrade_available": summary["upgrade_available"],
+        }
+
+    # Fallback: in-memory subscription store
     sub = _org_subscriptions.get(org_id, {})
     plan_key = sub.get("plan", "free")
     plan_def = PLANS.get(plan_key, PLANS["free"])

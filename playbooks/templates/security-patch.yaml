@@ -1,0 +1,98 @@
+# ShieldOps Agent Template: Critical Security Patch
+# Apply critical security patches across infrastructure
+
+name: "Security Patch Deployment"
+description: >
+  Automates the identification and deployment of critical security
+  patches (CVE-rated high/critical). Scans hosts for missing patches,
+  creates a patching plan with rollback capability, applies patches
+  in batches with canary validation, and generates a compliance
+  report after completion.
+category: "security"
+cloud_providers: ["aws", "gcp", "azure", "linux"]
+agent_type: "security"
+risk_level: "high"
+tags: ["security", "patching", "cve", "vulnerability", "compliance"]
+estimated_setup_minutes: 20
+featured: true
+
+parameters:
+  - name: "target_hosts"
+    type: "string"
+    required: true
+    default: ""
+    description: "Comma-separated list of hosts or ASG name to patch"
+  - name: "severity_filter"
+    type: "string"
+    required: false
+    default: "critical,high"
+    description: "Comma-separated CVE severity levels to include"
+  - name: "patch_batch_size"
+    type: "integer"
+    required: false
+    default: 5
+    description: "Number of hosts to patch simultaneously"
+  - name: "canary_count"
+    type: "integer"
+    required: false
+    default: 1
+    description: "Number of canary hosts to patch first for validation"
+  - name: "reboot_if_required"
+    type: "boolean"
+    required: false
+    default: true
+    description: "Automatically reboot hosts if patches require it"
+  - name: "maintenance_window_hours"
+    type: "integer"
+    required: false
+    default: 4
+    description: "Maximum hours allowed for the patching operation"
+
+steps:
+  - name: "scan_for_vulnerabilities"
+    action: "security_scan"
+    config:
+      scan_type: "cve"
+      severity_filter: "critical,high"
+      include_os_packages: true
+
+  - name: "create_patch_plan"
+    action: "analyze"
+    config:
+      operation: "generate_patch_plan"
+      group_by: "host"
+      prioritize_by: "cvss_score"
+
+  - name: "snapshot_hosts"
+    action: "modify_infrastructure"
+    config:
+      operation: "create_snapshot"
+      requires_approval: true
+
+  - name: "patch_canary"
+    action: "modify_infrastructure"
+    config:
+      operation: "apply_patches"
+      scope: "canary"
+      requires_approval: true
+
+  - name: "validate_canary"
+    action: "health_check"
+    config:
+      check_type: "application_health"
+      timeout_seconds: 300
+      include_regression_tests: true
+
+  - name: "patch_remaining"
+    action: "modify_infrastructure"
+    config:
+      operation: "apply_patches"
+      scope: "remaining"
+      batch_size: 5
+      requires_approval: true
+
+  - name: "generate_compliance_report"
+    action: "report"
+    config:
+      report_type: "patch_compliance"
+      include_cve_details: true

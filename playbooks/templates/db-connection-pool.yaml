@@ -1,0 +1,87 @@
+# ShieldOps Agent Template: Database Connection Pool Remediation
+# Detect and fix database connection pool exhaustion
+
+name: "Database Connection Pool Fix"
+description: >
+  Monitors database connection pool utilization and remediates
+  connection exhaustion issues. Identifies idle connections, kills
+  long-running queries, adjusts pool size, and validates database
+  health after remediation. Supports PostgreSQL, MySQL, and
+  cloud-managed databases.
+category: "remediation"
+cloud_providers: ["aws", "gcp", "azure", "linux"]
+agent_type: "remediation"
+risk_level: "medium"
+tags: ["database", "connection-pool", "postgresql", "mysql", "rds"]
+estimated_setup_minutes: 10
+
+parameters:
+  - name: "database_host"
+    type: "string"
+    required: true
+    default: ""
+    description: "Database hostname or RDS endpoint"
+  - name: "database_type"
+    type: "string"
+    required: true
+    default: "postgresql"
+    description: "Database engine type: postgresql, mysql, or aurora"
+  - name: "max_connections"
+    type: "integer"
+    required: false
+    default: 100
+    description: "Maximum connection pool size"
+  - name: "idle_timeout_seconds"
+    type: "integer"
+    required: false
+    default: 300
+    description: "Kill connections idle longer than this threshold"
+  - name: "long_query_threshold_seconds"
+    type: "integer"
+    required: false
+    default: 60
+    description: "Flag queries running longer than this as candidates for termination"
+  - name: "pool_utilization_threshold"
+    type: "integer"
+    required: false
+    default: 85
+    description: "Connection pool utilization percentage that triggers remediation"
+
+steps:
+  - name: "check_pool_utilization"
+    action: "query_metrics"
+    config:
+      metric: "database_connections_active"
+      compare: "pool_utilization_threshold"
+
+  - name: "identify_idle_connections"
+    action: "query_infrastructure"
+    config:
+      operation: "list_connections"
+      filter: "idle_timeout_exceeded"
+
+  - name: "identify_long_running_queries"
+    action: "query_infrastructure"
+    config:
+      operation: "list_active_queries"
+      filter: "duration_exceeds_threshold"
+
+  - name: "terminate_idle_connections"
+    action: "modify_infrastructure"
+    config:
+      operation: "kill_connections"
+      target: "idle"
+      requires_approval: true
+
+  - name: "adjust_pool_settings"
+    action: "modify_infrastructure"
+    config:
+      operation: "update_pool_config"
+      requires_approval: true
+
+  - name: "validate_database_health"
+    action: "health_check"
+    config:
+      check_type: "database_connectivity"
+      run_test_query: true
+      timeout_seconds: 30

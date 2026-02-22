@@ -1,0 +1,90 @@
+# ShieldOps Agent Template: Cost Right-Sizing
+# Right-size over-provisioned cloud instances to reduce costs
+
+name: "Cost Right-Sizing"
+description: >
+  Analyzes historical resource utilization metrics to identify
+  over-provisioned compute instances and recommends right-sizing
+  actions. Supports EC2, GCE, and Azure VMs. Generates savings
+  estimates and can automatically apply downsizing with safety
+  checks and rollback capability.
+category: "cost"
+cloud_providers: ["aws", "gcp", "azure"]
+agent_type: "cost"
+risk_level: "medium"
+tags: ["cost", "optimization", "right-sizing", "ec2", "compute", "savings"]
+estimated_setup_minutes: 10
+
+parameters:
+  - name: "lookback_days"
+    type: "integer"
+    required: false
+    default: 14
+    description: "Number of days of historical metrics to analyze"
+  - name: "cpu_max_threshold"
+    type: "integer"
+    required: false
+    default: 40
+    description: "Maximum CPU utilization percent to consider over-provisioned"
+  - name: "memory_max_threshold"
+    type: "integer"
+    required: false
+    default: 50
+    description: "Maximum memory utilization percent to consider over-provisioned"
+  - name: "min_savings_percent"
+    type: "integer"
+    required: false
+    default: 20
+    description: "Minimum cost savings percentage to recommend a change"
+  - name: "exclude_tags"
+    type: "string"
+    required: false
+    default: ""
+    description: "Comma-separated tag key=value pairs to exclude from analysis"
+  - name: "auto_apply"
+    type: "boolean"
+    required: false
+    default: false
+    description: "Automatically apply right-sizing recommendations (requires approval)"
+
+steps:
+  - name: "collect_utilization_metrics"
+    action: "query_metrics"
+    config:
+      metrics: ["cpu_utilization", "memory_utilization", "network_io"]
+      aggregation: "p95"
+      period_days: 14
+
+  - name: "inventory_instances"
+    action: "query_infrastructure"
+    config:
+      operation: "list_compute_instances"
+      include_pricing: true
+
+  - name: "analyze_utilization"
+    action: "analyze"
+    config:
+      operation: "right_size_analysis"
+      algorithm: "percentile_based"
+      headroom_percent: 20
+
+  - name: "generate_recommendations"
+    action: "report"
+    config:
+      report_type: "cost_recommendations"
+      include_savings_estimate: true
+      group_by: "instance_family"
+
+  - name: "apply_resizing"
+    action: "modify_infrastructure"
+    config:
+      operation: "resize_instance"
+      requires_approval: true
+      rollback_on_failure: true
+
+  - name: "validate_performance"
+    action: "health_check"
+    config:
+      check_type: "application_latency"
+      compare_to_baseline: true
+      timeout_seconds: 600

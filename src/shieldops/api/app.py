@@ -409,6 +409,30 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         except Exception as e:
             logger.warning("stripe_billing_init_failed", error=str(e))
 
+    # ── Billing enforcement service ──────────────────────────────
+    try:
+        from shieldops.api.middleware.billing_enforcement import (
+            BillingEnforcementMiddleware,
+        )
+        from shieldops.billing.enforcement import PlanEnforcementService
+
+        enforcement_service = PlanEnforcementService(
+            session_factory=session_factory,
+        )
+        BillingEnforcementMiddleware.set_enforcement_service(enforcement_service)
+
+        # Also wire into billing routes for /billing/usage endpoint
+        try:
+            from shieldops.api.routes import billing as billing_routes
+
+            billing_routes.set_enforcement_service(enforcement_service)
+        except Exception:  # noqa: S110
+            pass  # billing routes may not be loaded yet
+
+        logger.info("billing_enforcement_initialized")
+    except Exception as e:
+        logger.warning("billing_enforcement_init_failed", error=str(e))
+
     cost_runner = CostRunner(
         connector_router=router,
         billing_sources=billing_sources or None,
@@ -425,6 +449,24 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         logger.info("playbooks_loaded", count=len(playbook_loader.all()))
     except Exception as e:
         logger.warning("playbook_load_failed", error=str(e))
+
+    # ── Template loader (Marketplace) ────────────────────────────
+    template_loader = None
+    try:
+        from shieldops.api.routes import marketplace
+        from shieldops.playbooks.template_loader import TemplateLoader
+
+        template_loader = TemplateLoader()
+        template_loader.load_all()
+        marketplace.set_template_loader(template_loader)
+        app.include_router(
+            marketplace.router,
+            prefix=settings.api_prefix,
+            tags=["Marketplace"],
+        )
+        logger.info("marketplace_initialized", templates=len(template_loader.all_templates()))
+    except Exception as e:
+        logger.warning("marketplace_init_failed", error=str(e))
 
     # Learning runner — wired to DB + playbook stores
     learn_runner = LearningRunner(
@@ -763,6 +805,76 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     except Exception as e:
         logger.warning("organization_routes_failed", error=str(e))
 
+    # Onboarding wizard routes
+    try:
+        from shieldops.api.routes import onboarding
+
+        onboarding.set_repository(repository)
+        app.include_router(
+            onboarding.router,
+            prefix=settings.api_prefix,
+            tags=["Onboarding"],
+        )
+        logger.info("onboarding_routes_initialized")
+    except Exception as e:
+        logger.warning("onboarding_routes_failed", error=str(e))
+
+    # ── Incident Correlation Engine ──────────────────────────────
+    try:
+        from shieldops.agents.investigation.correlation import CorrelationEngine
+        from shieldops.api.routes import incidents as incidents_routes
+
+        correlation_engine = CorrelationEngine(
+            time_window_minutes=30,
+            similarity_threshold=0.5,
+        )
+        incidents_routes.set_engine(correlation_engine)
+        incidents_routes.set_repository(repository)
+        app.include_router(
+            incidents_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Incidents"],
+        )
+        logger.info("incident_correlation_initialized")
+    except Exception as e:
+        logger.warning("incident_correlation_init_failed", error=str(e))
+
+    # ── Git Playbook Sync (Runbook-as-Code) ──────────────────────
+    if getattr(settings, "playbook_git_repo_url", None):
+        try:
+            from shieldops.api.routes import git_playbooks
+            from shieldops.playbooks.git_sync import GitPlaybookSync
+
+            git_sync = GitPlaybookSync(
+                repo_url=getattr(settings, "playbook_git_repo_url", ""),
+                branch=getattr(settings, "playbook_git_branch", "main"),
+            )
+            git_playbooks.set_git_sync(git_sync)
+            app.include_router(
+                git_playbooks.router,
+                prefix=settings.api_prefix,
+                tags=["Git Playbooks"],
+            )
+            logger.info("git_playbook_sync_initialized")
+        except Exception as e:
+            logger.warning("git_playbook_sync_init_failed", error=str(e))
+
+    # ── Custom Webhook Triggers ──────────────────────────────────
+    try:
+        from shieldops.api.routes import webhook_triggers
+
+        webhook_triggers.set_investigation_runner(inv_runner)
+        if getattr(settings, "webhook_trigger_secret", None):
+            webhook_triggers.set_webhook_secret(getattr(settings, "webhook_trigger_secret", ""))
+        app.include_router(
+            webhook_triggers.router,
+            prefix=settings.api_prefix,
+            tags=["Webhook Triggers"],
+        )
+        logger.info("webhook_triggers_initialized")
+    except Exception as e:
+        logger.warning("webhook_triggers_init_failed", error=str(e))
+
     # OIDC / SSO authentication
     if settings.oidc_enabled and settings.oidc_issuer_url:
         try:
@@ -788,6 +900,91 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
             )
         except Exception as e:
             logger.warning("oidc_init_failed", error=str(e))
+
+    # ── Agent Simulation Mode (dry-run remediations) ──────────────
+    try:
+        from shieldops.agents.remediation.simulator import RemediationSimulator
+        from shieldops.api.routes import simulations
+
+        sim = RemediationSimulator(policy_engine=policy_engine)
+        simulations.set_simulator(sim)
+        app.include_router(
+            simulations.router,
+            prefix=settings.api_prefix,
+            tags=["Simulations"],
+        )
+        logger.info("remediation_simulator_initialized")
+    except Exception as e:
+        logger.warning("remediation_simulator_init_failed", error=str(e))
+
+    # ── Cost Optimization Autopilot ──────────────────────────────
+    try:
+        from shieldops.agents.cost.autopilot import CostAutopilot
+        from shieldops.api.routes import autopilot as autopilot_routes
+
+        cost_autopilot = CostAutopilot()
+        autopilot_routes.set_autopilot(cost_autopilot)
+        app.include_router(
+            autopilot_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Cost Autopilot"],
+        )
+        logger.info("cost_autopilot_initialized")
+    except Exception as e:
+        logger.warning("cost_autopilot_init_failed", error=str(e))
+
+    # ── Mobile Push Notifications ────────────────────────────────
+    try:
+        from shieldops.api.routes import devices as devices_routes
+        from shieldops.integrations.notifications.push import PushNotifier
+
+        push_notifier = PushNotifier(
+            fcm_server_key=getattr(settings, "fcm_server_key", ""),
+            apns_key=getattr(settings, "apns_key", ""),
+        )
+        devices_routes.set_push_notifier(push_notifier)
+        app.include_router(
+            devices_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Devices"],
+        )
+        notification_channels["push"] = push_notifier
+        logger.info("push_notifications_initialized")
+    except Exception as e:
+        logger.warning("push_notifications_init_failed", error=str(e))
+
+    # ── GraphQL API Layer ────────────────────────────────────────
+    try:
+        from shieldops.api.graphql.routes import router as graphql_router
+        from shieldops.api.graphql.routes import set_resolver
+        from shieldops.api.graphql.schema import QueryResolver
+
+        gql_resolver = QueryResolver(repository=repository)
+        set_resolver(gql_resolver)
+        app.include_router(
+            graphql_router,
+            prefix=settings.api_prefix,
+            tags=["GraphQL"],
+        )
+        logger.info("graphql_api_initialized")
+    except Exception as e:
+        logger.warning("graphql_api_init_failed", error=str(e))
+
+    # ── SOC2 Compliance Engine ────────────────────────────────────
+    try:
+        from shieldops.api.routes import compliance as compliance_routes
+        from shieldops.compliance.soc2 import SOC2ComplianceEngine
+
+        soc2_engine = SOC2ComplianceEngine()
+        compliance_routes.set_engine(soc2_engine)
+        app.include_router(
+            compliance_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Compliance"],
+        )
+        logger.info("soc2_compliance_engine_initialized")
+    except Exception as e:
+        logger.warning("soc2_compliance_init_failed", error=str(e))
 
     yield
 
@@ -866,6 +1063,7 @@ def create_app() -> FastAPI:
     # Middleware stack (order matters: outermost first)
     from shieldops.api.middleware import (
         APIVersionMiddleware,
+        BillingEnforcementMiddleware,
         ErrorHandlerMiddleware,
         GracefulShutdownMiddleware,
         MetricsMiddleware,
@@ -882,6 +1080,12 @@ def create_app() -> FastAPI:
     # Sliding window rate limiter (activated after the fixed-window limiter)
     if settings.sliding_window_rate_limit_enabled:
         app.add_middleware(SlidingWindowRateLimiter)
+    # BillingEnforcementMiddleware checks plan limits (agent count,
+    # API quota) and returns 402 when exceeded.  Placed after rate
+    # limiting so rate-limited requests are rejected before hitting
+    # billing checks.  The enforcement service is injected at
+    # startup via set_enforcement_service().
+    app.add_middleware(BillingEnforcementMiddleware)
     # UsageTrackerMiddleware records per-endpoint call counts and
     # latencies.  Placed after auth/tenant so org_id is available
     # on request.state.

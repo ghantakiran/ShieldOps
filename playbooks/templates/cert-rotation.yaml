@@ -1,0 +1,88 @@
+# ShieldOps Agent Template: SSL Certificate Rotation
+# Rotate SSL/TLS certificates before they expire
+
+name: "SSL Certificate Rotation"
+description: >
+  Proactively detects SSL/TLS certificates approaching expiration and
+  performs automated rotation. Supports certificates managed by AWS ACM,
+  Kubernetes cert-manager, and Linux hosts. Includes validation of the
+  new certificate chain and connectivity testing after rotation.
+category: "security"
+cloud_providers: ["aws", "gcp", "azure", "kubernetes", "linux"]
+agent_type: "security"
+risk_level: "medium"
+tags: ["certificates", "ssl", "tls", "rotation", "security", "expiry"]
+estimated_setup_minutes: 15
+featured: true
+
+parameters:
+  - name: "certificate_identifier"
+    type: "string"
+    required: true
+    default: ""
+    description: "ARN, secret name, or file path of the certificate to rotate"
+  - name: "days_before_expiry"
+    type: "integer"
+    required: false
+    default: 30
+    description: "Number of days before expiry to trigger rotation"
+  - name: "certificate_provider"
+    type: "string"
+    required: true
+    default: "acm"
+    description: "Certificate provider: acm, cert-manager, letsencrypt, or manual"
+  - name: "domain_names"
+    type: "string"
+    required: true
+    default: ""
+    description: "Comma-separated list of domain names covered by the certificate"
+  - name: "notify_on_rotation"
+    type: "boolean"
+    required: false
+    default: true
+    description: "Send Slack or email notification after successful rotation"
+  - name: "validation_endpoints"
+    type: "string"
+    required: false
+    default: ""
+    description: "Comma-separated HTTPS endpoints to test after rotation"
+
+steps:
+  - name: "scan_certificates"
+    action: "query_infrastructure"
+    config:
+      operation: "list_certificates"
+      check_expiry: true
+
+  - name: "identify_expiring"
+    action: "analyze"
+    config:
+      filter: "expiry_within_threshold"
+      severity_mapping:
+        critical: 7
+        warning: 30
+
+  - name: "request_new_certificate"
+    action: "modify_infrastructure"
+    config:
+      operation: "request_certificate"
+      requires_approval: true
+
+  - name: "validate_new_certificate"
+    action: "health_check"
+    config:
+      check_type: "certificate_chain"
+      verify_san: true
+      verify_issuer: true
+
+  - name: "deploy_certificate"
+    action: "modify_infrastructure"
+    config:
+      operation: "update_certificate"
+      requires_approval: true
+
+  - name: "test_connectivity"
+    action: "health_check"
+    config:
+      check_type: "https_connectivity"
+      timeout_seconds: 30

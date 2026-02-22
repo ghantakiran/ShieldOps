@@ -23,6 +23,7 @@ from shieldops.db.models import (
     InvestigationRecord,
     LearningCycleRecord,
     NotificationPreferenceRecord,
+    OnboardingProgressRecord,
     OrganizationRecord,
     PlaybookRecord,
     RemediationRecord,
@@ -1659,6 +1660,66 @@ class Repository:
             "created_at": (record.created_at.isoformat() if record.created_at else None),
             "updated_at": (record.updated_at.isoformat() if record.updated_at else None),
         }
+
+    # ── Onboarding Progress ─────────────────────────────────────
+
+    async def get_onboarding_progress(self, org_id: str) -> list[dict[str, Any]]:
+        """Return all onboarding step records for an organization."""
+        async with self._sf() as session:
+            stmt = (
+                select(OnboardingProgressRecord)
+                .where(OnboardingProgressRecord.org_id == org_id)
+                .order_by(OnboardingProgressRecord.created_at.asc())
+            )
+            result = await session.execute(stmt)
+            return [
+                {
+                    "id": r.id,
+                    "org_id": r.org_id,
+                    "step_name": r.step_name,
+                    "status": r.status,
+                    "metadata": r.step_metadata,
+                    "completed_at": (r.completed_at.isoformat() if r.completed_at else None),
+                    "created_at": (r.created_at.isoformat() if r.created_at else None),
+                }
+                for r in result.scalars().all()
+            ]
+
+    async def update_onboarding_step(
+        self,
+        org_id: str,
+        step: str,
+        status: str,
+        metadata: dict[str, Any] | None = None,
+    ) -> None:
+        """Insert or update an onboarding step for an organization."""
+        async with self._sf() as session:
+            stmt = select(OnboardingProgressRecord).where(
+                OnboardingProgressRecord.org_id == org_id,
+                OnboardingProgressRecord.step_name == step,
+            )
+            result = await session.execute(stmt)
+            record = result.scalar_one_or_none()
+
+            if record is None:
+                record = OnboardingProgressRecord(
+                    org_id=org_id,
+                    step_name=step,
+                )
+                session.add(record)
+
+            record.status = status
+            if metadata is not None:
+                record.step_metadata = metadata
+            if status in ("completed", "skipped"):
+                record.completed_at = datetime.now(UTC)
+            await session.commit()
+            logger.info(
+                "onboarding_step_updated",
+                org_id=org_id,
+                step=step,
+                status=status,
+            )
 
     # ── Global Search ────────────────────────────────────────────
 
