@@ -895,7 +895,7 @@ export default function Marketplace() {
     queryFn: () => get<CategoriesResponse>("/marketplace/categories"),
   });
 
-  const allTemplates = templatesData?.templates ?? [];
+  const allTemplates = useMemo(() => templatesData?.templates ?? [], [templatesData]);
   const categories = categoriesData?.categories ?? [];
 
   // Client-side filtering for real-time search and sidebar filters

@@ -159,6 +159,38 @@ class Settings(BaseSettings):
     linux_username: str = ""
     linux_private_key_path: str = ""
 
+    # Windows WinRM
+    windows_host: str = ""
+    windows_username: str = ""
+    windows_password: str = ""
+    windows_use_ssl: bool = True
+    windows_port: int = 5986
+
+    # Chat Session Persistence
+    chat_session_ttl_seconds: int = 86400
+    chat_max_messages_per_session: int = 50
+
+    # GCP Secret Manager
+    gcp_secret_manager_enabled: bool = False
+
+    # Azure Key Vault
+    azure_keyvault_url: str = ""
+
+    # GitHub Advisory Database (GHSA)
+    github_advisory_token: str = ""
+    ghsa_enabled: bool = False
+
+    # OS Advisory Feeds
+    os_advisory_feeds_enabled: bool = False
+
+    # SBOM Generation
+    syft_path: str = "syft"
+    sbom_enabled: bool = False
+
+    # Threat Intelligence
+    mitre_attack_enabled: bool = False
+    epss_enabled: bool = False
+
     # Security
     jwt_secret_key: str = "change-me-in-production"  # noqa: S105
     jwt_algorithm: str = "HS256"

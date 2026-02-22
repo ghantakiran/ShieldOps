@@ -242,6 +242,50 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     except Exception as e:
         logger.debug("vault_credential_store_skipped", error=str(e))
 
+    # GCP Secret Manager credential store
+    if settings.gcp_project_id and settings.gcp_secret_manager_enabled:
+        try:
+            from shieldops.integrations.credentials.gcp_secrets import GCPSecretManagerStore
+
+            credential_stores.append(GCPSecretManagerStore(project_id=settings.gcp_project_id))
+            logger.info("gcp_secret_manager_initialized")
+        except Exception as e:
+            logger.debug("gcp_secret_manager_skipped", error=str(e))
+
+    # Azure Key Vault credential store
+    if settings.azure_keyvault_url:
+        try:
+            from shieldops.integrations.credentials.azure_keyvault import AzureKeyVaultStore
+
+            credential_stores.append(AzureKeyVaultStore(vault_url=settings.azure_keyvault_url))
+            logger.info("azure_keyvault_initialized")
+        except Exception as e:
+            logger.debug("azure_keyvault_skipped", error=str(e))
+
+    # GitHub Advisory Database (GHSA) CVE source
+    if settings.ghsa_enabled:
+        try:
+            from shieldops.integrations.cve.ghsa import GHSACVESource
+
+            cve_sources.append(GHSACVESource(token=settings.github_advisory_token))
+            logger.info("ghsa_cve_source_initialized")
+        except Exception as e:
+            logger.warning("ghsa_cve_source_init_failed", error=str(e))
+
+    # OS Advisory Feeds (Ubuntu USN + Red Hat RHSA)
+    if settings.os_advisory_feeds_enabled:
+        try:
+            from shieldops.integrations.cve.os_advisories import (
+                RedHatRHSASource,
+                UbuntuUSNSource,
+            )
+
+            cve_sources.append(UbuntuUSNSource())
+            cve_sources.append(RedHatRHSASource())
+            logger.info("os_advisory_feeds_initialized")
+        except Exception as e:
+            logger.warning("os_advisory_feeds_init_failed", error=str(e))
+
     # IaC Scanner (Checkov)
     if settings.iac_scanner_enabled:
         try:
@@ -1183,6 +1227,150 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         logger.info("custom_agent_builder_initialized")
     except Exception as e:
         logger.warning("custom_agent_builder_init_failed", error=str(e))
+
+    # ── Phase 11: Chat Session Store ─────────────────────────────
+    try:
+        from shieldops.api.routes.chat_session_store import (
+            InMemoryChatStore,
+            RedisChatSessionStore,
+        )
+
+        chat_store: Any = None
+        if redis_cache is not None:
+            try:
+                chat_store = RedisChatSessionStore(
+                    redis_url=settings.redis_url,
+                    ttl=settings.chat_session_ttl_seconds,
+                    max_messages=settings.chat_max_messages_per_session,
+                )
+                await chat_store.connect()
+                logger.info("redis_chat_session_store_initialized")
+            except Exception as e:
+                logger.warning("redis_chat_store_failed_fallback", error=str(e))
+                chat_store = InMemoryChatStore(
+                    max_messages=settings.chat_max_messages_per_session,
+                )
+        else:
+            chat_store = InMemoryChatStore(
+                max_messages=settings.chat_max_messages_per_session,
+            )
+
+        security_chat.set_session_store(chat_store)
+        app.state.chat_session_store = chat_store
+        logger.info("chat_session_store_initialized", store=getattr(chat_store, "store_name", ""))
+    except Exception as e:
+        logger.warning("chat_session_store_init_failed", error=str(e))
+
+    # ── Phase 11: SBOM Generator ─────────────────────────────────
+    sbom_generator = None
+    if settings.sbom_enabled:
+        try:
+            from shieldops.api.routes import sbom as sbom_routes
+            from shieldops.integrations.scanners.sbom_generator import SBOMGenerator
+
+            sbom_generator = SBOMGenerator(syft_path=settings.syft_path)
+            sbom_routes.set_generator(sbom_generator)
+            app.include_router(
+                sbom_routes.router,
+                prefix=settings.api_prefix,
+                tags=["SBOM"],
+            )
+            logger.info("sbom_generator_initialized")
+        except Exception as e:
+            logger.warning("sbom_generator_init_failed", error=str(e))
+
+    # ── Phase 11: Threat Intelligence (MITRE ATT&CK + EPSS) ─────
+    try:
+        from shieldops.api.routes import threat_intel as threat_intel_routes
+        from shieldops.integrations.threat_intel.epss import EPSSScorer
+        from shieldops.integrations.threat_intel.mitre_attack import MITREAttackMapper
+
+        mitre_mapper = MITREAttackMapper()
+        threat_intel_routes.set_mitre_mapper(mitre_mapper)
+
+        epss_scorer = EPSSScorer()
+        threat_intel_routes.set_epss_scorer(epss_scorer)
+
+        app.include_router(
+            threat_intel_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Threat Intel"],
+        )
+        logger.info("threat_intel_initialized")
+    except Exception as e:
+        logger.warning("threat_intel_init_failed", error=str(e))
+
+    # ── Phase 11: AI Playbook Generator ──────────────────────────
+    try:
+        from shieldops.api.routes import ai_playbooks as ai_playbook_routes
+        from shieldops.playbooks.ai_generator import AIPlaybookGenerator
+
+        ai_playbook_gen = AIPlaybookGenerator(repository=repository)
+        ai_playbook_routes.set_generator(ai_playbook_gen)
+        app.include_router(
+            ai_playbook_routes.router,
+            prefix=settings.api_prefix,
+            tags=["AI Playbooks"],
+        )
+        logger.info("ai_playbook_generator_initialized")
+    except Exception as e:
+        logger.warning("ai_playbook_generator_init_failed", error=str(e))
+
+    # ── Phase 11: Security Posture Dashboard ─────────────────────
+    posture_aggregator = None
+    try:
+        from shieldops.api.routes import security_posture as posture_routes
+        from shieldops.vulnerability.posture_aggregator import PostureAggregator
+
+        posture_aggregator = PostureAggregator(repository=repository)
+        posture_routes.set_aggregator(posture_aggregator)
+        app.include_router(
+            posture_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Security Posture"],
+        )
+        logger.info("security_posture_initialized")
+    except Exception as e:
+        logger.warning("security_posture_init_failed", error=str(e))
+
+    # ── Phase 11: Security Report Generator ──────────────────────
+    try:
+        from shieldops.api.routes import security_reports as report_routes
+        from shieldops.vulnerability.report_generator import SecurityReportGenerator
+
+        report_gen = SecurityReportGenerator(
+            posture_aggregator=posture_aggregator,
+            repository=repository,
+        )
+        report_routes.set_generator(report_gen)
+        app.include_router(
+            report_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Security Reports"],
+        )
+        logger.info("security_report_generator_initialized")
+    except Exception as e:
+        logger.warning("security_report_generator_init_failed", error=str(e))
+
+    # ── Phase 11: Attack Surface Mapping ─────────────────────────
+    try:
+        from shieldops.api.routes import attack_surface as attack_surface_routes
+        from shieldops.vulnerability.attack_surface import AttackSurfaceMapper
+
+        attack_mapper = AttackSurfaceMapper(
+            connector_router=router,
+            repository=repository,
+            credential_stores=credential_stores,
+        )
+        attack_surface_routes.set_mapper(attack_mapper)
+        app.include_router(
+            attack_surface_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Attack Surface"],
+        )
+        logger.info("attack_surface_mapper_initialized")
+    except Exception as e:
+        logger.warning("attack_surface_mapper_init_failed", error=str(e))
 
     yield
 

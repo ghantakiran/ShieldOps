@@ -7,7 +7,6 @@ import {
   CheckCircle,
   Clock,
   Search,
-  Filter,
   ChevronDown,
   ChevronRight,
   Layers,

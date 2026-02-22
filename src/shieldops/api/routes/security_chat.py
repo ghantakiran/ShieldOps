@@ -31,6 +31,7 @@ router = APIRouter(prefix="/security/chat", tags=["Security Chat"])
 # Module-level singletons — injected at app startup via set_* helpers
 _chat_agent: Any | None = None
 _repository: Any | None = None
+_session_store: Any | None = None
 
 
 def set_chat_agent(agent: Any) -> None:
@@ -43,6 +44,12 @@ def set_repository(repo: Any) -> None:
     """Wire the repository instance (called from app lifespan)."""
     global _repository
     _repository = repo
+
+
+def set_session_store(store: Any) -> None:
+    """Wire the ChatSessionStore backend (called from app lifespan)."""
+    global _session_store
+    _session_store = store
 
 
 # ---------------------------------------------------------------------------
@@ -83,14 +90,49 @@ class SessionSummary(BaseModel):
 
 
 # ---------------------------------------------------------------------------
-# In-memory session store
+# In-memory session store (legacy fallback when no store is injected)
 # ---------------------------------------------------------------------------
 
 # Maps session_id → ordered list of {role, content, timestamp} dicts.
-# Replace with a Redis-backed store for production multi-replica deployments.
+# Replaced by ChatSessionStore when available (see set_session_store).
 _sessions: dict[str, list[dict[str, Any]]] = {}
 
 _MAX_HISTORY = 50  # Hard cap per session to bound memory usage
+
+
+def _get_history(session_id: str) -> list[dict[str, Any]]:
+    """Get session history from store or in-memory fallback (sync helper)."""
+    return _sessions.setdefault(session_id, [])
+
+
+async def _get_history_async(session_id: str) -> list[dict[str, Any]]:
+    """Get session history from ChatSessionStore if available."""
+    if _session_store is not None:
+        session = await _session_store.get_session(session_id)
+        if session is not None:
+            return [m.model_dump() if hasattr(m, "model_dump") else m for m in session.messages]
+        return []
+    return _sessions.get(session_id, [])
+
+
+async def _save_history_async(session_id: str, messages: list[dict[str, Any]]) -> None:
+    """Persist session history via ChatSessionStore or in-memory."""
+    if _session_store is not None:
+        from shieldops.api.routes.chat_session_store import ChatMessage, ChatSession
+
+        chat_messages = [
+            ChatMessage(
+                role=m.get("role", "user"),
+                content=m.get("content", ""),
+                timestamp=m.get("timestamp", ""),
+            )
+            for m in messages
+        ]
+        session = ChatSession(session_id=session_id, messages=chat_messages)
+        await _session_store.save_session(session)
+    else:
+        trimmed = messages[-_MAX_HISTORY:]
+        _sessions[session_id] = trimmed
 
 
 # ---------------------------------------------------------------------------
@@ -112,7 +154,7 @@ async def send_message(
     """
     session_id = body.session_id or f"chat-{uuid4().hex[:12]}"
 
-    history = _sessions.setdefault(session_id, [])
+    history = await _get_history_async(session_id)
 
     history.append(
         {
@@ -156,15 +198,14 @@ async def send_message(
         }
     )
 
-    # Trim to keep memory bounded
-    if len(history) > _MAX_HISTORY:
-        _sessions[session_id] = history[-_MAX_HISTORY:]
+    # Persist via session store (or trim in-memory)
+    await _save_history_async(session_id, history)
 
     logger.info(
         "chat_turn_complete",
         session=session_id,
         user=user.id,
-        message_count=len(_sessions[session_id]),
+        message_count=len(history),
     )
 
     return ChatResponse(
@@ -179,16 +220,28 @@ async def send_message(
 async def list_sessions(
     _user: UserResponse = Depends(get_current_user),
 ) -> dict[str, list[SessionSummary]]:
-    """Return a summary of all active in-memory chat sessions."""
-    summaries = [
-        SessionSummary(
-            id=sid,
-            message_count=len(msgs),
-            created_at=msgs[0]["timestamp"] if msgs else None,
-            last_message=msgs[-1]["timestamp"] if msgs else None,
-        )
-        for sid, msgs in _sessions.items()
-    ]
+    """Return a summary of all active chat sessions."""
+    if _session_store is not None:
+        sessions = await _session_store.list_sessions()
+        summaries = [
+            SessionSummary(
+                id=s.session_id,
+                message_count=len(s.messages),
+                created_at=s.created_at if hasattr(s, "created_at") else None,
+                last_message=s.updated_at if hasattr(s, "updated_at") else None,
+            )
+            for s in sessions
+        ]
+    else:
+        summaries = [
+            SessionSummary(
+                id=sid,
+                message_count=len(msgs),
+                created_at=msgs[0]["timestamp"] if msgs else None,
+                last_message=msgs[-1]["timestamp"] if msgs else None,
+            )
+            for sid, msgs in _sessions.items()
+        ]
     return {"sessions": summaries}
 
 
@@ -201,13 +254,14 @@ async def get_session(
 
     Raises 404 when the session does not exist or has been evicted.
     """
-    if session_id not in _sessions:
+    messages = await _get_history_async(session_id)
+    if not messages and session_id not in _sessions:
         raise HTTPException(status_code=404, detail=f"Session '{session_id}' not found")
 
     return {
         "session_id": session_id,
-        "messages": _sessions[session_id],
-        "message_count": len(_sessions[session_id]),
+        "messages": messages,
+        "message_count": len(messages),
     }
 
 

@@ -71,5 +71,19 @@ def create_connector_router(settings: Settings) -> ConnectorRouter:
         router.register(azure)
         logger.info("connector_registered", provider="azure")
 
+    # Windows WinRM — registered when windows_host is configured
+    if settings.windows_host:
+        from shieldops.connectors.windows.connector import WindowsConnector
+
+        windows = WindowsConnector(
+            host=settings.windows_host,
+            username=settings.windows_username,
+            password=settings.windows_password,
+            use_ssl=settings.windows_use_ssl,
+            port=settings.windows_port,
+        )
+        router.register(windows)
+        logger.info("connector_registered", provider="windows")
+
     logger.info("connector_router_ready", providers=router.providers)
     return router
