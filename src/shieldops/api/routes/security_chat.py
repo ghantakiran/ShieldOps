@@ -112,7 +112,7 @@ async def _get_history_async(session_id: str) -> list[dict[str, Any]]:
         if session is not None:
             return [m.model_dump() if hasattr(m, "model_dump") else m for m in session.messages]
         return []
-    return _sessions.setdefault(session_id, [])
+    return _sessions.get(session_id, [])
 
 
 async def _save_history_async(session_id: str, messages: list[dict[str, Any]]) -> None:
