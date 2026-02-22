@@ -91,6 +91,30 @@ def create_observability_sources(settings: Settings) -> ObservabilitySources:
         sources.trace_sources.append(JaegerSource(url=settings.jaeger_url))
         logger.info("observability_source_initialized", source="jaeger")
 
+    # New Relic — requires API key and account ID
+    if settings.newrelic_api_key and settings.newrelic_account_id:
+        from shieldops.observability.newrelic.client import NewRelicSource
+
+        nr_source = NewRelicSource(
+            api_key=settings.newrelic_api_key,
+            account_id=settings.newrelic_account_id,
+        )
+        sources.log_sources.append(nr_source)
+        sources.metric_sources.append(nr_source)
+        logger.info("observability_source_initialized", source="newrelic")
+
+    # Elastic / OpenSearch — requires URL
+    if settings.elastic_url:
+        from shieldops.observability.elastic.client import ElasticSource
+
+        elastic_source = ElasticSource(
+            url=settings.elastic_url,
+            api_key=settings.elastic_api_key,
+        )
+        sources.log_sources.append(elastic_source)
+        sources.trace_sources.append(elastic_source)
+        logger.info("observability_source_initialized", source="elastic")
+
     logger.info(
         "observability_sources_ready",
         log_sources=len(sources.log_sources),

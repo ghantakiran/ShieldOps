@@ -20,6 +20,10 @@ import {
   Store,
   Layers,
   ShieldCheck,
+  TrendingUp,
+  HardDrive,
+  Puzzle,
+  Code,
 } from "lucide-react";
 import clsx from "clsx";
 
@@ -39,6 +43,10 @@ const NAV_ITEMS = [
   { to: "/agent-performance", icon: Gauge, label: "Agent Performance" },
   { to: "/audit-log", icon: FileText, label: "Audit Log" },
   { to: "/compliance", icon: ShieldCheck, label: "Compliance" },
+  { to: "/predictions", icon: TrendingUp, label: "Predictions" },
+  { to: "/capacity", icon: HardDrive, label: "Capacity" },
+  { to: "/plugins", icon: Puzzle, label: "Plugins" },
+  { to: "/infra-as-code", icon: Code, label: "Infra as Code" },
   { to: "/billing", icon: CreditCard, label: "Billing" },
   { to: "/system-health", icon: HeartPulse, label: "System Health" },
   { to: "/settings", icon: Settings, label: "Settings" },

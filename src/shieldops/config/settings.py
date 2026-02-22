@@ -196,6 +196,28 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     jwt_expire_minutes: int = 60
 
+    # Phase 12: Prediction Agent
+    prediction_confidence_threshold: float = 0.75
+    prediction_schedule_minutes: int = 30
+
+    # Phase 12: RAG Knowledge Store
+    rag_enabled: bool = False
+    rag_embedding_model: str = "text-embedding-3-small"
+
+    # Phase 12: LLM Router
+    llm_routing_enabled: bool = False
+    llm_simple_model: str = "claude-haiku-4-5-20251001"
+    llm_moderate_model: str = "claude-sonnet-4-20250514"
+    llm_complex_model: str = "claude-opus-4-20250514"
+
+    # Phase 12: Observability — New Relic
+    newrelic_api_key: str = ""
+    newrelic_account_id: str = ""
+
+    # Phase 12: Observability — Elastic / OpenSearch
+    elastic_url: str = ""
+    elastic_api_key: str = ""
+
     # OIDC / SSO
     oidc_enabled: bool = False
     oidc_issuer_url: str = ""

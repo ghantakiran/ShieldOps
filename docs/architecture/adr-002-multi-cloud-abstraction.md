@@ -22,6 +22,7 @@ Agent Logic (LangGraph)
 │ AzureConnector      │ ← azure-mgmt-* + Managed Identity
 │ KubernetesConnector │ ← kubernetes-client + ServiceAccount
 │ LinuxConnector      │ ← asyncssh + Ansible
+│ WindowsConnector    │ ← WinRM + PowerShell
 └─────────────────────┘
 ```
 
