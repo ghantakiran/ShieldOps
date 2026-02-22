@@ -482,6 +482,29 @@ class APIKeyRecord(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
+class OnboardingProgressRecord(Base):
+    """Tracks onboarding wizard progress per organization."""
+
+    __tablename__ = "onboarding_progress"
+
+    id: Mapped[str] = mapped_column(
+        String(64), primary_key=True, default=lambda: f"onb-{uuid4().hex[:12]}"
+    )
+    org_id: Mapped[str] = mapped_column(String(64), index=True)
+    step_name: Mapped[str] = mapped_column(String(64), index=True)
+    status: Mapped[str] = mapped_column(
+        String(32), default="pending"
+    )  # pending, completed, skipped
+    step_metadata: Mapped[dict[str, Any]] = mapped_column("metadata", JSONB, default=dict)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    __table_args__ = (
+        UniqueConstraint("org_id", "step_name", name="uq_onboarding_org_step"),
+        Index("ix_onboarding_org_id", "org_id"),
+    )
+
+
 class NotificationPreferenceRecord(Base):
     """Per-user notification preference for a channel + event type."""
 

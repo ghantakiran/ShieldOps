@@ -23,6 +23,10 @@ import UserManagement from "./pages/UserManagement";
 import IncidentTimeline from "./pages/IncidentTimeline";
 import Billing from "./pages/Billing";
 import SystemHealth from "./pages/SystemHealth";
+import OnboardingWizard from "./pages/OnboardingWizard";
+import Marketplace from "./pages/Marketplace";
+import IncidentCorrelation from "./pages/IncidentCorrelation";
+import ComplianceDashboard from "./pages/ComplianceDashboard";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuthStore();
@@ -63,14 +67,18 @@ export default function App() {
           <Route path="learning" element={<Learning />} />
           <Route path="analytics" element={<Analytics />} />
           <Route path="agent-performance" element={<AgentPerformance />} />
+          <Route path="marketplace" element={<Marketplace />} />
           <Route path="playbooks" element={<Playbooks />} />
           <Route path="playbooks/editor" element={<PlaybookEditor />} />
           <Route path="playbooks/editor/:id" element={<PlaybookEditor />} />
           <Route path="audit-log" element={<AuditLog />} />
+          <Route path="compliance" element={<ComplianceDashboard />} />
           <Route path="billing" element={<Billing />} />
           <Route path="system-health" element={<SystemHealth />} />
           <Route path="settings" element={<Settings />} />
           <Route path="users" element={<UserManagement />} />
+          <Route path="incidents" element={<IncidentCorrelation />} />
+          <Route path="onboarding" element={<OnboardingWizard />} />
         </Route>
       </Routes>
     </BrowserRouter>

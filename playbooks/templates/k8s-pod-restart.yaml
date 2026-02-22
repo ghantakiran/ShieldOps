@@ -1,0 +1,96 @@
+# ShieldOps Agent Template: Kubernetes Pod Restart
+# Restart failing K8s pods with comprehensive health checks
+
+name: "Kubernetes Pod Restart"
+description: >
+  Detects pods in CrashLoopBackOff or unhealthy states and performs
+  a controlled restart with pre-flight checks, graceful termination,
+  and post-restart health validation. Supports namespace-scoped and
+  label-based pod selection.
+category: "remediation"
+cloud_providers: ["kubernetes"]
+agent_type: "remediation"
+risk_level: "low"
+tags: ["kubernetes", "pods", "restart", "health-check", "k8s"]
+estimated_setup_minutes: 5
+featured: true
+
+parameters:
+  - name: "namespace"
+    type: "string"
+    required: true
+    default: "default"
+    description: "Kubernetes namespace where the pod is running"
+  - name: "pod_selector"
+    type: "string"
+    required: true
+    default: ""
+    description: "Label selector or pod name to target (e.g. app=web)"
+  - name: "grace_period_seconds"
+    type: "integer"
+    required: false
+    default: 30
+    description: "Graceful shutdown period before force-killing the pod"
+  - name: "max_restart_attempts"
+    type: "integer"
+    required: false
+    default: 3
+    description: "Maximum number of restart attempts before escalating"
+  - name: "health_check_path"
+    type: "string"
+    required: false
+    default: "/healthz"
+    description: "HTTP health check endpoint path for readiness validation"
+  - name: "health_check_timeout"
+    type: "integer"
+    required: false
+    default: 120
+    description: "Seconds to wait for the pod to become healthy after restart"
+
+steps:
+  - name: "identify_failing_pods"
+    action: "query_infrastructure"
+    config:
+      provider: "kubernetes"
+      resource: "pods"
+      operation: "list"
+      filters:
+        status: ["CrashLoopBackOff", "Error", "ImagePullBackOff"]
+
+  - name: "capture_pod_logs"
+    action: "collect_diagnostics"
+    config:
+      provider: "kubernetes"
+      resource: "pods"
+      operation: "logs"
+      tail_lines: 200
+
+  - name: "check_node_resources"
+    action: "query_metrics"
+    config:
+      provider: "kubernetes"
+      metric: "node_resource_utilization"
+      check_memory: true
+      check_cpu: true
+
+  - name: "delete_pod"
+    action: "modify_infrastructure"
+    config:
+      provider: "kubernetes"
+      resource: "pods"
+      operation: "delete"
+      requires_approval: false
+
+  - name: "wait_for_replacement"
+    action: "wait_condition"
+    config:
+      condition: "pod_ready"
+      timeout_seconds: 180
+      poll_interval: 5
+
+  - name: "validate_health"
+    action: "health_check"
+    config:
+      provider: "kubernetes"
+      check_type: "readiness_probe"
+      timeout_seconds: 120

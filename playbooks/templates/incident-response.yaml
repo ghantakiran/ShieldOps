@@ -1,0 +1,106 @@
+# ShieldOps Agent Template: Automated Incident Response
+# End-to-end automated incident investigation and response playbook
+
+name: "Automated Incident Response"
+description: >
+  Comprehensive incident response playbook that triages incoming
+  alerts, performs root cause analysis across logs/metrics/traces,
+  correlates related events, determines severity, executes remediation,
+  and generates a post-incident report. Integrates with PagerDuty
+  and Slack for real-time status updates.
+category: "investigation"
+cloud_providers: ["aws", "gcp", "azure", "kubernetes", "linux"]
+agent_type: "investigation"
+risk_level: "low"
+tags: ["incident-response", "investigation", "rca", "triage", "alerting"]
+estimated_setup_minutes: 15
+featured: true
+
+parameters:
+  - name: "alert_source"
+    type: "string"
+    required: true
+    default: ""
+    description: "Source of the alert (e.g. prometheus, datadog, cloudwatch)"
+  - name: "alert_id"
+    type: "string"
+    required: true
+    default: ""
+    description: "Unique identifier of the triggering alert"
+  - name: "environment"
+    type: "string"
+    required: true
+    default: "production"
+    description: "Target environment: production, staging, or development"
+  - name: "escalation_channel"
+    type: "string"
+    required: false
+    default: "#sre-oncall"
+    description: "Slack channel for escalation notifications"
+  - name: "auto_remediate"
+    type: "boolean"
+    required: false
+    default: false
+    description: "Automatically execute remediation if confidence is high"
+  - name: "correlation_window_minutes"
+    type: "integer"
+    required: false
+    default: 30
+    description: "Time window in minutes for correlating related events"
+
+steps:
+  - name: "triage_alert"
+    action: "analyze"
+    config:
+      operation: "alert_triage"
+      classify_severity: true
+      check_duplicates: true
+
+  - name: "collect_context"
+    action: "collect_diagnostics"
+    config:
+      sources: ["logs", "metrics", "traces"]
+      time_range_minutes: 30
+      include_related_services: true
+
+  - name: "correlate_events"
+    action: "analyze"
+    config:
+      operation: "event_correlation"
+      algorithm: "temporal_proximity"
+      include_deployment_events: true
+
+  - name: "root_cause_analysis"
+    action: "analyze"
+    config:
+      operation: "root_cause_analysis"
+      use_historical_patterns: true
+      confidence_threshold: 0.7
+
+  - name: "determine_remediation"
+    action: "analyze"
+    config:
+      operation: "select_remediation"
+      match_playbook: true
+      check_blast_radius: true
+
+  - name: "execute_remediation"
+    action: "modify_infrastructure"
+    config:
+      operation: "run_remediation"
+      requires_approval: true
+      rollback_on_failure: true
+
+  - name: "validate_resolution"
+    action: "health_check"
+    config:
+      check_type: "service_health"
+      compare_to_baseline: true
+      timeout_seconds: 300
+
+  - name: "generate_report"
+    action: "report"
+    config:
+      report_type: "incident_postmortem"
+      include_timeline: true
+      include_metrics: true

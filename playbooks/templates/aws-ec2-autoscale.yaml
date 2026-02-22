@@ -1,0 +1,94 @@
+# ShieldOps Agent Template: AWS EC2 Auto-Scale
+# Auto-scale EC2 instances based on CPU utilization threshold
+
+name: "AWS EC2 Auto-Scale"
+description: >
+  Monitors EC2 instance CPU utilization and automatically adjusts
+  Auto Scaling Group capacity when sustained high CPU is detected.
+  Includes pre-scaling health checks, gradual capacity increase,
+  and post-scale validation to ensure new instances are healthy.
+category: "remediation"
+cloud_providers: ["aws"]
+agent_type: "remediation"
+risk_level: "medium"
+tags: ["auto-scaling", "ec2", "cpu", "capacity", "aws"]
+estimated_setup_minutes: 10
+featured: true
+
+parameters:
+  - name: "asg_name"
+    type: "string"
+    required: true
+    default: ""
+    description: "Name of the Auto Scaling Group to manage"
+  - name: "cpu_threshold_percent"
+    type: "integer"
+    required: true
+    default: 80
+    description: "CPU utilization percentage that triggers scaling"
+  - name: "scale_up_count"
+    type: "integer"
+    required: false
+    default: 2
+    description: "Number of instances to add when scaling up"
+  - name: "cooldown_seconds"
+    type: "integer"
+    required: false
+    default: 300
+    description: "Cooldown period between scaling actions in seconds"
+  - name: "max_instances"
+    type: "integer"
+    required: false
+    default: 10
+    description: "Maximum number of instances allowed in the ASG"
+  - name: "region"
+    type: "string"
+    required: true
+    default: "us-east-1"
+    description: "AWS region where the ASG is located"
+
+steps:
+  - name: "check_current_utilization"
+    action: "query_metrics"
+    config:
+      provider: "aws"
+      metric: "CPUUtilization"
+      namespace: "AWS/EC2"
+      period: 300
+      statistic: "Average"
+
+  - name: "validate_asg_exists"
+    action: "query_infrastructure"
+    config:
+      provider: "aws"
+      service: "autoscaling"
+      operation: "describe_auto_scaling_groups"
+
+  - name: "check_instance_health"
+    action: "health_check"
+    config:
+      provider: "aws"
+      check_type: "ec2_status"
+      timeout_seconds: 30
+
+  - name: "scale_asg"
+    action: "modify_infrastructure"
+    config:
+      provider: "aws"
+      service: "autoscaling"
+      operation: "set_desired_capacity"
+      requires_approval: true
+
+  - name: "wait_for_instances"
+    action: "wait_condition"
+    config:
+      condition: "all_instances_in_service"
+      timeout_seconds: 600
+      poll_interval: 15
+
+  - name: "validate_scaling"
+    action: "health_check"
+    config:
+      provider: "aws"
+      check_type: "elb_health"
+      timeout_seconds: 120

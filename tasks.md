@@ -1,7 +1,7 @@
 # ShieldOps — Feature Implementation Tracker
 
-**Last Updated:** 2026-02-19
-**Platform Completeness:** Phase 8 complete — 100% across all phases
+**Last Updated:** 2026-02-22
+**Platform Completeness:** Phase 9 complete — all 12 features shipped
 
 ---
 
@@ -463,6 +463,90 @@
 
 ---
 
+## Phase 9 — Growth & Enterprise Differentiation
+
+### Tier 1 — Investor/Demo Impact (Revenue-Critical)
+
+- [x] **Multi-tenant Billing Enforcement** — Wire Stripe plans to feature gates
+  - Middleware: enforce agent limits, API call quotas per org based on plan
+  - Module: `src/shieldops/api/middleware/billing_enforcement.py`
+  - Wire: check org plan on agent creation, API call counting against quota
+  - Dashboard: usage meters on Settings page, upgrade prompts on limit hit
+  - Tests: quota enforcement, plan upgrade/downgrade, grace period
+
+- [x] **Onboarding Wizard** — Guided setup flow for new organizations
+  - Backend: `src/shieldops/api/routes/onboarding.py` — step tracking, cloud validation
+  - Dashboard: `OnboardingWizard.tsx` — 5 steps (org, cloud, agent, playbook, demo)
+  - Features: cloud credential validation, first agent deployment, demo trigger
+  - Tests: step progression, validation, skip/resume
+
+- [x] **Agent Marketplace / Templates** — Pre-built agent configs for common scenarios
+  - Backend: `src/shieldops/api/routes/marketplace.py` — template CRUD + deploy
+  - Templates: `playbooks/templates/` — 8+ templates (auto-scale, restart, cert-rotate, etc.)
+  - Dashboard: `Marketplace.tsx` — card grid, categories, one-click deploy
+  - Tests: template validation, deployment, customization
+
+### Tier 2 — Enterprise Differentiation
+
+- [x] **Incident Correlation Engine** — Group related alerts into unified incidents
+  - Module: `src/shieldops/agents/investigation/correlation.py` — CorrelationEngine
+  - Features: time-window grouping, service-graph linking, dedup scoring, severity escalation
+  - API: `GET /incidents`, `POST /incidents/merge`, `PUT /incidents/{id}/status`
+  - Dashboard: `IncidentCorrelation.tsx` — stats cards, search/filter, merge workflow
+  - Tests: `tests/unit/test_incident_correlation.py` — 17 tests
+
+- [x] **Runbook-as-Code** — Git-backed playbooks with PR approval flow
+  - Module: `src/shieldops/playbooks/git_sync.py` — GitPlaybookSync
+  - Features: async git subprocess, clone/pull/diff, rollback, version history
+  - API: 6 endpoints (git-status, sync, diff, history, rollback, files)
+  - Tests: `tests/unit/test_git_sync.py` — 21 tests
+
+- [x] **Custom Webhook Triggers** — Ingest alerts from external monitoring tools
+  - Module: `src/shieldops/api/routes/webhook_triggers.py`
+  - Adapters: Datadog, PagerDuty, Grafana, OpsGenie, generic JSON
+  - Features: HMAC-SHA256 verification, fingerprint dedup, auto-investigation trigger
+  - Tests: `tests/unit/api/test_webhook_triggers.py` — 25 tests
+
+- [x] **Role-scoped Dashboard Views** — UI adapts to user permissions
+  - Hook: `dashboard-ui/src/hooks/usePermissions.ts` — permission matrix (3 roles x 12 resources x 6 actions)
+  - Components: `PermissionGate`, `ConditionalAction` wrappers
+  - Tests: `dashboard-ui/src/__tests__/permissions.test.ts` — 14 tests
+
+### Tier 3 — Platform Maturity
+
+- [x] **Agent Simulation Mode** — Dry-run remediation without touching infra
+  - Module: `src/shieldops/agents/remediation/simulator.py` — RemediationSimulator
+  - Features: step planning, impact estimation, OPA policy check, no side effects
+  - API: `POST /remediations/simulate`, `GET /remediations/simulations`
+  - Tests: `tests/unit/test_simulation.py` — 16 tests
+
+- [x] **Cost Optimization Autopilot** — Auto-execute low-risk cost recommendations
+  - Module: `src/shieldops/agents/cost/autopilot.py` — CostAutopilot
+  - Features: risk scoring, auto-approval threshold, env exclusion, dry-run mode
+  - API: 7 endpoints (config, analyze, recommendations, approve, execute, history)
+  - Tests: `tests/unit/test_cost_autopilot.py` — 18 tests
+
+- [x] **Mobile Push Notifications** — FCM/APNs for critical alerts
+  - Module: `src/shieldops/integrations/notifications/push.py` — PushNotifier
+  - Features: device registration, topic subscriptions, priority routing, platform payloads
+  - API: `POST /devices/register`, `DELETE /devices/{id}`, `GET /devices`, `PUT /devices/{id}/topics`
+  - Tests: `tests/unit/test_push_notifications.py` — 20 tests
+
+- [x] **GraphQL API Layer** — Flexible query API alongside REST
+  - Module: `src/shieldops/api/graphql/` — schema.py, routes.py
+  - Features: multi-query support, field selection, filtering, 8 resolver types
+  - API: `POST /graphql`, `GET /graphql/schema`
+  - Tests: `tests/unit/api/test_graphql.py` — 15 tests
+
+- [x] **SOC2 Compliance Dashboard** — Real-time compliance posture
+  - Module: `src/shieldops/compliance/soc2.py` — SOC2ComplianceEngine
+  - 15 controls across 5 Trust Service Categories (Security, Availability, PI, Confidentiality, Privacy)
+  - API: report, controls, trends, evidence, admin override (6 endpoints)
+  - Dashboard: `ComplianceDashboard.tsx` — circular gauge, category cards, controls table, trend chart
+  - Tests: `tests/unit/test_soc2_compliance.py` — 31 tests
+
+---
+
 ## Completed
 
 - [x] Multi-cloud Terraform infrastructure (AWS/GCP/Azure)
@@ -553,3 +637,15 @@
 - [x] Notification Preferences (12 events x 4 channels, upsert pattern) — 15 tests
 - [x] API Usage Analytics (per-org/endpoint/hour tracking middleware) — 33 tests
 - [x] Global Search (Cmd+K palette, parallel ILIKE, relevance scoring) — 25 tests
+- [x] Multi-tenant Billing Enforcement (plan limits middleware, usage meters) — tests
+- [x] Onboarding Wizard (5-step guided setup, cloud validation) — tests
+- [x] Agent Marketplace / Templates (8+ templates, one-click deploy) — tests
+- [x] Incident Correlation Engine (time-window grouping, dedup, merge) — 17 tests
+- [x] Runbook-as-Code (git sync, diff, rollback, version history) — 21 tests
+- [x] Custom Webhook Triggers (5 adapters, HMAC, fingerprint dedup) — 25 tests
+- [x] Role-scoped Dashboard Views (usePermissions, PermissionGate) — 14 tests
+- [x] Agent Simulation Mode (dry-run, impact estimation, OPA check) — 16 tests
+- [x] Cost Optimization Autopilot (risk scoring, auto-approval, env exclusion) — 18 tests
+- [x] Mobile Push Notifications (FCM/APNs, device registration, topics) — 20 tests
+- [x] GraphQL API Layer (multi-query, field selection, 8 resolvers) — 15 tests
+- [x] SOC2 Compliance Dashboard (15 controls, 5 categories, evidence, trends) — 31 tests

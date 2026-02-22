@@ -1,0 +1,92 @@
+# ShieldOps Agent Template: Disk Space Cleanup
+# Clean up disk space on Linux hosts when utilization is high
+
+name: "Disk Space Cleanup"
+description: >
+  Monitors disk utilization on Linux hosts and performs automated
+  cleanup when thresholds are exceeded. Safely removes old log files,
+  temporary files, package caches, and old kernel versions. Includes
+  dry-run capability and post-cleanup validation.
+category: "remediation"
+cloud_providers: ["linux", "aws", "gcp", "azure"]
+agent_type: "remediation"
+risk_level: "low"
+tags: ["disk", "cleanup", "linux", "storage", "logs"]
+estimated_setup_minutes: 5
+
+parameters:
+  - name: "target_host"
+    type: "string"
+    required: true
+    default: ""
+    description: "Hostname or IP address of the target Linux host"
+  - name: "disk_threshold_percent"
+    type: "integer"
+    required: true
+    default: 85
+    description: "Disk utilization percentage that triggers cleanup"
+  - name: "log_retention_days"
+    type: "integer"
+    required: false
+    default: 7
+    description: "Delete log files older than this many days"
+  - name: "tmp_retention_hours"
+    type: "integer"
+    required: false
+    default: 24
+    description: "Delete temp files older than this many hours"
+  - name: "cleanup_package_cache"
+    type: "boolean"
+    required: false
+    default: true
+    description: "Clean apt/yum package cache"
+  - name: "dry_run"
+    type: "boolean"
+    required: false
+    default: false
+    description: "Preview cleanup actions without deleting files"
+
+steps:
+  - name: "check_disk_usage"
+    action: "query_metrics"
+    config:
+      provider: "linux"
+      command: "df -h"
+      parse_output: true
+
+  - name: "identify_large_files"
+    action: "collect_diagnostics"
+    config:
+      provider: "linux"
+      command: "find / -type f -size +100M -not -path '/proc/*'"
+      timeout_seconds: 60
+
+  - name: "cleanup_old_logs"
+    action: "modify_infrastructure"
+    config:
+      provider: "linux"
+      operation: "delete_files"
+      target_paths: ["/var/log"]
+      requires_approval: false
+
+  - name: "cleanup_temp_files"
+    action: "modify_infrastructure"
+    config:
+      provider: "linux"
+      operation: "delete_files"
+      target_paths: ["/tmp", "/var/tmp"]
+      requires_approval: false
+
+  - name: "cleanup_package_cache"
+    action: "modify_infrastructure"
+    config:
+      provider: "linux"
+      operation: "clean_package_cache"
+      requires_approval: false
+
+  - name: "validate_disk_usage"
+    action: "health_check"
+    config:
+      provider: "linux"
+      check_type: "disk_utilization"
+      expected_below_threshold: true
