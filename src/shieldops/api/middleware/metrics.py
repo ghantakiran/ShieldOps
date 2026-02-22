@@ -114,11 +114,16 @@ class MetricsRegistry:
 
     # ── Counter operations ──────────────────────────────────────
 
-    def inc_counter(self, name: str, labels: dict[str, str]) -> None:
-        """Increment a labelled counter by 1."""
+    def inc_counter(
+        self,
+        name: str,
+        labels: dict[str, str],
+        amount: int = 1,
+    ) -> None:
+        """Increment a labelled counter by *amount* (default 1)."""
         key = self._label_key(name, labels)
         with self._mu:
-            self.counters[key] = self.counters.get(key, 0) + 1
+            self.counters[key] = self.counters.get(key, 0) + amount
 
     # ── Histogram operations ────────────────────────────────────
 
@@ -160,6 +165,12 @@ class MetricsRegistry:
         key = self._label_key(name, labels)
         with self._mu:
             self.gauges[key] = self.gauges.get(key, 0) - 1
+
+    def set_gauge(self, name: str, labels: dict[str, str], value: int) -> None:
+        """Set a gauge to an absolute value."""
+        key = self._label_key(name, labels)
+        with self._mu:
+            self.gauges[key] = value
 
     # ── Reset (testing) ─────────────────────────────────────────
 
