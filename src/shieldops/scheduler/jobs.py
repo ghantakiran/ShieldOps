@@ -16,6 +16,7 @@ import structlog
 if TYPE_CHECKING:
     from shieldops.agents.cost.runner import CostRunner
     from shieldops.agents.learning.runner import LearningRunner
+    from shieldops.agents.security.drift import DriftDetector
     from shieldops.agents.security.runner import SecurityRunner
 
 logger = structlog.get_logger()
@@ -227,4 +228,40 @@ async def escalation_check_job(
     logger.info(
         "escalation_check_completed",
         escalations=result.get("escalations_triggered", 0),
+    )
+
+
+async def periodic_drift_scan(
+    drift_detector: DriftDetector | None = None,
+    environment: str = "production",
+    tfstate_path: str | None = None,
+    **kwargs: Any,
+) -> None:
+    """Run a Terraform drift scan -- typically every 4-6 hours.
+
+    Compares Terraform state files against live infrastructure to detect
+    configuration drift across all registered providers.
+    """
+    if drift_detector is None:
+        logger.warning("drift_scan_skipped", reason="no detector provided")
+        return
+
+    from shieldops.agents.security.drift import DriftScanRequest
+
+    logger.info(
+        "periodic_drift_scan_started",
+        environment=environment,
+        tfstate_path=tfstate_path,
+    )
+    request = DriftScanRequest(
+        tfstate_path=tfstate_path,
+        environment=environment,
+    )
+    report = await drift_detector.scan(request)
+    logger.info(
+        "periodic_drift_scan_completed",
+        scan_id=report.scan_id,
+        total_resources=report.total_resources,
+        drifted_resources=report.drifted_resources,
+        drift_items=len(report.drift_items),
     )

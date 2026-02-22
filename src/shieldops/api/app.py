@@ -819,6 +819,56 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     except Exception as e:
         logger.warning("onboarding_routes_failed", error=str(e))
 
+    # ── Redis Cache Layer ──────────────────────────────────────────
+    redis_cache = None
+    try:
+        from shieldops.api.routes import cache as cache_routes
+        from shieldops.cache import RedisCache
+        from shieldops.cache import set_cache as set_decorator_cache
+
+        redis_cache = RedisCache(redis_url=settings.redis_url)
+        await redis_cache.connect()
+        cache_routes.set_cache(redis_cache)
+        set_decorator_cache(redis_cache)
+        app.include_router(
+            cache_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Cache"],
+        )
+        logger.info("redis_cache_initialized")
+    except Exception as e:
+        logger.warning("redis_cache_init_failed", error=str(e))
+    app.state.redis_cache = redis_cache
+
+    # ── Background Task Queue ────────────────────────────────────────
+    task_queue = None
+    try:
+        from shieldops.api.routes import task_queue as task_queue_routes
+        from shieldops.workers import TaskQueue
+
+        task_queue = TaskQueue(max_workers=4)
+        await task_queue.start()
+        task_queue_routes.set_task_queue(task_queue)
+        app.include_router(
+            task_queue_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Task Queue"],
+        )
+        logger.info("task_queue_initialized")
+    except Exception as e:
+        logger.warning("task_queue_init_failed", error=str(e))
+    app.state.task_queue = task_queue
+
+    # ── Database Migrations API ─────────────────────────────────
+    try:
+        from shieldops.api.routes import migrations as migrations_routes
+        from shieldops.db import migrate as migrate_module
+
+        migrations_routes.set_migrator(migrate_module)
+        logger.info("migration_service_initialized")
+    except Exception as e:
+        logger.warning("migration_service_init_failed", error=str(e))
+
     # ── Incident Correlation Engine ──────────────────────────────
     try:
         from shieldops.agents.investigation.correlation import CorrelationEngine
@@ -986,6 +1036,154 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     except Exception as e:
         logger.warning("soc2_compliance_init_failed", error=str(e))
 
+    # ── Jira ITSM Integration ───────────────────────────────────
+    if getattr(settings, "jira_base_url", None):
+        try:
+            from shieldops.api.routes import jira as jira_routes
+            from shieldops.integrations.itsm.jira import JiraClient, JiraConfig
+
+            jira_config = JiraConfig(
+                base_url=getattr(settings, "jira_base_url", ""),
+                email=getattr(settings, "jira_email", ""),
+                api_token=getattr(settings, "jira_api_token", ""),
+                project_key=getattr(settings, "jira_project_key", "OPS"),
+            )
+            jira_client = JiraClient(
+                base_url=jira_config.base_url,
+                email=jira_config.email,
+                api_token=jira_config.api_token,
+                project_key=jira_config.project_key,
+            )
+            jira_routes.set_client(jira_client)
+            jira_routes.set_config(jira_config)
+            app.include_router(
+                jira_routes.router,
+                prefix=settings.api_prefix,
+                tags=["Jira"],
+            )
+            logger.info("jira_integration_initialized")
+        except Exception as e:
+            logger.warning("jira_integration_init_failed", error=str(e))
+
+    # ── ServiceNow ITSM Integration ─────────────────────────────
+    if getattr(settings, "servicenow_instance_url", None):
+        try:
+            from shieldops.api.routes import servicenow as servicenow_routes
+            from shieldops.integrations.itsm.servicenow import ServiceNowClient
+
+            snow_client = ServiceNowClient(
+                instance_url=getattr(settings, "servicenow_instance_url", ""),
+                username=getattr(settings, "servicenow_username", ""),
+                password=getattr(settings, "servicenow_password", ""),
+            )
+            servicenow_routes.set_client(snow_client)
+            app.include_router(
+                servicenow_routes.router,
+                prefix=settings.api_prefix,
+                tags=["ServiceNow"],
+            )
+            logger.info("servicenow_integration_initialized")
+        except Exception as e:
+            logger.warning("servicenow_integration_init_failed", error=str(e))
+
+    # ── Terraform Drift Detection ───────────────────────────────
+    try:
+        from shieldops.agents.security.drift import DriftDetector
+        from shieldops.api.routes import drift as drift_routes
+
+        drift_detector = DriftDetector(connector_router=router)
+        drift_routes.set_detector(drift_detector)
+        app.include_router(
+            drift_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Drift Detection"],
+        )
+        logger.info("drift_detection_initialized")
+    except Exception as e:
+        logger.warning("drift_detection_init_failed", error=str(e))
+
+    # ── SLA Management Engine ───────────────────────────────────
+    try:
+        from shieldops.api.routes import sla as sla_routes
+        from shieldops.sla.engine import SLAEngine
+
+        sla_engine = SLAEngine()
+        sla_routes.set_engine(sla_engine)
+        app.include_router(
+            sla_routes.router,
+            prefix=settings.api_prefix,
+            tags=["SLA"],
+        )
+        logger.info("sla_engine_initialized")
+    except Exception as e:
+        logger.warning("sla_engine_init_failed", error=str(e))
+
+    # ── Anomaly Detection Engine ────────────────────────────────
+    try:
+        from shieldops.analytics.anomaly import AnomalyDetector
+        from shieldops.api.routes import anomaly as anomaly_routes
+
+        anomaly_detector = AnomalyDetector()
+        anomaly_routes.set_detector(anomaly_detector)
+        app.include_router(
+            anomaly_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Anomaly Detection"],
+        )
+        logger.info("anomaly_detection_initialized")
+    except Exception as e:
+        logger.warning("anomaly_detection_init_failed", error=str(e))
+
+    # ── Service Dependency Map ──────────────────────────────────
+    try:
+        from shieldops.api.routes import topology as topology_routes
+        from shieldops.topology.graph import ServiceGraphBuilder
+
+        graph_builder = ServiceGraphBuilder()
+        topology_routes.set_builder(graph_builder)
+        app.include_router(
+            topology_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Topology"],
+        )
+        logger.info("service_topology_initialized")
+    except Exception as e:
+        logger.warning("service_topology_init_failed", error=str(e))
+
+    # ── Change Tracking / Deployment Correlation ────────────────
+    try:
+        from shieldops.api.routes import changes as changes_routes
+        from shieldops.changes.tracker import ChangeTracker
+
+        change_tracker = ChangeTracker()
+        changes_routes.set_tracker(change_tracker)
+        app.include_router(
+            changes_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Changes"],
+        )
+        logger.info("change_tracking_initialized")
+    except Exception as e:
+        logger.warning("change_tracking_init_failed", error=str(e))
+
+    # ── Custom Agent Builder ────────────────────────────────────
+    # Registered BEFORE the agents router to prevent /agents/{agent_id}
+    # from capturing /agents/custom paths.
+    try:
+        from shieldops.agents.custom.builder import CustomAgentBuilder
+        from shieldops.api.routes import custom_agents as custom_agents_routes
+
+        agent_builder = CustomAgentBuilder()
+        custom_agents_routes.set_builder(agent_builder)
+        app.include_router(
+            custom_agents_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Custom Agents"],
+        )
+        logger.info("custom_agent_builder_initialized")
+    except Exception as e:
+        logger.warning("custom_agent_builder_init_failed", error=str(e))
+
     yield
 
     logger.info("shieldops_shutting_down")
@@ -1007,6 +1205,12 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         )
 
     # ── Resource cleanup ───────────────────────────────────────
+    _task_queue = getattr(getattr(app, "state", None), "task_queue", None)
+    if _task_queue:
+        await _task_queue.stop()
+    _redis_cache = getattr(getattr(app, "state", None), "redis_cache", None)
+    if _redis_cache:
+        await _redis_cache.disconnect()
     _event_bus = getattr(getattr(app, "state", None), "event_bus", None)
     if _event_bus:
         await _event_bus.stop()
@@ -1131,6 +1335,11 @@ def create_app() -> FastAPI:
     app.include_router(batch.router, prefix=settings.api_prefix, tags=["Batch"])
     app.include_router(search.router, prefix=settings.api_prefix, tags=["Search"])
     app.include_router(usage.router, prefix=settings.api_prefix, tags=["API Usage"])
+
+    # Database migration management
+    from shieldops.api.routes.migrations import router as migrations_router
+
+    app.include_router(migrations_router, prefix=settings.api_prefix, tags=["Migrations"])
 
     # Health check (detailed, authenticated)
     from shieldops.api.routes.health import router as health_router
