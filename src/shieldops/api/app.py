@@ -126,6 +126,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
                 "cost",
                 "learning",
                 "supervisor",
+                "prediction",
             ):
                 try:
                     await agent_registry.register(
@@ -1372,9 +1373,212 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     except Exception as e:
         logger.warning("attack_surface_mapper_init_failed", error=str(e))
 
+    # ── Phase 12: Playbook Auto-Applier ─────────────────────────
+    try:
+        from shieldops.api.routes import learning_approvals
+        from shieldops.playbooks.auto_applier import PlaybookAutoApplier
+
+        auto_applier = PlaybookAutoApplier(playbook_loader=playbook_loader)
+        learning_approvals.set_applier(auto_applier)
+        app.include_router(
+            learning_approvals.router,
+            prefix=settings.api_prefix,
+            tags=["Learning Approvals"],
+        )
+        logger.info("playbook_auto_applier_initialized")
+    except Exception as e:
+        logger.warning("playbook_auto_applier_init_failed", error=str(e))
+
+    # ── Phase 12: Prediction Agent ────────────────────────────
+    try:
+        from shieldops.agents.prediction.runner import PredictionRunner
+        from shieldops.api.routes import predictions as predictions_routes
+
+        prediction_runner = PredictionRunner()
+        predictions_routes.set_runner(prediction_runner)
+        app.include_router(
+            predictions_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Predictions"],
+        )
+        logger.info("prediction_agent_initialized")
+    except Exception as e:
+        logger.warning("prediction_agent_init_failed", error=str(e))
+
+    # ── Phase 12: RAG Knowledge Store ─────────────────────────
+    try:
+        from shieldops.agents.knowledge.rag_store import RAGStore
+        from shieldops.api.routes import knowledge as knowledge_routes
+
+        rag_store = RAGStore()
+        knowledge_routes.set_store(rag_store)
+        app.include_router(
+            knowledge_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Knowledge"],
+        )
+        logger.info("rag_knowledge_store_initialized")
+    except Exception as e:
+        logger.warning("rag_knowledge_store_init_failed", error=str(e))
+
+    # ── Phase 12: LLM Router ─────────────────────────────────
+    try:
+        from shieldops.api.routes import llm_usage as llm_usage_routes
+        from shieldops.utils.llm_router import LLMRouter, ModelTier, TaskComplexity
+
+        model_tiers = {
+            TaskComplexity.SIMPLE: ModelTier(
+                provider="anthropic",
+                model=settings.llm_simple_model,
+                cost_per_1k_input=0.001,
+                cost_per_1k_output=0.005,
+            ),
+            TaskComplexity.MODERATE: ModelTier(
+                provider="anthropic",
+                model=settings.llm_moderate_model,
+                cost_per_1k_input=0.003,
+                cost_per_1k_output=0.015,
+            ),
+            TaskComplexity.COMPLEX: ModelTier(
+                provider="anthropic",
+                model=settings.llm_complex_model,
+                cost_per_1k_input=0.015,
+                cost_per_1k_output=0.075,
+            ),
+        }
+        llm_router = LLMRouter(
+            model_tiers=model_tiers,
+            enabled=settings.llm_routing_enabled,
+        )
+        llm_usage_routes.set_llm_router(llm_router)
+        app.include_router(
+            llm_usage_routes.router,
+            prefix=settings.api_prefix,
+            tags=["LLM Usage"],
+        )
+        logger.info("llm_router_initialized")
+    except Exception as e:
+        logger.warning("llm_router_init_failed", error=str(e))
+
+    # ── Phase 12: Capacity Planner ────────────────────────────
+    try:
+        from shieldops.analytics.capacity_planner import CapacityPlanner
+        from shieldops.api.routes import capacity as capacity_routes
+
+        capacity_planner = CapacityPlanner()
+        capacity_routes.set_planner(capacity_planner)
+        app.include_router(
+            capacity_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Capacity Planning"],
+        )
+        logger.info("capacity_planner_initialized")
+    except Exception as e:
+        logger.warning("capacity_planner_init_failed", error=str(e))
+
+    # ── Phase 12: PCI-DSS + HIPAA Compliance ──────────────────
+    try:
+        from shieldops.api.routes import compliance_reports
+        from shieldops.compliance.hipaa import HIPAAEngine
+        from shieldops.compliance.pci_dss import PCIDSSEngine
+
+        pci_engine = PCIDSSEngine()
+        hipaa_engine = HIPAAEngine()
+        compliance_reports.set_pci_engine(pci_engine)
+        compliance_reports.set_hipaa_engine(hipaa_engine)
+        app.include_router(
+            compliance_reports.router,
+            prefix=settings.api_prefix,
+            tags=["Compliance Reports"],
+        )
+        logger.info("pci_hipaa_compliance_initialized")
+    except Exception as e:
+        logger.warning("pci_hipaa_compliance_init_failed", error=str(e))
+
+    # ── Phase 12: Outbound Webhooks ───────────────────────────
+    try:
+        from shieldops.api.routes import webhook_subscriptions
+        from shieldops.integrations.outbound.webhook_dispatcher import (
+            OutboundWebhookDispatcher,
+        )
+
+        webhook_dispatcher = OutboundWebhookDispatcher()
+        webhook_subscriptions.set_dispatcher(webhook_dispatcher)
+        app.include_router(
+            webhook_subscriptions.router,
+            prefix=settings.api_prefix,
+            tags=["Outbound Webhooks"],
+        )
+        logger.info("outbound_webhooks_initialized")
+    except Exception as e:
+        logger.warning("outbound_webhooks_init_failed", error=str(e))
+
+    # ── Phase 12: Agent Calibration ───────────────────────────
+    try:
+        from shieldops.agents.calibration.calibrator import ConfidenceCalibrator
+        from shieldops.agents.calibration.tracker import AccuracyTracker
+        from shieldops.api.routes import calibration as calibration_routes
+
+        accuracy_tracker = AccuracyTracker()
+        confidence_calibrator = ConfidenceCalibrator(tracker=accuracy_tracker)
+        calibration_routes.set_calibration(accuracy_tracker, confidence_calibrator)
+        app.include_router(
+            calibration_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Calibration"],
+        )
+        logger.info("agent_calibration_initialized")
+    except Exception as e:
+        logger.warning("agent_calibration_init_failed", error=str(e))
+
+    # ── Phase 12: Plugin System ───────────────────────────────
+    plugin_registry = None
+    try:
+        from shieldops.api.routes import plugins as plugin_routes
+        from shieldops.plugins.loader import PluginLoader
+        from shieldops.plugins.registry import PluginRegistry
+
+        plugin_registry = PluginRegistry()
+        plugin_loader = PluginLoader(registry=plugin_registry)
+        plugin_routes.set_plugin_registry(plugin_registry, plugin_loader)
+        app.include_router(
+            plugin_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Plugins"],
+        )
+        logger.info("plugin_system_initialized")
+    except Exception as e:
+        logger.warning("plugin_system_init_failed", error=str(e))
+
+    # ── Phase 12: Terraform API ───────────────────────────────
+    try:
+        from shieldops.api.routes import terraform as terraform_routes
+        from shieldops.api.routes import terraform_state as tf_state_routes
+
+        app.include_router(
+            terraform_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Terraform"],
+        )
+        app.include_router(
+            tf_state_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Terraform State"],
+        )
+        logger.info("terraform_api_initialized")
+    except Exception as e:
+        logger.warning("terraform_api_init_failed", error=str(e))
+
     yield
 
     logger.info("shieldops_shutting_down")
+
+    # Plugin teardown
+    if plugin_registry:
+        try:
+            await plugin_registry.teardown_all()
+        except Exception as e:
+            logger.debug("plugin_teardown_error", error=str(e))
 
     # ── Graceful request draining ──────────────────────────────
     from shieldops.api.middleware.shutdown import get_shutdown_state

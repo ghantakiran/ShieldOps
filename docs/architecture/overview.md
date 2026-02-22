@@ -23,7 +23,7 @@ across any cloud or on-premise environment.
 |  Vendor-neutral telemetry . No rip-and-replace       |
 +-----------------------------------------------------+
 |  Layer 1: Multi-Environment Connectors               |
-|  AWS . GCP . Azure . Kubernetes . Linux (SSH)        |
+|  AWS . GCP . Azure . Kubernetes . Linux . Windows     |
 |  Unified interface . Write once, deploy anywhere     |
 +-----------------------------------------------------+
 ```

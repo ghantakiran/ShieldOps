@@ -4,7 +4,7 @@
 
 > Your infrastructure never sleeps. Neither should its intelligence.
 
-ShieldOps deploys autonomous AI agents that investigate incidents, execute remediations, enforce security policies, and learn from outcomes — across multi-cloud (AWS/GCP/Azure) and on-premise Linux environments.
+ShieldOps deploys autonomous AI agents that investigate incidents, execute remediations, enforce security policies, and learn from outcomes — across multi-cloud (AWS/GCP/Azure), Kubernetes, on-premise Linux, and Windows environments.
 
 Unlike existing tools that only *analyze*, ShieldOps agents *act* — with policy-gated safety, full audit trails, and one-click rollback.
 
@@ -17,7 +17,7 @@ Unlike existing tools that only *analyze*, ShieldOps agents *act* — with polic
 | SRE teams handle 50+ alerts/day manually | Agents auto-investigate and resolve incidents 24/7 |
 | MTTR averages 2+ hours for P1 incidents | Root cause in minutes, remediation in seconds |
 | 70% of enterprises lack DevSecOps expertise | Security policies enforced continuously by agents |
-| Multi-cloud complexity growing 3x faster than teams | One agent works across AWS, GCP, Azure, K8s, and bare-metal Linux |
+| Multi-cloud complexity growing 3x faster than teams | One agent works across AWS, GCP, Azure, K8s, Linux, and Windows |
 | Alert fatigue causes burnout and missed incidents | Intelligent triage reduces noise, escalates what matters |
 
 ## How It Works
@@ -51,14 +51,14 @@ ShieldOps is built on a four-layer stack:
 ├─────────────────────────────────────────────────────┤
 │  Layer 3: Agent Orchestration (LangGraph)           │
 │  Investigation · Remediation · Security · Learning  │
-│  Supervisor agent · Multi-agent coordination         │
+│  Cost · Prediction · Supervisor · Custom agents      │
 ├─────────────────────────────────────────────────────┤
 │  Layer 2: Observability Ingestion                   │
 │  OpenTelemetry · Splunk · Datadog · Prometheus      │
-│  Vendor-neutral telemetry · No rip-and-replace       │
+│  CloudWatch · New Relic · Elastic · Jaeger           │
 ├─────────────────────────────────────────────────────┤
 │  Layer 1: Multi-Environment Connectors              │
-│  AWS · GCP · Azure · Kubernetes · Linux (SSH)       │
+│  AWS · GCP · Azure · Kubernetes · Linux · Windows   │
 │  Unified interface · Write once, deploy anywhere     │
 └─────────────────────────────────────────────────────┘
 ```
@@ -71,6 +71,8 @@ ShieldOps is built on a four-layer stack:
 | **Remediation** | Infrastructure execution | Restart pods, scale services, rollback deployments, patch systems |
 | **Security** | Continuous security posture | CVE patching, credential rotation, compliance monitoring |
 | **Learning** | Continuous improvement | Update playbooks, refine thresholds, learn from outcomes |
+| **Cost** | Cloud cost optimization | Analyze spend, identify waste, recommend savings |
+| **Prediction** | Proactive incident prevention | Detect trends, forecast anomalies, generate predictions |
 | **Supervisor** | Orchestration | Delegates to specialists, manages escalation, chains workflows |
 
 ### Safety Model (Defense in Depth)
@@ -91,12 +93,14 @@ Every agent action passes through five safety layers:
 | Agent Framework | LangGraph |
 | LLM | Anthropic Claude (primary), OpenAI (fallback) |
 | API | FastAPI |
-| Dashboard | React + TypeScript + Tailwind CSS |
+| Dashboard | React + TypeScript + Tailwind CSS + shadcn/ui |
 | Database | PostgreSQL (state), Redis (coordination) |
 | Messaging | Apache Kafka |
 | Infrastructure | Kubernetes, Terraform |
 | Observability | OpenTelemetry, LangSmith |
 | Policy Engine | Open Policy Agent (OPA) |
+| Logging | structlog (structured logging) |
+| Validation | Pydantic v2 |
 | CI/CD | GitHub Actions |
 
 ## Getting Started
@@ -155,48 +159,73 @@ ShieldOps/
 ├── src/shieldops/
 │   ├── agents/                        # AI agent implementations
 │   │   ├── investigation/             # Root cause analysis agent
-│   │   │   ├── graph.py               #   LangGraph workflow
-│   │   │   ├── nodes.py               #   Node implementations
-│   │   │   └── models.py              #   State models
 │   │   ├── remediation/               # Infrastructure execution agent
 │   │   ├── security/                  # Security posture agent
 │   │   ├── learning/                  # Continuous improvement agent
-│   │   └── supervisor/                # Multi-agent orchestrator
+│   │   ├── cost/                      # Cloud cost optimization agent
+│   │   ├── prediction/                # Predictive incident detection
+│   │   ├── supervisor/                # Multi-agent orchestrator
+│   │   ├── custom/                    # Custom agent builder
+│   │   ├── knowledge/                 # RAG over incidents & runbooks
+│   │   ├── calibration/               # Agent confidence calibration
+│   │   └── registry.py                # Agent fleet registry
 │   ├── connectors/                    # Multi-cloud abstraction layer
 │   │   ├── base.py                    #   Connector interface & router
-│   │   ├── kubernetes/connector.py    #   K8s implementation
+│   │   ├── kubernetes/                #   Kubernetes
 │   │   ├── aws/                       #   AWS (EC2, ECS, Lambda)
-│   │   ├── gcp/                       #   GCP (Phase 2)
-│   │   ├── azure/                     #   Azure (Phase 2)
-│   │   └── linux/                     #   Bare-metal SSH/Ansible
+│   │   ├── gcp/                       #   GCP
+│   │   ├── azure/                     #   Azure
+│   │   ├── linux/                     #   Bare-metal SSH/Ansible
+│   │   └── windows/                   #   Windows WinRM
 │   ├── observability/                 # Telemetry ingestion
 │   │   ├── splunk/                    #   Splunk integration
 │   │   ├── datadog/                   #   Datadog integration
 │   │   ├── prometheus/                #   Prometheus integration
+│   │   ├── cloudwatch/                #   AWS CloudWatch
+│   │   ├── newrelic/                  #   New Relic integration
+│   │   ├── elastic/                   #   Elastic/OpenSearch integration
 │   │   └── otel/                      #   OpenTelemetry native
 │   ├── policy/                        # Safety & governance
 │   │   ├── opa/client.py              #   OPA policy evaluation
 │   │   ├── approval/workflow.py       #   Human approval workflows
 │   │   └── rollback/                  #   Rollback mechanisms
-│   ├── orchestration/                  # Agent orchestration utilities
+│   ├── orchestration/                 # Agent orchestration utilities
+│   ├── compliance/                    # SOC2, PCI-DSS, HIPAA engines
+│   ├── analytics/                     # Anomaly detection, capacity planning
+│   ├── auth/                          # OIDC/SSO authentication
+│   ├── billing/                       # Stripe billing & plan enforcement
+│   ├── sla/                           # SLA management engine
+│   ├── topology/                      # Service dependency mapping
+│   ├── vulnerability/                 # Posture aggregation & reporting
+│   ├── workers/                       # Background task queue
+│   ├── integrations/                  # CVE sources, scanners, billing, ITSM
+│   ├── scheduler/                     # Job scheduling (learning, scans)
+│   ├── changes/                       # Change tracking / deployment correlation
+│   ├── cache/                         # Redis cache layer
+│   ├── plugins/                       # Plugin SDK & extension framework
+│   ├── playbooks/                     # Playbook loader, AI generator, auto-applier
 │   ├── api/                           # FastAPI application
 │   │   ├── app.py                     #   App factory & middleware
-│   │   └── routes/                    #   API endpoints
+│   │   ├── auth/                      #   JWT auth, RBAC
+│   │   ├── routes/                    #   API endpoints
+│   │   ├── middleware/                #   Rate limiting, security headers
+│   │   └── ws/                        #   WebSocket routes
 │   ├── models/base.py                 # Core Pydantic models
 │   ├── config/settings.py             # Environment configuration
 │   └── cli.py                         # CLI entry point
 │
 ├── playbooks/                         # Remediation playbooks (YAML)
-│   ├── pod-crash-loop.yaml
-│   ├── high-latency.yaml
-│   └── policies/shieldops.rego        # Default OPA policies
+│   └── policies/                      # Default OPA policies
 │
 ├── infrastructure/
 │   ├── docker/                        # Dockerfile & docker-compose
 │   └── kubernetes/                    # K8s manifests with RBAC
 │
+├── dashboard-ui/                      # React + TypeScript dashboard
+│
 ├── tests/
-│   └── unit/                          # Unit tests
+│   ├── unit/                          # Unit tests (4,300+ tests)
+│   └── integration/                   # Integration tests
 │
 ├── docs/
 │   ├── prd/                           # Product Requirements Documents
@@ -208,20 +237,25 @@ ShieldOps/
 
 ## API Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/health` | Health check |
-| `GET` | `/api/v1/agents` | List all agents with status |
-| `GET` | `/api/v1/agents/{id}` | Agent detail & config |
-| `GET` | `/api/v1/investigations` | Active/recent investigations |
-| `GET` | `/api/v1/investigations/{id}` | Investigation detail with reasoning chain |
-| `GET` | `/api/v1/remediations` | Remediation timeline |
-| `POST` | `/api/v1/remediations/{id}/approve` | Approve pending remediation |
-| `POST` | `/api/v1/remediations/{id}/rollback` | Rollback a remediation |
-| `GET` | `/api/v1/analytics/mttr` | MTTR trends |
-| `GET` | `/api/v1/analytics/resolution-rate` | Auto-resolution metrics |
-| `GET` | `/api/v1/security/posture` | Security overview |
-| `GET` | `/api/v1/security/compliance/{framework}` | Compliance status (SOC 2, PCI-DSS, HIPAA) |
+| Category | Key Endpoints |
+|----------|--------------|
+| **Health** | `GET /health`, `GET /ready`, `GET /metrics` |
+| **Agents** | `GET /api/v1/agents`, `GET /api/v1/agents/{id}` |
+| **Investigations** | `GET /api/v1/investigations`, `POST /api/v1/investigations` |
+| **Remediations** | `GET /api/v1/remediations`, `POST /api/v1/remediations/{id}/approve` |
+| **Security** | `GET /api/v1/security/posture`, `GET /api/v1/security/compliance/{framework}` |
+| **Vulnerabilities** | `GET /api/v1/vulnerabilities`, `GET /api/v1/vulnerabilities/{id}` |
+| **Compliance** | `GET /api/v1/compliance/soc2`, `GET /api/v1/compliance/pci-dss`, `GET /api/v1/compliance/hipaa` |
+| **Cost** | `GET /api/v1/cost/analysis`, `GET /api/v1/cost/recommendations` |
+| **Learning** | `GET /api/v1/learning/cycles`, `GET /api/v1/learning/recommendations` |
+| **Predictions** | `POST /api/v1/predictions/run`, `GET /api/v1/predictions/active` |
+| **Playbooks** | `GET /api/v1/playbooks`, `POST /api/v1/playbooks/ai/generate` |
+| **Billing** | `GET /api/v1/billing/usage`, `POST /api/v1/billing/subscribe` |
+| **Webhooks** | `POST /api/v1/webhooks/subscriptions`, `GET /api/v1/webhooks/subscriptions` |
+| **Plugins** | `GET /api/v1/plugins`, `POST /api/v1/plugins/install` |
+| **Analytics** | `GET /api/v1/analytics/mttr`, `GET /api/v1/analytics/resolution-rate` |
+
+Full interactive API documentation is available at `/api/v1/docs` when the server is running.
 
 ## Remediation Playbooks
 
@@ -260,29 +294,22 @@ Default policies ship with the platform and can be customized per environment:
 - **`rate_limit_actions`** — Max actions per hour per environment
 - **`change_freeze_window`** — Block changes during configured freeze windows
 
-## Roadmap
+## Development Phases
 
-### Phase 1: MVP (Months 0-6)
-- [x] Project scaffolding & architecture
-- [ ] Investigation Agent (AWS + K8s + Splunk + Prometheus)
-- [ ] Remediation Agent with OPA policy gates
-- [ ] Unified Dashboard (Fleet Overview + Investigation Detail)
-- [ ] 10 pre-built remediation playbooks
-- [ ] 3 design partners in production
-
-### Phase 2: Multi-Cloud (Months 7-12)
-- [ ] GCP + Azure connector parity
-- [ ] Security Agent (CVE patching, credential rotation)
-- [ ] Compliance packs (SOC 2, PCI-DSS, HIPAA)
-- [ ] Datadog + New Relic integrations
-- [ ] Self-service Starter tier
-
-### Phase 3: Scale (Months 13-18)
-- [ ] Learning Agent (continuous improvement from outcomes)
-- [ ] Custom playbook builder UI
-- [ ] AWS/Azure/GCP Marketplace listings
-- [ ] Advanced analytics & ROI reporting
-- [ ] Enterprise SSO & multi-tenancy
+| Phase | Theme | Status |
+|-------|-------|--------|
+| Phase 1 | Project scaffolding & core architecture | Completed |
+| Phase 2 | Investigation Agent (AWS + K8s + Splunk + Prometheus) | Completed |
+| Phase 3 | Remediation Agent with OPA policy gates | Completed |
+| Phase 4 | Unified Dashboard (React + TypeScript) | Completed |
+| Phase 5 | Multi-Cloud Connectors (GCP, Azure, Windows) | Completed |
+| Phase 6 | Security Agent + CVE management | Completed |
+| Phase 7 | Learning Agent + Cost Agent | Completed |
+| Phase 8 | Enterprise features (SSO, RBAC, billing, multi-tenant) | Completed |
+| Phase 9 | Production-scale ops (scheduler, webhooks, GraphQL) | Completed |
+| Phase 10 | Production-scale ops (caching, workers, ITSM, mobile push) | Completed |
+| Phase 11 | Security Platform Sophistication (SBOM, MITRE ATT&CK, EPSS) | Completed |
+| Phase 12 | Autonomous Intelligence & Platform Ecosystem | In Progress |
 
 ## Documentation
 
@@ -294,9 +321,11 @@ Default policies ship with the platform and can be customized per environment:
 | [PRD-004: Unified Dashboard](docs/prd/PRD-004-unified-dashboard.md) | Real-time agent monitoring command center |
 | [PRD-005: Multi-Cloud Connectors](docs/prd/PRD-005-multi-cloud-connectors.md) | Unified abstraction layer |
 | [PRD-006: Policy Engine](docs/prd/PRD-006-policy-engine.md) | OPA-powered action governance |
+| [PRD-007: Learning Agent](docs/prd/PRD-007-learning-agent.md) | Continuous improvement from outcomes |
 | [ADR-001: LangGraph Selection](docs/architecture/adr-001-langgraph-selection.md) | Why LangGraph over CrewAI/AutoGen |
 | [ADR-002: Multi-Cloud Abstraction](docs/architecture/adr-002-multi-cloud-abstraction.md) | Connector architecture |
 | [ADR-003: Agent Safety Model](docs/architecture/adr-003-agent-safety-model.md) | Five-layer defense in depth |
+| [Architecture Overview](docs/architecture/overview.md) | Four-layer architecture design |
 | [Dashboard Design](docs/architecture/dashboard-design.md) | Wireframes & component hierarchy |
 
 ## Contributing

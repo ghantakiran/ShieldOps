@@ -20,6 +20,7 @@ Agent Logic (LangGraph)
 | AzureConnector      | <-- azure-mgmt-* + Managed Identity
 | KubernetesConnector | <-- kubernetes-client + ServiceAccount
 | LinuxConnector      | <-- asyncssh + Ansible
+| WindowsConnector    | <-- WinRM + PowerShell
 +---------------------+
 ```
 
@@ -100,6 +101,12 @@ health = await connector.get_health("pod/web-server-01")
 - **Module:** `src/shieldops/connectors/linux/connector.py`
 - **Auth:** SSH key-based authentication
 - **Capabilities:** Remote command execution, file management, service control
+
+### Windows WinRM (registered when `SHIELDOPS_WINDOWS_HOST` is set)
+
+- **Module:** `src/shieldops/connectors/windows/connector.py`
+- **Auth:** WinRM with NTLM/Kerberos authentication
+- **Capabilities:** PowerShell command execution, Windows service management, IIS administration
 
 ---
 

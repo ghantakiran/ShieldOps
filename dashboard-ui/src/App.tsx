@@ -27,6 +27,9 @@ import OnboardingWizard from "./pages/OnboardingWizard";
 import Marketplace from "./pages/Marketplace";
 import IncidentCorrelation from "./pages/IncidentCorrelation";
 import ComplianceDashboard from "./pages/ComplianceDashboard";
+import Predictions from "./pages/Predictions";
+import CapacityForecast from "./pages/CapacityForecast";
+import InfraAsCode from "./pages/InfraAsCode";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuthStore();
@@ -78,6 +81,9 @@ export default function App() {
           <Route path="settings" element={<Settings />} />
           <Route path="users" element={<UserManagement />} />
           <Route path="incidents" element={<IncidentCorrelation />} />
+          <Route path="predictions" element={<Predictions />} />
+          <Route path="capacity" element={<CapacityForecast />} />
+          <Route path="infra-as-code" element={<InfraAsCode />} />
           <Route path="onboarding" element={<OnboardingWizard />} />
         </Route>
       </Routes>

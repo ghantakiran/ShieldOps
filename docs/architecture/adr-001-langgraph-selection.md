@@ -60,7 +60,7 @@ We need an AI agent orchestration framework to build our multi-agent SRE platfor
 - All agent workflows defined as LangGraph `StateGraph` instances
 - Agent state schemas use Pydantic models (type-safe, serializable)
 - LangSmith required for production tracing and monitoring
-- Team must learn Rego graph patterns (training budget allocated)
+- Team must learn LangGraph graph patterns (training budget allocated)
 
 ## References
 - LangGraph docs: https://python.langchain.com/docs/langgraph
