@@ -35,6 +35,9 @@ class SecurityToolkit:
         policy_engine: Any | None = None,
         approval_workflow: Any | None = None,
         repository: Any | None = None,
+        threat_intel: Any | None = None,
+        epss_scorer: Any | None = None,
+        sbom_generator: Any | None = None,
     ) -> None:
         self._router = connector_router
         self._cve_sources = cve_sources or []
@@ -43,6 +46,9 @@ class SecurityToolkit:
         self._policy_engine = policy_engine
         self._approval_workflow = approval_workflow
         self._repository = repository
+        self._threat_intel = threat_intel
+        self._epss_scorer = epss_scorer
+        self._sbom_generator = sbom_generator
 
     # ── Scan tools (existing) ─────────────────────────────────────
 
@@ -693,6 +699,25 @@ class SecurityToolkit:
         except (ValueError, Exception) as e:
             logger.error("resource_list_failed", error=str(e))
             return []
+
+    # ── SBOM generation ───────────────────────────────────────────
+
+    async def generate_sbom(
+        self,
+        target: str,
+        output_format: str = "cyclonedx-json",
+    ) -> dict[str, Any]:
+        """Generate a Software Bill of Materials for a target."""
+        if self._sbom_generator is None:
+            return {"error": "SBOM generator not configured", "components": []}
+
+        try:
+            result = await self._sbom_generator.generate(target, output_format)
+            data: dict[str, Any] = result.model_dump() if hasattr(result, "model_dump") else result
+            return data
+        except Exception as e:
+            logger.error("sbom_generation_failed", target=target, error=str(e))
+            return {"error": str(e), "components": []}
 
     # ── Action execution tools (new) ──────────────────────────────
 

@@ -68,6 +68,23 @@ class CVESource(ABC):
         """
 
 
+class SBOMGeneratorProtocol(ABC):
+    """Abstract interface for SBOM generation."""
+
+    @abstractmethod
+    async def generate(self, target: str, output_format: str = "cyclonedx-json") -> Any:
+        """Generate an SBOM for the given target."""
+
+    @abstractmethod
+    async def generate_and_scan(
+        self,
+        target: str,
+        cve_sources: list[Any] | None = None,
+        severity_threshold: str = "medium",
+    ) -> dict[str, Any]:
+        """Generate SBOM and scan components for vulnerabilities."""
+
+
 class CredentialStore(ABC):
     """Abstract interface for credential / secret management backends.
 
