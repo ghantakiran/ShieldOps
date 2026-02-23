@@ -1569,6 +1569,159 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     except Exception as e:
         logger.warning("terraform_api_init_failed", error=str(e))
 
+    # ── Phase 13: Circuit Breaker Registry ──────────────────
+    try:
+        from shieldops.api.routes import circuit_breakers as cb_routes
+        from shieldops.utils.circuit_breaker import CircuitBreakerRegistry
+
+        cb_registry = CircuitBreakerRegistry()
+        # Pre-register breakers for external dependencies
+        cb_registry.register("opa", failure_threshold=5, reset_timeout=30.0)
+        cb_registry.register("llm", failure_threshold=3, reset_timeout=60.0)
+        cb_registry.register("observability", failure_threshold=5, reset_timeout=45.0)
+        cb_routes.set_registry(cb_registry)
+        app.include_router(
+            cb_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Circuit Breakers"],
+        )
+        app.state.circuit_breaker_registry = cb_registry
+        logger.info("circuit_breaker_registry_initialized")
+    except Exception as e:
+        logger.warning("circuit_breaker_registry_init_failed", error=str(e))
+
+    # ── Phase 13: Startup Secret Validator ───────────────────
+    try:
+        from shieldops.config.startup_validator import StartupValidator
+
+        startup_validator = StartupValidator()
+        validation_result = startup_validator.validate()
+        if not validation_result.valid:
+            for err in validation_result.errors:
+                logger.error(
+                    "startup_validation_error",
+                    category=err.category,
+                    key=err.key,
+                    message=err.message,
+                )
+        for warn in validation_result.warnings:
+            logger.warning(
+                "startup_validation_warning",
+                category=warn.category,
+                key=warn.key,
+                message=warn.message,
+            )
+        logger.info(
+            "startup_validation_complete",
+            valid=validation_result.valid,
+            errors=len(validation_result.errors),
+            warnings=len(validation_result.warnings),
+        )
+    except Exception as e:
+        logger.warning("startup_validator_init_failed", error=str(e))
+
+    # ── Phase 13: Exception Handlers ─────────────────────────
+    try:
+        from shieldops.api.exceptions import register_exception_handlers
+
+        register_exception_handlers(app)
+        logger.info("exception_handlers_registered")
+    except Exception as e:
+        logger.warning("exception_handlers_init_failed", error=str(e))
+
+    # ── Phase 13: SLO Monitor ────────────────────────────────
+    try:
+        from shieldops.api.routes import slo as slo_routes
+        from shieldops.observability.slo_monitor import SLOMonitor
+
+        slo_monitor = SLOMonitor(
+            burn_rate_threshold=settings.slo_burn_rate_threshold,
+        )
+        slo_routes.set_monitor(slo_monitor)
+        app.include_router(
+            slo_routes.router,
+            prefix=settings.api_prefix,
+            tags=["SLO"],
+        )
+        app.state.slo_monitor = slo_monitor
+        logger.info("slo_monitor_initialized")
+    except Exception as e:
+        logger.warning("slo_monitor_init_failed", error=str(e))
+
+    # ── Phase 13: Audit Event Bus ────────────────────────────
+    try:
+        from shieldops.api.routes import audit_events as audit_event_routes
+        from shieldops.audit.event_bus import AuditEventBus
+
+        audit_event_bus = AuditEventBus()
+        audit_event_routes.set_bus(audit_event_bus)
+        app.include_router(
+            audit_event_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Audit Events"],
+        )
+        app.state.audit_event_bus = audit_event_bus
+        logger.info("audit_event_bus_initialized")
+    except Exception as e:
+        logger.warning("audit_event_bus_init_failed", error=str(e))
+
+    # ── Phase 13: Token Manager ──────────────────────────────
+    try:
+        from shieldops.api.auth.token_manager import TokenManager
+        from shieldops.api.routes import token as token_routes
+
+        token_manager = TokenManager(access_ttl=settings.jwt_expire_minutes * 60)
+        token_routes.set_manager(token_manager)
+        app.include_router(
+            token_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Token Management"],
+        )
+        app.state.token_manager = token_manager
+        logger.info("token_manager_initialized")
+    except Exception as e:
+        logger.warning("token_manager_init_failed", error=str(e))
+
+    # ── Phase 13: GDPR Processor ─────────────────────────────
+    try:
+        from shieldops.api.routes import gdpr as gdpr_routes
+        from shieldops.compliance.gdpr import GDPRProcessor
+
+        gdpr_processor = GDPRProcessor()
+        gdpr_routes.set_processor(gdpr_processor)
+        app.include_router(
+            gdpr_routes.router,
+            prefix=settings.api_prefix,
+            tags=["GDPR"],
+        )
+        logger.info("gdpr_processor_initialized")
+    except Exception as e:
+        logger.warning("gdpr_processor_init_failed", error=str(e))
+
+    # ── Phase 13: Hot Reload Manager ─────────────────────────
+    try:
+        from shieldops.api.routes import config as config_routes
+        from shieldops.config.hot_reload import HotReloadManager
+
+        hot_reload_manager = HotReloadManager(
+            initial_config={
+                "environment": settings.environment,
+                "debug": settings.debug,
+                "rate_limit_default": settings.rate_limit_default,
+                "agent_confidence_threshold_auto": settings.agent_confidence_threshold_auto,
+            }
+        )
+        config_routes.set_manager(hot_reload_manager)
+        app.include_router(
+            config_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Configuration"],
+        )
+        app.state.hot_reload_manager = hot_reload_manager
+        logger.info("hot_reload_manager_initialized")
+    except Exception as e:
+        logger.warning("hot_reload_manager_init_failed", error=str(e))
+
     yield
 
     logger.info("shieldops_shutting_down")
@@ -1645,6 +1798,7 @@ def create_app() -> FastAPI:
             "Content-Type",
             "X-Request-ID",
             "X-Organization-ID",
+            "Idempotency-Key",
         ],
     )
 
@@ -1672,6 +1826,13 @@ def create_app() -> FastAPI:
     )
 
     app.add_middleware(ErrorHandlerMiddleware)
+    # Phase 13: Idempotency middleware for POST/PUT/PATCH deduplication
+    try:
+        from shieldops.api.middleware.idempotency import IdempotencyMiddleware
+
+        app.add_middleware(IdempotencyMiddleware, ttl=settings.idempotency_ttl_seconds)
+    except Exception:  # noqa: S110
+        pass  # Idempotency middleware is optional
     app.add_middleware(RateLimitMiddleware)
     # Sliding window rate limiter (activated after the fixed-window limiter)
     if settings.sliding_window_rate_limit_enabled:
