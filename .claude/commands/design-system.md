@@ -31,6 +31,8 @@ Design new ShieldOps components, APIs, or agent workflows.
    - Define rollback procedures
    - Assess deployment risk via `DeploymentRiskPredictor`
    - Verify compliance gaps via `ComplianceGapAnalyzer`
+   - Simulate service dependency impact via `ServiceDependencyImpactAnalyzer` (`src/shieldops/topology/impact_analyzer.py`)
+   - Evaluate compliance automation rules via `ComplianceAutomationEngine` (`src/shieldops/compliance/automation_rules.py`)
 
 5. **Documentation**:
    - Write Architecture Decision Record (ADR) in `docs/architecture/`

@@ -10,7 +10,9 @@ Run security audits on ShieldOps codebase and agent configurations.
 - `deps` — Dependency vulnerability scan
 - `policies` — OPA policy completeness check (includes PolicyCodeGenerator output)
 - `agents` — Agent blast-radius and permission audit (includes AgentDecisionExplainer)
-- `compliance` — Compliance gap analysis via `ComplianceGapAnalyzer`
+- `compliance` — Compliance gap analysis via `ComplianceGapAnalyzer` + `ComplianceAutomationEngine`
+- `audit` — Configuration audit trail via `ConfigurationAuditTrail`
+- `isolation` — Tenant resource isolation checks via `TenantResourceIsolationManager`
 - `infra` — Infrastructure-as-code security scan (checkov, tfsec)
 - `all` — Full security audit
 
@@ -21,8 +23,11 @@ Run security audits on ShieldOps codebase and agent configurations.
 3. **OPA Policy Review**: Verify all agent actions have corresponding policy rules
 4. **Agent Permissions**: Audit blast-radius limits per environment
 5. **Compliance Gap Analysis**: Run `ComplianceGapAnalyzer` from `src/shieldops/compliance/gap_analyzer.py`
-6. **Infrastructure**: Scan Terraform/K8s configs for misconfigurations
-7. **Generate Report**: Severity-rated findings with remediation guidance
+6. **Compliance Automation**: Check auto-remediation rules via `ComplianceAutomationEngine` (`src/shieldops/compliance/automation_rules.py`)
+7. **Configuration Audit**: Review config change trail via `ConfigurationAuditTrail` (`src/shieldops/audit/config_audit.py`)
+8. **Tenant Isolation**: Verify resource boundaries via `TenantResourceIsolationManager` (`src/shieldops/policy/tenant_isolation.py`)
+9. **Infrastructure**: Scan Terraform/K8s configs for misconfigurations
+10. **Generate Report**: Severity-rated findings with remediation guidance
 
 ## Severity Levels
 - **CRITICAL**: Hardcoded secrets, SQL injection, unauthenticated endpoints

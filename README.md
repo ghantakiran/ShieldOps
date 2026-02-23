@@ -254,6 +254,18 @@ ShieldOps/
 | **Webhooks** | `POST /api/v1/webhooks/subscriptions`, `GET /api/v1/webhooks/subscriptions` |
 | **Plugins** | `GET /api/v1/plugins`, `POST /api/v1/plugins/install` |
 | **Analytics** | `GET /api/v1/analytics/mttr`, `GET /api/v1/analytics/resolution-rate` |
+| **Tenant Isolation** | `POST /api/v1/tenant-isolation`, `GET /api/v1/tenant-isolation/{id}` |
+| **Alert Noise** | `POST /api/v1/alert-noise/alerts`, `POST /api/v1/alert-noise/analyze` |
+| **Threshold Tuning** | `POST /api/v1/threshold-tuner/thresholds`, `POST /api/v1/threshold-tuner/recommendations/generate` |
+| **Severity Prediction** | `POST /api/v1/severity-predictor/predict`, `GET /api/v1/severity-predictor/accuracy` |
+| **Impact Analysis** | `POST /api/v1/impact-analyzer/simulate`, `GET /api/v1/impact-analyzer/critical-services` |
+| **Config Audit** | `POST /api/v1/config-audit/changes`, `GET /api/v1/config-audit/history` |
+| **Deployment Velocity** | `POST /api/v1/deployment-velocity/events`, `GET /api/v1/deployment-velocity/velocity` |
+| **Compliance Automation** | `POST /api/v1/compliance-automation/rules`, `POST /api/v1/compliance-automation/violations` |
+| **Knowledge Base** | `POST /api/v1/knowledge-articles`, `GET /api/v1/knowledge-articles/search` |
+| **On-Call Fatigue** | `POST /api/v1/oncall-fatigue/pages`, `GET /api/v1/oncall-fatigue/burnout-risks` |
+| **Backup Verification** | `POST /api/v1/backup-verification/backups`, `GET /api/v1/backup-verification/recovery-readiness` |
+| **Cost Tag Enforcement** | `POST /api/v1/cost-tag-enforcer/policies`, `GET /api/v1/cost-tag-enforcer/compliance-summary` |
 
 Full interactive API documentation is available at `/api/v1/docs` when the server is running.
 
