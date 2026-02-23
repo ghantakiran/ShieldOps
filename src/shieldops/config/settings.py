@@ -596,6 +596,66 @@ class Settings(BaseSettings):
     incident_learning_max_lessons: int = 10000
     incident_learning_max_applications: int = 50000
 
+    # Phase 20: Tenant Resource Isolation
+    tenant_isolation_enabled: bool = True
+    tenant_isolation_max_tenants: int = 500
+    tenant_isolation_max_violations: int = 50000
+
+    # Phase 20: Alert Noise Analyzer
+    alert_noise_enabled: bool = True
+    alert_noise_max_records: int = 100000
+    alert_noise_threshold: float = 0.3
+
+    # Phase 20: Automated Threshold Tuner
+    threshold_tuner_enabled: bool = True
+    threshold_tuner_max_thresholds: int = 2000
+    threshold_tuner_max_samples: int = 100000
+
+    # Phase 20: Incident Severity Predictor
+    severity_predictor_enabled: bool = True
+    severity_predictor_max_predictions: int = 50000
+    severity_predictor_max_profiles: int = 1000
+
+    # Phase 20: Service Dependency Impact Analyzer
+    impact_analyzer_enabled: bool = True
+    impact_analyzer_max_dependencies: int = 5000
+    impact_analyzer_max_simulations: int = 10000
+
+    # Phase 20: Configuration Audit Trail
+    config_audit_enabled: bool = True
+    config_audit_max_entries: int = 100000
+    config_audit_max_versions_per_key: int = 50
+
+    # Phase 20: Deployment Velocity Tracker
+    deployment_velocity_enabled: bool = True
+    deployment_velocity_max_events: int = 100000
+    deployment_velocity_default_period_days: int = 30
+
+    # Phase 20: Compliance Automation Rule Engine
+    compliance_automation_enabled: bool = True
+    compliance_automation_max_rules: int = 500
+    compliance_automation_max_executions: int = 50000
+
+    # Phase 20: Knowledge Base Article Manager
+    knowledge_base_enabled: bool = True
+    knowledge_base_max_articles: int = 5000
+    knowledge_base_max_votes: int = 50000
+
+    # Phase 20: On-Call Fatigue Analyzer
+    oncall_fatigue_enabled: bool = True
+    oncall_fatigue_max_events: int = 100000
+    oncall_fatigue_burnout_threshold: float = 75.0
+
+    # Phase 20: Backup Verification Engine
+    backup_verification_enabled: bool = True
+    backup_verification_max_backups: int = 10000
+    backup_verification_stale_hours: float = 48.0
+
+    # Phase 20: Cost Allocation Tag Enforcer
+    cost_tag_enforcer_enabled: bool = True
+    cost_tag_enforcer_max_policies: int = 200
+    cost_tag_enforcer_max_checks: int = 100000
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",

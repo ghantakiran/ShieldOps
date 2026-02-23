@@ -317,6 +317,7 @@ Default policies ship with the platform and can be customized per environment:
 | Phase 17 | Incident Intelligence & FinOps Automation | Completed |
 | Phase 18 | Advanced Security & Intelligent Operations | Completed |
 | Phase 19 | Intelligent Automation & Governance | Completed |
+| Phase 20 | Platform Intelligence & Enterprise Hardening | Completed |
 
 ## Documentation
 
