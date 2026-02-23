@@ -207,6 +207,18 @@ module = [
     "shieldops.api.routes.third_party_risk",
     "shieldops.api.routes.roi_tracker",
     "shieldops.api.routes.infrastructure_map",
+    "shieldops.api.routes.secret_rotation",
+    "shieldops.api.routes.anomaly_correlation",
+    "shieldops.api.routes.synthetic_monitor",
+    "shieldops.api.routes.chaos_experiments",
+    "shieldops.api.routes.data_quality",
+    "shieldops.api.routes.canary_tracker",
+    "shieldops.api.routes.incident_comms",
+    "shieldops.api.routes.dependency_sla",
+    "shieldops.api.routes.posture_scorer",
+    "shieldops.api.routes.workload_fingerprint",
+    "shieldops.api.routes.maintenance_window",
+    "shieldops.api.routes.evidence_collector",
 ]
 warn_return_any = false
 disallow_untyped_defs = false

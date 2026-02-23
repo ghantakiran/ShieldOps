@@ -2644,6 +2644,255 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     except Exception as e:
         logger.warning("infrastructure_map_init_failed", error=str(e))
 
+    # ── Phase 18: Secret Rotation ───────────────────────────
+    try:
+        from shieldops.api.routes import secret_rotation as secret_rot_route
+        from shieldops.auth.secret_rotation import SecretRotationScheduler
+
+        secret_scheduler = SecretRotationScheduler(
+            max_secrets=settings.secret_rotation_max_secrets,
+            default_rotation_days=settings.secret_rotation_default_days,
+        )
+        secret_rot_route.set_scheduler(secret_scheduler)
+        app.include_router(
+            secret_rot_route.router,
+            prefix=settings.api_prefix,
+            tags=["Secret Rotation"],
+        )
+        logger.info("secret_rotation_initialized")
+    except Exception as e:
+        logger.warning("secret_rotation_init_failed", error=str(e))
+
+    # ── Phase 18: Anomaly Correlation ───────────────────────
+    try:
+        from shieldops.analytics.anomaly_correlation import (
+            AnomalyCorrelationEngine,
+        )
+        from shieldops.api.routes import anomaly_correlation as anomaly_corr_route
+
+        anomaly_engine = AnomalyCorrelationEngine(
+            max_events=settings.anomaly_correlation_max_events,
+            correlation_window_seconds=settings.anomaly_correlation_window_seconds,
+        )
+        anomaly_corr_route.set_engine(anomaly_engine)
+        app.include_router(
+            anomaly_corr_route.router,
+            prefix=settings.api_prefix,
+            tags=["Anomaly Correlation"],
+        )
+        logger.info("anomaly_correlation_initialized")
+    except Exception as e:
+        logger.warning("anomaly_correlation_init_failed", error=str(e))
+
+    # ── Phase 18: Synthetic Monitor ─────────────────────────
+    try:
+        from shieldops.api.routes import synthetic_monitor as synth_route
+        from shieldops.observability.synthetic_monitor import (
+            SyntheticMonitorManager,
+        )
+
+        synth_mgr = SyntheticMonitorManager(
+            max_monitors=settings.synthetic_monitor_max_monitors,
+            max_results=settings.synthetic_monitor_max_results,
+            failure_threshold=settings.synthetic_monitor_failure_threshold,
+        )
+        synth_route.set_manager(synth_mgr)
+        app.include_router(
+            synth_route.router,
+            prefix=settings.api_prefix,
+            tags=["Synthetic Monitors"],
+        )
+        logger.info("synthetic_monitor_initialized")
+    except Exception as e:
+        logger.warning("synthetic_monitor_init_failed", error=str(e))
+
+    # ── Phase 18: Chaos Experiments ─────────────────────────
+    try:
+        from shieldops.api.routes import chaos_experiments as chaos_route
+        from shieldops.observability.chaos_experiments import (
+            ChaosExperimentTracker,
+        )
+
+        chaos_tracker = ChaosExperimentTracker(
+            max_experiments=settings.chaos_experiments_max_experiments,
+            max_results=settings.chaos_experiments_max_results,
+        )
+        chaos_route.set_tracker(chaos_tracker)
+        app.include_router(
+            chaos_route.router,
+            prefix=settings.api_prefix,
+            tags=["Chaos Experiments"],
+        )
+        logger.info("chaos_experiments_initialized")
+    except Exception as e:
+        logger.warning("chaos_experiments_init_failed", error=str(e))
+
+    # ── Phase 18: Data Quality ──────────────────────────────
+    try:
+        from shieldops.api.routes import data_quality as dq_route
+        from shieldops.compliance.data_quality import DataQualityMonitor
+
+        dq_monitor = DataQualityMonitor(
+            max_rules=settings.data_quality_max_rules,
+            max_results=settings.data_quality_max_results,
+            alert_cooldown_seconds=settings.data_quality_alert_cooldown,
+        )
+        dq_route.set_monitor(dq_monitor)
+        app.include_router(
+            dq_route.router,
+            prefix=settings.api_prefix,
+            tags=["Data Quality"],
+        )
+        logger.info("data_quality_initialized")
+    except Exception as e:
+        logger.warning("data_quality_init_failed", error=str(e))
+
+    # ── Phase 18: Canary Tracker ────────────────────────────
+    try:
+        from shieldops.api.routes import canary_tracker as canary_route
+        from shieldops.policy.rollback.canary_tracker import (
+            CanaryDeploymentTracker,
+        )
+
+        canary_trk = CanaryDeploymentTracker(
+            max_deployments=settings.canary_tracker_max_deployments,
+            max_metrics=settings.canary_tracker_max_metrics,
+        )
+        canary_route.set_tracker(canary_trk)
+        app.include_router(
+            canary_route.router,
+            prefix=settings.api_prefix,
+            tags=["Canary Deployments"],
+        )
+        logger.info("canary_tracker_initialized")
+    except Exception as e:
+        logger.warning("canary_tracker_init_failed", error=str(e))
+
+    # ── Phase 18: Incident Communications ───────────────────
+    try:
+        from shieldops.api.routes import incident_comms as comms_route
+        from shieldops.incidents.incident_comms import (
+            IncidentCommunicationManager,
+        )
+
+        comms_mgr = IncidentCommunicationManager(
+            max_templates=settings.incident_comms_max_templates,
+            max_messages=settings.incident_comms_max_messages,
+        )
+        comms_route.set_manager(comms_mgr)
+        app.include_router(
+            comms_route.router,
+            prefix=settings.api_prefix,
+            tags=["Incident Communications"],
+        )
+        logger.info("incident_comms_initialized")
+    except Exception as e:
+        logger.warning("incident_comms_init_failed", error=str(e))
+
+    # ── Phase 18: Dependency SLA ────────────────────────────
+    try:
+        from shieldops.api.routes import dependency_sla as dep_sla_route
+        from shieldops.sla.dependency_sla import DependencySLATracker
+
+        dep_sla_trk = DependencySLATracker(
+            max_slas=settings.dependency_sla_max_slas,
+            max_evaluations=settings.dependency_sla_max_evaluations,
+        )
+        dep_sla_route.set_tracker(dep_sla_trk)
+        app.include_router(
+            dep_sla_route.router,
+            prefix=settings.api_prefix,
+            tags=["Dependency SLAs"],
+        )
+        logger.info("dependency_sla_initialized")
+    except Exception as e:
+        logger.warning("dependency_sla_init_failed", error=str(e))
+
+    # ── Phase 18: Security Posture Scorer ───────────────────
+    try:
+        from shieldops.api.routes import posture_scorer as posture_route
+        from shieldops.vulnerability.posture_scorer import (
+            SecurityPostureScorer,
+        )
+
+        posture_scr = SecurityPostureScorer(
+            max_checks=settings.posture_scorer_max_checks,
+            max_scores=settings.posture_scorer_max_scores,
+        )
+        posture_route.set_scorer(posture_scr)
+        app.include_router(
+            posture_route.router,
+            prefix=settings.api_prefix,
+            tags=["Security Posture"],
+        )
+        logger.info("posture_scorer_initialized")
+    except Exception as e:
+        logger.warning("posture_scorer_init_failed", error=str(e))
+
+    # ── Phase 18: Workload Fingerprint ──────────────────────
+    try:
+        from shieldops.analytics.workload_fingerprint import (
+            WorkloadFingerprintEngine,
+        )
+        from shieldops.api.routes import workload_fingerprint as wf_route
+
+        wf_engine = WorkloadFingerprintEngine(
+            max_samples=settings.workload_fingerprint_max_samples,
+            min_samples_for_stable=settings.workload_fingerprint_min_stable,
+            drift_threshold_pct=settings.workload_fingerprint_drift_threshold,
+        )
+        wf_route.set_engine(wf_engine)
+        app.include_router(
+            wf_route.router,
+            prefix=settings.api_prefix,
+            tags=["Workload Fingerprints"],
+        )
+        logger.info("workload_fingerprint_initialized")
+    except Exception as e:
+        logger.warning("workload_fingerprint_init_failed", error=str(e))
+
+    # ── Phase 18: Maintenance Window ────────────────────────
+    try:
+        from shieldops.api.routes import maintenance_window as mw_route
+        from shieldops.scheduler.maintenance_window import (
+            MaintenanceWindowManager,
+        )
+
+        mw_mgr = MaintenanceWindowManager(
+            max_windows=settings.maintenance_window_max_windows,
+            max_duration_hours=settings.maintenance_window_max_duration_hours,
+        )
+        mw_route.set_manager(mw_mgr)
+        app.include_router(
+            mw_route.router,
+            prefix=settings.api_prefix,
+            tags=["Maintenance Windows"],
+        )
+        logger.info("maintenance_window_initialized")
+    except Exception as e:
+        logger.warning("maintenance_window_init_failed", error=str(e))
+
+    # ── Phase 18: Compliance Evidence ───────────────────────
+    try:
+        from shieldops.api.routes import evidence_collector as ev_route
+        from shieldops.compliance.evidence_collector import (
+            ComplianceEvidenceCollector,
+        )
+
+        ev_collector = ComplianceEvidenceCollector(
+            max_evidence=settings.evidence_collector_max_evidence,
+            max_packages=settings.evidence_collector_max_packages,
+        )
+        ev_route.set_collector(ev_collector)
+        app.include_router(
+            ev_route.router,
+            prefix=settings.api_prefix,
+            tags=["Compliance Evidence"],
+        )
+        logger.info("evidence_collector_initialized")
+    except Exception as e:
+        logger.warning("evidence_collector_init_failed", error=str(e))
+
     yield
 
     logger.info("shieldops_shutting_down")
