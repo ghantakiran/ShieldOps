@@ -307,7 +307,7 @@ class Settings(BaseSettings):
     # Phase 15: Alert Suppression
     alert_suppression_enabled: bool = True
     alert_suppression_max_rules: int = 500
-    maintenance_window_max_duration_hours: int = 24
+    maintenance_window_max_duration_hours: int = 48
 
     # Phase 15: On-Call Schedules
     oncall_enabled: bool = True
@@ -469,6 +469,68 @@ class Settings(BaseSettings):
     infrastructure_map_enabled: bool = True
     infrastructure_map_max_nodes: int = 10000
     infrastructure_map_max_relationships: int = 50000
+
+    # Phase 18: Secret Rotation
+    secret_rotation_enabled: bool = True
+    secret_rotation_max_secrets: int = 1000
+    secret_rotation_default_days: int = 90
+
+    # Phase 18: Anomaly Correlation
+    anomaly_correlation_enabled: bool = True
+    anomaly_correlation_max_events: int = 50000
+    anomaly_correlation_window_seconds: int = 300
+
+    # Phase 18: Synthetic Monitor
+    synthetic_monitor_enabled: bool = True
+    synthetic_monitor_max_monitors: int = 500
+    synthetic_monitor_max_results: int = 100000
+    synthetic_monitor_failure_threshold: int = 3
+
+    # Phase 18: Chaos Experiments
+    chaos_experiments_enabled: bool = True
+    chaos_experiments_max_experiments: int = 5000
+    chaos_experiments_max_results: int = 50000
+
+    # Phase 18: Data Quality
+    data_quality_enabled: bool = True
+    data_quality_max_rules: int = 1000
+    data_quality_max_results: int = 100000
+    data_quality_alert_cooldown: int = 3600
+
+    # Phase 18: Canary Tracker
+    canary_tracker_enabled: bool = True
+    canary_tracker_max_deployments: int = 1000
+    canary_tracker_max_metrics: int = 50000
+
+    # Phase 18: Incident Communications
+    incident_comms_enabled: bool = True
+    incident_comms_max_templates: int = 500
+    incident_comms_max_messages: int = 50000
+
+    # Phase 18: Dependency SLA
+    dependency_sla_enabled: bool = True
+    dependency_sla_max_slas: int = 2000
+    dependency_sla_max_evaluations: int = 100000
+
+    # Phase 18: Security Posture Scorer
+    posture_scorer_enabled: bool = True
+    posture_scorer_max_checks: int = 100000
+    posture_scorer_max_scores: int = 10000
+
+    # Phase 18: Workload Fingerprint
+    workload_fingerprint_enabled: bool = True
+    workload_fingerprint_max_samples: int = 100000
+    workload_fingerprint_min_stable: int = 20
+    workload_fingerprint_drift_threshold: float = 50.0
+
+    # Phase 18: Maintenance Window
+    maintenance_window_enabled: bool = True
+    maintenance_window_max_windows: int = 2000
+
+    # Phase 18: Compliance Evidence
+    evidence_collector_enabled: bool = True
+    evidence_collector_max_evidence: int = 50000
+    evidence_collector_max_packages: int = 500
 
     model_config = {
         "env_prefix": "SHIELDOPS_",

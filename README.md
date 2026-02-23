@@ -224,7 +224,7 @@ ShieldOps/
 ├── dashboard-ui/                      # React + TypeScript dashboard
 │
 ├── tests/
-│   ├── unit/                          # Unit tests (8,000+ tests)
+│   ├── unit/                          # Unit tests (8,500+ tests)
 │   └── integration/                   # Integration tests
 │
 ├── docs/
@@ -315,6 +315,7 @@ Default policies ship with the platform and can be customized per environment:
 | Phase 15 | Operational Intelligence & Reliability Engineering | Completed |
 | Phase 16 | Operational Resilience & Intelligent Automation | Completed |
 | Phase 17 | Incident Intelligence & FinOps Automation | Completed |
+| Phase 18 | Advanced Security & Intelligent Operations | Completed |
 
 ## Documentation
 
