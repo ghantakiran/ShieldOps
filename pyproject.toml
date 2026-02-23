@@ -171,6 +171,18 @@ module = [
     "shieldops.api.routes.api_lifecycle",
     "shieldops.api.routes.agent_collaboration",
     "shieldops.api.middleware.correlation",
+    "shieldops.api.routes.postmortem",
+    "shieldops.api.routes.dora_metrics",
+    "shieldops.api.routes.alert_suppression",
+    "shieldops.api.routes.oncall",
+    "shieldops.api.routes.service_ownership",
+    "shieldops.api.routes.runbook_executions",
+    "shieldops.api.routes.incident_impact",
+    "shieldops.api.routes.drift_detection",
+    "shieldops.api.routes.cost_anomaly",
+    "shieldops.api.routes.compliance_report_gen",
+    "shieldops.api.routes.agent_benchmarks",
+    "shieldops.api.routes.webhook_replay",
 ]
 warn_return_any = false
 disallow_untyped_defs = false

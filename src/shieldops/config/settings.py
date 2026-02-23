@@ -295,6 +295,62 @@ class Settings(BaseSettings):
     agent_collaboration_max_messages: int = 1000
     agent_collaboration_session_timeout_minutes: int = 60
 
+    # Phase 15: Post-Mortem Generator
+    postmortem_enabled: bool = True
+    postmortem_max_reports: int = 1000
+
+    # Phase 15: DORA Metrics
+    dora_enabled: bool = True
+    dora_default_period_days: int = 30
+    dora_max_records: int = 50000
+
+    # Phase 15: Alert Suppression
+    alert_suppression_enabled: bool = True
+    alert_suppression_max_rules: int = 500
+    maintenance_window_max_duration_hours: int = 24
+
+    # Phase 15: On-Call Schedules
+    oncall_enabled: bool = True
+    oncall_default_rotation: str = "weekly"
+    oncall_max_schedules: int = 100
+
+    # Phase 15: Service Ownership
+    service_ownership_enabled: bool = True
+    service_ownership_max_entries: int = 5000
+
+    # Phase 15: Runbook Execution Tracker
+    runbook_tracking_enabled: bool = True
+    runbook_max_executions: int = 10000
+    runbook_execution_ttl_days: int = 90
+
+    # Phase 15: Incident Impact Scoring
+    impact_scoring_enabled: bool = True
+    impact_max_records: int = 10000
+
+    # Phase 15: Configuration Drift Detection
+    drift_detection_enabled: bool = True
+    drift_max_snapshots_per_env: int = 100
+    drift_retention_days: int = 30
+
+    # Phase 15: Cost Anomaly Detection
+    cost_anomaly_enabled: bool = True
+    cost_anomaly_z_threshold: float = 2.5
+    cost_anomaly_lookback_days: int = 30
+
+    # Phase 15: Compliance Report Generator
+    compliance_reports_enabled: bool = True
+    compliance_max_reports: int = 500
+
+    # Phase 15: Agent Performance Benchmarker
+    agent_benchmark_enabled: bool = True
+    agent_benchmark_baseline_days: int = 30
+    agent_benchmark_regression_threshold: float = 0.2
+
+    # Phase 15: Webhook Replay Engine
+    webhook_replay_enabled: bool = True
+    webhook_replay_max_retries: int = 3
+    webhook_replay_max_deliveries: int = 50000
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",

@@ -1960,6 +1960,230 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     except Exception as e:
         logger.warning("agent_collaboration_init_failed", error=str(e))
 
+    # ── Phase 15: Post-Mortem Generator ────────────────────────────
+    try:
+        from shieldops.agents.investigation.postmortem import PostMortemGenerator
+        from shieldops.api.routes import postmortem as postmortem_routes
+
+        postmortem_gen = PostMortemGenerator(
+            max_reports=settings.postmortem_max_reports,
+        )
+        postmortem_routes.set_generator(postmortem_gen)
+        app.include_router(
+            postmortem_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Post-Mortems"],
+        )
+        logger.info("postmortem_generator_initialized")
+    except Exception as e:
+        logger.warning("postmortem_generator_init_failed", error=str(e))
+
+    # ── Phase 15: DORA Metrics Engine ────────────────────────────────
+    try:
+        from shieldops.analytics.dora_metrics import DORAMetricsEngine
+        from shieldops.api.routes import dora_metrics as dora_routes
+
+        dora_engine = DORAMetricsEngine(
+            default_period_days=settings.dora_default_period_days,
+            max_records=settings.dora_max_records,
+        )
+        dora_routes.set_engine(dora_engine)
+        app.include_router(
+            dora_routes.router,
+            prefix=settings.api_prefix,
+            tags=["DORA Metrics"],
+        )
+        logger.info("dora_metrics_engine_initialized")
+    except Exception as e:
+        logger.warning("dora_metrics_init_failed", error=str(e))
+
+    # ── Phase 15: Alert Suppression Engine ───────────────────────────
+    try:
+        from shieldops.api.routes import alert_suppression as suppression_routes
+        from shieldops.observability.alert_suppression import AlertSuppressionEngine
+
+        suppression_engine = AlertSuppressionEngine(
+            max_rules=settings.alert_suppression_max_rules,
+            max_window_duration_hours=settings.maintenance_window_max_duration_hours,
+        )
+        suppression_routes.set_engine(suppression_engine)
+        app.include_router(
+            suppression_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Alert Suppression"],
+        )
+        logger.info("alert_suppression_initialized")
+    except Exception as e:
+        logger.warning("alert_suppression_init_failed", error=str(e))
+
+    # ── Phase 15: On-Call Schedule Manager ───────────────────────────
+    try:
+        from shieldops.api.routes import oncall as oncall_routes
+        from shieldops.integrations.oncall.schedule import OnCallScheduleManager
+
+        oncall_manager = OnCallScheduleManager(
+            default_rotation=settings.oncall_default_rotation,
+            max_schedules=settings.oncall_max_schedules,
+        )
+        oncall_routes.set_manager(oncall_manager)
+        app.include_router(
+            oncall_routes.router,
+            prefix=settings.api_prefix,
+            tags=["On-Call"],
+        )
+        logger.info("oncall_schedule_manager_initialized")
+    except Exception as e:
+        logger.warning("oncall_schedule_init_failed", error=str(e))
+
+    # ── Phase 15: Service Ownership Registry ─────────────────────────
+    try:
+        from shieldops.api.routes import service_ownership as ownership_routes
+        from shieldops.topology.ownership import ServiceOwnershipRegistry
+
+        ownership_registry = ServiceOwnershipRegistry(
+            max_entries=settings.service_ownership_max_entries,
+        )
+        ownership_routes.set_registry(ownership_registry)
+        app.include_router(
+            ownership_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Service Ownership"],
+        )
+        logger.info("service_ownership_registry_initialized")
+    except Exception as e:
+        logger.warning("service_ownership_init_failed", error=str(e))
+
+    # ── Phase 15: Runbook Execution Tracker ──────────────────────────
+    try:
+        from shieldops.api.routes import runbook_executions as runbook_exec_routes
+        from shieldops.playbooks.execution_tracker import RunbookExecutionTracker
+
+        runbook_tracker = RunbookExecutionTracker(
+            max_executions=settings.runbook_max_executions,
+            execution_ttl_days=settings.runbook_execution_ttl_days,
+        )
+        runbook_exec_routes.set_tracker(runbook_tracker)
+        app.include_router(
+            runbook_exec_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Runbook Executions"],
+        )
+        logger.info("runbook_execution_tracker_initialized")
+    except Exception as e:
+        logger.warning("runbook_execution_tracker_init_failed", error=str(e))
+
+    # ── Phase 15: Incident Impact Scorer ─────────────────────────────
+    try:
+        from shieldops.agents.investigation.impact_scorer import IncidentImpactScorer
+        from shieldops.api.routes import incident_impact as impact_routes
+
+        impact_scorer = IncidentImpactScorer(
+            max_records=settings.impact_max_records,
+        )
+        impact_routes.set_scorer(impact_scorer)
+        app.include_router(
+            impact_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Incident Impact"],
+        )
+        logger.info("incident_impact_scorer_initialized")
+    except Exception as e:
+        logger.warning("incident_impact_scorer_init_failed", error=str(e))
+
+    # ── Phase 15: Configuration Drift Detector ───────────────────────
+    try:
+        from shieldops.api.routes import drift_detection as drift_det_routes
+        from shieldops.observability.drift_detector import ConfigDriftDetector
+
+        config_drift_detector = ConfigDriftDetector(
+            max_snapshots_per_env=settings.drift_max_snapshots_per_env,
+            retention_days=settings.drift_retention_days,
+        )
+        drift_det_routes.set_detector(config_drift_detector)
+        app.include_router(
+            drift_det_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Config Drift Detection"],
+        )
+        logger.info("config_drift_detector_initialized")
+    except Exception as e:
+        logger.warning("config_drift_detector_init_failed", error=str(e))
+
+    # ── Phase 15: Cost Anomaly Detector ──────────────────────────────
+    try:
+        from shieldops.analytics.cost_anomaly import CostAnomalyDetector
+        from shieldops.api.routes import cost_anomaly as cost_anomaly_routes
+
+        cost_anomaly_detector = CostAnomalyDetector(
+            z_threshold=settings.cost_anomaly_z_threshold,
+            lookback_days=settings.cost_anomaly_lookback_days,
+        )
+        cost_anomaly_routes.set_detector(cost_anomaly_detector)
+        app.include_router(
+            cost_anomaly_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Cost Anomaly"],
+        )
+        logger.info("cost_anomaly_detector_initialized")
+    except Exception as e:
+        logger.warning("cost_anomaly_detector_init_failed", error=str(e))
+
+    # ── Phase 15: Compliance Report Generator ────────────────────────
+    try:
+        from shieldops.api.routes import compliance_report_gen as comp_gen_routes
+        from shieldops.compliance.report_generator import ComplianceReportGenerator
+
+        compliance_gen = ComplianceReportGenerator(
+            max_reports=settings.compliance_max_reports,
+        )
+        comp_gen_routes.set_generator(compliance_gen)
+        app.include_router(
+            comp_gen_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Compliance Report Generator"],
+        )
+        logger.info("compliance_report_generator_initialized")
+    except Exception as e:
+        logger.warning("compliance_report_generator_init_failed", error=str(e))
+
+    # ── Phase 15: Agent Performance Benchmarker ──────────────────────
+    try:
+        from shieldops.agents.benchmarker import AgentPerformanceBenchmarker
+        from shieldops.api.routes import agent_benchmarks as bench_routes
+
+        agent_benchmarker = AgentPerformanceBenchmarker(
+            baseline_days=settings.agent_benchmark_baseline_days,
+            regression_threshold=settings.agent_benchmark_regression_threshold,
+        )
+        bench_routes.set_benchmarker(agent_benchmarker)
+        app.include_router(
+            bench_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Agent Benchmarks"],
+        )
+        logger.info("agent_benchmarker_initialized")
+    except Exception as e:
+        logger.warning("agent_benchmarker_init_failed", error=str(e))
+
+    # ── Phase 15: Webhook Replay Engine ──────────────────────────────
+    try:
+        from shieldops.api.routes import webhook_replay as replay_routes
+        from shieldops.integrations.outbound.replay_engine import WebhookReplayEngine
+
+        webhook_replay = WebhookReplayEngine(
+            max_retries=settings.webhook_replay_max_retries,
+            max_deliveries=settings.webhook_replay_max_deliveries,
+        )
+        replay_routes.set_engine(webhook_replay)
+        app.include_router(
+            replay_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Webhook Replay"],
+        )
+        logger.info("webhook_replay_engine_initialized")
+    except Exception as e:
+        logger.warning("webhook_replay_engine_init_failed", error=str(e))
+
     yield
 
     logger.info("shieldops_shutting_down")
