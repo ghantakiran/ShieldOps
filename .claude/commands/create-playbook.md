@@ -49,4 +49,7 @@ validation:
     escalation_channel: "#sre-oncall"
 ```
 
+## Runbook Recommendation
+After creating a playbook, register it with the Runbook Recommender (`src/shieldops/playbooks/runbook_recommender.py`) so it can be auto-suggested for matching incident symptoms via `RunbookRecommender.register_runbook()`.
+
 ## Save playbook to `playbooks/{name}.yaml`

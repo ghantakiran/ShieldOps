@@ -28,7 +28,16 @@ Run health checks on all ShieldOps platform dependencies.
    - Integration tests: `python3 -m pytest tests/integration/ -v --tb=short`
    - Report: total tests, passed, failed, coverage
 
-5. **Check configuration**:
+5. **Platform feature health** (Phase 11–19 modules):
+   - Capacity trends: `src/shieldops/analytics/capacity_trends.py` — CapacityTrendAnalyzer
+   - SRE metrics: `src/shieldops/analytics/sre_metrics.py` — SREMetricsAggregator
+   - Health reports: `src/shieldops/observability/health_report.py` — ServiceHealthReportGenerator
+   - Cost forecasts: `src/shieldops/billing/cost_forecast.py` — CostForecastEngine
+   - Deployment risk: `src/shieldops/changes/deployment_risk.py` — DeploymentRiskPredictor
+   - Incident clustering: `src/shieldops/analytics/incident_clustering.py` — IncidentClusteringEngine
+   - Verify each module initializes in `src/shieldops/api/app.py` lifespan
+
+6. **Check configuration**:
    - Verify `.env` file exists (warn if missing)
    - Check required env vars are set (DATABASE_URL, REDIS_URL, etc.)
    - Validate OPA policies: check `playbooks/policies/` for syntax

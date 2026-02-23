@@ -5,7 +5,7 @@ Scaffold a new external integration (billing, notification, CVE source, credenti
 ## Usage
 `/add-integration <type> <provider-name>`
 
-Types: `billing`, `notification`, `cve`, `credential`
+Types: `billing`, `notification`, `cve`, `credential`, `cost-forecast`
 
 ## Process
 
@@ -15,6 +15,7 @@ Types: `billing`, `notification`, `cve`, `credential`
    - Notification: `src/shieldops/integrations/notifications/base.py` — `NotificationChannel.send()`
    - CVE: `src/shieldops/integrations/cve/` — `CVESource.scan()`
    - Credential: `src/shieldops/integrations/credentials/` — `CredentialStore.list_credentials()`
+   - Cost-forecast: `src/shieldops/billing/cost_forecast.py` — `CostForecastEngine.record_cost()`
 3. **Create the integration**:
    - File: `src/shieldops/integrations/{type}/{provider}.py`
    - Implement the protocol with async methods

@@ -19,7 +19,11 @@ Deploy ShieldOps agents to target environments.
 2. **Build artifacts**:
    - Build Docker image: `docker build -t shieldops-agent:{version}`
    - Push to container registry
-3. **Deploy**:
+3. **Pre-deploy risk assessment**:
+   - Run `DeploymentRiskPredictor` from `src/shieldops/changes/deployment_risk.py`
+   - Check `ChangeAdvisoryBoard` approval status from `src/shieldops/changes/change_advisory.py`
+   - Verify deployment freeze windows via `DeploymentFreezeManager`
+4. **Deploy**:
    - Apply Kubernetes manifests from `infrastructure/kubernetes/`
    - For production: trigger approval workflow via Slack/Teams
 4. **Validate deployment**:

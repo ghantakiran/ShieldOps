@@ -28,6 +28,8 @@ Review ShieldOps agent code for correctness, safety, and reliability.
 - [ ] Conditional edges have complete coverage (no missing branches)
 - [ ] Tool functions properly typed and documented
 - [ ] Reasoning chain captures every decision point
+- [ ] Decision explainability via `AgentDecisionExplainer` (`src/shieldops/agents/decision_explainer.py`)
+- [ ] Approval delegation rules respected (`src/shieldops/policy/approval/approval_delegation.py`)
 
 ### Testing
 - [ ] Unit tests for all node functions
