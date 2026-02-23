@@ -239,6 +239,62 @@ class Settings(BaseSettings):
     oidc_redirect_uri: str = "http://localhost:8000/api/v1/auth/oidc/callback"
     oidc_scopes: str = "openid email profile"
 
+    # Phase 14: Multi-Level Cache
+    cache_l1_max_size: int = 1000
+    cache_l1_ttl_seconds: int = 60
+    cache_l1_enabled: bool = True
+
+    # Phase 14: Feature Flags
+    feature_flags_enabled: bool = True
+    feature_flags_sync_interval_seconds: int = 30
+
+    # Phase 14: Health Aggregation
+    health_history_size: int = 100
+    health_check_interval_seconds: int = 60
+    health_degraded_threshold: float = 70.0
+    health_unhealthy_threshold: float = 40.0
+
+    # Phase 14: Request Correlation
+    correlation_enabled: bool = True
+    correlation_max_traces: int = 10000
+    correlation_trace_ttl_minutes: int = 60
+
+    # Phase 14: Escalation Policies
+    escalation_enabled: bool = True
+    escalation_default_timeout_seconds: int = 300
+    escalation_max_retries: int = 3
+
+    # Phase 14: Agent Resource Quotas
+    agent_global_max_concurrent: int = 20
+    agent_quota_enabled: bool = True
+
+    # Phase 14: Batch Operations
+    batch_max_size: int = 500
+    batch_max_parallel: int = 10
+    batch_job_ttl_hours: int = 24
+
+    # Phase 14: Incident Timeline
+    timeline_max_events_per_incident: int = 1000
+    timeline_retention_days: int = 90
+
+    # Phase 14: Export Engine
+    export_max_rows: int = 50000
+    export_pdf_enabled: bool = True
+    export_xlsx_enabled: bool = True
+
+    # Phase 14: Environment Promotion
+    promotion_require_approval_for_prod: bool = True
+    promotion_allowed_source_envs: list[str] = ["development", "staging"]
+
+    # Phase 14: API Lifecycle
+    api_deprecation_header_enabled: bool = True
+    api_sunset_warning_days: int = 30
+
+    # Phase 14: Agent Collaboration
+    agent_collaboration_enabled: bool = True
+    agent_collaboration_max_messages: int = 1000
+    agent_collaboration_session_timeout_minutes: int = 60
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",

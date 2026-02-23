@@ -139,6 +139,8 @@ module = [
     "moto.*",
     "locust",
     "locust.*",
+    "openpyxl",
+    "openpyxl.*",
 ]
 ignore_missing_imports = true
 
@@ -157,6 +159,18 @@ module = [
     "shieldops.api.routes.security_chat",
     "shieldops.agents.security.chat",
     "shieldops.db.repository",
+    "shieldops.api.routes.feature_flags",
+    "shieldops.api.routes.health_aggregate",
+    "shieldops.api.routes.correlation",
+    "shieldops.api.routes.escalation_policies",
+    "shieldops.api.routes.agent_quotas",
+    "shieldops.api.routes.batch_operations",
+    "shieldops.api.routes.timeline",
+    "shieldops.api.routes.export_engine",
+    "shieldops.api.routes.environment_promotion",
+    "shieldops.api.routes.api_lifecycle",
+    "shieldops.api.routes.agent_collaboration",
+    "shieldops.api.middleware.correlation",
 ]
 warn_return_any = false
 disallow_untyped_defs = false
