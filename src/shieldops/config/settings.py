@@ -351,6 +351,66 @@ class Settings(BaseSettings):
     webhook_replay_max_retries: int = 3
     webhook_replay_max_deliveries: int = 50000
 
+    # Phase 16: Dependency Health Tracker
+    dependency_health_enabled: bool = True
+    dependency_health_max_checks: int = 10000
+    dependency_cascade_threshold: int = 3
+
+    # Phase 16: Deployment Freeze Manager
+    deployment_freeze_enabled: bool = True
+    deployment_freeze_max_windows: int = 200
+    deployment_freeze_max_duration_days: int = 30
+
+    # Phase 16: Error Budget Tracker
+    error_budget_enabled: bool = True
+    error_budget_warning_threshold: float = 0.3
+    error_budget_critical_threshold: float = 0.1
+
+    # Phase 16: Alert Grouping Engine
+    alert_grouping_enabled: bool = True
+    alert_grouping_window_seconds: int = 300
+    alert_grouping_max_groups: int = 5000
+
+    # Phase 16: Status Page Manager
+    status_page_enabled: bool = True
+    status_page_max_components: int = 200
+    status_page_max_incidents: int = 1000
+
+    # Phase 16: Rollback Registry
+    rollback_registry_enabled: bool = True
+    rollback_registry_max_events: int = 10000
+    rollback_pattern_lookback_days: int = 90
+
+    # Phase 16: Capacity Reservation System
+    capacity_reservation_enabled: bool = True
+    capacity_reservation_max_active: int = 500
+    capacity_reservation_max_duration_days: int = 90
+
+    # Phase 16: Dependency Vulnerability Mapper
+    dep_vuln_mapping_enabled: bool = True
+    dep_vuln_max_services: int = 1000
+    dep_vuln_max_depth: int = 10
+
+    # Phase 16: Operational Readiness Reviewer
+    readiness_review_enabled: bool = True
+    readiness_review_max_checklists: int = 200
+    readiness_review_passing_threshold: float = 0.8
+
+    # Phase 16: Rate Limit Analytics Engine
+    rate_limit_analytics_enabled: bool = True
+    rate_limit_analytics_max_events: int = 100000
+    rate_limit_analytics_retention_hours: int = 168
+
+    # Phase 16: Agent Decision Explainer
+    agent_decision_tracking_enabled: bool = True
+    agent_decision_max_records: int = 50000
+    agent_decision_retention_days: int = 90
+
+    # Phase 16: Runbook Scheduler
+    runbook_scheduler_enabled: bool = True
+    runbook_scheduler_max_schedules: int = 500
+    runbook_scheduler_lookahead_minutes: int = 60
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",
