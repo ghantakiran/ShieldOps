@@ -23,6 +23,9 @@ Deploy ShieldOps agents to target environments.
    - Run `DeploymentRiskPredictor` from `src/shieldops/changes/deployment_risk.py`
    - Check `ChangeAdvisoryBoard` approval status from `src/shieldops/changes/change_advisory.py`
    - Verify deployment freeze windows via `DeploymentFreezeManager`
+   - Record deployment event via `DeploymentVelocityTracker` (`src/shieldops/analytics/deployment_velocity.py`)
+   - Verify backup readiness via `BackupVerificationEngine` (`src/shieldops/observability/backup_verification.py`)
+   - Check service dependency impact via `ServiceDependencyImpactAnalyzer` (`src/shieldops/topology/impact_analyzer.py`)
 4. **Deploy**:
    - Apply Kubernetes manifests from `infrastructure/kubernetes/`
    - For production: trigger approval workflow via Slack/Teams

@@ -30,6 +30,8 @@ Review ShieldOps agent code for correctness, safety, and reliability.
 - [ ] Reasoning chain captures every decision point
 - [ ] Decision explainability via `AgentDecisionExplainer` (`src/shieldops/agents/decision_explainer.py`)
 - [ ] Approval delegation rules respected (`src/shieldops/policy/approval/approval_delegation.py`)
+- [ ] Tenant isolation boundaries enforced (`src/shieldops/policy/tenant_isolation.py`)
+- [ ] Configuration changes tracked via `ConfigurationAuditTrail` (`src/shieldops/audit/config_audit.py`)
 
 ### Testing
 - [ ] Unit tests for all node functions
