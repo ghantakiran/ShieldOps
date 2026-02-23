@@ -139,6 +139,8 @@ module = [
     "moto.*",
     "locust",
     "locust.*",
+    "openpyxl",
+    "openpyxl.*",
 ]
 ignore_missing_imports = true
 
