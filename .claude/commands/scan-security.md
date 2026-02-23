@@ -8,8 +8,9 @@ Run security audits on ShieldOps codebase and agent configurations.
 ## Scopes
 - `code` — Static analysis of Python code (ruff, bandit, safety)
 - `deps` — Dependency vulnerability scan
-- `policies` — OPA policy completeness check
-- `agents` — Agent blast-radius and permission audit
+- `policies` — OPA policy completeness check (includes PolicyCodeGenerator output)
+- `agents` — Agent blast-radius and permission audit (includes AgentDecisionExplainer)
+- `compliance` — Compliance gap analysis via `ComplianceGapAnalyzer`
 - `infra` — Infrastructure-as-code security scan (checkov, tfsec)
 - `all` — Full security audit
 
@@ -19,8 +20,9 @@ Run security audits on ShieldOps codebase and agent configurations.
 2. **Dependency Audit**: Check all dependencies against CVE databases
 3. **OPA Policy Review**: Verify all agent actions have corresponding policy rules
 4. **Agent Permissions**: Audit blast-radius limits per environment
-5. **Infrastructure**: Scan Terraform/K8s configs for misconfigurations
-6. **Generate Report**: Severity-rated findings with remediation guidance
+5. **Compliance Gap Analysis**: Run `ComplianceGapAnalyzer` from `src/shieldops/compliance/gap_analyzer.py`
+6. **Infrastructure**: Scan Terraform/K8s configs for misconfigurations
+7. **Generate Report**: Severity-rated findings with remediation guidance
 
 ## Severity Levels
 - **CRITICAL**: Hardcoded secrets, SQL injection, unauthenticated endpoints

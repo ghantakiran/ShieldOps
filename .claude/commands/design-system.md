@@ -27,8 +27,10 @@ Design new ShieldOps components, APIs, or agent workflows.
 4. **Safety Analysis**:
    - Identify failure modes and blast radius
    - Design circuit breakers and fallbacks
-   - Plan OPA policies needed
+   - Plan OPA policies needed (leverage `PolicyCodeGenerator` for Rego stubs)
    - Define rollback procedures
+   - Assess deployment risk via `DeploymentRiskPredictor`
+   - Verify compliance gaps via `ComplianceGapAnalyzer`
 
 5. **Documentation**:
    - Write Architecture Decision Record (ADR) in `docs/architecture/`
