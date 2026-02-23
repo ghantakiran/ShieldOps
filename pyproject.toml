@@ -243,6 +243,18 @@ module = [
     "shieldops.api.routes.oncall_fatigue",
     "shieldops.api.routes.backup_verification",
     "shieldops.api.routes.cost_tag_enforcer",
+    "shieldops.api.routes.dr_readiness",
+    "shieldops.api.routes.service_catalog",
+    "shieldops.api.routes.contract_testing",
+    "shieldops.api.routes.orphan_detector",
+    "shieldops.api.routes.latency_profiler",
+    "shieldops.api.routes.license_scanner",
+    "shieldops.api.routes.release_manager",
+    "shieldops.api.routes.budget_manager",
+    "shieldops.api.routes.config_parity",
+    "shieldops.api.routes.incident_dedup",
+    "shieldops.api.routes.access_certification",
+    "shieldops.api.routes.toil_tracker",
 ]
 warn_return_any = false
 disallow_untyped_defs = false

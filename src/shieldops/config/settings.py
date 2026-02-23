@@ -656,6 +656,66 @@ class Settings(BaseSettings):
     cost_tag_enforcer_max_policies: int = 200
     cost_tag_enforcer_max_checks: int = 100000
 
+    # Phase 21: Disaster Recovery Readiness Tracker
+    dr_readiness_enabled: bool = True
+    dr_readiness_max_plans: int = 2000
+    dr_readiness_drill_max_age_days: int = 90
+
+    # Phase 21: Service Catalog Manager
+    service_catalog_enabled: bool = True
+    service_catalog_max_services: int = 5000
+    service_catalog_stale_days: int = 180
+
+    # Phase 21: API Contract Testing Engine
+    contract_testing_enabled: bool = True
+    contract_testing_max_schemas: int = 5000
+    contract_testing_max_checks: int = 50000
+
+    # Phase 21: Orphaned Resource Detector
+    orphan_detector_enabled: bool = True
+    orphan_detector_max_resources: int = 50000
+    orphan_detector_stale_days: int = 30
+
+    # Phase 21: Service Latency Profiler
+    latency_profiler_enabled: bool = True
+    latency_profiler_max_samples: int = 500000
+    latency_profiler_regression_threshold: float = 0.1
+
+    # Phase 21: Dependency License Compliance Scanner
+    license_scanner_enabled: bool = True
+    license_scanner_max_dependencies: int = 100000
+    license_scanner_max_violations: int = 50000
+
+    # Phase 21: Release Management Tracker
+    release_manager_enabled: bool = True
+    release_manager_max_releases: int = 10000
+    release_manager_require_approval: bool = True
+
+    # Phase 21: Infrastructure Cost Budget Manager
+    budget_manager_enabled: bool = True
+    budget_manager_max_budgets: int = 2000
+    budget_manager_warning_threshold: float = 0.8
+
+    # Phase 21: Configuration Parity Validator
+    config_parity_enabled: bool = True
+    config_parity_max_configs: int = 5000
+    config_parity_max_violations: int = 50000
+
+    # Phase 21: Incident Deduplication Engine
+    incident_dedup_enabled: bool = True
+    incident_dedup_max_incidents: int = 100000
+    incident_dedup_similarity_threshold: float = 0.8
+
+    # Phase 21: Access Certification Manager
+    access_certification_enabled: bool = True
+    access_certification_max_grants: int = 50000
+    access_certification_default_expiry_days: int = 90
+
+    # Phase 21: Toil Measurement Tracker
+    toil_tracker_enabled: bool = True
+    toil_tracker_max_entries: int = 100000
+    toil_tracker_automation_min_occurrences: int = 3
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",

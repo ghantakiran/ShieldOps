@@ -80,14 +80,15 @@ ShieldOps is an enterprise SaaS platform that deploys autonomous AI agents for S
 - `src/shieldops/api/` — FastAPI routes and middleware
 - `src/shieldops/dashboard/` — React dashboard components
 - `src/shieldops/observability/` — Alert noise, threshold tuning, backup verification
-- `src/shieldops/incidents/` — Severity prediction, on-call fatigue analysis
-- `src/shieldops/topology/` — Service dependency impact analysis
+- `src/shieldops/incidents/` — Severity prediction, on-call fatigue analysis, incident deduplication
+- `src/shieldops/topology/` — Service dependency impact analysis, service catalog
 - `src/shieldops/audit/` — Configuration audit trail
-- `src/shieldops/analytics/` — Deployment velocity, capacity trends, SRE metrics
-- `src/shieldops/compliance/` — Compliance automation rules, gap analysis
+- `src/shieldops/analytics/` — Deployment velocity, capacity trends, SRE metrics, latency profiling, toil tracking
+- `src/shieldops/compliance/` — Compliance automation, gap analysis, license scanning, access certification
 - `src/shieldops/knowledge/` — Knowledge base article management
-- `src/shieldops/billing/` — Cost forecasting, cost tag enforcement
-- `src/shieldops/changes/` — Deployment risk, change advisory
+- `src/shieldops/billing/` — Cost forecasting, cost tag enforcement, orphan detection, budget management
+- `src/shieldops/changes/` — Deployment risk, change advisory, release management
+- `src/shieldops/config/` — Configuration, parity validation
 - `docs/prd/` — Product Requirements Documents
 - `docs/architecture/` — Architecture Decision Records
 - `playbooks/` — Remediation playbook definitions (YAML)

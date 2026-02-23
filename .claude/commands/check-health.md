@@ -28,7 +28,7 @@ Run health checks on all ShieldOps platform dependencies.
    - Integration tests: `python3 -m pytest tests/integration/ -v --tb=short`
    - Report: total tests, passed, failed, coverage
 
-5. **Platform feature health** (Phase 11–20 modules):
+5. **Platform feature health** (Phase 11–21 modules):
    - Capacity trends: `src/shieldops/analytics/capacity_trends.py` — CapacityTrendAnalyzer
    - SRE metrics: `src/shieldops/analytics/sre_metrics.py` — SREMetricsAggregator
    - Health reports: `src/shieldops/observability/health_report.py` — ServiceHealthReportGenerator
@@ -47,6 +47,18 @@ Run health checks on all ShieldOps platform dependencies.
    - On-call fatigue: `src/shieldops/incidents/oncall_fatigue.py` — OnCallFatigueAnalyzer
    - Backup verification: `src/shieldops/observability/backup_verification.py` — BackupVerificationEngine
    - Cost tag enforcer: `src/shieldops/billing/cost_tag_enforcer.py` — CostAllocationTagEnforcer
+   - DR readiness: `src/shieldops/observability/dr_readiness.py` — DisasterRecoveryReadinessTracker
+   - Service catalog: `src/shieldops/topology/service_catalog.py` — ServiceCatalogManager
+   - Contract testing: `src/shieldops/api/contract_testing.py` — APIContractTestingEngine
+   - Orphan detector: `src/shieldops/billing/orphan_detector.py` — OrphanedResourceDetector
+   - Latency profiler: `src/shieldops/analytics/latency_profiler.py` — ServiceLatencyProfiler
+   - License scanner: `src/shieldops/compliance/license_scanner.py` — DependencyLicenseScanner
+   - Release manager: `src/shieldops/changes/release_manager.py` — ReleaseManagementTracker
+   - Budget manager: `src/shieldops/billing/budget_manager.py` — InfrastructureCostBudgetManager
+   - Config parity: `src/shieldops/config/parity_validator.py` — ConfigurationParityValidator
+   - Incident dedup: `src/shieldops/incidents/dedup_engine.py` — IncidentDeduplicationEngine
+   - Access certification: `src/shieldops/compliance/access_certification.py` — AccessCertificationManager
+   - Toil tracker: `src/shieldops/analytics/toil_tracker.py` — ToilMeasurementTracker
    - Verify each module initializes in `src/shieldops/api/app.py` lifespan
 
 6. **Check configuration**:
