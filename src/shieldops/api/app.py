@@ -3391,6 +3391,260 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         except Exception as e:
             logger.warning("cost_tag_enforcer_init_failed", error=str(e))
 
+    # --- Phase 21 ---
+
+    if settings.dr_readiness_enabled:
+        try:
+            from shieldops.api.routes import dr_readiness as drr_route
+            from shieldops.observability.dr_readiness import (
+                DisasterRecoveryReadinessTracker,
+            )
+
+            dr_tracker = DisasterRecoveryReadinessTracker(
+                max_plans=settings.dr_readiness_max_plans,
+                drill_max_age_days=settings.dr_readiness_drill_max_age_days,
+            )
+            drr_route.set_tracker(dr_tracker)
+            app.include_router(
+                drr_route.router,
+                prefix=settings.api_prefix,
+                tags=["DR Readiness"],
+            )
+            logger.info("dr_readiness_initialized")
+        except Exception as e:
+            logger.warning("dr_readiness_init_failed", error=str(e))
+
+    if settings.service_catalog_enabled:
+        try:
+            from shieldops.api.routes import service_catalog as sc_route
+            from shieldops.topology.service_catalog import (
+                ServiceCatalogManager,
+            )
+
+            sc_manager = ServiceCatalogManager(
+                max_services=settings.service_catalog_max_services,
+                stale_days=settings.service_catalog_stale_days,
+            )
+            sc_route.set_manager(sc_manager)
+            app.include_router(
+                sc_route.router,
+                prefix=settings.api_prefix,
+                tags=["Service Catalog"],
+            )
+            logger.info("service_catalog_initialized")
+        except Exception as e:
+            logger.warning("service_catalog_init_failed", error=str(e))
+
+    if settings.contract_testing_enabled:
+        try:
+            from shieldops.api.contract_testing import (
+                APIContractTestingEngine,
+            )
+            from shieldops.api.routes import contract_testing as ctest_route
+
+            ct_engine = APIContractTestingEngine(
+                max_schemas=settings.contract_testing_max_schemas,
+                max_checks=settings.contract_testing_max_checks,
+            )
+            ctest_route.set_engine(ct_engine)
+            app.include_router(
+                ctest_route.router,
+                prefix=settings.api_prefix,
+                tags=["Contract Testing"],
+            )
+            logger.info("contract_testing_initialized")
+        except Exception as e:
+            logger.warning("contract_testing_init_failed", error=str(e))
+
+    if settings.orphan_detector_enabled:
+        try:
+            from shieldops.api.routes import orphan_detector as od_route
+            from shieldops.billing.orphan_detector import (
+                OrphanedResourceDetector,
+            )
+
+            od_detector = OrphanedResourceDetector(
+                max_resources=settings.orphan_detector_max_resources,
+                stale_days=settings.orphan_detector_stale_days,
+            )
+            od_route.set_detector(od_detector)
+            app.include_router(
+                od_route.router,
+                prefix=settings.api_prefix,
+                tags=["Orphan Detector"],
+            )
+            logger.info("orphan_detector_initialized")
+        except Exception as e:
+            logger.warning("orphan_detector_init_failed", error=str(e))
+
+    if settings.latency_profiler_enabled:
+        try:
+            from shieldops.analytics.latency_profiler import (
+                ServiceLatencyProfiler,
+            )
+            from shieldops.api.routes import latency_profiler as lp_route
+
+            lp_profiler = ServiceLatencyProfiler(
+                max_samples=settings.latency_profiler_max_samples,
+                regression_threshold=settings.latency_profiler_regression_threshold,
+            )
+            lp_route.set_profiler(lp_profiler)
+            app.include_router(
+                lp_route.router,
+                prefix=settings.api_prefix,
+                tags=["Latency Profiler"],
+            )
+            logger.info("latency_profiler_initialized")
+        except Exception as e:
+            logger.warning("latency_profiler_init_failed", error=str(e))
+
+    if settings.license_scanner_enabled:
+        try:
+            from shieldops.api.routes import license_scanner as ls_route
+            from shieldops.compliance.license_scanner import (
+                DependencyLicenseScanner,
+            )
+
+            ls_scanner = DependencyLicenseScanner(
+                max_dependencies=settings.license_scanner_max_dependencies,
+                max_violations=settings.license_scanner_max_violations,
+            )
+            ls_route.set_scanner(ls_scanner)
+            app.include_router(
+                ls_route.router,
+                prefix=settings.api_prefix,
+                tags=["License Scanner"],
+            )
+            logger.info("license_scanner_initialized")
+        except Exception as e:
+            logger.warning("license_scanner_init_failed", error=str(e))
+
+    if settings.release_manager_enabled:
+        try:
+            from shieldops.api.routes import release_manager as rm_route
+            from shieldops.changes.release_manager import (
+                ReleaseManagementTracker,
+            )
+
+            rm_tracker = ReleaseManagementTracker(
+                max_releases=settings.release_manager_max_releases,
+                require_approval=settings.release_manager_require_approval,
+            )
+            rm_route.set_tracker(rm_tracker)
+            app.include_router(
+                rm_route.router,
+                prefix=settings.api_prefix,
+                tags=["Release Manager"],
+            )
+            logger.info("release_manager_initialized")
+        except Exception as e:
+            logger.warning("release_manager_init_failed", error=str(e))
+
+    if settings.budget_manager_enabled:
+        try:
+            from shieldops.api.routes import budget_manager as bm_route
+            from shieldops.billing.budget_manager import (
+                InfrastructureCostBudgetManager,
+            )
+
+            bm_manager = InfrastructureCostBudgetManager(
+                max_budgets=settings.budget_manager_max_budgets,
+                warning_threshold=settings.budget_manager_warning_threshold,
+            )
+            bm_route.set_manager(bm_manager)
+            app.include_router(
+                bm_route.router,
+                prefix=settings.api_prefix,
+                tags=["Budget Manager"],
+            )
+            logger.info("budget_manager_initialized")
+        except Exception as e:
+            logger.warning("budget_manager_init_failed", error=str(e))
+
+    if settings.config_parity_enabled:
+        try:
+            from shieldops.api.routes import config_parity as cp_route
+            from shieldops.config.parity_validator import (
+                ConfigurationParityValidator,
+            )
+
+            cp_validator = ConfigurationParityValidator(
+                max_configs=settings.config_parity_max_configs,
+                max_violations=settings.config_parity_max_violations,
+            )
+            cp_route.set_validator(cp_validator)
+            app.include_router(
+                cp_route.router,
+                prefix=settings.api_prefix,
+                tags=["Config Parity"],
+            )
+            logger.info("config_parity_initialized")
+        except Exception as e:
+            logger.warning("config_parity_init_failed", error=str(e))
+
+    if settings.incident_dedup_enabled:
+        try:
+            from shieldops.api.routes import incident_dedup as id_route
+            from shieldops.incidents.dedup_engine import (
+                IncidentDeduplicationEngine,
+            )
+
+            id_engine = IncidentDeduplicationEngine(
+                max_incidents=settings.incident_dedup_max_incidents,
+                similarity_threshold=settings.incident_dedup_similarity_threshold,
+            )
+            id_route.set_engine(id_engine)
+            app.include_router(
+                id_route.router,
+                prefix=settings.api_prefix,
+                tags=["Incident Dedup"],
+            )
+            logger.info("incident_dedup_initialized")
+        except Exception as e:
+            logger.warning("incident_dedup_init_failed", error=str(e))
+
+    if settings.access_certification_enabled:
+        try:
+            from shieldops.api.routes import access_certification as ac_route
+            from shieldops.compliance.access_certification import (
+                AccessCertificationManager,
+            )
+
+            ac_manager = AccessCertificationManager(
+                max_grants=settings.access_certification_max_grants,
+                default_expiry_days=settings.access_certification_default_expiry_days,
+            )
+            ac_route.set_manager(ac_manager)
+            app.include_router(
+                ac_route.router,
+                prefix=settings.api_prefix,
+                tags=["Access Certification"],
+            )
+            logger.info("access_certification_initialized")
+        except Exception as e:
+            logger.warning("access_certification_init_failed", error=str(e))
+
+    if settings.toil_tracker_enabled:
+        try:
+            from shieldops.analytics.toil_tracker import (
+                ToilMeasurementTracker,
+            )
+            from shieldops.api.routes import toil_tracker as toil_route
+
+            tt_tracker = ToilMeasurementTracker(
+                max_entries=settings.toil_tracker_max_entries,
+                automation_min_occurrences=settings.toil_tracker_automation_min_occurrences,
+            )
+            toil_route.set_tracker(tt_tracker)
+            app.include_router(
+                toil_route.router,
+                prefix=settings.api_prefix,
+                tags=["Toil Tracker"],
+            )
+            logger.info("toil_tracker_initialized")
+        except Exception as e:
+            logger.warning("toil_tracker_init_failed", error=str(e))
+
     yield
 
     logger.info("shieldops_shutting_down")

@@ -13,6 +13,9 @@ Run security audits on ShieldOps codebase and agent configurations.
 - `compliance` — Compliance gap analysis via `ComplianceGapAnalyzer` + `ComplianceAutomationEngine`
 - `audit` — Configuration audit trail via `ConfigurationAuditTrail`
 - `isolation` — Tenant resource isolation checks via `TenantResourceIsolationManager`
+- `licenses` — Dependency license compliance via `DependencyLicenseScanner`
+- `access` — Access certification review via `AccessCertificationManager`
+- `contracts` — API contract drift and breaking changes via `APIContractTestingEngine`
 - `infra` — Infrastructure-as-code security scan (checkov, tfsec)
 - `all` — Full security audit
 
@@ -27,7 +30,10 @@ Run security audits on ShieldOps codebase and agent configurations.
 7. **Configuration Audit**: Review config change trail via `ConfigurationAuditTrail` (`src/shieldops/audit/config_audit.py`)
 8. **Tenant Isolation**: Verify resource boundaries via `TenantResourceIsolationManager` (`src/shieldops/policy/tenant_isolation.py`)
 9. **Infrastructure**: Scan Terraform/K8s configs for misconfigurations
-10. **Generate Report**: Severity-rated findings with remediation guidance
+10. **License Compliance**: Scan dependency licenses via `DependencyLicenseScanner` (`src/shieldops/compliance/license_scanner.py`)
+11. **Access Certification**: Review expired/uncertified grants via `AccessCertificationManager` (`src/shieldops/compliance/access_certification.py`)
+12. **API Contract Testing**: Detect breaking changes and schema drift via `APIContractTestingEngine` (`src/shieldops/api/contract_testing.py`)
+13. **Generate Report**: Severity-rated findings with remediation guidance
 
 ## Severity Levels
 - **CRITICAL**: Hardcoded secrets, SQL injection, unauthenticated endpoints

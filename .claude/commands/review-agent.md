@@ -32,6 +32,10 @@ Review ShieldOps agent code for correctness, safety, and reliability.
 - [ ] Approval delegation rules respected (`src/shieldops/policy/approval/approval_delegation.py`)
 - [ ] Tenant isolation boundaries enforced (`src/shieldops/policy/tenant_isolation.py`)
 - [ ] Configuration changes tracked via `ConfigurationAuditTrail` (`src/shieldops/audit/config_audit.py`)
+- [ ] Configuration parity validated across environments via `ConfigurationParityValidator` (`src/shieldops/config/parity_validator.py`)
+- [ ] Release approval gates enforced via `ReleaseManagementTracker` (`src/shieldops/changes/release_manager.py`)
+- [ ] DR readiness verified for affected services via `DisasterRecoveryReadinessTracker` (`src/shieldops/observability/dr_readiness.py`)
+- [ ] Incident deduplication active via `IncidentDeduplicationEngine` (`src/shieldops/incidents/dedup_engine.py`)
 
 ### Testing
 - [ ] Unit tests for all node functions
