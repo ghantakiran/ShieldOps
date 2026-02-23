@@ -218,6 +218,19 @@ class Settings(BaseSettings):
     elastic_url: str = ""
     elastic_api_key: str = ""
 
+    # Phase 13: Agent Tracing
+    tracing_enabled: bool = False
+    otel_endpoint: str = "http://localhost:4317"
+
+    # Phase 13: SLO Monitoring
+    slo_burn_rate_threshold: float = 2.0
+
+    # Phase 13: Idempotency
+    idempotency_ttl_seconds: int = 86400
+
+    # Phase 13: Hot Reload
+    hot_reload_enabled: bool = False
+
     # OIDC / SSO
     oidc_enabled: bool = False
     oidc_issuer_url: str = ""

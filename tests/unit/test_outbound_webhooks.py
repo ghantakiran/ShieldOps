@@ -29,12 +29,21 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from shieldops.integrations.outbound.webhook_dispatcher import (
+    DeliveryAttempt,
     DeliveryRecord,
     DeliveryStatus,
     OutboundWebhookDispatcher,
     WebhookEventType,
     WebhookSubscription,
 )
+
+
+class _MockDeliveryEngine:
+    """Delivery engine that always succeeds (for unit tests with fake URLs)."""
+
+    async def deliver(self, url, payload, headers=None):
+        return [DeliveryAttempt(attempt=1, status_code=200, response_time_ms=1.0)]
+
 
 # Patch target for the structlog logger that has the event= kwarg bug.
 _LOGGER_PATCH = "shieldops.integrations.outbound.webhook_dispatcher.logger"
@@ -47,15 +56,15 @@ _LOGGER_PATCH = "shieldops.integrations.outbound.webhook_dispatcher.logger"
 
 @pytest.fixture
 def dispatcher() -> OutboundWebhookDispatcher:
-    """Fresh dispatcher instance for each test."""
-    return OutboundWebhookDispatcher()
+    """Fresh dispatcher instance with mock delivery engine for each test."""
+    return OutboundWebhookDispatcher(delivery_engine=_MockDeliveryEngine())
 
 
 @pytest.fixture
 def patched_dispatcher() -> OutboundWebhookDispatcher:
     """Dispatcher with the module logger patched out (for async _deliver tests)."""
     with patch(_LOGGER_PATCH):
-        d = OutboundWebhookDispatcher()
+        d = OutboundWebhookDispatcher(delivery_engine=_MockDeliveryEngine())
         yield d
 
 
