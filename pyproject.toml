@@ -195,6 +195,18 @@ module = [
     "shieldops.api.routes.rate_limit_analytics",
     "shieldops.api.routes.agent_decisions",
     "shieldops.api.routes.runbook_scheduler",
+    "shieldops.api.routes.war_room",
+    "shieldops.api.routes.retrospective",
+    "shieldops.api.routes.change_risk",
+    "shieldops.api.routes.sla_violations",
+    "shieldops.api.routes.tagging_compliance",
+    "shieldops.api.routes.cost_attribution",
+    "shieldops.api.routes.cost_normalizer",
+    "shieldops.api.routes.temporal_patterns",
+    "shieldops.api.routes.continuous_compliance",
+    "shieldops.api.routes.third_party_risk",
+    "shieldops.api.routes.roi_tracker",
+    "shieldops.api.routes.infrastructure_map",
 ]
 warn_return_any = false
 disallow_untyped_defs = false

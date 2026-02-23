@@ -2414,6 +2414,236 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     except Exception as e:
         logger.warning("runbook_scheduler_init_failed", error=str(e))
 
+    # ── Phase 17: War Room ──────────────────────────────────
+    try:
+        from shieldops.api.routes import war_room as war_room_route
+        from shieldops.incidents.war_room import WarRoomManager
+
+        war_room_mgr = WarRoomManager(
+            max_rooms=settings.war_room_max_rooms,
+            auto_escalate_minutes=settings.war_room_auto_escalate_minutes,
+        )
+        war_room_route.set_manager(war_room_mgr)
+        app.include_router(
+            war_room_route.router,
+            prefix=settings.api_prefix,
+            tags=["War Rooms"],
+        )
+        logger.info("war_room_initialized")
+    except Exception as e:
+        logger.warning("war_room_init_failed", error=str(e))
+
+    # ── Phase 17: Retrospective ─────────────────────────────
+    try:
+        from shieldops.api.routes import retrospective as retro_route
+        from shieldops.incidents.retrospective import RetrospectiveManager
+
+        retro_mgr = RetrospectiveManager(
+            max_retros=settings.retrospective_max_retros,
+        )
+        retro_route.set_manager(retro_mgr)
+        app.include_router(
+            retro_route.router,
+            prefix=settings.api_prefix,
+            tags=["Retrospectives"],
+        )
+        logger.info("retrospective_initialized")
+    except Exception as e:
+        logger.warning("retrospective_init_failed", error=str(e))
+
+    # ── Phase 17: Change Risk Scorer ────────────────────────
+    try:
+        from shieldops.analytics.change_risk_scorer import ChangeRiskScorer
+        from shieldops.api.routes import change_risk as change_risk_route
+
+        change_risk_scorer = ChangeRiskScorer(
+            max_records=settings.change_risk_max_records,
+            high_risk_threshold=settings.change_risk_high_threshold,
+            critical_risk_threshold=settings.change_risk_critical_threshold,
+        )
+        change_risk_route.set_scorer(change_risk_scorer)
+        app.include_router(
+            change_risk_route.router,
+            prefix=settings.api_prefix,
+            tags=["Change Risk"],
+        )
+        logger.info("change_risk_scorer_initialized")
+    except Exception as e:
+        logger.warning("change_risk_scorer_init_failed", error=str(e))
+
+    # ── Phase 17: SLA Violation Tracker ─────────────────────
+    try:
+        from shieldops.api.routes import sla_violations as sla_viol_route
+        from shieldops.sla.violation_tracker import SLAViolationTracker
+
+        sla_violation_tracker = SLAViolationTracker(
+            max_targets=settings.sla_violation_max_targets,
+            max_violations=settings.sla_violation_max_violations,
+        )
+        sla_viol_route.set_tracker(sla_violation_tracker)
+        app.include_router(
+            sla_viol_route.router,
+            prefix=settings.api_prefix,
+            tags=["SLA Violations"],
+        )
+        logger.info("sla_violation_tracker_initialized")
+    except Exception as e:
+        logger.warning("sla_violation_tracker_init_failed", error=str(e))
+
+    # ── Phase 17: Tagging Compliance ────────────────────────
+    try:
+        from shieldops.analytics.tagging_compliance import TaggingComplianceEngine
+        from shieldops.api.routes import tagging_compliance as tag_route
+
+        tagging_engine = TaggingComplianceEngine(
+            max_policies=settings.tagging_compliance_max_policies,
+            max_records=settings.tagging_compliance_max_records,
+        )
+        tag_route.set_engine(tagging_engine)
+        app.include_router(
+            tag_route.router,
+            prefix=settings.api_prefix,
+            tags=["Tagging Compliance"],
+        )
+        logger.info("tagging_compliance_initialized")
+    except Exception as e:
+        logger.warning("tagging_compliance_init_failed", error=str(e))
+
+    # ── Phase 17: Cost Attribution ──────────────────────────
+    try:
+        from shieldops.api.routes import cost_attribution as cost_attr_route
+        from shieldops.billing.cost_attribution import CostAttributionEngine
+
+        cost_attr_engine = CostAttributionEngine(
+            max_rules=settings.cost_attribution_max_rules,
+            max_entries=settings.cost_attribution_max_entries,
+        )
+        cost_attr_route.set_engine(cost_attr_engine)
+        app.include_router(
+            cost_attr_route.router,
+            prefix=settings.api_prefix,
+            tags=["Cost Attribution"],
+        )
+        logger.info("cost_attribution_initialized")
+    except Exception as e:
+        logger.warning("cost_attribution_init_failed", error=str(e))
+
+    # ── Phase 17: Cost Normalizer ───────────────────────────
+    try:
+        from shieldops.analytics.cost_normalizer import CostNormalizer
+        from shieldops.api.routes import cost_normalizer as cost_norm_route
+
+        cost_norm = CostNormalizer(
+            max_pricing_entries=settings.cost_normalizer_max_pricing,
+        )
+        cost_norm_route.set_normalizer(cost_norm)
+        app.include_router(
+            cost_norm_route.router,
+            prefix=settings.api_prefix,
+            tags=["Cost Normalizer"],
+        )
+        logger.info("cost_normalizer_initialized")
+    except Exception as e:
+        logger.warning("cost_normalizer_init_failed", error=str(e))
+
+    # ── Phase 17: Temporal Patterns ─────────────────────────
+    try:
+        from shieldops.analytics.temporal_patterns import TemporalPatternEngine
+        from shieldops.api.routes import temporal_patterns as temporal_route
+
+        temporal_engine = TemporalPatternEngine(
+            max_events=settings.temporal_patterns_max_events,
+            min_occurrences=settings.temporal_patterns_min_occurrences,
+        )
+        temporal_route.set_engine(temporal_engine)
+        app.include_router(
+            temporal_route.router,
+            prefix=settings.api_prefix,
+            tags=["Temporal Patterns"],
+        )
+        logger.info("temporal_patterns_initialized")
+    except Exception as e:
+        logger.warning("temporal_patterns_init_failed", error=str(e))
+
+    # ── Phase 17: Continuous Compliance ─────────────────────
+    try:
+        from shieldops.api.routes import continuous_compliance as cc_route
+        from shieldops.compliance.continuous_validator import (
+            ContinuousComplianceValidator,
+        )
+
+        cc_validator = ContinuousComplianceValidator(
+            max_controls=settings.continuous_compliance_max_controls,
+            max_records=settings.continuous_compliance_max_records,
+        )
+        cc_route.set_validator(cc_validator)
+        app.include_router(
+            cc_route.router,
+            prefix=settings.api_prefix,
+            tags=["Continuous Compliance"],
+        )
+        logger.info("continuous_compliance_initialized")
+    except Exception as e:
+        logger.warning("continuous_compliance_init_failed", error=str(e))
+
+    # ── Phase 17: Third-Party Risk ──────────────────────────
+    try:
+        from shieldops.api.routes import third_party_risk as tpr_route
+        from shieldops.vulnerability.third_party_risk import ThirdPartyRiskTracker
+
+        tpr_tracker = ThirdPartyRiskTracker(
+            max_vendors=settings.third_party_risk_max_vendors,
+            assessment_interval_days=settings.third_party_risk_reassessment_days,
+        )
+        tpr_route.set_tracker(tpr_tracker)
+        app.include_router(
+            tpr_route.router,
+            prefix=settings.api_prefix,
+            tags=["Third Party Risk"],
+        )
+        logger.info("third_party_risk_initialized")
+    except Exception as e:
+        logger.warning("third_party_risk_init_failed", error=str(e))
+
+    # ── Phase 17: ROI Tracker ───────────────────────────────
+    try:
+        from shieldops.agents.roi_tracker import AgentROITracker
+        from shieldops.api.routes import roi_tracker as roi_route
+
+        roi_tracker = AgentROITracker(
+            max_entries=settings.roi_tracker_max_entries,
+        )
+        roi_route.set_tracker(roi_tracker)
+        app.include_router(
+            roi_route.router,
+            prefix=settings.api_prefix,
+            tags=["ROI Tracker"],
+        )
+        logger.info("roi_tracker_initialized")
+    except Exception as e:
+        logger.warning("roi_tracker_init_failed", error=str(e))
+
+    # ── Phase 17: Infrastructure Map ────────────────────────
+    try:
+        from shieldops.api.routes import infrastructure_map as infra_route
+        from shieldops.topology.infrastructure_map import (
+            InfrastructureTopologyMapper,
+        )
+
+        infra_mapper = InfrastructureTopologyMapper(
+            max_nodes=settings.infrastructure_map_max_nodes,
+            max_relationships=settings.infrastructure_map_max_relationships,
+        )
+        infra_route.set_mapper(infra_mapper)
+        app.include_router(
+            infra_route.router,
+            prefix=settings.api_prefix,
+            tags=["Infrastructure Map"],
+        )
+        logger.info("infrastructure_map_initialized")
+    except Exception as e:
+        logger.warning("infrastructure_map_init_failed", error=str(e))
+
     yield
 
     logger.info("shieldops_shutting_down")

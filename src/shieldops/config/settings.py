@@ -411,6 +411,65 @@ class Settings(BaseSettings):
     runbook_scheduler_max_schedules: int = 500
     runbook_scheduler_lookahead_minutes: int = 60
 
+    # Phase 17: War Room
+    war_room_enabled: bool = True
+    war_room_max_rooms: int = 500
+    war_room_auto_escalate_minutes: int = 30
+
+    # Phase 17: Retrospective
+    retrospective_enabled: bool = True
+    retrospective_max_retros: int = 1000
+    retrospective_action_overdue_days: int = 14
+
+    # Phase 17: Change Risk Scorer
+    change_risk_enabled: bool = True
+    change_risk_max_records: int = 50000
+    change_risk_high_threshold: float = 0.7
+    change_risk_critical_threshold: float = 0.9
+
+    # Phase 17: SLA Violation Tracker
+    sla_violation_enabled: bool = True
+    sla_violation_max_targets: int = 1000
+    sla_violation_max_violations: int = 50000
+
+    # Phase 17: Tagging Compliance
+    tagging_compliance_enabled: bool = True
+    tagging_compliance_max_policies: int = 200
+    tagging_compliance_max_records: int = 100000
+
+    # Phase 17: Cost Attribution
+    cost_attribution_enabled: bool = True
+    cost_attribution_max_rules: int = 500
+    cost_attribution_max_entries: int = 100000
+
+    # Phase 17: Cost Normalizer
+    cost_normalizer_enabled: bool = True
+    cost_normalizer_max_pricing: int = 10000
+
+    # Phase 17: Temporal Patterns
+    temporal_patterns_enabled: bool = True
+    temporal_patterns_max_events: int = 100000
+    temporal_patterns_min_occurrences: int = 3
+
+    # Phase 17: Continuous Compliance
+    continuous_compliance_enabled: bool = True
+    continuous_compliance_max_controls: int = 5000
+    continuous_compliance_max_records: int = 100000
+
+    # Phase 17: Third-Party Risk
+    third_party_risk_enabled: bool = True
+    third_party_risk_max_vendors: int = 1000
+    third_party_risk_reassessment_days: int = 90
+
+    # Phase 17: ROI Tracker
+    roi_tracker_enabled: bool = True
+    roi_tracker_max_entries: int = 100000
+
+    # Phase 17: Infrastructure Map
+    infrastructure_map_enabled: bool = True
+    infrastructure_map_max_nodes: int = 10000
+    infrastructure_map_max_relationships: int = 50000
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",
