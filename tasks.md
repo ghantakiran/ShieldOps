@@ -746,3 +746,174 @@
 - [x] Service Dependency Map (graph builder, cycle detection, BFS, OTel/K8s ingestion) — 55 tests
 - [x] Change Tracking / Deployment Correlation (scoring engine, K8s/GitHub/CI sources) — 58 tests
 - [x] Custom Agent Builder (workflow DSL, condition/action/LLM/loop steps, DAG validation) — 61 tests
+
+---
+
+## Phase 11 — Security Platform Sophistication (SBOM, MITRE ATT&CK, EPSS)
+
+**Status:** Completed | **PR:** #24
+
+- [x] SBOM Generator (CycloneDX JSON, dependency tree, license detection)
+- [x] MITRE ATT&CK Mapper (technique mapping, tactic grouping, coverage scoring)
+- [x] EPSS Risk Scorer (probability scoring, priority ranking, trend tracking)
+- [x] Vulnerability Scanner Aggregator (multi-source dedup, severity normalization)
+- [x] Security Policy Validator (OPA Rego validation, drift detection)
+- [x] Compliance Report Generator (SOC2/PCI-DSS/HIPAA, evidence collection)
+- [x] Threat Intelligence Feed (STIX/TAXII ingestion, IOC matching)
+- [x] Secret Scanner (regex patterns, entropy detection, git history)
+- [x] Container Image Scanner (layer analysis, CVE mapping)
+- [x] Network Policy Analyzer (K8s NetworkPolicy, connectivity matrix)
+- [x] Access Review Automation (RBAC analysis, least-privilege scoring)
+- [x] Security Incident Timeline (event correlation, kill chain mapping)
+
+---
+
+## Phase 12 — Autonomous Intelligence & Platform Ecosystem
+
+**Status:** Completed | **PR:** #25
+
+- [x] Agent Collaboration Protocol (message passing, shared context, task delegation)
+- [x] Agent Resource Quotas (CPU/memory/API limits per agent, throttling)
+- [x] Batch Operations Engine (bulk actions, progress tracking, rollback)
+- [x] Export Engine (CSV/JSON/PDF export, async generation, S3 upload)
+- [x] Incident Timeline Builder (event aggregation, swimlane visualization)
+- [x] Health Aggregation Dashboard (service health rollup, SLA tracking)
+- [x] Circuit Breaker (failure detection, half-open state, recovery)
+- [x] Distributed Lock Manager (Redis-based locks, TTL, deadlock detection)
+- [x] Feature Flag Engine (gradual rollout, user targeting, kill switch)
+- [x] Environment Promotion Pipeline (dev→staging→prod, gate checks)
+- [x] API Lifecycle Manager (versioning, deprecation, migration paths)
+- [x] Plugin SDK (extension points, hook system, sandboxed execution)
+
+---
+
+## Phase 13 — Advanced Observability & Platform Hardening
+
+**Status:** Completed | **PR:** #27
+
+- [x] Escalation Policy Engine (multi-tier escalation, rotation, override)
+- [x] On-Call Schedule Manager (rotation patterns, swap, override windows)
+- [x] Service Ownership Registry (team mapping, contact routing, SLA ownership)
+- [x] Alert Suppression Engine (maintenance windows, dedup, snooze)
+- [x] SLO/SLI Tracker (error budget, burn rate alerts, objective tracking)
+- [x] DORA Metrics Calculator (deployment frequency, lead time, MTTR, change failure)
+- [x] Capacity Planning Engine (trend analysis, forecast, right-sizing)
+- [x] Incident Impact Scorer (blast radius, customer impact, revenue impact)
+- [x] Drift Detection Engine (config drift, infrastructure drift, remediation)
+- [x] Cost Anomaly Detector (spend tracking, anomaly detection, alerts)
+- [x] Compliance Report Generator (multi-framework, evidence mapping)
+- [x] Agent Benchmark Suite (performance profiling, accuracy scoring)
+
+---
+
+## Phase 14 — Enterprise Scalability & Developer Experience
+
+**Status:** Completed | **PR:** #30
+
+- [x] Webhook Replay Engine (event replay, filtering, retry with backoff)
+- [x] Postmortem Generator (template-driven, timeline extraction, action items)
+- [x] Runbook Execution Tracker (step-by-step tracking, outcome recording)
+- [x] Multi-Region Configuration (region-aware settings, failover)
+- [x] Audit Log Analyzer (pattern detection, compliance reporting)
+- [x] API Rate Limit Manager (per-tenant limits, burst handling)
+- [x] Data Retention Policy Engine (TTL enforcement, archival, purge)
+- [x] Configuration Validator (schema validation, dependency checks)
+- [x] Performance Profiler (endpoint latency, query analysis)
+- [x] Dependency Health Monitor (upstream health checks, circuit breaking)
+- [x] Event Bus (pub/sub, topic routing, dead letter queue)
+- [x] Tenant Isolation Manager (data partitioning, resource quotas)
+
+---
+
+## Phase 15 — Operational Intelligence & Reliability Engineering
+
+**Status:** Completed | **PR:** #33
+
+- [x] Dependency Health Tracker (cascade detection, health scoring)
+- [x] Deployment Freeze Manager (freeze windows, exceptions, scope control)
+- [x] Error Budget Tracker (SLO budget consumption, burn-rate alerting)
+- [x] Alert Grouping Engine (fingerprint-based grouping, time-window)
+- [x] Status Page Manager (component health, incident tracking, updates)
+- [x] Rollback Registry (rollback events, pattern detection, success tracking)
+- [x] Capacity Reservation System (resource reservations, conflict detection)
+- [x] Dependency Vulnerability Mapper (CVE→service mapping, transitive analysis)
+- [x] Operational Readiness Reviewer (pre-launch checklists, gate validation)
+- [x] Rate Limit Analytics Engine (offender tracking, quota utilization)
+- [x] Agent Decision Explainer (decision chain, alternatives, explainability)
+- [x] Runbook Scheduler (scheduled execution, maintenance windows)
+
+---
+
+## Phase 16 — Operational Resilience & Intelligent Automation
+
+**Status:** Completed | **PR:** #34
+
+- [x] Dependency Health Tracker (health monitoring, cascade detection) — ~50 tests
+- [x] Deployment Freeze Manager (change-freeze windows, exceptions) — ~50 tests
+- [x] Error Budget Tracker (SLO budget, burn-rate alerts, deployment gating) — ~50 tests
+- [x] Alert Grouping Engine (fingerprint grouping, time-window, merge) — ~50 tests
+- [x] Status Page Manager (component health, incident tracking) — ~50 tests
+- [x] Rollback Registry (event tracking, pattern detection) — ~50 tests
+- [x] Capacity Reservation System (reservations, conflict detection) — ~50 tests
+- [x] Dependency Vulnerability Mapper (CVE-service mapping) — ~50 tests
+- [x] Operational Readiness Reviewer (pre-launch checklists) — ~50 tests
+- [x] Rate Limit Analytics Engine (offender tracking, burst detection) — ~50 tests
+- [x] Agent Decision Explainer (decision chain tracking) — ~50 tests
+- [x] Runbook Scheduler (scheduled execution, cron support) — ~50 tests
+
+---
+
+## Phase 17 — Incident Intelligence & FinOps Automation
+
+**Status:** Completed | **PR:** #35
+
+- [x] War Room Manager (incident command, participant tracking) — ~56 tests
+- [x] Retrospective Engine (structured retros, action items, tracking) — ~56 tests
+- [x] Change Risk Scorer (risk assessment, deployment gating) — ~56 tests
+- [x] SLA Violation Tracker (target monitoring, violation detection) — ~56 tests
+- [x] Tagging Compliance Engine (tag policies, audit, enforcement) — ~56 tests
+- [x] Cost Attribution Engine (cost allocation rules, team billing) — ~56 tests
+- [x] Cost Normalizer (multi-cloud pricing, normalization) — ~56 tests
+- [x] Temporal Pattern Detector (recurring event detection, forecasting) — ~56 tests
+- [x] Continuous Compliance Monitor (real-time control monitoring) — ~56 tests
+- [x] Third-Party Risk Assessor (vendor risk scoring, reassessment) — ~56 tests
+- [x] ROI Tracker (investment tracking, return calculation) — ~56 tests
+- [x] Infrastructure Map Builder (topology mapping, relationships) — ~56 tests
+
+---
+
+## Phase 18 — Advanced Security & Intelligent Operations
+
+**Status:** Completed | **PR:** #36
+
+- [x] Secret Rotation Manager (credential rotation, scheduling) — ~40 tests
+- [x] Anomaly Correlation Engine (cross-service correlation, root cause) — ~40 tests
+- [x] Synthetic Monitor (endpoint monitoring, SLA verification) — ~40 tests
+- [x] Chaos Experiment Tracker (experiment lifecycle, result analysis) — ~40 tests
+- [x] Data Quality Monitor (rule-based validation, quality scoring) — ~40 tests
+- [x] Canary Deployment Tracker (canary lifecycle, metric comparison) — ~40 tests
+- [x] Incident Communications Manager (templates, notifications) — ~40 tests
+- [x] Dependency SLA Monitor (SLA evaluation, breach detection) — ~40 tests
+- [x] Security Posture Scorer (security scoring, check tracking) — ~40 tests
+- [x] Workload Fingerprint Engine (behavioral profiling, drift detection) — ~40 tests
+- [x] Maintenance Window Manager (window scheduling, service assignment) — ~40 tests
+- [x] Compliance Evidence Collector (evidence collection, packaging) — ~40 tests
+
+---
+
+## Phase 19 — Intelligent Automation & Governance
+
+**Status:** Completed | **PR:** #37
+
+- [x] Runbook Recommender (symptom matching, historical success scoring) — 38 tests
+- [x] Incident Clustering Engine (Jaccard similarity, auto-clustering) — 41 tests
+- [x] Policy-as-Code Generator (OPA Rego generation from requirements) — 36 tests
+- [x] Change Advisory Board (automated review, voting, auto-approve) — 38 tests
+- [x] SRE Metrics Aggregator (service scorecards, weighted scoring) — 38 tests
+- [x] Service Health Report Card (grading, weighted averages, reports) — 40 tests
+- [x] Approval Delegation Engine (scope-based delegation, audit trail) — 41 tests
+- [x] Compliance Gap Analyzer (gap detection, coverage reporting) — 42 tests
+- [x] Cost Forecast Engine (linear/moving avg/exponential forecasting) — 41 tests
+- [x] Deployment Risk Predictor (failure/rollback/size risk scoring) — 38 tests
+- [x] Capacity Trend Analyzer (utilization trends, exhaustion prediction) — 40 tests
+- [x] Incident Learning Tracker (lessons learned, application tracking) — 39 tests

@@ -532,6 +532,70 @@ class Settings(BaseSettings):
     evidence_collector_max_evidence: int = 50000
     evidence_collector_max_packages: int = 500
 
+    # Phase 19: Runbook Recommender
+    runbook_recommender_enabled: bool = True
+    runbook_recommender_max_profiles: int = 1000
+    runbook_recommender_max_candidates: int = 10
+    runbook_recommender_min_score: float = 0.1
+
+    # Phase 19: Incident Clustering
+    incident_clustering_enabled: bool = True
+    incident_clustering_max_incidents: int = 50000
+    incident_clustering_max_clusters: int = 5000
+    incident_clustering_similarity: float = 0.4
+
+    # Phase 19: Policy Generator
+    policy_generator_enabled: bool = True
+    policy_generator_max_requirements: int = 1000
+    policy_generator_max_policies: int = 5000
+
+    # Phase 19: Change Advisory Board
+    change_advisory_enabled: bool = True
+    change_advisory_max_requests: int = 10000
+    change_advisory_max_votes: int = 50000
+    change_advisory_auto_approve: float = 0.5
+
+    # Phase 19: SRE Metrics
+    sre_metrics_enabled: bool = True
+    sre_metrics_max_datapoints: int = 100000
+    sre_metrics_max_scorecards: int = 5000
+
+    # Phase 19: Health Reports
+    health_report_enabled: bool = True
+    health_report_max_reports: int = 10000
+
+    # Phase 19: Approval Delegation
+    approval_delegation_enabled: bool = True
+    approval_delegation_max_rules: int = 1000
+    approval_delegation_max_audit: int = 50000
+
+    # Phase 19: Compliance Gap Analyzer
+    gap_analyzer_enabled: bool = True
+    gap_analyzer_max_controls: int = 5000
+    gap_analyzer_max_gaps: int = 50000
+
+    # Phase 19: Cost Forecast
+    cost_forecast_enabled: bool = True
+    cost_forecast_max_datapoints: int = 100000
+    cost_forecast_max_forecasts: int = 5000
+    cost_forecast_alert_threshold: float = 0.9
+
+    # Phase 19: Deployment Risk
+    deployment_risk_enabled: bool = True
+    deployment_risk_max_records: int = 50000
+    deployment_risk_max_assessments: int = 10000
+
+    # Phase 19: Capacity Trends
+    capacity_trends_enabled: bool = True
+    capacity_trends_max_snapshots: int = 100000
+    capacity_trends_max_analyses: int = 10000
+    capacity_trends_exhaustion_threshold: float = 0.85
+
+    # Phase 19: Incident Learning
+    incident_learning_enabled: bool = True
+    incident_learning_max_lessons: int = 10000
+    incident_learning_max_applications: int = 50000
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",

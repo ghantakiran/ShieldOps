@@ -2893,6 +2893,240 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     except Exception as e:
         logger.warning("evidence_collector_init_failed", error=str(e))
 
+    # ── Phase 19 ────────────────────────────────────────────
+
+    try:
+        from shieldops.api.routes import runbook_recommender as rb_rec_route
+        from shieldops.playbooks.runbook_recommender import RunbookRecommender
+
+        rb_rec = RunbookRecommender(
+            max_profiles=settings.runbook_recommender_max_profiles,
+            max_candidates=settings.runbook_recommender_max_candidates,
+            min_score=settings.runbook_recommender_min_score,
+        )
+        rb_rec_route.set_recommender(rb_rec)
+        app.include_router(
+            rb_rec_route.router,
+            prefix=settings.api_prefix,
+            tags=["Runbook Recommender"],
+        )
+        logger.info("runbook_recommender_initialized")
+    except Exception as e:
+        logger.warning("runbook_recommender_init_failed", error=str(e))
+
+    try:
+        from shieldops.analytics.incident_clustering import (
+            IncidentClusteringEngine,
+        )
+        from shieldops.api.routes import incident_clustering as ic_route
+
+        ic_engine = IncidentClusteringEngine(
+            max_incidents=settings.incident_clustering_max_incidents,
+            max_clusters=settings.incident_clustering_max_clusters,
+            similarity_threshold=settings.incident_clustering_similarity,
+        )
+        ic_route.set_engine(ic_engine)
+        app.include_router(
+            ic_route.router,
+            prefix=settings.api_prefix,
+            tags=["Incident Clustering"],
+        )
+        logger.info("incident_clustering_initialized")
+    except Exception as e:
+        logger.warning("incident_clustering_init_failed", error=str(e))
+
+    try:
+        from shieldops.api.routes import policy_generator as pg_route
+        from shieldops.policy.policy_generator import PolicyCodeGenerator
+
+        pg_engine = PolicyCodeGenerator(
+            max_requirements=settings.policy_generator_max_requirements,
+            max_policies=settings.policy_generator_max_policies,
+        )
+        pg_route.set_generator(pg_engine)
+        app.include_router(
+            pg_route.router,
+            prefix=settings.api_prefix,
+            tags=["Policy Generator"],
+        )
+        logger.info("policy_generator_initialized")
+    except Exception as e:
+        logger.warning("policy_generator_init_failed", error=str(e))
+
+    try:
+        from shieldops.api.routes import change_advisory as cab_route
+        from shieldops.changes.change_advisory import ChangeAdvisoryBoard
+
+        cab = ChangeAdvisoryBoard(
+            max_requests=settings.change_advisory_max_requests,
+            max_votes=settings.change_advisory_max_votes,
+            auto_approve_threshold=settings.change_advisory_auto_approve,
+        )
+        cab_route.set_board(cab)
+        app.include_router(
+            cab_route.router,
+            prefix=settings.api_prefix,
+            tags=["Change Advisory"],
+        )
+        logger.info("change_advisory_initialized")
+    except Exception as e:
+        logger.warning("change_advisory_init_failed", error=str(e))
+
+    try:
+        from shieldops.analytics.sre_metrics import SREMetricsAggregator
+        from shieldops.api.routes import sre_metrics as sre_route
+
+        sre_agg = SREMetricsAggregator(
+            max_datapoints=settings.sre_metrics_max_datapoints,
+            max_scorecards=settings.sre_metrics_max_scorecards,
+        )
+        sre_route.set_aggregator(sre_agg)
+        app.include_router(
+            sre_route.router,
+            prefix=settings.api_prefix,
+            tags=["SRE Metrics"],
+        )
+        logger.info("sre_metrics_initialized")
+    except Exception as e:
+        logger.warning("sre_metrics_init_failed", error=str(e))
+
+    try:
+        from shieldops.api.routes import health_report as hr_route
+        from shieldops.observability.health_report import (
+            ServiceHealthReportGenerator,
+        )
+
+        hr_gen = ServiceHealthReportGenerator(
+            max_reports=settings.health_report_max_reports,
+        )
+        hr_route.set_generator(hr_gen)
+        app.include_router(
+            hr_route.router,
+            prefix=settings.api_prefix,
+            tags=["Health Reports"],
+        )
+        logger.info("health_report_initialized")
+    except Exception as e:
+        logger.warning("health_report_init_failed", error=str(e))
+
+    try:
+        from shieldops.api.routes import approval_delegation as ad_route
+        from shieldops.policy.approval.approval_delegation import (
+            ApprovalDelegationEngine,
+        )
+
+        ad_engine = ApprovalDelegationEngine(
+            max_rules=settings.approval_delegation_max_rules,
+            max_audit=settings.approval_delegation_max_audit,
+        )
+        ad_route.set_engine(ad_engine)
+        app.include_router(
+            ad_route.router,
+            prefix=settings.api_prefix,
+            tags=["Approval Delegation"],
+        )
+        logger.info("approval_delegation_initialized")
+    except Exception as e:
+        logger.warning("approval_delegation_init_failed", error=str(e))
+
+    try:
+        from shieldops.api.routes import gap_analyzer as ga_route
+        from shieldops.compliance.gap_analyzer import ComplianceGapAnalyzer
+
+        ga = ComplianceGapAnalyzer(
+            max_controls=settings.gap_analyzer_max_controls,
+            max_gaps=settings.gap_analyzer_max_gaps,
+        )
+        ga_route.set_analyzer(ga)
+        app.include_router(
+            ga_route.router,
+            prefix=settings.api_prefix,
+            tags=["Compliance Gaps"],
+        )
+        logger.info("gap_analyzer_initialized")
+    except Exception as e:
+        logger.warning("gap_analyzer_init_failed", error=str(e))
+
+    try:
+        from shieldops.api.routes import cost_forecast as cf_route
+        from shieldops.billing.cost_forecast import CostForecastEngine
+
+        cf_engine = CostForecastEngine(
+            max_datapoints=settings.cost_forecast_max_datapoints,
+            max_forecasts=settings.cost_forecast_max_forecasts,
+            budget_alert_threshold=settings.cost_forecast_alert_threshold,
+        )
+        cf_route.set_engine(cf_engine)
+        app.include_router(
+            cf_route.router,
+            prefix=settings.api_prefix,
+            tags=["Cost Forecast"],
+        )
+        logger.info("cost_forecast_initialized")
+    except Exception as e:
+        logger.warning("cost_forecast_init_failed", error=str(e))
+
+    try:
+        from shieldops.api.routes import deployment_risk as dr_route
+        from shieldops.changes.deployment_risk import (
+            DeploymentRiskPredictor,
+        )
+
+        dr_pred = DeploymentRiskPredictor(
+            max_records=settings.deployment_risk_max_records,
+            max_assessments=settings.deployment_risk_max_assessments,
+        )
+        dr_route.set_predictor(dr_pred)
+        app.include_router(
+            dr_route.router,
+            prefix=settings.api_prefix,
+            tags=["Deployment Risk"],
+        )
+        logger.info("deployment_risk_initialized")
+    except Exception as e:
+        logger.warning("deployment_risk_init_failed", error=str(e))
+
+    try:
+        from shieldops.analytics.capacity_trends import (
+            CapacityTrendAnalyzer,
+        )
+        from shieldops.api.routes import capacity_trends as ct_route
+
+        ct_analyzer = CapacityTrendAnalyzer(
+            max_snapshots=settings.capacity_trends_max_snapshots,
+            max_analyses=settings.capacity_trends_max_analyses,
+            exhaustion_threshold=settings.capacity_trends_exhaustion_threshold,
+        )
+        ct_route.set_analyzer(ct_analyzer)
+        app.include_router(
+            ct_route.router,
+            prefix=settings.api_prefix,
+            tags=["Capacity Trends"],
+        )
+        logger.info("capacity_trends_initialized")
+    except Exception as e:
+        logger.warning("capacity_trends_init_failed", error=str(e))
+
+    try:
+        from shieldops.agents.incident_learning import (
+            IncidentLearningTracker,
+        )
+        from shieldops.api.routes import incident_learning as il_route
+
+        il_tracker = IncidentLearningTracker(
+            max_lessons=settings.incident_learning_max_lessons,
+            max_applications=settings.incident_learning_max_applications,
+        )
+        il_route.set_tracker(il_tracker)
+        app.include_router(
+            il_route.router,
+            prefix=settings.api_prefix,
+            tags=["Incident Learning"],
+        )
+        logger.info("incident_learning_initialized")
+    except Exception as e:
+        logger.warning("incident_learning_init_failed", error=str(e))
+
     yield
 
     logger.info("shieldops_shutting_down")

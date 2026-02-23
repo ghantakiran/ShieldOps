@@ -219,6 +219,18 @@ module = [
     "shieldops.api.routes.workload_fingerprint",
     "shieldops.api.routes.maintenance_window",
     "shieldops.api.routes.evidence_collector",
+    "shieldops.api.routes.runbook_recommender",
+    "shieldops.api.routes.incident_clustering",
+    "shieldops.api.routes.policy_generator",
+    "shieldops.api.routes.change_advisory",
+    "shieldops.api.routes.sre_metrics",
+    "shieldops.api.routes.health_report",
+    "shieldops.api.routes.approval_delegation",
+    "shieldops.api.routes.gap_analyzer",
+    "shieldops.api.routes.cost_forecast",
+    "shieldops.api.routes.deployment_risk",
+    "shieldops.api.routes.capacity_trends",
+    "shieldops.api.routes.incident_learning",
 ]
 warn_return_any = false
 disallow_untyped_defs = false
