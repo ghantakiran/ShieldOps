@@ -183,6 +183,18 @@ module = [
     "shieldops.api.routes.compliance_report_gen",
     "shieldops.api.routes.agent_benchmarks",
     "shieldops.api.routes.webhook_replay",
+    "shieldops.api.routes.dependency_health",
+    "shieldops.api.routes.deployment_freeze",
+    "shieldops.api.routes.error_budget",
+    "shieldops.api.routes.alert_grouping",
+    "shieldops.api.routes.status_page",
+    "shieldops.api.routes.rollback_registry",
+    "shieldops.api.routes.capacity_reservation",
+    "shieldops.api.routes.dependency_vuln_map",
+    "shieldops.api.routes.readiness_review",
+    "shieldops.api.routes.rate_limit_analytics",
+    "shieldops.api.routes.agent_decisions",
+    "shieldops.api.routes.runbook_scheduler",
 ]
 warn_return_any = false
 disallow_untyped_defs = false

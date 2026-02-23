@@ -2184,6 +2184,236 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     except Exception as e:
         logger.warning("webhook_replay_engine_init_failed", error=str(e))
 
+    # ── Phase 16: Dependency Health Tracker ────────────────────────
+    try:
+        from shieldops.api.routes import dependency_health as dep_health_routes
+        from shieldops.observability.dependency_health import DependencyHealthTracker
+
+        dep_health_tracker = DependencyHealthTracker(
+            max_checks=settings.dependency_health_max_checks,
+            cascade_threshold=settings.dependency_cascade_threshold,
+        )
+        dep_health_routes.set_tracker(dep_health_tracker)
+        app.include_router(
+            dep_health_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Dependency Health"],
+        )
+        logger.info("dependency_health_tracker_initialized")
+    except Exception as e:
+        logger.warning("dependency_health_tracker_init_failed", error=str(e))
+
+    # ── Phase 16: Deployment Freeze Manager ────────────────────────
+    try:
+        from shieldops.api.routes import deployment_freeze as freeze_routes
+        from shieldops.config.deployment_freeze import DeploymentFreezeManager
+
+        deployment_freeze_mgr = DeploymentFreezeManager(
+            max_windows=settings.deployment_freeze_max_windows,
+            max_duration_days=settings.deployment_freeze_max_duration_days,
+        )
+        freeze_routes.set_manager(deployment_freeze_mgr)
+        app.include_router(
+            freeze_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Deployment Freezes"],
+        )
+        logger.info("deployment_freeze_manager_initialized")
+    except Exception as e:
+        logger.warning("deployment_freeze_manager_init_failed", error=str(e))
+
+    # ── Phase 16: Error Budget Tracker ─────────────────────────────
+    try:
+        from shieldops.api.routes import error_budget as budget_routes
+        from shieldops.sla.error_budget import ErrorBudgetTracker
+
+        error_budget_tracker = ErrorBudgetTracker(
+            warning_threshold=settings.error_budget_warning_threshold,
+            critical_threshold=settings.error_budget_critical_threshold,
+        )
+        budget_routes.set_tracker(error_budget_tracker)
+        app.include_router(
+            budget_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Error Budgets"],
+        )
+        logger.info("error_budget_tracker_initialized")
+    except Exception as e:
+        logger.warning("error_budget_tracker_init_failed", error=str(e))
+
+    # ── Phase 16: Alert Grouping Engine ────────────────────────────
+    try:
+        from shieldops.api.routes import alert_grouping as grouping_routes
+        from shieldops.observability.alert_grouping import AlertGroupingEngine
+
+        alert_grouping_engine = AlertGroupingEngine(
+            window_seconds=settings.alert_grouping_window_seconds,
+            max_groups=settings.alert_grouping_max_groups,
+        )
+        grouping_routes.set_engine(alert_grouping_engine)
+        app.include_router(
+            grouping_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Alert Grouping"],
+        )
+        logger.info("alert_grouping_engine_initialized")
+    except Exception as e:
+        logger.warning("alert_grouping_engine_init_failed", error=str(e))
+
+    # ── Phase 16: Status Page Manager ──────────────────────────────
+    try:
+        from shieldops.api.routes import status_page as status_routes
+        from shieldops.observability.status_page import StatusPageManager
+
+        status_page_mgr = StatusPageManager(
+            max_components=settings.status_page_max_components,
+            max_incidents=settings.status_page_max_incidents,
+        )
+        status_routes.set_manager(status_page_mgr)
+        app.include_router(
+            status_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Status Page"],
+        )
+        logger.info("status_page_manager_initialized")
+    except Exception as e:
+        logger.warning("status_page_manager_init_failed", error=str(e))
+
+    # ── Phase 16: Rollback Registry ────────────────────────────────
+    try:
+        from shieldops.api.routes import rollback_registry as rollback_routes
+        from shieldops.policy.rollback.registry import RollbackRegistry
+
+        rollback_registry = RollbackRegistry(
+            max_events=settings.rollback_registry_max_events,
+            pattern_lookback_days=settings.rollback_pattern_lookback_days,
+        )
+        rollback_routes.set_registry(rollback_registry)
+        app.include_router(
+            rollback_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Rollback Registry"],
+        )
+        logger.info("rollback_registry_initialized")
+    except Exception as e:
+        logger.warning("rollback_registry_init_failed", error=str(e))
+
+    # ── Phase 16: Capacity Reservation System ──────────────────────
+    try:
+        from shieldops.analytics.capacity_reservation import CapacityReservationManager
+        from shieldops.api.routes import capacity_reservation as cap_routes
+
+        capacity_reservation_mgr = CapacityReservationManager(
+            max_active=settings.capacity_reservation_max_active,
+            max_duration_days=settings.capacity_reservation_max_duration_days,
+        )
+        cap_routes.set_manager(capacity_reservation_mgr)
+        app.include_router(
+            cap_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Capacity Reservations"],
+        )
+        logger.info("capacity_reservation_manager_initialized")
+    except Exception as e:
+        logger.warning("capacity_reservation_manager_init_failed", error=str(e))
+
+    # ── Phase 16: Dependency Vulnerability Mapper ──────────────────
+    try:
+        from shieldops.api.routes import dependency_vuln_map as vuln_map_routes
+        from shieldops.vulnerability.dependency_mapper import DependencyVulnerabilityMapper
+
+        dep_vuln_mapper = DependencyVulnerabilityMapper(
+            max_services=settings.dep_vuln_max_services,
+            max_depth=settings.dep_vuln_max_depth,
+        )
+        vuln_map_routes.set_mapper(dep_vuln_mapper)
+        app.include_router(
+            vuln_map_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Dependency Vulnerability Map"],
+        )
+        logger.info("dependency_vuln_mapper_initialized")
+    except Exception as e:
+        logger.warning("dependency_vuln_mapper_init_failed", error=str(e))
+
+    # ── Phase 16: Operational Readiness Reviewer ───────────────────
+    try:
+        from shieldops.agents.investigation.readiness_review import (
+            OperationalReadinessReviewer,
+        )
+        from shieldops.api.routes import readiness_review as readiness_routes
+
+        readiness_reviewer = OperationalReadinessReviewer(
+            max_checklists=settings.readiness_review_max_checklists,
+            passing_threshold=settings.readiness_review_passing_threshold,
+        )
+        readiness_routes.set_reviewer(readiness_reviewer)
+        app.include_router(
+            readiness_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Readiness Reviews"],
+        )
+        logger.info("readiness_reviewer_initialized")
+    except Exception as e:
+        logger.warning("readiness_reviewer_init_failed", error=str(e))
+
+    # ── Phase 16: Rate Limit Analytics Engine ──────────────────────
+    try:
+        from shieldops.analytics.rate_limit_analytics import RateLimitAnalyticsEngine
+        from shieldops.api.routes import rate_limit_analytics as rl_routes
+
+        rate_limit_analytics = RateLimitAnalyticsEngine(
+            max_events=settings.rate_limit_analytics_max_events,
+            retention_hours=settings.rate_limit_analytics_retention_hours,
+        )
+        rl_routes.set_engine(rate_limit_analytics)
+        app.include_router(
+            rl_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Rate Limit Analytics"],
+        )
+        logger.info("rate_limit_analytics_initialized")
+    except Exception as e:
+        logger.warning("rate_limit_analytics_init_failed", error=str(e))
+
+    # ── Phase 16: Agent Decision Explainer ─────────────────────────
+    try:
+        from shieldops.agents.decision_explainer import AgentDecisionExplainer
+        from shieldops.api.routes import agent_decisions as decision_routes
+
+        agent_decision_explainer = AgentDecisionExplainer(
+            max_records=settings.agent_decision_max_records,
+            retention_days=settings.agent_decision_retention_days,
+        )
+        decision_routes.set_explainer(agent_decision_explainer)
+        app.include_router(
+            decision_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Agent Decisions"],
+        )
+        logger.info("agent_decision_explainer_initialized")
+    except Exception as e:
+        logger.warning("agent_decision_explainer_init_failed", error=str(e))
+
+    # ── Phase 16: Runbook Scheduler ────────────────────────────────
+    try:
+        from shieldops.api.routes import runbook_scheduler as rb_sched_routes
+        from shieldops.playbooks.runbook_scheduler import RunbookScheduler
+
+        runbook_scheduler = RunbookScheduler(
+            max_schedules=settings.runbook_scheduler_max_schedules,
+            lookahead_minutes=settings.runbook_scheduler_lookahead_minutes,
+        )
+        rb_sched_routes.set_scheduler(runbook_scheduler)
+        app.include_router(
+            rb_sched_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Runbook Scheduler"],
+        )
+        logger.info("runbook_scheduler_initialized")
+    except Exception as e:
+        logger.warning("runbook_scheduler_init_failed", error=str(e))
+
     yield
 
     logger.info("shieldops_shutting_down")
