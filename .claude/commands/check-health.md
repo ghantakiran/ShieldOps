@@ -28,13 +28,25 @@ Run health checks on all ShieldOps platform dependencies.
    - Integration tests: `python3 -m pytest tests/integration/ -v --tb=short`
    - Report: total tests, passed, failed, coverage
 
-5. **Platform feature health** (Phase 11–19 modules):
+5. **Platform feature health** (Phase 11–20 modules):
    - Capacity trends: `src/shieldops/analytics/capacity_trends.py` — CapacityTrendAnalyzer
    - SRE metrics: `src/shieldops/analytics/sre_metrics.py` — SREMetricsAggregator
    - Health reports: `src/shieldops/observability/health_report.py` — ServiceHealthReportGenerator
    - Cost forecasts: `src/shieldops/billing/cost_forecast.py` — CostForecastEngine
    - Deployment risk: `src/shieldops/changes/deployment_risk.py` — DeploymentRiskPredictor
    - Incident clustering: `src/shieldops/analytics/incident_clustering.py` — IncidentClusteringEngine
+   - Tenant isolation: `src/shieldops/policy/tenant_isolation.py` — TenantResourceIsolationManager
+   - Alert noise: `src/shieldops/observability/alert_noise.py` — AlertNoiseAnalyzer
+   - Threshold tuner: `src/shieldops/observability/threshold_tuner.py` — ThresholdTuningEngine
+   - Severity predictor: `src/shieldops/incidents/severity_predictor.py` — IncidentSeverityPredictor
+   - Impact analyzer: `src/shieldops/topology/impact_analyzer.py` — ServiceDependencyImpactAnalyzer
+   - Config audit: `src/shieldops/audit/config_audit.py` — ConfigurationAuditTrail
+   - Deployment velocity: `src/shieldops/analytics/deployment_velocity.py` — DeploymentVelocityTracker
+   - Compliance automation: `src/shieldops/compliance/automation_rules.py` — ComplianceAutomationEngine
+   - Knowledge base: `src/shieldops/knowledge/article_manager.py` — KnowledgeBaseManager
+   - On-call fatigue: `src/shieldops/incidents/oncall_fatigue.py` — OnCallFatigueAnalyzer
+   - Backup verification: `src/shieldops/observability/backup_verification.py` — BackupVerificationEngine
+   - Cost tag enforcer: `src/shieldops/billing/cost_tag_enforcer.py` — CostAllocationTagEnforcer
    - Verify each module initializes in `src/shieldops/api/app.py` lifespan
 
 6. **Check configuration**:

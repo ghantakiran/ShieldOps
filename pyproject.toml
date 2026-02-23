@@ -231,6 +231,18 @@ module = [
     "shieldops.api.routes.deployment_risk",
     "shieldops.api.routes.capacity_trends",
     "shieldops.api.routes.incident_learning",
+    "shieldops.api.routes.tenant_isolation",
+    "shieldops.api.routes.alert_noise",
+    "shieldops.api.routes.threshold_tuner",
+    "shieldops.api.routes.severity_predictor",
+    "shieldops.api.routes.impact_analyzer",
+    "shieldops.api.routes.config_audit",
+    "shieldops.api.routes.deployment_velocity",
+    "shieldops.api.routes.compliance_automation",
+    "shieldops.api.routes.knowledge_articles",
+    "shieldops.api.routes.oncall_fatigue",
+    "shieldops.api.routes.backup_verification",
+    "shieldops.api.routes.cost_tag_enforcer",
 ]
 warn_return_any = false
 disallow_untyped_defs = false

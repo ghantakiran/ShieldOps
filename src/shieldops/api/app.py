@@ -3127,6 +3127,270 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     except Exception as e:
         logger.warning("incident_learning_init_failed", error=str(e))
 
+    # ── Phase 20: Tenant Resource Isolation ────────────────────
+    if settings.tenant_isolation_enabled:
+        try:
+            from shieldops.api.routes import tenant_isolation as ti_route
+            from shieldops.policy.tenant_isolation import (
+                TenantResourceIsolationManager,
+            )
+
+            ti_mgr = TenantResourceIsolationManager(
+                max_tenants=settings.tenant_isolation_max_tenants,
+                max_violations=settings.tenant_isolation_max_violations,
+            )
+            ti_route.set_manager(ti_mgr)
+            app.include_router(
+                ti_route.router,
+                prefix=settings.api_prefix,
+                tags=["Tenant Isolation"],
+            )
+            logger.info("tenant_isolation_initialized")
+        except Exception as e:
+            logger.warning("tenant_isolation_init_failed", error=str(e))
+
+    # ── Phase 20: Alert Noise Analyzer ─────────────────────────
+    if settings.alert_noise_enabled:
+        try:
+            from shieldops.api.routes import alert_noise as an_route
+            from shieldops.observability.alert_noise import (
+                AlertNoiseAnalyzer,
+            )
+
+            an_analyzer = AlertNoiseAnalyzer(
+                max_records=settings.alert_noise_max_records,
+                noise_threshold=settings.alert_noise_threshold,
+            )
+            an_route.set_analyzer(an_analyzer)
+            app.include_router(
+                an_route.router,
+                prefix=settings.api_prefix,
+                tags=["Alert Noise"],
+            )
+            logger.info("alert_noise_initialized")
+        except Exception as e:
+            logger.warning("alert_noise_init_failed", error=str(e))
+
+    # ── Phase 20: Automated Threshold Tuner ────────────────────
+    if settings.threshold_tuner_enabled:
+        try:
+            from shieldops.api.routes import threshold_tuner as tt_route
+            from shieldops.observability.threshold_tuner import (
+                ThresholdTuningEngine,
+            )
+
+            tt_engine = ThresholdTuningEngine(
+                max_thresholds=settings.threshold_tuner_max_thresholds,
+                max_samples=settings.threshold_tuner_max_samples,
+            )
+            tt_route.set_engine(tt_engine)
+            app.include_router(
+                tt_route.router,
+                prefix=settings.api_prefix,
+                tags=["Threshold Tuner"],
+            )
+            logger.info("threshold_tuner_initialized")
+        except Exception as e:
+            logger.warning("threshold_tuner_init_failed", error=str(e))
+
+    # ── Phase 20: Incident Severity Predictor ──────────────────
+    if settings.severity_predictor_enabled:
+        try:
+            from shieldops.api.routes import severity_predictor as sp_route
+            from shieldops.incidents.severity_predictor import (
+                IncidentSeverityPredictor,
+            )
+
+            sp_predictor = IncidentSeverityPredictor(
+                max_predictions=settings.severity_predictor_max_predictions,
+                max_profiles=settings.severity_predictor_max_profiles,
+            )
+            sp_route.set_predictor(sp_predictor)
+            app.include_router(
+                sp_route.router,
+                prefix=settings.api_prefix,
+                tags=["Severity Predictor"],
+            )
+            logger.info("severity_predictor_initialized")
+        except Exception as e:
+            logger.warning("severity_predictor_init_failed", error=str(e))
+
+    # ── Phase 20: Service Dependency Impact Analyzer ───────────
+    if settings.impact_analyzer_enabled:
+        try:
+            from shieldops.api.routes import impact_analyzer as ia_route
+            from shieldops.topology.impact_analyzer import (
+                ServiceDependencyImpactAnalyzer,
+            )
+
+            ia_analyzer = ServiceDependencyImpactAnalyzer(
+                max_dependencies=settings.impact_analyzer_max_dependencies,
+                max_simulations=settings.impact_analyzer_max_simulations,
+            )
+            ia_route.set_analyzer(ia_analyzer)
+            app.include_router(
+                ia_route.router,
+                prefix=settings.api_prefix,
+                tags=["Impact Analyzer"],
+            )
+            logger.info("impact_analyzer_initialized")
+        except Exception as e:
+            logger.warning("impact_analyzer_init_failed", error=str(e))
+
+    # ── Phase 20: Configuration Audit Trail ────────────────────
+    if settings.config_audit_enabled:
+        try:
+            from shieldops.api.routes import config_audit as ca_route
+            from shieldops.audit.config_audit import (
+                ConfigurationAuditTrail,
+            )
+
+            ca_trail = ConfigurationAuditTrail(
+                max_entries=settings.config_audit_max_entries,
+                max_versions_per_key=settings.config_audit_max_versions_per_key,
+            )
+            ca_route.set_trail(ca_trail)
+            app.include_router(
+                ca_route.router,
+                prefix=settings.api_prefix,
+                tags=["Config Audit"],
+            )
+            logger.info("config_audit_initialized")
+        except Exception as e:
+            logger.warning("config_audit_init_failed", error=str(e))
+
+    # ── Phase 20: Deployment Velocity Tracker ──────────────────
+    if settings.deployment_velocity_enabled:
+        try:
+            from shieldops.analytics.deployment_velocity import (
+                DeploymentVelocityTracker,
+            )
+            from shieldops.api.routes import deployment_velocity as dv_route
+
+            dv_tracker = DeploymentVelocityTracker(
+                max_events=settings.deployment_velocity_max_events,
+                default_period_days=settings.deployment_velocity_default_period_days,
+            )
+            dv_route.set_tracker(dv_tracker)
+            app.include_router(
+                dv_route.router,
+                prefix=settings.api_prefix,
+                tags=["Deployment Velocity"],
+            )
+            logger.info("deployment_velocity_initialized")
+        except Exception as e:
+            logger.warning("deployment_velocity_init_failed", error=str(e))
+
+    # ── Phase 20: Compliance Automation Rule Engine ─────────────
+    if settings.compliance_automation_enabled:
+        try:
+            from shieldops.api.routes import compliance_automation as cam_route
+            from shieldops.compliance.automation_rules import (
+                ComplianceAutomationEngine,
+            )
+
+            cam_engine = ComplianceAutomationEngine(
+                max_rules=settings.compliance_automation_max_rules,
+                max_executions=settings.compliance_automation_max_executions,
+            )
+            cam_route.set_engine(cam_engine)
+            app.include_router(
+                cam_route.router,
+                prefix=settings.api_prefix,
+                tags=["Compliance Automation"],
+            )
+            logger.info("compliance_automation_initialized")
+        except Exception as e:
+            logger.warning("compliance_automation_init_failed", error=str(e))
+
+    # ── Phase 20: Knowledge Base Article Manager ───────────────
+    if settings.knowledge_base_enabled:
+        try:
+            from shieldops.api.routes import knowledge_articles as ka_route
+            from shieldops.knowledge.article_manager import (
+                KnowledgeBaseManager,
+            )
+
+            ka_mgr = KnowledgeBaseManager(
+                max_articles=settings.knowledge_base_max_articles,
+                max_votes=settings.knowledge_base_max_votes,
+            )
+            ka_route.set_manager(ka_mgr)
+            app.include_router(
+                ka_route.router,
+                prefix=settings.api_prefix,
+                tags=["Knowledge Articles"],
+            )
+            logger.info("knowledge_base_initialized")
+        except Exception as e:
+            logger.warning("knowledge_base_init_failed", error=str(e))
+
+    # ── Phase 20: On-Call Fatigue Analyzer ─────────────────────
+    if settings.oncall_fatigue_enabled:
+        try:
+            from shieldops.api.routes import oncall_fatigue as of_route
+            from shieldops.incidents.oncall_fatigue import (
+                OnCallFatigueAnalyzer,
+            )
+
+            of_analyzer = OnCallFatigueAnalyzer(
+                max_events=settings.oncall_fatigue_max_events,
+                burnout_threshold=settings.oncall_fatigue_burnout_threshold,
+            )
+            of_route.set_analyzer(of_analyzer)
+            app.include_router(
+                of_route.router,
+                prefix=settings.api_prefix,
+                tags=["On-Call Fatigue"],
+            )
+            logger.info("oncall_fatigue_initialized")
+        except Exception as e:
+            logger.warning("oncall_fatigue_init_failed", error=str(e))
+
+    # ── Phase 20: Backup Verification Engine ───────────────────
+    if settings.backup_verification_enabled:
+        try:
+            from shieldops.api.routes import backup_verification as bv_route
+            from shieldops.observability.backup_verification import (
+                BackupVerificationEngine,
+            )
+
+            bv_engine = BackupVerificationEngine(
+                max_backups=settings.backup_verification_max_backups,
+                stale_hours=settings.backup_verification_stale_hours,
+            )
+            bv_route.set_engine(bv_engine)
+            app.include_router(
+                bv_route.router,
+                prefix=settings.api_prefix,
+                tags=["Backup Verification"],
+            )
+            logger.info("backup_verification_initialized")
+        except Exception as e:
+            logger.warning("backup_verification_init_failed", error=str(e))
+
+    # ── Phase 20: Cost Allocation Tag Enforcer ─────────────────
+    if settings.cost_tag_enforcer_enabled:
+        try:
+            from shieldops.api.routes import cost_tag_enforcer as cte_route
+            from shieldops.billing.cost_tag_enforcer import (
+                CostAllocationTagEnforcer,
+            )
+
+            cte_enforcer = CostAllocationTagEnforcer(
+                max_policies=settings.cost_tag_enforcer_max_policies,
+                max_checks=settings.cost_tag_enforcer_max_checks,
+            )
+            cte_route.set_enforcer(cte_enforcer)
+            app.include_router(
+                cte_route.router,
+                prefix=settings.api_prefix,
+                tags=["Cost Tag Enforcer"],
+            )
+            logger.info("cost_tag_enforcer_initialized")
+        except Exception as e:
+            logger.warning("cost_tag_enforcer_init_failed", error=str(e))
+
     yield
 
     logger.info("shieldops_shutting_down")
