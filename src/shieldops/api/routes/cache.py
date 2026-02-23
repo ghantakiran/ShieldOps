@@ -73,3 +73,42 @@ async def cache_health() -> dict[str, Any]:
     cache = _get_cache()
     result: dict[str, Any] = await cache.health_check()
     return result
+
+
+# ── Multi-Level Cache ────────────────────────────────────────────
+
+_multilevel_cache: Any = None
+
+
+def set_multilevel_cache(cache: Any) -> None:
+    """Wire the MultiLevelCache instance into this route module."""
+    global _multilevel_cache
+    _multilevel_cache = cache
+
+
+@router.get("/stats/multilevel")
+async def multilevel_cache_stats(
+    _user: Any = Depends(require_role("admin")),  # type: ignore[arg-type]
+) -> dict[str, Any]:
+    """Return L1+L2 cache statistics (admin only)."""
+    if _multilevel_cache is None:
+        raise HTTPException(503, "Multi-level cache not configured")
+    return _multilevel_cache.get_stats().model_dump()  # type: ignore[no-any-return]
+
+
+class WarmupRequest(BaseModel):
+    """Request body for cache warmup."""
+
+    keys: list[dict[str, str]]
+
+
+@router.post("/warmup")
+async def cache_warmup(
+    body: WarmupRequest,
+    _user: Any = Depends(require_role("admin")),  # type: ignore[arg-type]
+) -> dict[str, Any]:
+    """Pre-populate L1 from L2 for given keys (admin only)."""
+    if _multilevel_cache is None:
+        raise HTTPException(503, "Multi-level cache not configured")
+    warmed = await _multilevel_cache.warmup(body.keys)
+    return {"warmed": warmed, "requested": len(body.keys)}

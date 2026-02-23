@@ -1722,6 +1722,244 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     except Exception as e:
         logger.warning("hot_reload_manager_init_failed", error=str(e))
 
+    # ── Phase 14: Multi-Level Cache ─────────────────────────────
+    multilevel_cache = None
+    try:
+        from shieldops.api.routes.cache import set_multilevel_cache
+        from shieldops.cache.multilevel_cache import MultiLevelCache
+
+        if redis_cache is not None:
+            multilevel_cache = MultiLevelCache(
+                l2_cache=redis_cache,
+                l1_max_size=settings.cache_l1_max_size,
+                l1_ttl_seconds=settings.cache_l1_ttl_seconds,
+                l1_enabled=settings.cache_l1_enabled,
+            )
+            set_multilevel_cache(multilevel_cache)
+            logger.info("multilevel_cache_initialized")
+    except Exception as e:
+        logger.warning("multilevel_cache_init_failed", error=str(e))
+
+    # ── Phase 14: Feature Flag Manager ───────────────────────────
+    try:
+        from shieldops.api.routes import feature_flags as ff_routes
+        from shieldops.config.feature_flags import FeatureFlagManager
+
+        ff_manager = FeatureFlagManager(
+            redis_cache=redis_cache,
+            sync_interval_seconds=settings.feature_flags_sync_interval_seconds,
+        )
+        ff_routes.set_manager(ff_manager)
+        app.include_router(
+            ff_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Feature Flags"],
+        )
+        logger.info("feature_flag_manager_initialized")
+    except Exception as e:
+        logger.warning("feature_flag_manager_init_failed", error=str(e))
+
+    # ── Phase 14: Health Aggregator ──────────────────────────────
+    try:
+        from shieldops.api.routes import health_aggregate as ha_routes
+        from shieldops.observability.health_aggregator import HealthAggregator
+
+        health_aggregator = HealthAggregator(
+            history_size=settings.health_history_size,
+            degraded_threshold=settings.health_degraded_threshold,
+            unhealthy_threshold=settings.health_unhealthy_threshold,
+        )
+        # Register known components
+        health_aggregator.register("database", weight=2.0, is_critical=True)
+        health_aggregator.register("redis", weight=1.5, is_critical=True)
+        health_aggregator.register("kafka", weight=1.0)
+        health_aggregator.register("opa", weight=1.0)
+        ha_routes.set_aggregator(health_aggregator)
+        app.include_router(
+            ha_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Health Aggregate"],
+        )
+        logger.info("health_aggregator_initialized")
+    except Exception as e:
+        logger.warning("health_aggregator_init_failed", error=str(e))
+
+    # ── Phase 14: Request Correlator ─────────────────────────────
+    request_correlator = None
+    try:
+        from shieldops.api.routes import correlation as corr_routes
+        from shieldops.observability.request_correlation import RequestCorrelator
+
+        request_correlator = RequestCorrelator(
+            max_traces=settings.correlation_max_traces,
+            trace_ttl_minutes=settings.correlation_trace_ttl_minutes,
+        )
+        corr_routes.set_correlator(request_correlator)
+        app.include_router(
+            corr_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Correlation"],
+        )
+        logger.info("request_correlator_initialized")
+    except Exception as e:
+        logger.warning("request_correlator_init_failed", error=str(e))
+
+    # ── Phase 14: Escalation Engine ──────────────────────────────
+    try:
+        from shieldops.api.routes import escalation_policies as esc_routes
+        from shieldops.integrations.notifications.escalation import EscalationEngine
+
+        escalation_engine = EscalationEngine(
+            dispatcher=notification_dispatcher,
+            default_timeout=settings.escalation_default_timeout_seconds,
+            max_retries=settings.escalation_max_retries,
+        )
+        esc_routes.set_engine(escalation_engine)
+        app.include_router(
+            esc_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Escalation Policies"],
+        )
+        logger.info("escalation_engine_initialized")
+    except Exception as e:
+        logger.warning("escalation_engine_init_failed", error=str(e))
+
+    # ── Phase 14: Agent Resource Quotas ──────────────────────────
+    try:
+        from shieldops.agents.resource_quotas import ResourceQuotaManager
+        from shieldops.api.routes import agent_quotas as aq_routes
+
+        quota_manager = ResourceQuotaManager(
+            global_max_concurrent=settings.agent_global_max_concurrent,
+            enabled=settings.agent_quota_enabled,
+        )
+        aq_routes.set_manager(quota_manager)
+        app.include_router(
+            aq_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Agent Quotas"],
+        )
+        logger.info("agent_quota_manager_initialized")
+    except Exception as e:
+        logger.warning("agent_quota_manager_init_failed", error=str(e))
+
+    # ── Phase 14: Batch Engine ───────────────────────────────────
+    try:
+        from shieldops.api.batch_engine import BatchEngine
+        from shieldops.api.routes import batch_operations as bo_routes
+
+        batch_engine = BatchEngine(
+            max_batch_size=settings.batch_max_size,
+            max_parallel=settings.batch_max_parallel,
+            job_ttl_hours=settings.batch_job_ttl_hours,
+        )
+        bo_routes.set_engine(batch_engine)
+        app.include_router(
+            bo_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Batch Operations"],
+        )
+        logger.info("batch_engine_initialized")
+    except Exception as e:
+        logger.warning("batch_engine_init_failed", error=str(e))
+
+    # ── Phase 14: Incident Timeline ──────────────────────────────
+    try:
+        from shieldops.agents.investigation.timeline import TimelineBuilder
+        from shieldops.api.routes import timeline as tl_routes
+
+        timeline_builder = TimelineBuilder(
+            max_events_per_incident=settings.timeline_max_events_per_incident,
+            retention_days=settings.timeline_retention_days,
+        )
+        tl_routes.set_builder(timeline_builder)
+        app.include_router(
+            tl_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Incident Timeline"],
+        )
+        logger.info("timeline_builder_initialized")
+    except Exception as e:
+        logger.warning("timeline_builder_init_failed", error=str(e))
+
+    # ── Phase 14: Export Engine ──────────────────────────────────
+    try:
+        from shieldops.api.routes import export_engine as exp_routes
+        from shieldops.utils.export_engine import ExportEngine
+
+        export_engine = ExportEngine(
+            max_rows=settings.export_max_rows,
+            pdf_enabled=settings.export_pdf_enabled,
+            xlsx_enabled=settings.export_xlsx_enabled,
+        )
+        exp_routes.set_engine(export_engine)
+        app.include_router(
+            exp_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Exports"],
+        )
+        logger.info("export_engine_initialized")
+    except Exception as e:
+        logger.warning("export_engine_init_failed", error=str(e))
+
+    # ── Phase 14: Environment Promotion ──────────────────────────
+    try:
+        from shieldops.api.routes import environment_promotion as ep_routes
+        from shieldops.config.environment_promotion import PromotionManager
+
+        promotion_manager = PromotionManager(
+            require_approval_for_prod=settings.promotion_require_approval_for_prod,
+            allowed_source_envs=settings.promotion_allowed_source_envs,
+        )
+        ep_routes.set_manager(promotion_manager)
+        app.include_router(
+            ep_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Environment Promotion"],
+        )
+        logger.info("promotion_manager_initialized")
+    except Exception as e:
+        logger.warning("promotion_manager_init_failed", error=str(e))
+
+    # ── Phase 14: API Lifecycle Manager ──────────────────────────
+    try:
+        from shieldops.api.routes import api_lifecycle as al_routes
+        from shieldops.api.versioning.lifecycle import APILifecycleManager
+
+        api_lifecycle = APILifecycleManager(
+            deprecation_header_enabled=settings.api_deprecation_header_enabled,
+            sunset_warning_days=settings.api_sunset_warning_days,
+        )
+        api_lifecycle.scan_routes(app)
+        al_routes.set_manager(api_lifecycle)
+        app.include_router(
+            al_routes.router,
+            prefix=settings.api_prefix,
+            tags=["API Lifecycle"],
+        )
+        logger.info("api_lifecycle_manager_initialized")
+    except Exception as e:
+        logger.warning("api_lifecycle_manager_init_failed", error=str(e))
+
+    # ── Phase 14: Agent Collaboration Protocol ───────────────────
+    try:
+        from shieldops.agents.collaboration import AgentCollaborationProtocol
+        from shieldops.api.routes import agent_collaboration as ac_routes
+
+        collaboration_protocol = AgentCollaborationProtocol(
+            max_messages=settings.agent_collaboration_max_messages,
+            session_timeout_minutes=settings.agent_collaboration_session_timeout_minutes,
+        )
+        ac_routes.set_protocol(collaboration_protocol)
+        app.include_router(
+            ac_routes.router,
+            prefix=settings.api_prefix,
+            tags=["Agent Collaboration"],
+        )
+        logger.info("agent_collaboration_initialized")
+    except Exception as e:
+        logger.warning("agent_collaboration_init_failed", error=str(e))
+
     yield
 
     logger.info("shieldops_shutting_down")
