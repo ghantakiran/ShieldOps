@@ -58,6 +58,10 @@ Review ShieldOps agent code for correctness, safety, and reliability.
 - [ ] Capacity forecasts verified via `CapacityForecastEngine` (`src/shieldops/analytics/capacity_forecast_engine.py`)
 - [ ] Metric baselines tracked via `MetricBaselineManager` (`src/shieldops/observability/metric_baseline.py`)
 - [ ] Team skills assessed via `TeamSkillMatrix` (`src/shieldops/operations/team_skill_matrix.py`)
+- [ ] Reliability targets advised via `ReliabilityTargetAdvisor` (`src/shieldops/sla/reliability_target.py`)
+- [ ] Incident severity calibrated via `IncidentSeverityCalibrator` (`src/shieldops/incidents/severity_calibrator.py`)
+- [ ] Service dependencies mapped via `ServiceDependencyMapper` (`src/shieldops/topology/dependency_mapper.py`)
+- [ ] Billing reconciled via `CloudBillingReconciler` (`src/shieldops/billing/billing_reconciler.py`)
 
 ### Testing
 - [ ] Unit tests for all node functions

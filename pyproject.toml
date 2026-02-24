@@ -315,6 +315,18 @@ module = [
     "shieldops.api.routes.capacity_forecast_engine",
     "shieldops.api.routes.runbook_versioner",
     "shieldops.api.routes.team_skill_matrix",
+    "shieldops.api.routes.error_budget_policy",
+    "shieldops.api.routes.reliability_target",
+    "shieldops.api.routes.severity_calibrator",
+    "shieldops.api.routes.dependency_mapper",
+    "shieldops.api.routes.alert_rule_linter",
+    "shieldops.api.routes.deployment_gate",
+    "shieldops.api.routes.billing_reconciler",
+    "shieldops.api.routes.chargeback_engine",
+    "shieldops.api.routes.compliance_drift",
+    "shieldops.api.routes.comm_planner",
+    "shieldops.api.routes.infra_drift_reconciler",
+    "shieldops.api.routes.service_maturity",
 ]
 warn_return_any = false
 disallow_untyped_defs = false

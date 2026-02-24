@@ -4984,6 +4984,287 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         except Exception as e:
             logger.warning("team_skill_matrix_init_failed", error=str(e))
 
+    # ── Phase 27: Advanced Reliability & Cost Governance ─────────
+
+    if settings.error_budget_policy_enabled:
+        try:
+            from shieldops.api.routes import (
+                error_budget_policy as ebp_route,
+            )
+            from shieldops.sla.error_budget_policy import (
+                ErrorBudgetPolicyEngine,
+            )
+
+            ebp = ErrorBudgetPolicyEngine(
+                max_policies=settings.error_budget_policy_max_policies,
+                warning_threshold_pct=settings.error_budget_policy_warning_threshold_pct,
+            )
+            ebp_route.set_engine(ebp)
+            app.include_router(
+                ebp_route.router,
+                prefix=settings.api_prefix,
+                tags=["Error Budget Policy"],
+            )
+            logger.info("error_budget_policy_initialized")
+        except Exception as e:
+            logger.warning("error_budget_policy_init_failed", error=str(e))
+
+    if settings.reliability_target_enabled:
+        try:
+            from shieldops.api.routes import (
+                reliability_target as rta_route,
+            )
+            from shieldops.sla.reliability_target import (
+                ReliabilityTargetAdvisor,
+            )
+
+            rta = ReliabilityTargetAdvisor(
+                max_targets=settings.reliability_target_max_targets,
+                default_target_pct=settings.reliability_target_default_target_pct,
+            )
+            rta_route.set_advisor(rta)
+            app.include_router(
+                rta_route.router,
+                prefix=settings.api_prefix,
+                tags=["Reliability Target"],
+            )
+            logger.info("reliability_target_initialized")
+        except Exception as e:
+            logger.warning("reliability_target_init_failed", error=str(e))
+
+    if settings.severity_calibrator_enabled:
+        try:
+            from shieldops.api.routes import (
+                severity_calibrator as scal_route,
+            )
+            from shieldops.incidents.severity_calibrator import (
+                IncidentSeverityCalibrator,
+            )
+
+            scal = IncidentSeverityCalibrator(
+                max_records=settings.severity_calibrator_max_records,
+                accuracy_target_pct=settings.severity_calibrator_accuracy_target_pct,
+            )
+            scal_route.set_calibrator(scal)
+            app.include_router(
+                scal_route.router,
+                prefix=settings.api_prefix,
+                tags=["Severity Calibrator"],
+            )
+            logger.info("severity_calibrator_initialized")
+        except Exception as e:
+            logger.warning("severity_calibrator_init_failed", error=str(e))
+
+    if settings.dependency_mapper_enabled:
+        try:
+            from shieldops.api.routes import (
+                dependency_mapper as dm_route,
+            )
+            from shieldops.topology.dependency_mapper import (
+                ServiceDependencyMapper,
+            )
+
+            dm = ServiceDependencyMapper(
+                max_edges=settings.dependency_mapper_max_edges,
+                max_chain_depth=settings.dependency_mapper_max_chain_depth,
+            )
+            dm_route.set_mapper(dm)
+            app.include_router(
+                dm_route.router,
+                prefix=settings.api_prefix,
+                tags=["Dependency Mapper"],
+            )
+            logger.info("dependency_mapper_initialized")
+        except Exception as e:
+            logger.warning("dependency_mapper_init_failed", error=str(e))
+
+    if settings.alert_rule_linter_enabled:
+        try:
+            from shieldops.api.routes import (
+                alert_rule_linter as arl_route,
+            )
+            from shieldops.observability.alert_rule_linter import (
+                AlertRuleLinter,
+            )
+
+            arl = AlertRuleLinter(
+                max_rules=settings.alert_rule_linter_max_rules,
+                min_quality_score=settings.alert_rule_linter_min_quality_score,
+            )
+            arl_route.set_linter(arl)
+            app.include_router(
+                arl_route.router,
+                prefix=settings.api_prefix,
+                tags=["Alert Rule Linter"],
+            )
+            logger.info("alert_rule_linter_initialized")
+        except Exception as e:
+            logger.warning("alert_rule_linter_init_failed", error=str(e))
+
+    if settings.deployment_gate_enabled:
+        try:
+            from shieldops.api.routes import (
+                deployment_gate as dg_route,
+            )
+            from shieldops.changes.deployment_gate import (
+                DeploymentApprovalGate,
+            )
+
+            dg = DeploymentApprovalGate(
+                max_gates=settings.deployment_gate_max_gates,
+                gate_expiry_hours=settings.deployment_gate_expiry_hours,
+            )
+            dg_route.set_gate_manager(dg)
+            app.include_router(
+                dg_route.router,
+                prefix=settings.api_prefix,
+                tags=["Deployment Gate"],
+            )
+            logger.info("deployment_gate_initialized")
+        except Exception as e:
+            logger.warning("deployment_gate_init_failed", error=str(e))
+
+    if settings.billing_reconciler_enabled:
+        try:
+            from shieldops.api.routes import (
+                billing_reconciler as br_route,
+            )
+            from shieldops.billing.billing_reconciler import (
+                CloudBillingReconciler,
+            )
+
+            br = CloudBillingReconciler(
+                max_records=settings.billing_reconciler_max_records,
+                discrepancy_threshold_pct=settings.billing_reconciler_discrepancy_threshold_pct,
+            )
+            br_route.set_reconciler(br)
+            app.include_router(
+                br_route.router,
+                prefix=settings.api_prefix,
+                tags=["Billing Reconciler"],
+            )
+            logger.info("billing_reconciler_initialized")
+        except Exception as e:
+            logger.warning("billing_reconciler_init_failed", error=str(e))
+
+    if settings.chargeback_engine_enabled:
+        try:
+            from shieldops.api.routes import (
+                chargeback_engine as cbe_route,
+            )
+            from shieldops.billing.chargeback_engine import (
+                CostChargebackEngine,
+            )
+
+            cbe = CostChargebackEngine(
+                max_records=settings.chargeback_engine_max_records,
+                unallocated_threshold_pct=settings.chargeback_engine_unallocated_threshold_pct,
+            )
+            cbe_route.set_engine(cbe)
+            app.include_router(
+                cbe_route.router,
+                prefix=settings.api_prefix,
+                tags=["Chargeback Engine"],
+            )
+            logger.info("chargeback_engine_initialized")
+        except Exception as e:
+            logger.warning("chargeback_engine_init_failed", error=str(e))
+
+    if settings.compliance_drift_enabled:
+        try:
+            from shieldops.api.routes import (
+                compliance_drift as cdrift_route,
+            )
+            from shieldops.compliance.compliance_drift import (
+                ComplianceDriftDetector,
+            )
+
+            cdrift = ComplianceDriftDetector(
+                max_records=settings.compliance_drift_max_records,
+                max_drift_rate_pct=settings.compliance_drift_max_drift_rate_pct,
+            )
+            cdrift_route.set_detector(cdrift)
+            app.include_router(
+                cdrift_route.router,
+                prefix=settings.api_prefix,
+                tags=["Compliance Drift"],
+            )
+            logger.info("compliance_drift_initialized")
+        except Exception as e:
+            logger.warning("compliance_drift_init_failed", error=str(e))
+
+    if settings.comm_planner_enabled:
+        try:
+            from shieldops.api.routes import (
+                comm_planner as cpl2_route,
+            )
+            from shieldops.incidents.comm_planner import (
+                IncidentCommPlanner,
+            )
+
+            cpl2 = IncidentCommPlanner(
+                max_plans=settings.comm_planner_max_plans,
+                max_overdue_minutes=settings.comm_planner_max_overdue_minutes,
+            )
+            cpl2_route.set_planner(cpl2)
+            app.include_router(
+                cpl2_route.router,
+                prefix=settings.api_prefix,
+                tags=["Comm Planner"],
+            )
+            logger.info("comm_planner_initialized")
+        except Exception as e:
+            logger.warning("comm_planner_init_failed", error=str(e))
+
+    if settings.infra_drift_reconciler_enabled:
+        try:
+            from shieldops.api.routes import (
+                infra_drift_reconciler as idr_route,
+            )
+            from shieldops.operations.infra_drift_reconciler import (
+                InfraDriftReconciler,
+            )
+
+            idr = InfraDriftReconciler(
+                max_drifts=settings.infra_drift_reconciler_max_drifts,
+                auto_reconcile_enabled=settings.infra_drift_reconciler_auto_reconcile_enabled,
+            )
+            idr_route.set_reconciler(idr)
+            app.include_router(
+                idr_route.router,
+                prefix=settings.api_prefix,
+                tags=["Infra Drift Reconciler"],
+            )
+            logger.info("infra_drift_reconciler_initialized")
+        except Exception as e:
+            logger.warning(
+                "infra_drift_reconciler_init_failed",
+                error=str(e),
+            )
+
+    if settings.service_maturity_enabled:
+        try:
+            from shieldops.api.routes import (
+                service_maturity as sm_route,
+            )
+            from shieldops.topology.service_maturity import (
+                ServiceMaturityModel,
+            )
+
+            sm = ServiceMaturityModel(
+                max_assessments=settings.service_maturity_max_assessments,
+                target_maturity_level=settings.service_maturity_target_level,
+            )
+            sm_route.set_model(sm)
+            app.include_router(
+                sm_route.router,
+                prefix=settings.api_prefix,
+                tags=["Service Maturity"],
+            )
+            logger.info("service_maturity_initialized")
+        except Exception as e:
+            logger.warning("service_maturity_init_failed", error=str(e))
+
     yield
 
     logger.info("shieldops_shutting_down")

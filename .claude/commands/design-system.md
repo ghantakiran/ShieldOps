@@ -62,6 +62,10 @@ Design new ShieldOps components, APIs, or agent workflows.
    - Forecast capacity via `CapacityForecastEngine` (`src/shieldops/analytics/capacity_forecast_engine.py`)
    - Plan dependency updates via `DependencyUpdatePlanner` (`src/shieldops/topology/dependency_update_planner.py`)
    - Aggregate service health via `ServiceHealthAggregator` (`src/shieldops/topology/service_health_agg.py`)
+   - Map service dependencies via `ServiceDependencyMapper` (`src/shieldops/topology/dependency_mapper.py`)
+   - Assess service maturity via `ServiceMaturityModel` (`src/shieldops/topology/service_maturity.py`)
+   - Allocate cost chargebacks via `CostChargebackEngine` (`src/shieldops/billing/chargeback_engine.py`)
+   - Reconcile infrastructure drift via `InfrastructureDriftReconciler` (`src/shieldops/operations/infra_drift_reconciler.py`)
 
 5. **Documentation**:
    - Write Architecture Decision Record (ADR) in `docs/architecture/`

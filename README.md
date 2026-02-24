@@ -348,6 +348,7 @@ Default policies ship with the platform and can be customized per environment:
 | Phase 24 | Autonomous Resilience & Platform Hardening | Completed |
 | Phase 25 | Chaos Engineering & Operational Intelligence | Completed |
 | Phase 26 | Platform Intelligence & Operational Excellence | Completed |
+| Phase 27 | Advanced Reliability & Cost Governance | Completed |
 
 ## Documentation
 

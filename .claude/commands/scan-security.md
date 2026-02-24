@@ -48,7 +48,9 @@ Run security audits on ShieldOps codebase and agent configurations.
 22. **Incident Review Board**: Review incident response quality via `IncidentReviewBoard` (`src/shieldops/incidents/review_board.py`)
 23. **Compliance Evidence Chain**: Verify evidence integrity via `ComplianceEvidenceChain` (`src/shieldops/compliance/evidence_chain.py`)
 24. **Alert Fatigue Scoring**: Assess alert fatigue risk via `AlertFatigueScorer` (`src/shieldops/observability/alert_fatigue.py`)
-25. **Generate Report**: Severity-rated findings with remediation guidance
+25. **Compliance Drift Detection**: Detect compliance policy drift via `ComplianceDriftDetector` (`src/shieldops/compliance/compliance_drift.py`)
+26. **Alert Rule Linting**: Validate alert rule quality via `AlertRuleLinter` (`src/shieldops/observability/alert_rule_linter.py`)
+27. **Generate Report**: Severity-rated findings with remediation guidance
 
 ## Severity Levels
 - **CRITICAL**: Hardcoded secrets, SQL injection, unauthenticated endpoints

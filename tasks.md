@@ -1,7 +1,7 @@
 # ShieldOps — Feature Implementation Tracker
 
 **Last Updated:** 2026-02-24
-**Platform Completeness:** Phase 26 complete — Platform Intelligence & Operational Excellence (~12,452 tests)
+**Platform Completeness:** Phase 27 complete — Advanced Reliability & Cost Governance (~13,004 tests)
 
 ---
 
@@ -1078,3 +1078,27 @@
 - [x] F10: Capacity Forecast Engine (`src/shieldops/analytics/capacity_forecast_engine.py`)
 - [x] F11: Runbook Version Manager (`src/shieldops/operations/runbook_versioner.py`)
 - [x] F12: Team Skill Matrix (`src/shieldops/operations/team_skill_matrix.py`)
+
+---
+
+## Phase 27 — Advanced Reliability & Cost Governance
+
+### Tier 1: Reliability Engineering
+- [x] F1: Error Budget Policy Engine (`src/shieldops/sla/error_budget_policy.py`)
+- [x] F2: Reliability Target Advisor (`src/shieldops/sla/reliability_target.py`)
+- [x] F3: Incident Severity Calibrator (`src/shieldops/incidents/severity_calibrator.py`)
+
+### Tier 2: Service Intelligence
+- [x] F4: Service Dependency Mapper (`src/shieldops/topology/dependency_mapper.py`)
+- [x] F5: Alert Rule Linter (`src/shieldops/observability/alert_rule_linter.py`)
+- [x] F6: Deployment Approval Gate (`src/shieldops/changes/deployment_gate.py`)
+
+### Tier 3: Cost Governance
+- [x] F7: Cloud Billing Reconciler (`src/shieldops/billing/billing_reconciler.py`)
+- [x] F8: Cost Chargeback Engine (`src/shieldops/billing/chargeback_engine.py`)
+- [x] F9: Compliance Drift Detector (`src/shieldops/compliance/compliance_drift.py`)
+
+### Tier 4: Operational Maturity
+- [x] F10: Incident Communication Planner (`src/shieldops/incidents/comm_planner.py`)
+- [x] F11: Infrastructure Drift Reconciler (`src/shieldops/operations/infra_drift_reconciler.py`)
+- [x] F12: Service Maturity Model (`src/shieldops/topology/service_maturity.py`)
