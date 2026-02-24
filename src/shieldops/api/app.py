@@ -4173,6 +4173,270 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         except Exception as e:
             logger.warning("workload_scheduler_init_failed", error=str(e))
 
+    # ── Phase 24: Cascading Failure Predictor ──
+    if settings.cascade_predictor_enabled:
+        try:
+            from shieldops.api.routes import cascade_predictor as cascade_route
+            from shieldops.topology.cascade_predictor import (
+                CascadingFailurePredictor,
+            )
+
+            cp_predictor = CascadingFailurePredictor(
+                max_services=settings.cascade_predictor_max_services,
+                max_cascade_depth=settings.cascade_predictor_max_cascade_depth,
+            )
+            cascade_route.set_predictor(cp_predictor)
+            app.include_router(
+                cascade_route.router,
+                prefix=settings.api_prefix,
+                tags=["Cascade Predictor"],
+            )
+            logger.info("cascade_predictor_initialized")
+        except Exception as e:
+            logger.warning("cascade_predictor_init_failed", error=str(e))
+
+    # ── Phase 24: Resilience Score Calculator ──
+    if settings.resilience_scorer_enabled:
+        try:
+            from shieldops.api.routes import resilience_scorer as rsc_route
+            from shieldops.observability.resilience_scorer import (
+                ResilienceScoreCalculator,
+            )
+
+            rsc_calculator = ResilienceScoreCalculator(
+                max_profiles=settings.resilience_scorer_max_profiles,
+                minimum_score_threshold=settings.resilience_scorer_minimum_score_threshold,
+            )
+            rsc_route.set_scorer(rsc_calculator)
+            app.include_router(
+                rsc_route.router,
+                prefix=settings.api_prefix,
+                tags=["Resilience Scorer"],
+            )
+            logger.info("resilience_scorer_initialized")
+        except Exception as e:
+            logger.warning("resilience_scorer_init_failed", error=str(e))
+
+    # ── Phase 24: Incident Timeline Reconstructor ──
+    if settings.timeline_reconstructor_enabled:
+        try:
+            from shieldops.api.routes import timeline_reconstructor as tr_route
+            from shieldops.incidents.timeline_reconstructor import (
+                IncidentTimelineReconstructor,
+            )
+
+            tr_reconstructor = IncidentTimelineReconstructor(
+                max_events=settings.timeline_reconstructor_max_events,
+                correlation_window_seconds=settings.timeline_reconstructor_correlation_window_seconds,
+            )
+            tr_route.set_reconstructor(tr_reconstructor)
+            app.include_router(
+                tr_route.router,
+                prefix=settings.api_prefix,
+                tags=["Timeline Reconstructor"],
+            )
+            logger.info("timeline_reconstructor_initialized")
+        except Exception as e:
+            logger.warning("timeline_reconstructor_init_failed", error=str(e))
+
+    # ── Phase 24: Reserved Instance Optimizer ──
+    if settings.reserved_instance_optimizer_enabled:
+        try:
+            from shieldops.api.routes import reserved_instance_optimizer as ri_route
+            from shieldops.billing.reserved_instance_optimizer import (
+                ReservedInstanceOptimizer,
+            )
+
+            ri_optimizer = ReservedInstanceOptimizer(
+                max_reservations=settings.reserved_instance_optimizer_max_reservations,
+                expiry_warning_days=settings.reserved_instance_optimizer_expiry_warning_days,
+            )
+            ri_route.set_optimizer(ri_optimizer)
+            app.include_router(
+                ri_route.router,
+                prefix=settings.api_prefix,
+                tags=["Reserved Instance Optimizer"],
+            )
+            logger.info("reserved_instance_optimizer_initialized")
+        except Exception as e:
+            logger.warning("reserved_instance_optimizer_init_failed", error=str(e))
+
+    # ── Phase 24: Cost Anomaly Root Cause Analyzer ──
+    if settings.cost_anomaly_rca_enabled:
+        try:
+            from shieldops.api.routes import cost_anomaly_rca as cr_route
+            from shieldops.billing.cost_anomaly_rca import (
+                CostAnomalyRootCauseAnalyzer,
+            )
+
+            cr_analyzer = CostAnomalyRootCauseAnalyzer(
+                max_spikes=settings.cost_anomaly_rca_max_spikes,
+                deviation_threshold_pct=settings.cost_anomaly_rca_deviation_threshold_pct,
+            )
+            cr_route.set_analyzer(cr_analyzer)
+            app.include_router(
+                cr_route.router,
+                prefix=settings.api_prefix,
+                tags=["Cost Anomaly RCA"],
+            )
+            logger.info("cost_anomaly_rca_initialized")
+        except Exception as e:
+            logger.warning("cost_anomaly_rca_init_failed", error=str(e))
+
+    # ── Phase 24: Spend Allocation Engine ──
+    if settings.spend_allocation_enabled:
+        try:
+            from shieldops.api.routes import spend_allocation as spa_route
+            from shieldops.billing.spend_allocation import (
+                SpendAllocationEngine,
+            )
+
+            spa_engine = SpendAllocationEngine(
+                max_pools=settings.spend_allocation_max_pools,
+                min_allocation_threshold=settings.spend_allocation_min_allocation_threshold,
+            )
+            spa_route.set_engine(spa_engine)
+            app.include_router(
+                spa_route.router,
+                prefix=settings.api_prefix,
+                tags=["Spend Allocation"],
+            )
+            logger.info("spend_allocation_initialized")
+        except Exception as e:
+            logger.warning("spend_allocation_init_failed", error=str(e))
+
+    # ── Phase 24: Container Image Scanner ──
+    if settings.container_scanner_enabled:
+        try:
+            from shieldops.api.routes import container_scanner as cs_route
+            from shieldops.security.container_scanner import (
+                ContainerImageScanner,
+            )
+
+            cs_scanner = ContainerImageScanner(
+                max_images=settings.container_scanner_max_images,
+                stale_threshold_days=settings.container_scanner_stale_threshold_days,
+            )
+            cs_route.set_scanner(cs_scanner)
+            app.include_router(
+                cs_route.router,
+                prefix=settings.api_prefix,
+                tags=["Container Scanner"],
+            )
+            logger.info("container_scanner_initialized")
+        except Exception as e:
+            logger.warning("container_scanner_init_failed", error=str(e))
+
+    # ── Phase 24: Cloud Security Posture Manager ──
+    if settings.cloud_posture_manager_enabled:
+        try:
+            from shieldops.api.routes import cloud_posture_manager as cpm_route
+            from shieldops.security.cloud_posture_manager import (
+                CloudSecurityPostureManager,
+            )
+
+            cpm_manager = CloudSecurityPostureManager(
+                max_resources=settings.cloud_posture_manager_max_resources,
+                auto_resolve_days=settings.cloud_posture_manager_auto_resolve_days,
+            )
+            cpm_route.set_manager(cpm_manager)
+            app.include_router(
+                cpm_route.router,
+                prefix=settings.api_prefix,
+                tags=["Cloud Posture Manager"],
+            )
+            logger.info("cloud_posture_manager_initialized")
+        except Exception as e:
+            logger.warning("cloud_posture_manager_init_failed", error=str(e))
+
+    # ── Phase 24: Secrets Sprawl Detector ──
+    if settings.secrets_detector_enabled:
+        try:
+            from shieldops.api.routes import secrets_detector as sd_route
+            from shieldops.security.secrets_detector import (
+                SecretsSprawlDetector,
+            )
+
+            sd_detector = SecretsSprawlDetector(
+                max_findings=settings.secrets_detector_max_findings,
+                high_severity_threshold=settings.secrets_detector_high_severity_threshold,
+            )
+            sd_route.set_detector(sd_detector)
+            app.include_router(
+                sd_route.router,
+                prefix=settings.api_prefix,
+                tags=["Secrets Detector"],
+            )
+            logger.info("secrets_detector_initialized")
+        except Exception as e:
+            logger.warning("secrets_detector_init_failed", error=str(e))
+
+    # ── Phase 24: Runbook Effectiveness Analyzer ──
+    if settings.runbook_effectiveness_enabled:
+        try:
+            from shieldops.api.routes import runbook_effectiveness as ref_route
+            from shieldops.operations.runbook_effectiveness import (
+                RunbookEffectivenessAnalyzer,
+            )
+
+            ref_analyzer = RunbookEffectivenessAnalyzer(
+                max_outcomes=settings.runbook_effectiveness_max_outcomes,
+                decay_window_days=settings.runbook_effectiveness_decay_window_days,
+            )
+            ref_route.set_analyzer(ref_analyzer)
+            app.include_router(
+                ref_route.router,
+                prefix=settings.api_prefix,
+                tags=["Runbook Effectiveness"],
+            )
+            logger.info("runbook_effectiveness_initialized")
+        except Exception as e:
+            logger.warning("runbook_effectiveness_init_failed", error=str(e))
+
+    # ── Phase 24: API Deprecation Tracker ──
+    if settings.api_deprecation_tracker_enabled:
+        try:
+            from shieldops.analytics.api_deprecation_tracker import (
+                APIDeprecationTracker,
+            )
+            from shieldops.api.routes import api_deprecation_tracker as adt_route
+
+            adt_tracker = APIDeprecationTracker(
+                max_records=settings.api_deprecation_tracker_max_records,
+                sunset_warning_days=settings.api_deprecation_tracker_sunset_warning_days,
+            )
+            adt_route.set_tracker(adt_tracker)
+            app.include_router(
+                adt_route.router,
+                prefix=settings.api_prefix,
+                tags=["API Deprecation Tracker"],
+            )
+            logger.info("api_deprecation_tracker_initialized")
+        except Exception as e:
+            logger.warning("api_deprecation_tracker_init_failed", error=str(e))
+
+    # ── Phase 24: Dependency Freshness Monitor ──
+    if settings.dependency_freshness_enabled:
+        try:
+            from shieldops.analytics.dependency_freshness import (
+                DependencyFreshnessMonitor,
+            )
+            from shieldops.api.routes import dependency_freshness as df_route
+
+            df_monitor = DependencyFreshnessMonitor(
+                max_dependencies=settings.dependency_freshness_max_dependencies,
+                stale_version_threshold=settings.dependency_freshness_stale_version_threshold,
+            )
+            df_route.set_monitor(df_monitor)
+            app.include_router(
+                df_route.router,
+                prefix=settings.api_prefix,
+                tags=["Dependency Freshness"],
+            )
+            logger.info("dependency_freshness_initialized")
+        except Exception as e:
+            logger.warning("dependency_freshness_init_failed", error=str(e))
+
     yield
 
     logger.info("shieldops_shutting_down")

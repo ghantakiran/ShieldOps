@@ -41,7 +41,10 @@ Run security audits on ShieldOps codebase and agent configurations.
 15. **API Threat Detection**: Assess endpoint risk and suspicious patterns via `APISecurityMonitor` (`src/shieldops/security/api_security.py`)
 16. **Certificate Expiry**: Check for expiring/expired TLS certs via `CertificateExpiryMonitor` (`src/shieldops/security/cert_monitor.py`)
 17. **Network Flow Analysis**: Detect anomalies and exfiltration via `NetworkFlowAnalyzer` (`src/shieldops/security/network_flow.py`)
-18. **Generate Report**: Severity-rated findings with remediation guidance
+18. **Container Image Scanning**: Scan images for vulnerabilities via `ContainerImageScanner` (`src/shieldops/security/container_scanner.py`)
+19. **Cloud Posture Management**: Detect cloud misconfigurations via `CloudSecurityPostureManager` (`src/shieldops/security/cloud_posture_manager.py`)
+20. **Secrets Sprawl Detection**: Detect hardcoded credentials via `SecretsSprawlDetector` (`src/shieldops/security/secrets_detector.py`)
+21. **Generate Report**: Severity-rated findings with remediation guidance
 
 ## Severity Levels
 - **CRITICAL**: Hardcoded secrets, SQL injection, unauthenticated endpoints

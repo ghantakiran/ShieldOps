@@ -345,6 +345,7 @@ Default policies ship with the platform and can be customized per environment:
 | Phase 21 | Disaster Recovery, Service Intelligence & Resource Governance | Completed |
 | Phase 22 | Proactive Intelligence & Security Operations | Completed |
 | Phase 23 | Infrastructure Intelligence & Resource Optimization | Completed |
+| Phase 24 | Autonomous Resilience & Platform Hardening | Completed |
 
 ## Documentation
 

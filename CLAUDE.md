@@ -79,17 +79,17 @@ ShieldOps is an enterprise SaaS platform that deploys autonomous AI agents for S
 - `src/shieldops/policy/` — OPA policies, approval logic, tenant isolation
 - `src/shieldops/api/` — FastAPI routes and middleware
 - `src/shieldops/dashboard/` — React dashboard components
-- `src/shieldops/observability/` — Alert noise, threshold tuning, backup verification
-- `src/shieldops/incidents/` — Severity prediction, on-call fatigue analysis, incident deduplication
-- `src/shieldops/topology/` — Service dependency impact analysis, service catalog, dependency health scoring
+- `src/shieldops/observability/` — Alert noise, threshold tuning, backup verification, resilience scoring
+- `src/shieldops/incidents/` — Severity prediction, on-call fatigue analysis, incident deduplication, timeline reconstruction
+- `src/shieldops/topology/` — Service dependency impact analysis, service catalog, dependency health scoring, cascade failure prediction
 - `src/shieldops/audit/` — Configuration audit trail
-- `src/shieldops/analytics/` — Deployment velocity, capacity trends, SRE metrics, latency profiling, toil tracking, trace analysis, log anomaly detection, event correlation, team performance
+- `src/shieldops/analytics/` — Deployment velocity, capacity trends, SRE metrics, latency profiling, toil tracking, trace analysis, log anomaly detection, event correlation, team performance, API deprecation tracking, dependency freshness
 - `src/shieldops/compliance/` — Compliance automation, gap analysis, license scanning, access certification
 - `src/shieldops/knowledge/` — Knowledge base article management
-- `src/shieldops/billing/` — Cost forecasting, cost tag enforcement, orphan detection, budget management, tag governance, right-sizing, storage optimization, resource lifecycle
+- `src/shieldops/billing/` — Cost forecasting, cost tag enforcement, orphan detection, budget management, tag governance, right-sizing, storage optimization, resource lifecycle, RI optimization, cost anomaly RCA, spend allocation
 - `src/shieldops/changes/` — Deployment risk, change advisory, release management, change intelligence
-- `src/shieldops/security/` — Security incident response, vulnerability lifecycle, API security monitoring, certificate monitoring, network flow analysis
-- `src/shieldops/operations/` — Runbook execution engine, workload scheduling optimization
+- `src/shieldops/security/` — Security incident response, vulnerability lifecycle, API security monitoring, certificate monitoring, network flow analysis, container scanning, cloud posture management, secrets detection
+- `src/shieldops/operations/` — Runbook execution engine, workload scheduling optimization, runbook effectiveness analysis
 - `src/shieldops/sla/` — SLA engine, SLO burn rate prediction, SLO target advisory
 - `src/shieldops/config/` — Configuration, parity validation
 - `docs/prd/` — Product Requirements Documents

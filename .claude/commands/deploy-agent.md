@@ -36,6 +36,9 @@ Deploy ShieldOps agents to target environments.
    - Analyze workload conflicts via `WorkloadSchedulingOptimizer` (`src/shieldops/operations/workload_scheduler.py`)
    - Check certificate expiry via `CertificateExpiryMonitor` (`src/shieldops/security/cert_monitor.py`)
    - Validate SLO targets via `SLOTargetAdvisor` (`src/shieldops/sla/slo_advisor.py`)
+   - Predict cascade failures via `CascadingFailurePredictor` (`src/shieldops/topology/cascade_predictor.py`)
+   - Scan container images via `ContainerImageScanner` (`src/shieldops/security/container_scanner.py`)
+   - Detect secrets sprawl via `SecretsSprawlDetector` (`src/shieldops/security/secrets_detector.py`)
 4. **Deploy**:
    - Apply Kubernetes manifests from `infrastructure/kubernetes/`
    - For production: trigger approval workflow via Slack/Teams
