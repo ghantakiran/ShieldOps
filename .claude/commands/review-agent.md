@@ -54,6 +54,10 @@ Review ShieldOps agent code for correctness, safety, and reliability.
 - [ ] Change failure rates tracked via `ChangeFailureRateTracker` (`src/shieldops/changes/change_failure_tracker.py`)
 - [ ] SLI calculations verified via `SLICalculationPipeline` (`src/shieldops/sla/sli_pipeline.py`)
 - [ ] FinOps maturity assessed via `FinOpsMaturityScorer` (`src/shieldops/billing/finops_maturity.py`)
+- [ ] Deployment cadence analyzed via `DeploymentCadenceAnalyzer` (`src/shieldops/analytics/deployment_cadence.py`)
+- [ ] Capacity forecasts verified via `CapacityForecastEngine` (`src/shieldops/analytics/capacity_forecast_engine.py`)
+- [ ] Metric baselines tracked via `MetricBaselineManager` (`src/shieldops/observability/metric_baseline.py`)
+- [ ] Team skills assessed via `TeamSkillMatrix` (`src/shieldops/operations/team_skill_matrix.py`)
 
 ### Testing
 - [ ] Unit tests for all node functions

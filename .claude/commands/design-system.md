@@ -58,6 +58,10 @@ Design new ShieldOps components, APIs, or agent workflows.
    - Simulate cost scenarios via `CostSimulationEngine` (`src/shieldops/billing/cost_simulator.py`)
    - Calculate SLIs via `SLICalculationPipeline` (`src/shieldops/sla/sli_pipeline.py`)
    - Check failure modes via `FailureModeCatalog` (`src/shieldops/topology/failure_mode_catalog.py`)
+   - Detect resource waste via `ResourceWasteDetector` (`src/shieldops/billing/resource_waste.py`)
+   - Forecast capacity via `CapacityForecastEngine` (`src/shieldops/analytics/capacity_forecast_engine.py`)
+   - Plan dependency updates via `DependencyUpdatePlanner` (`src/shieldops/topology/dependency_update_planner.py`)
+   - Aggregate service health via `ServiceHealthAggregator` (`src/shieldops/topology/service_health_agg.py`)
 
 5. **Documentation**:
    - Write Architecture Decision Record (ADR) in `docs/architecture/`

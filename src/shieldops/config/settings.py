@@ -956,6 +956,65 @@ class Settings(BaseSettings):
     sli_pipeline_max_definitions: int = 50000
     sli_pipeline_data_retention_hours: int = 168
 
+    # Phase 26: Deployment Cadence Analyzer
+    deployment_cadence_enabled: bool = True
+    deployment_cadence_max_deployments: int = 200000
+
+    # Phase 26: Metric Baseline Manager
+    metric_baseline_enabled: bool = True
+    metric_baseline_max_baselines: int = 100000
+    metric_baseline_deviation_threshold_pct: float = 25.0
+
+    # Phase 26: Incident Timeline Analyzer
+    incident_timeline_enabled: bool = True
+    incident_timeline_max_entries: int = 200000
+    incident_timeline_target_resolution_minutes: int = 60
+
+    # Phase 26: Service Health Aggregator
+    service_health_agg_enabled: bool = True
+    service_health_agg_max_signals: int = 500000
+    service_health_agg_health_threshold: float = 70.0
+
+    # Phase 26: Alert Fatigue Scorer
+    alert_fatigue_enabled: bool = True
+    alert_fatigue_max_records: int = 500000
+    alert_fatigue_threshold: float = 70.0
+
+    # Phase 26: Change Window Optimizer
+    change_window_enabled: bool = True
+    change_window_max_records: int = 200000
+    change_window_min_success_rate: float = 90.0
+
+    # Phase 26: Resource Waste Detector
+    resource_waste_enabled: bool = True
+    resource_waste_max_records: int = 200000
+    resource_waste_idle_threshold_pct: float = 5.0
+
+    # Phase 26: Compliance Evidence Chain
+    evidence_chain_enabled: bool = True
+    evidence_chain_max_chains: int = 50000
+    evidence_chain_max_items_per_chain: int = 10000
+
+    # Phase 26: Dependency Update Planner
+    dependency_update_planner_enabled: bool = True
+    dependency_update_planner_max_updates: int = 100000
+    dependency_update_planner_max_risk_threshold: int = 3
+
+    # Phase 26: Capacity Forecast Engine
+    capacity_forecast_engine_enabled: bool = True
+    capacity_forecast_engine_max_data_points: int = 500000
+    capacity_forecast_engine_headroom_target_pct: float = 70.0
+
+    # Phase 26: Runbook Version Manager
+    runbook_versioner_enabled: bool = True
+    runbook_versioner_max_versions: int = 100000
+    runbook_versioner_stale_age_days: int = 90
+
+    # Phase 26: Team Skill Matrix
+    team_skill_matrix_enabled: bool = True
+    team_skill_matrix_max_entries: int = 100000
+    team_skill_matrix_min_coverage_per_domain: int = 2
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",

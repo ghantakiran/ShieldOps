@@ -4701,6 +4701,289 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         except Exception as e:
             logger.warning("sli_pipeline_init_failed", error=str(e))
 
+    # ── Phase 26: Platform Intelligence & Operational Excellence ──
+
+    if settings.deployment_cadence_enabled:
+        try:
+            from shieldops.analytics.deployment_cadence import (
+                DeploymentCadenceAnalyzer,
+            )
+            from shieldops.api.routes import (
+                deployment_cadence as dca_route,
+            )
+
+            dca = DeploymentCadenceAnalyzer(
+                max_deployments=settings.deployment_cadence_max_deployments,
+            )
+            dca_route.set_analyzer(dca)
+            app.include_router(
+                dca_route.router,
+                prefix=settings.api_prefix,
+                tags=["Deployment Cadence"],
+            )
+            logger.info("deployment_cadence_initialized")
+        except Exception as e:
+            logger.warning("deployment_cadence_init_failed", error=str(e))
+
+    if settings.metric_baseline_enabled:
+        try:
+            from shieldops.api.routes import (
+                metric_baseline as mb_route,
+            )
+            from shieldops.observability.metric_baseline import (
+                MetricBaselineManager,
+            )
+
+            mb = MetricBaselineManager(
+                max_baselines=settings.metric_baseline_max_baselines,
+                deviation_threshold_pct=settings.metric_baseline_deviation_threshold_pct,
+            )
+            mb_route.set_manager(mb)
+            app.include_router(
+                mb_route.router,
+                prefix=settings.api_prefix,
+                tags=["Metric Baseline"],
+            )
+            logger.info("metric_baseline_initialized")
+        except Exception as e:
+            logger.warning("metric_baseline_init_failed", error=str(e))
+
+    if settings.incident_timeline_enabled:
+        try:
+            from shieldops.api.routes import (
+                incident_timeline as itl_route,
+            )
+            from shieldops.incidents.incident_timeline import (
+                IncidentTimelineAnalyzer,
+            )
+
+            itl = IncidentTimelineAnalyzer(
+                max_entries=settings.incident_timeline_max_entries,
+                target_resolution_minutes=settings.incident_timeline_target_resolution_minutes,
+            )
+            itl_route.set_analyzer(itl)
+            app.include_router(
+                itl_route.router,
+                prefix=settings.api_prefix,
+                tags=["Incident Timeline"],
+            )
+            logger.info("incident_timeline_initialized")
+        except Exception as e:
+            logger.warning("incident_timeline_init_failed", error=str(e))
+
+    if settings.service_health_agg_enabled:
+        try:
+            from shieldops.api.routes import (
+                service_health_agg as sha_route,
+            )
+            from shieldops.topology.service_health_agg import (
+                ServiceHealthAggregator,
+            )
+
+            sha = ServiceHealthAggregator(
+                max_signals=settings.service_health_agg_max_signals,
+                health_threshold=settings.service_health_agg_health_threshold,
+            )
+            sha_route.set_aggregator(sha)
+            app.include_router(
+                sha_route.router,
+                prefix=settings.api_prefix,
+                tags=["Service Health Aggregator"],
+            )
+            logger.info("service_health_agg_initialized")
+        except Exception as e:
+            logger.warning("service_health_agg_init_failed", error=str(e))
+
+    if settings.alert_fatigue_enabled:
+        try:
+            from shieldops.api.routes import (
+                alert_fatigue as af_route,
+            )
+            from shieldops.observability.alert_fatigue import (
+                AlertFatigueScorer,
+            )
+
+            af = AlertFatigueScorer(
+                max_records=settings.alert_fatigue_max_records,
+                fatigue_threshold=settings.alert_fatigue_threshold,
+            )
+            af_route.set_scorer(af)
+            app.include_router(
+                af_route.router,
+                prefix=settings.api_prefix,
+                tags=["Alert Fatigue"],
+            )
+            logger.info("alert_fatigue_initialized")
+        except Exception as e:
+            logger.warning("alert_fatigue_init_failed", error=str(e))
+
+    if settings.change_window_enabled:
+        try:
+            from shieldops.api.routes import (
+                change_window as cw_route,
+            )
+            from shieldops.changes.change_window import (
+                ChangeWindowOptimizer,
+            )
+
+            cw = ChangeWindowOptimizer(
+                max_records=settings.change_window_max_records,
+                min_success_rate=settings.change_window_min_success_rate,
+            )
+            cw_route.set_optimizer(cw)
+            app.include_router(
+                cw_route.router,
+                prefix=settings.api_prefix,
+                tags=["Change Window"],
+            )
+            logger.info("change_window_initialized")
+        except Exception as e:
+            logger.warning("change_window_init_failed", error=str(e))
+
+    if settings.resource_waste_enabled:
+        try:
+            from shieldops.api.routes import (
+                resource_waste as rw_route,
+            )
+            from shieldops.billing.resource_waste import (
+                ResourceWasteDetector,
+            )
+
+            rw = ResourceWasteDetector(
+                max_records=settings.resource_waste_max_records,
+                idle_threshold_pct=settings.resource_waste_idle_threshold_pct,
+            )
+            rw_route.set_detector(rw)
+            app.include_router(
+                rw_route.router,
+                prefix=settings.api_prefix,
+                tags=["Resource Waste"],
+            )
+            logger.info("resource_waste_initialized")
+        except Exception as e:
+            logger.warning("resource_waste_init_failed", error=str(e))
+
+    if settings.evidence_chain_enabled:
+        try:
+            from shieldops.api.routes import (
+                evidence_chain as ech_route,
+            )
+            from shieldops.compliance.evidence_chain import (
+                ComplianceEvidenceChain,
+            )
+
+            ech = ComplianceEvidenceChain(
+                max_chains=settings.evidence_chain_max_chains,
+                max_items_per_chain=settings.evidence_chain_max_items_per_chain,
+            )
+            ech_route.set_chain_manager(ech)
+            app.include_router(
+                ech_route.router,
+                prefix=settings.api_prefix,
+                tags=["Evidence Chain"],
+            )
+            logger.info("evidence_chain_initialized")
+        except Exception as e:
+            logger.warning("evidence_chain_init_failed", error=str(e))
+
+    if settings.dependency_update_planner_enabled:
+        try:
+            from shieldops.api.routes import (
+                dependency_update_planner as dup_route,
+            )
+            from shieldops.topology.dependency_update_planner import (
+                DependencyUpdatePlanner,
+            )
+
+            dup = DependencyUpdatePlanner(
+                max_updates=settings.dependency_update_planner_max_updates,
+                max_risk_threshold=settings.dependency_update_planner_max_risk_threshold,
+            )
+            dup_route.set_planner(dup)
+            app.include_router(
+                dup_route.router,
+                prefix=settings.api_prefix,
+                tags=["Dependency Update Planner"],
+            )
+            logger.info("dependency_update_planner_initialized")
+        except Exception as e:
+            logger.warning(
+                "dependency_update_planner_init_failed",
+                error=str(e),
+            )
+
+    if settings.capacity_forecast_engine_enabled:
+        try:
+            from shieldops.analytics.capacity_forecast_engine import (
+                CapacityForecastEngine,
+            )
+            from shieldops.api.routes import (
+                capacity_forecast_engine as cfe_route,
+            )
+
+            cfe = CapacityForecastEngine(
+                max_data_points=settings.capacity_forecast_engine_max_data_points,
+                headroom_target_pct=settings.capacity_forecast_engine_headroom_target_pct,
+            )
+            cfe_route.set_engine(cfe)
+            app.include_router(
+                cfe_route.router,
+                prefix=settings.api_prefix,
+                tags=["Capacity Forecast Engine"],
+            )
+            logger.info("capacity_forecast_engine_initialized")
+        except Exception as e:
+            logger.warning(
+                "capacity_forecast_engine_init_failed",
+                error=str(e),
+            )
+
+    if settings.runbook_versioner_enabled:
+        try:
+            from shieldops.api.routes import (
+                runbook_versioner as rv_route,
+            )
+            from shieldops.operations.runbook_versioner import (
+                RunbookVersionManager,
+            )
+
+            rv = RunbookVersionManager(
+                max_versions=settings.runbook_versioner_max_versions,
+                stale_age_days=settings.runbook_versioner_stale_age_days,
+            )
+            rv_route.set_manager(rv)
+            app.include_router(
+                rv_route.router,
+                prefix=settings.api_prefix,
+                tags=["Runbook Versioner"],
+            )
+            logger.info("runbook_versioner_initialized")
+        except Exception as e:
+            logger.warning("runbook_versioner_init_failed", error=str(e))
+
+    if settings.team_skill_matrix_enabled:
+        try:
+            from shieldops.api.routes import (
+                team_skill_matrix as tsm_route,
+            )
+            from shieldops.operations.team_skill_matrix import (
+                TeamSkillMatrix,
+            )
+
+            tsm = TeamSkillMatrix(
+                max_entries=settings.team_skill_matrix_max_entries,
+                min_coverage_per_domain=settings.team_skill_matrix_min_coverage_per_domain,
+            )
+            tsm_route.set_matrix(tsm)
+            app.include_router(
+                tsm_route.router,
+                prefix=settings.api_prefix,
+                tags=["Team Skill Matrix"],
+            )
+            logger.info("team_skill_matrix_initialized")
+        except Exception as e:
+            logger.warning("team_skill_matrix_init_failed", error=str(e))
+
     yield
 
     logger.info("shieldops_shutting_down")
