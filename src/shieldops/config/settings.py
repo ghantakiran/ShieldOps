@@ -1015,6 +1015,66 @@ class Settings(BaseSettings):
     team_skill_matrix_max_entries: int = 100000
     team_skill_matrix_min_coverage_per_domain: int = 2
 
+    # Phase 27: Error Budget Policy Engine
+    error_budget_policy_enabled: bool = True
+    error_budget_policy_max_policies: int = 50000
+    error_budget_policy_warning_threshold_pct: float = 50.0
+
+    # Phase 27: Reliability Target Advisor
+    reliability_target_enabled: bool = True
+    reliability_target_max_targets: int = 50000
+    reliability_target_default_target_pct: float = 99.9
+
+    # Phase 27: Incident Severity Calibrator
+    severity_calibrator_enabled: bool = True
+    severity_calibrator_max_records: int = 200000
+    severity_calibrator_accuracy_target_pct: float = 85.0
+
+    # Phase 27: Service Dependency Mapper
+    dependency_mapper_enabled: bool = True
+    dependency_mapper_max_edges: int = 200000
+    dependency_mapper_max_chain_depth: int = 10
+
+    # Phase 27: Alert Rule Linter
+    alert_rule_linter_enabled: bool = True
+    alert_rule_linter_max_rules: int = 100000
+    alert_rule_linter_min_quality_score: float = 80.0
+
+    # Phase 27: Deployment Approval Gate
+    deployment_gate_enabled: bool = True
+    deployment_gate_max_gates: int = 100000
+    deployment_gate_expiry_hours: int = 24
+
+    # Phase 27: Cloud Billing Reconciler
+    billing_reconciler_enabled: bool = True
+    billing_reconciler_max_records: int = 500000
+    billing_reconciler_discrepancy_threshold_pct: float = 5.0
+
+    # Phase 27: Cost Chargeback Engine
+    chargeback_engine_enabled: bool = True
+    chargeback_engine_max_records: int = 500000
+    chargeback_engine_unallocated_threshold_pct: float = 5.0
+
+    # Phase 27: Compliance Drift Detector
+    compliance_drift_enabled: bool = True
+    compliance_drift_max_records: int = 200000
+    compliance_drift_max_drift_rate_pct: float = 5.0
+
+    # Phase 27: Incident Communication Planner
+    comm_planner_enabled: bool = True
+    comm_planner_max_plans: int = 100000
+    comm_planner_max_overdue_minutes: int = 30
+
+    # Phase 27: Infrastructure Drift Reconciler
+    infra_drift_reconciler_enabled: bool = True
+    infra_drift_reconciler_max_drifts: int = 200000
+    infra_drift_reconciler_auto_reconcile_enabled: bool = True
+
+    # Phase 27: Service Maturity Model
+    service_maturity_enabled: bool = True
+    service_maturity_max_assessments: int = 100000
+    service_maturity_target_level: int = 3
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",

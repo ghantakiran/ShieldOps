@@ -28,7 +28,7 @@ Run health checks on all ShieldOps platform dependencies.
    - Integration tests: `python3 -m pytest tests/integration/ -v --tb=short`
    - Report: total tests, passed, failed, coverage
 
-5. **Platform feature health** (Phase 11–26 modules):
+5. **Platform feature health** (Phase 11–27 modules):
    - Capacity trends: `src/shieldops/analytics/capacity_trends.py` — CapacityTrendAnalyzer
    - SRE metrics: `src/shieldops/analytics/sre_metrics.py` — SREMetricsAggregator
    - Health reports: `src/shieldops/observability/health_report.py` — ServiceHealthReportGenerator
@@ -119,6 +119,18 @@ Run health checks on all ShieldOps platform dependencies.
    - Capacity forecast engine: `src/shieldops/analytics/capacity_forecast_engine.py` — CapacityForecastEngine
    - Runbook versioner: `src/shieldops/operations/runbook_versioner.py` — RunbookVersionManager
    - Team skill matrix: `src/shieldops/operations/team_skill_matrix.py` — TeamSkillMatrix
+   - Error budget policy: `src/shieldops/sla/error_budget_policy.py` — ErrorBudgetPolicyEngine
+   - Reliability target: `src/shieldops/sla/reliability_target.py` — ReliabilityTargetAdvisor
+   - Severity calibrator: `src/shieldops/incidents/severity_calibrator.py` — IncidentSeverityCalibrator
+   - Dependency mapper: `src/shieldops/topology/dependency_mapper.py` — ServiceDependencyMapper
+   - Alert rule linter: `src/shieldops/observability/alert_rule_linter.py` — AlertRuleLinter
+   - Deployment gate: `src/shieldops/changes/deployment_gate.py` — DeploymentApprovalGate
+   - Billing reconciler: `src/shieldops/billing/billing_reconciler.py` — CloudBillingReconciler
+   - Chargeback engine: `src/shieldops/billing/chargeback_engine.py` — CostChargebackEngine
+   - Compliance drift: `src/shieldops/compliance/compliance_drift.py` — ComplianceDriftDetector
+   - Comm planner: `src/shieldops/incidents/comm_planner.py` — IncidentCommunicationPlanner
+   - Infra drift reconciler: `src/shieldops/operations/infra_drift_reconciler.py` — InfrastructureDriftReconciler
+   - Service maturity: `src/shieldops/topology/service_maturity.py` — ServiceMaturityModel
    - Verify each module initializes in `src/shieldops/api/app.py` lifespan
 
 6. **Check configuration**:
