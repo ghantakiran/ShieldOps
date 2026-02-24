@@ -896,6 +896,66 @@ class Settings(BaseSettings):
     dependency_freshness_max_dependencies: int = 200000
     dependency_freshness_stale_version_threshold: int = 3
 
+    # Phase 25: Chaos Experiment Designer
+    chaos_designer_enabled: bool = True
+    chaos_designer_max_experiments: int = 50000
+    chaos_designer_max_blast_radius: int = 3
+
+    # Phase 25: Game Day Planner
+    game_day_planner_enabled: bool = True
+    game_day_planner_max_game_days: int = 10000
+    game_day_planner_min_scenarios_per_day: int = 3
+
+    # Phase 25: Failure Mode Catalog
+    failure_mode_catalog_enabled: bool = True
+    failure_mode_catalog_max_modes: int = 100000
+    failure_mode_catalog_mtbf_window_days: int = 365
+
+    # Phase 25: On-Call Rotation Optimizer
+    oncall_optimizer_enabled: bool = True
+    oncall_optimizer_max_members: int = 10000
+    oncall_optimizer_max_consecutive_days: int = 7
+
+    # Phase 25: Alert Correlation Rule Engine
+    alert_correlation_rules_enabled: bool = True
+    alert_correlation_rules_max_rules: int = 50000
+    alert_correlation_rules_time_window_seconds: int = 300
+
+    # Phase 25: Incident Review Board
+    review_board_enabled: bool = True
+    review_board_max_reviews: int = 100000
+    review_board_action_sla_days: int = 14
+
+    # Phase 25: Cloud Commitment Planner
+    commitment_planner_enabled: bool = True
+    commitment_planner_max_workloads: int = 100000
+    commitment_planner_min_savings_threshold_pct: float = 10.0
+
+    # Phase 25: Cost Simulation Engine
+    cost_simulator_enabled: bool = True
+    cost_simulator_max_scenarios: int = 50000
+    cost_simulator_budget_breach_threshold_pct: float = 20.0
+
+    # Phase 25: FinOps Maturity Scorer
+    finops_maturity_enabled: bool = True
+    finops_maturity_max_assessments: int = 50000
+    finops_maturity_target_level: int = 3
+
+    # Phase 25: Change Failure Rate Tracker
+    change_failure_tracker_enabled: bool = True
+    change_failure_tracker_max_deployments: int = 200000
+    change_failure_tracker_trend_window_days: int = 30
+
+    # Phase 25: Toil Automation Recommender
+    toil_recommender_enabled: bool = True
+    toil_recommender_max_patterns: int = 100000
+    toil_recommender_min_roi_multiplier: float = 2.0
+
+    # Phase 25: SLI Calculation Pipeline
+    sli_pipeline_enabled: bool = True
+    sli_pipeline_max_definitions: int = 50000
+    sli_pipeline_data_retention_hours: int = 168
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",

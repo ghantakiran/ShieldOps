@@ -39,6 +39,9 @@ Deploy ShieldOps agents to target environments.
    - Predict cascade failures via `CascadingFailurePredictor` (`src/shieldops/topology/cascade_predictor.py`)
    - Scan container images via `ContainerImageScanner` (`src/shieldops/security/container_scanner.py`)
    - Detect secrets sprawl via `SecretsSprawlDetector` (`src/shieldops/security/secrets_detector.py`)
+   - Design chaos experiments via `ChaosExperimentDesigner` (`src/shieldops/observability/chaos_designer.py`)
+   - Plan game day exercises via `GameDayPlanner` (`src/shieldops/operations/game_day_planner.py`)
+   - Check failure modes via `FailureModeCatalog` (`src/shieldops/topology/failure_mode_catalog.py`)
 4. **Deploy**:
    - Apply Kubernetes manifests from `infrastructure/kubernetes/`
    - For production: trigger approval workflow via Slack/Teams

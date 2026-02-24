@@ -44,7 +44,9 @@ Run security audits on ShieldOps codebase and agent configurations.
 18. **Container Image Scanning**: Scan images for vulnerabilities via `ContainerImageScanner` (`src/shieldops/security/container_scanner.py`)
 19. **Cloud Posture Management**: Detect cloud misconfigurations via `CloudSecurityPostureManager` (`src/shieldops/security/cloud_posture_manager.py`)
 20. **Secrets Sprawl Detection**: Detect hardcoded credentials via `SecretsSprawlDetector` (`src/shieldops/security/secrets_detector.py`)
-21. **Generate Report**: Severity-rated findings with remediation guidance
+21. **Alert Correlation Rules**: Evaluate alert correlation patterns via `AlertCorrelationRuleEngine` (`src/shieldops/observability/alert_correlation_rules.py`)
+22. **Incident Review Board**: Review incident response quality via `IncidentReviewBoard` (`src/shieldops/incidents/review_board.py`)
+23. **Generate Report**: Severity-rated findings with remediation guidance
 
 ## Severity Levels
 - **CRITICAL**: Hardcoded secrets, SQL injection, unauthenticated endpoints

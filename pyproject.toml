@@ -291,6 +291,18 @@ module = [
     "shieldops.api.routes.runbook_effectiveness",
     "shieldops.api.routes.api_deprecation_tracker",
     "shieldops.api.routes.dependency_freshness",
+    "shieldops.api.routes.chaos_designer",
+    "shieldops.api.routes.game_day_planner",
+    "shieldops.api.routes.failure_mode_catalog",
+    "shieldops.api.routes.oncall_optimizer",
+    "shieldops.api.routes.alert_correlation_rules",
+    "shieldops.api.routes.review_board",
+    "shieldops.api.routes.commitment_planner",
+    "shieldops.api.routes.cost_simulator",
+    "shieldops.api.routes.finops_maturity",
+    "shieldops.api.routes.change_failure_tracker",
+    "shieldops.api.routes.toil_recommender",
+    "shieldops.api.routes.sli_pipeline",
 ]
 warn_return_any = false
 disallow_untyped_defs = false

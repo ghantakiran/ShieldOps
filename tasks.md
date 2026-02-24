@@ -1,7 +1,7 @@
 # ShieldOps — Feature Implementation Tracker
 
 **Last Updated:** 2026-02-24
-**Platform Completeness:** Phase 24 complete — Autonomous Resilience & Platform Hardening (~11,442 tests)
+**Platform Completeness:** Phase 25 complete — Chaos Engineering & Operational Intelligence (~11,905 tests)
 
 ---
 
@@ -1030,3 +1030,27 @@
 - [x] Runbook Effectiveness Analyzer (score runbook outcomes, detect decay, suggest improvements) — 41 tests
 - [x] API Deprecation Tracker (API version lifecycle, sunset timelines, consumer migration progress) — 41 tests
 - [x] Dependency Freshness Monitor (dependency version tracking, staleness scoring, update urgency) — 41 tests
+
+---
+
+## Phase 25 — Chaos Engineering & Operational Intelligence
+
+### Tier 1: Chaos & Resilience Testing
+- [x] F1: Chaos Experiment Designer (`src/shieldops/observability/chaos_designer.py`)
+- [x] F2: Game Day Planner (`src/shieldops/operations/game_day_planner.py`)
+- [x] F3: Failure Mode Catalog (`src/shieldops/topology/failure_mode_catalog.py`)
+
+### Tier 2: Intelligent Alert & Incident Management
+- [x] F4: On-Call Rotation Optimizer (`src/shieldops/incidents/oncall_optimizer.py`)
+- [x] F5: Alert Correlation Rule Engine (`src/shieldops/observability/alert_correlation_rules.py`)
+- [x] F6: Incident Review Board (`src/shieldops/incidents/review_board.py`)
+
+### Tier 3: FinOps Maturity
+- [x] F7: Cloud Commitment Planner (`src/shieldops/billing/commitment_planner.py`)
+- [x] F8: Cost Simulation Engine (`src/shieldops/billing/cost_simulator.py`)
+- [x] F9: FinOps Maturity Scorer (`src/shieldops/billing/finops_maturity.py`)
+
+### Tier 4: Operational Intelligence
+- [x] F10: Change Failure Rate Tracker (`src/shieldops/changes/change_failure_tracker.py`)
+- [x] F11: Toil Automation Recommender (`src/shieldops/operations/toil_recommender.py`)
+- [x] F12: SLI Calculation Pipeline (`src/shieldops/sla/sli_pipeline.py`)
