@@ -81,13 +81,16 @@ ShieldOps is an enterprise SaaS platform that deploys autonomous AI agents for S
 - `src/shieldops/dashboard/` — React dashboard components
 - `src/shieldops/observability/` — Alert noise, threshold tuning, backup verification
 - `src/shieldops/incidents/` — Severity prediction, on-call fatigue analysis, incident deduplication
-- `src/shieldops/topology/` — Service dependency impact analysis, service catalog
+- `src/shieldops/topology/` — Service dependency impact analysis, service catalog, dependency health scoring
 - `src/shieldops/audit/` — Configuration audit trail
-- `src/shieldops/analytics/` — Deployment velocity, capacity trends, SRE metrics, latency profiling, toil tracking
+- `src/shieldops/analytics/` — Deployment velocity, capacity trends, SRE metrics, latency profiling, toil tracking, trace analysis, log anomaly detection, event correlation, team performance
 - `src/shieldops/compliance/` — Compliance automation, gap analysis, license scanning, access certification
 - `src/shieldops/knowledge/` — Knowledge base article management
-- `src/shieldops/billing/` — Cost forecasting, cost tag enforcement, orphan detection, budget management
-- `src/shieldops/changes/` — Deployment risk, change advisory, release management
+- `src/shieldops/billing/` — Cost forecasting, cost tag enforcement, orphan detection, budget management, tag governance
+- `src/shieldops/changes/` — Deployment risk, change advisory, release management, change intelligence
+- `src/shieldops/security/` — Security incident response, vulnerability lifecycle, API security monitoring
+- `src/shieldops/operations/` — Runbook execution engine
+- `src/shieldops/sla/` — SLA engine, SLO burn rate prediction
 - `src/shieldops/config/` — Configuration, parity validation
 - `docs/prd/` — Product Requirements Documents
 - `docs/architecture/` — Architecture Decision Records

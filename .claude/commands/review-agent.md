@@ -36,6 +36,12 @@ Review ShieldOps agent code for correctness, safety, and reliability.
 - [ ] Release approval gates enforced via `ReleaseManagementTracker` (`src/shieldops/changes/release_manager.py`)
 - [ ] DR readiness verified for affected services via `DisasterRecoveryReadinessTracker` (`src/shieldops/observability/dr_readiness.py`)
 - [ ] Incident deduplication active via `IncidentDeduplicationEngine` (`src/shieldops/incidents/dedup_engine.py`)
+- [ ] Change risk scored via `ChangeIntelligenceAnalyzer` (`src/shieldops/changes/change_intelligence.py`)
+- [ ] Safety gate evaluated before deployment via `ChangeIntelligenceAnalyzer.evaluate_safety_gate()`
+- [ ] Security incidents tracked via `SecurityIncidentResponseTracker` (`src/shieldops/security/incident_response.py`)
+- [ ] API endpoint threats monitored via `APISecurityMonitor` (`src/shieldops/security/api_security.py`)
+- [ ] Vulnerability patches tracked via `VulnerabilityLifecycleManager` (`src/shieldops/security/vuln_lifecycle.py`)
+- [ ] Runbook executions logged via `RunbookExecutionEngine` (`src/shieldops/operations/runbook_engine.py`)
 
 ### Testing
 - [ ] Unit tests for all node functions

@@ -255,6 +255,18 @@ module = [
     "shieldops.api.routes.incident_dedup",
     "shieldops.api.routes.access_certification",
     "shieldops.api.routes.toil_tracker",
+    "shieldops.api.routes.trace_analyzer",
+    "shieldops.api.routes.log_anomaly",
+    "shieldops.api.routes.event_correlation",
+    "shieldops.api.routes.security_incident",
+    "shieldops.api.routes.vuln_lifecycle",
+    "shieldops.api.routes.api_security",
+    "shieldops.api.routes.tag_governance",
+    "shieldops.api.routes.team_performance",
+    "shieldops.api.routes.runbook_engine",
+    "shieldops.api.routes.dependency_scorer",
+    "shieldops.api.routes.burn_predictor",
+    "shieldops.api.routes.change_intelligence",
 ]
 warn_return_any = false
 disallow_untyped_defs = false

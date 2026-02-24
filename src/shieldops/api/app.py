@@ -3645,6 +3645,270 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         except Exception as e:
             logger.warning("toil_tracker_init_failed", error=str(e))
 
+    # ── Phase 22: Distributed Trace Analyzer ──
+    if settings.trace_analyzer_enabled:
+        try:
+            from shieldops.analytics.trace_analyzer import (
+                DistributedTraceAnalyzer,
+            )
+            from shieldops.api.routes import trace_analyzer as ta_route
+
+            ta_analyzer = DistributedTraceAnalyzer(
+                max_traces=settings.trace_analyzer_max_traces,
+                bottleneck_threshold=settings.trace_analyzer_bottleneck_threshold,
+            )
+            ta_route.set_analyzer(ta_analyzer)
+            app.include_router(
+                ta_route.router,
+                prefix=settings.api_prefix,
+                tags=["Trace Analyzer"],
+            )
+            logger.info("trace_analyzer_initialized")
+        except Exception as e:
+            logger.warning("trace_analyzer_init_failed", error=str(e))
+
+    # ── Phase 22: Log Anomaly Detector ──
+    if settings.log_anomaly_enabled:
+        try:
+            from shieldops.analytics.log_anomaly import (
+                LogAnomalyDetector,
+            )
+            from shieldops.api.routes import log_anomaly as la_route
+
+            la_detector = LogAnomalyDetector(
+                max_patterns=settings.log_anomaly_max_patterns,
+                sensitivity=settings.log_anomaly_sensitivity,
+            )
+            la_route.set_detector(la_detector)
+            app.include_router(
+                la_route.router,
+                prefix=settings.api_prefix,
+                tags=["Log Anomaly"],
+            )
+            logger.info("log_anomaly_initialized")
+        except Exception as e:
+            logger.warning("log_anomaly_init_failed", error=str(e))
+
+    # ── Phase 22: Event Correlation Engine ──
+    if settings.event_correlation_enabled:
+        try:
+            from shieldops.analytics.event_correlation import (
+                EventCorrelationEngine,
+            )
+            from shieldops.api.routes import event_correlation as ec_route
+
+            ec_engine = EventCorrelationEngine(
+                max_events=settings.event_correlation_max_events,
+                window_minutes=settings.event_correlation_window_minutes,
+            )
+            ec_route.set_engine(ec_engine)
+            app.include_router(
+                ec_route.router,
+                prefix=settings.api_prefix,
+                tags=["Event Correlation"],
+            )
+            logger.info("event_correlation_initialized")
+        except Exception as e:
+            logger.warning("event_correlation_init_failed", error=str(e))
+
+    # ── Phase 22: Security Incident Response Tracker ──
+    if settings.security_incident_enabled:
+        try:
+            from shieldops.api.routes import security_incident as sir_route
+            from shieldops.security.incident_response import (
+                SecurityIncidentResponseTracker,
+            )
+
+            sir_tracker = SecurityIncidentResponseTracker(
+                max_incidents=settings.security_incident_max_incidents,
+                auto_escalate_minutes=settings.security_incident_auto_escalate_minutes,
+            )
+            sir_route.set_tracker(sir_tracker)
+            app.include_router(
+                sir_route.router,
+                prefix=settings.api_prefix,
+                tags=["Security Incidents"],
+            )
+            logger.info("security_incident_initialized")
+        except Exception as e:
+            logger.warning("security_incident_init_failed", error=str(e))
+
+    # ── Phase 22: Vulnerability Lifecycle Manager ──
+    if settings.vuln_lifecycle_enabled:
+        try:
+            from shieldops.api.routes import vuln_lifecycle as vl_route
+            from shieldops.security.vuln_lifecycle import (
+                VulnerabilityLifecycleManager,
+            )
+
+            vl_manager = VulnerabilityLifecycleManager(
+                max_records=settings.vuln_lifecycle_max_records,
+                patch_sla_days=settings.vuln_lifecycle_patch_sla_days,
+            )
+            vl_route.set_manager(vl_manager)
+            app.include_router(
+                vl_route.router,
+                prefix=settings.api_prefix,
+                tags=["Vulnerability Lifecycle"],
+            )
+            logger.info("vuln_lifecycle_initialized")
+        except Exception as e:
+            logger.warning("vuln_lifecycle_init_failed", error=str(e))
+
+    # ── Phase 22: API Security Monitor ──
+    if settings.api_security_enabled:
+        try:
+            from shieldops.api.routes import api_security as as_route
+            from shieldops.security.api_security import (
+                APISecurityMonitor,
+            )
+
+            as_monitor = APISecurityMonitor(
+                max_endpoints=settings.api_security_max_endpoints,
+                alert_threshold=settings.api_security_alert_threshold,
+            )
+            as_route.set_monitor(as_monitor)
+            app.include_router(
+                as_route.router,
+                prefix=settings.api_prefix,
+                tags=["API Security"],
+            )
+            logger.info("api_security_initialized")
+        except Exception as e:
+            logger.warning("api_security_init_failed", error=str(e))
+
+    # ── Phase 22: Resource Tag Governance Engine ──
+    if settings.tag_governance_enabled:
+        try:
+            from shieldops.api.routes import tag_governance as tg_route
+            from shieldops.billing.tag_governance import (
+                ResourceTagGovernanceEngine,
+            )
+
+            tg_engine = ResourceTagGovernanceEngine(
+                max_policies=settings.tag_governance_max_policies,
+                max_reports=settings.tag_governance_max_reports,
+            )
+            tg_route.set_engine(tg_engine)
+            app.include_router(
+                tg_route.router,
+                prefix=settings.api_prefix,
+                tags=["Tag Governance"],
+            )
+            logger.info("tag_governance_initialized")
+        except Exception as e:
+            logger.warning("tag_governance_init_failed", error=str(e))
+
+    # ── Phase 22: Team Performance Analyzer ──
+    if settings.team_performance_enabled:
+        try:
+            from shieldops.analytics.team_performance import (
+                TeamPerformanceAnalyzer,
+            )
+            from shieldops.api.routes import team_performance as tp_route
+
+            tp_analyzer = TeamPerformanceAnalyzer(
+                max_members=settings.team_performance_max_members,
+                burnout_threshold=settings.team_performance_burnout_threshold,
+            )
+            tp_route.set_analyzer(tp_analyzer)
+            app.include_router(
+                tp_route.router,
+                prefix=settings.api_prefix,
+                tags=["Team Performance"],
+            )
+            logger.info("team_performance_initialized")
+        except Exception as e:
+            logger.warning("team_performance_init_failed", error=str(e))
+
+    # ── Phase 22: Runbook Execution Engine ──
+    if settings.runbook_engine_enabled:
+        try:
+            from shieldops.api.routes import runbook_engine as re_route
+            from shieldops.operations.runbook_engine import (
+                RunbookExecutionEngine,
+            )
+
+            re_engine = RunbookExecutionEngine(
+                max_executions=settings.runbook_engine_max_executions,
+                step_timeout=settings.runbook_engine_step_timeout,
+            )
+            re_route.set_engine(re_engine)
+            app.include_router(
+                re_route.router,
+                prefix=settings.api_prefix,
+                tags=["Runbook Engine"],
+            )
+            logger.info("runbook_engine_initialized")
+        except Exception as e:
+            logger.warning("runbook_engine_init_failed", error=str(e))
+
+    # ── Phase 22: Dependency Health Scorer ──
+    if settings.dependency_scorer_enabled:
+        try:
+            from shieldops.api.routes import dependency_scorer as ds_route
+            from shieldops.topology.dependency_scorer import (
+                DependencyHealthScorer,
+            )
+
+            ds_scorer = DependencyHealthScorer(
+                max_dependencies=settings.dependency_scorer_max_dependencies,
+                check_interval=settings.dependency_scorer_check_interval,
+            )
+            ds_route.set_scorer(ds_scorer)
+            app.include_router(
+                ds_route.router,
+                prefix=settings.api_prefix,
+                tags=["Dependency Scorer"],
+            )
+            logger.info("dependency_scorer_initialized")
+        except Exception as e:
+            logger.warning("dependency_scorer_init_failed", error=str(e))
+
+    # ── Phase 22: SLO Burn Rate Predictor ──
+    if settings.burn_predictor_enabled:
+        try:
+            from shieldops.api.routes import burn_predictor as bp_route
+            from shieldops.sla.burn_predictor import (
+                SLOBurnRatePredictor,
+            )
+
+            bp_predictor = SLOBurnRatePredictor(
+                max_slos=settings.burn_predictor_max_slos,
+                forecast_hours=settings.burn_predictor_forecast_hours,
+            )
+            bp_route.set_predictor(bp_predictor)
+            app.include_router(
+                bp_route.router,
+                prefix=settings.api_prefix,
+                tags=["Burn Predictor"],
+            )
+            logger.info("burn_predictor_initialized")
+        except Exception as e:
+            logger.warning("burn_predictor_init_failed", error=str(e))
+
+    # ── Phase 22: Change Intelligence Analyzer ──
+    if settings.change_intelligence_enabled:
+        try:
+            from shieldops.api.routes import change_intelligence as ci_route
+            from shieldops.changes.change_intelligence import (
+                ChangeIntelligenceAnalyzer,
+            )
+
+            ci_analyzer = ChangeIntelligenceAnalyzer(
+                max_records=settings.change_intelligence_max_records,
+                risk_threshold=settings.change_intelligence_risk_threshold,
+            )
+            ci_route.set_analyzer(ci_analyzer)
+            app.include_router(
+                ci_route.router,
+                prefix=settings.api_prefix,
+                tags=["Change Intelligence"],
+            )
+            logger.info("change_intelligence_initialized")
+        except Exception as e:
+            logger.warning("change_intelligence_init_failed", error=str(e))
+
     yield
 
     logger.info("shieldops_shutting_down")

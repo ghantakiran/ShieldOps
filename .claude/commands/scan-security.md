@@ -16,6 +16,9 @@ Run security audits on ShieldOps codebase and agent configurations.
 - `licenses` — Dependency license compliance via `DependencyLicenseScanner`
 - `access` — Access certification review via `AccessCertificationManager`
 - `contracts` — API contract drift and breaking changes via `APIContractTestingEngine`
+- `incidents` — Security incident response tracking via `SecurityIncidentResponseTracker`
+- `vulns` — Vulnerability lifecycle and exploit risk via `VulnerabilityLifecycleManager`
+- `api-threats` — API endpoint threat detection via `APISecurityMonitor`
 - `infra` — Infrastructure-as-code security scan (checkov, tfsec)
 - `all` — Full security audit
 
@@ -33,7 +36,10 @@ Run security audits on ShieldOps codebase and agent configurations.
 10. **License Compliance**: Scan dependency licenses via `DependencyLicenseScanner` (`src/shieldops/compliance/license_scanner.py`)
 11. **Access Certification**: Review expired/uncertified grants via `AccessCertificationManager` (`src/shieldops/compliance/access_certification.py`)
 12. **API Contract Testing**: Detect breaking changes and schema drift via `APIContractTestingEngine` (`src/shieldops/api/contract_testing.py`)
-13. **Generate Report**: Severity-rated findings with remediation guidance
+13. **Security Incident Review**: Check active incidents via `SecurityIncidentResponseTracker` (`src/shieldops/security/incident_response.py`)
+14. **Vulnerability Lifecycle**: Review overdue patches and exploit risk via `VulnerabilityLifecycleManager` (`src/shieldops/security/vuln_lifecycle.py`)
+15. **API Threat Detection**: Assess endpoint risk and suspicious patterns via `APISecurityMonitor` (`src/shieldops/security/api_security.py`)
+16. **Generate Report**: Severity-rated findings with remediation guidance
 
 ## Severity Levels
 - **CRITICAL**: Hardcoded secrets, SQL injection, unauthenticated endpoints

@@ -29,6 +29,10 @@ Deploy ShieldOps agents to target environments.
    - Verify DR readiness via `DisasterRecoveryReadinessTracker` (`src/shieldops/observability/dr_readiness.py`)
    - Check release approval via `ReleaseManagementTracker` (`src/shieldops/changes/release_manager.py`)
    - Validate config parity via `ConfigurationParityValidator` (`src/shieldops/config/parity_validator.py`)
+   - Predict change risk via `ChangeIntelligenceAnalyzer` (`src/shieldops/changes/change_intelligence.py`)
+   - Evaluate safety gate via `ChangeIntelligenceAnalyzer.evaluate_safety_gate()`
+   - Predict SLO burn rate via `SLOBurnRatePredictor` (`src/shieldops/sla/burn_predictor.py`)
+   - Check dependency health via `DependencyHealthScorer` (`src/shieldops/topology/dependency_scorer.py`)
 4. **Deploy**:
    - Apply Kubernetes manifests from `infrastructure/kubernetes/`
    - For production: trigger approval workflow via Slack/Teams
