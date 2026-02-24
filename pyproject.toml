@@ -267,6 +267,18 @@ module = [
     "shieldops.api.routes.dependency_scorer",
     "shieldops.api.routes.burn_predictor",
     "shieldops.api.routes.change_intelligence",
+    "shieldops.api.routes.db_performance",
+    "shieldops.api.routes.queue_health",
+    "shieldops.api.routes.cert_monitor",
+    "shieldops.api.routes.network_flow",
+    "shieldops.api.routes.dns_health",
+    "shieldops.api.routes.escalation_analyzer",
+    "shieldops.api.routes.right_sizer",
+    "shieldops.api.routes.storage_optimizer",
+    "shieldops.api.routes.resource_lifecycle",
+    "shieldops.api.routes.alert_routing",
+    "shieldops.api.routes.slo_advisor",
+    "shieldops.api.routes.workload_scheduler",
 ]
 warn_return_any = false
 disallow_untyped_defs = false

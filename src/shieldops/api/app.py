@@ -3909,6 +3909,270 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         except Exception as e:
             logger.warning("change_intelligence_init_failed", error=str(e))
 
+    # ── Phase 23: Database Performance Analyzer ──
+    if settings.db_performance_enabled:
+        try:
+            from shieldops.analytics.db_performance import (
+                DatabasePerformanceAnalyzer,
+            )
+            from shieldops.api.routes import db_performance as db_perf_route
+
+            db_perf_analyzer = DatabasePerformanceAnalyzer(
+                max_queries=settings.db_performance_max_queries,
+                slow_threshold_ms=settings.db_performance_slow_threshold_ms,
+            )
+            db_perf_route.set_analyzer(db_perf_analyzer)
+            app.include_router(
+                db_perf_route.router,
+                prefix=settings.api_prefix,
+                tags=["Database Performance"],
+            )
+            logger.info("db_performance_initialized")
+        except Exception as e:
+            logger.warning("db_performance_init_failed", error=str(e))
+
+    # ── Phase 23: Queue Health Monitor ──
+    if settings.queue_health_enabled:
+        try:
+            from shieldops.api.routes import queue_health as qh_route
+            from shieldops.observability.queue_health import (
+                QueueHealthMonitor,
+            )
+
+            qh_monitor = QueueHealthMonitor(
+                max_metrics=settings.queue_health_max_metrics,
+                stall_threshold_seconds=settings.queue_health_stall_threshold_seconds,
+            )
+            qh_route.set_monitor(qh_monitor)
+            app.include_router(
+                qh_route.router,
+                prefix=settings.api_prefix,
+                tags=["Queue Health"],
+            )
+            logger.info("queue_health_initialized")
+        except Exception as e:
+            logger.warning("queue_health_init_failed", error=str(e))
+
+    # ── Phase 23: Certificate Expiry Monitor ──
+    if settings.cert_monitor_enabled:
+        try:
+            from shieldops.api.routes import cert_monitor as cm_route
+            from shieldops.security.cert_monitor import (
+                CertificateExpiryMonitor,
+            )
+
+            cm_monitor = CertificateExpiryMonitor(
+                max_certificates=settings.cert_monitor_max_certificates,
+                expiry_warning_days=settings.cert_monitor_expiry_warning_days,
+            )
+            cm_route.set_monitor(cm_monitor)
+            app.include_router(
+                cm_route.router,
+                prefix=settings.api_prefix,
+                tags=["Certificate Monitor"],
+            )
+            logger.info("cert_monitor_initialized")
+        except Exception as e:
+            logger.warning("cert_monitor_init_failed", error=str(e))
+
+    # ── Phase 23: Network Flow Analyzer ──
+    if settings.network_flow_enabled:
+        try:
+            from shieldops.api.routes import network_flow as nf_route
+            from shieldops.security.network_flow import (
+                NetworkFlowAnalyzer,
+            )
+
+            nf_analyzer = NetworkFlowAnalyzer(
+                max_records=settings.network_flow_max_records,
+                anomaly_threshold=settings.network_flow_anomaly_threshold,
+            )
+            nf_route.set_analyzer(nf_analyzer)
+            app.include_router(
+                nf_route.router,
+                prefix=settings.api_prefix,
+                tags=["Network Flow"],
+            )
+            logger.info("network_flow_initialized")
+        except Exception as e:
+            logger.warning("network_flow_init_failed", error=str(e))
+
+    # ── Phase 23: DNS Health Monitor ──
+    if settings.dns_health_enabled:
+        try:
+            from shieldops.api.routes import dns_health as dh_route
+            from shieldops.observability.dns_health import (
+                DNSHealthMonitor,
+            )
+
+            dh_monitor = DNSHealthMonitor(
+                max_checks=settings.dns_health_max_checks,
+                timeout_ms=settings.dns_health_timeout_ms,
+            )
+            dh_route.set_monitor(dh_monitor)
+            app.include_router(
+                dh_route.router,
+                prefix=settings.api_prefix,
+                tags=["DNS Health"],
+            )
+            logger.info("dns_health_initialized")
+        except Exception as e:
+            logger.warning("dns_health_init_failed", error=str(e))
+
+    # ── Phase 23: Escalation Pattern Analyzer ──
+    if settings.escalation_analyzer_enabled:
+        try:
+            from shieldops.api.routes import escalation_analyzer as ea_route
+            from shieldops.incidents.escalation_analyzer import (
+                EscalationPatternAnalyzer,
+            )
+
+            ea_analyzer = EscalationPatternAnalyzer(
+                max_events=settings.escalation_analyzer_max_events,
+                false_alarm_threshold=settings.escalation_analyzer_false_alarm_threshold,
+            )
+            ea_route.set_analyzer(ea_analyzer)
+            app.include_router(
+                ea_route.router,
+                prefix=settings.api_prefix,
+                tags=["Escalation Analyzer"],
+            )
+            logger.info("escalation_analyzer_initialized")
+        except Exception as e:
+            logger.warning("escalation_analyzer_init_failed", error=str(e))
+
+    # ── Phase 23: Capacity Right-Sizing Recommender ──
+    if settings.right_sizer_enabled:
+        try:
+            from shieldops.api.routes import right_sizer as rs_route
+            from shieldops.billing.right_sizer import (
+                CapacityRightSizer,
+            )
+
+            rs_engine = CapacityRightSizer(
+                max_samples=settings.right_sizer_max_samples,
+                underutil_threshold=settings.right_sizer_underutil_threshold,
+            )
+            rs_route.set_right_sizer(rs_engine)
+            app.include_router(
+                rs_route.router,
+                prefix=settings.api_prefix,
+                tags=["Right Sizer"],
+            )
+            logger.info("right_sizer_initialized")
+        except Exception as e:
+            logger.warning("right_sizer_init_failed", error=str(e))
+
+    # ── Phase 23: Storage Tier Optimizer ──
+    if settings.storage_optimizer_enabled:
+        try:
+            from shieldops.api.routes import storage_optimizer as so_route
+            from shieldops.billing.storage_optimizer import (
+                StorageTierOptimizer,
+            )
+
+            so_engine = StorageTierOptimizer(
+                max_assets=settings.storage_optimizer_max_assets,
+                cold_threshold_days=settings.storage_optimizer_cold_threshold_days,
+            )
+            so_route.set_optimizer(so_engine)
+            app.include_router(
+                so_route.router,
+                prefix=settings.api_prefix,
+                tags=["Storage Optimizer"],
+            )
+            logger.info("storage_optimizer_initialized")
+        except Exception as e:
+            logger.warning("storage_optimizer_init_failed", error=str(e))
+
+    # ── Phase 23: Resource Lifecycle Tracker ──
+    if settings.resource_lifecycle_enabled:
+        try:
+            from shieldops.api.routes import resource_lifecycle as rl_route
+            from shieldops.billing.resource_lifecycle import (
+                ResourceLifecycleTracker,
+            )
+
+            rl_tracker = ResourceLifecycleTracker(
+                max_resources=settings.resource_lifecycle_max_resources,
+                stale_days=settings.resource_lifecycle_stale_days,
+            )
+            rl_route.set_tracker(rl_tracker)
+            app.include_router(
+                rl_route.router,
+                prefix=settings.api_prefix,
+                tags=["Resource Lifecycle"],
+            )
+            logger.info("resource_lifecycle_initialized")
+        except Exception as e:
+            logger.warning("resource_lifecycle_init_failed", error=str(e))
+
+    # ── Phase 23: Alert Routing Optimizer ──
+    if settings.alert_routing_enabled:
+        try:
+            from shieldops.api.routes import alert_routing as ar_route
+            from shieldops.observability.alert_routing import (
+                AlertRoutingOptimizer,
+            )
+
+            ar_optimizer = AlertRoutingOptimizer(
+                max_records=settings.alert_routing_max_records,
+                reroute_threshold=settings.alert_routing_reroute_threshold,
+            )
+            ar_route.set_optimizer(ar_optimizer)
+            app.include_router(
+                ar_route.router,
+                prefix=settings.api_prefix,
+                tags=["Alert Routing"],
+            )
+            logger.info("alert_routing_initialized")
+        except Exception as e:
+            logger.warning("alert_routing_init_failed", error=str(e))
+
+    # ── Phase 23: SLO Target Advisor ──
+    if settings.slo_advisor_enabled:
+        try:
+            from shieldops.api.routes import slo_advisor as sa_route
+            from shieldops.sla.slo_advisor import (
+                SLOTargetAdvisor,
+            )
+
+            sa_advisor = SLOTargetAdvisor(
+                max_samples=settings.slo_advisor_max_samples,
+                min_sample_count=settings.slo_advisor_min_sample_count,
+            )
+            sa_route.set_advisor(sa_advisor)
+            app.include_router(
+                sa_route.router,
+                prefix=settings.api_prefix,
+                tags=["SLO Advisor"],
+            )
+            logger.info("slo_advisor_initialized")
+        except Exception as e:
+            logger.warning("slo_advisor_init_failed", error=str(e))
+
+    # ── Phase 23: Workload Scheduling Optimizer ──
+    if settings.workload_scheduler_enabled:
+        try:
+            from shieldops.api.routes import workload_scheduler as ws_route
+            from shieldops.operations.workload_scheduler import (
+                WorkloadSchedulingOptimizer,
+            )
+
+            ws_optimizer = WorkloadSchedulingOptimizer(
+                max_workloads=settings.workload_scheduler_max_workloads,
+                conflict_window_seconds=settings.workload_scheduler_conflict_window_seconds,
+            )
+            ws_route.set_optimizer(ws_optimizer)
+            app.include_router(
+                ws_route.router,
+                prefix=settings.api_prefix,
+                tags=["Workload Scheduler"],
+            )
+            logger.info("workload_scheduler_initialized")
+        except Exception as e:
+            logger.warning("workload_scheduler_init_failed", error=str(e))
+
     yield
 
     logger.info("shieldops_shutting_down")

@@ -71,6 +71,18 @@ Run health checks on all ShieldOps platform dependencies.
    - Dependency scorer: `src/shieldops/topology/dependency_scorer.py` — DependencyHealthScorer
    - Burn predictor: `src/shieldops/sla/burn_predictor.py` — SLOBurnRatePredictor
    - Change intelligence: `src/shieldops/changes/change_intelligence.py` — ChangeIntelligenceAnalyzer
+   - DB performance: `src/shieldops/analytics/db_performance.py` — DatabasePerformanceAnalyzer
+   - Queue health: `src/shieldops/observability/queue_health.py` — QueueHealthMonitor
+   - Cert monitor: `src/shieldops/security/cert_monitor.py` — CertificateExpiryMonitor
+   - Network flow: `src/shieldops/security/network_flow.py` — NetworkFlowAnalyzer
+   - DNS health: `src/shieldops/observability/dns_health.py` — DNSHealthMonitor
+   - Escalation analyzer: `src/shieldops/incidents/escalation_analyzer.py` — EscalationPatternAnalyzer
+   - Right sizer: `src/shieldops/billing/right_sizer.py` — CapacityRightSizer
+   - Storage optimizer: `src/shieldops/billing/storage_optimizer.py` — StorageTierOptimizer
+   - Resource lifecycle: `src/shieldops/billing/resource_lifecycle.py` — ResourceLifecycleTracker
+   - Alert routing: `src/shieldops/observability/alert_routing.py` — AlertRoutingOptimizer
+   - SLO advisor: `src/shieldops/sla/slo_advisor.py` — SLOTargetAdvisor
+   - Workload scheduler: `src/shieldops/operations/workload_scheduler.py` — WorkloadSchedulingOptimizer
    - Verify each module initializes in `src/shieldops/api/app.py` lifespan
 
 6. **Check configuration**:

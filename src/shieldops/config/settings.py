@@ -776,6 +776,66 @@ class Settings(BaseSettings):
     change_intelligence_max_records: int = 200000
     change_intelligence_risk_threshold: float = 0.6
 
+    # Phase 23: Database Performance Analyzer
+    db_performance_enabled: bool = True
+    db_performance_max_queries: int = 200000
+    db_performance_slow_threshold_ms: float = 500.0
+
+    # Phase 23: Queue Health Monitor
+    queue_health_enabled: bool = True
+    queue_health_max_metrics: int = 200000
+    queue_health_stall_threshold_seconds: int = 300
+
+    # Phase 23: Certificate Expiry Monitor
+    cert_monitor_enabled: bool = True
+    cert_monitor_max_certificates: int = 50000
+    cert_monitor_expiry_warning_days: int = 30
+
+    # Phase 23: Network Flow Analyzer
+    network_flow_enabled: bool = True
+    network_flow_max_records: int = 500000
+    network_flow_anomaly_threshold: float = 0.8
+
+    # Phase 23: DNS Health Monitor
+    dns_health_enabled: bool = True
+    dns_health_max_checks: int = 200000
+    dns_health_timeout_ms: int = 5000
+
+    # Phase 23: Escalation Pattern Analyzer
+    escalation_analyzer_enabled: bool = True
+    escalation_analyzer_max_events: int = 100000
+    escalation_analyzer_false_alarm_threshold: float = 0.3
+
+    # Phase 23: Capacity Right-Sizing Recommender
+    right_sizer_enabled: bool = True
+    right_sizer_max_samples: int = 500000
+    right_sizer_underutil_threshold: float = 0.3
+
+    # Phase 23: Storage Tier Optimizer
+    storage_optimizer_enabled: bool = True
+    storage_optimizer_max_assets: int = 100000
+    storage_optimizer_cold_threshold_days: int = 90
+
+    # Phase 23: Resource Lifecycle Tracker
+    resource_lifecycle_enabled: bool = True
+    resource_lifecycle_max_resources: int = 100000
+    resource_lifecycle_stale_days: int = 180
+
+    # Phase 23: Alert Routing Optimizer
+    alert_routing_enabled: bool = True
+    alert_routing_max_records: int = 200000
+    alert_routing_reroute_threshold: float = 0.2
+
+    # Phase 23: SLO Target Advisor
+    slo_advisor_enabled: bool = True
+    slo_advisor_max_samples: int = 500000
+    slo_advisor_min_sample_count: int = 100
+
+    # Phase 23: Workload Scheduling Optimizer
+    workload_scheduler_enabled: bool = True
+    workload_scheduler_max_workloads: int = 50000
+    workload_scheduler_conflict_window_seconds: int = 600
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",

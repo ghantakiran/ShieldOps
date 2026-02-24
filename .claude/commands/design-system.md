@@ -42,6 +42,13 @@ Design new ShieldOps components, APIs, or agent workflows.
    - Score dependency health via `DependencyHealthScorer` (`src/shieldops/topology/dependency_scorer.py`)
    - Enforce tag governance via `ResourceTagGovernanceEngine` (`src/shieldops/billing/tag_governance.py`)
    - Analyze team performance via `TeamPerformanceAnalyzer` (`src/shieldops/analytics/team_performance.py`)
+   - Analyze DB performance via `DatabasePerformanceAnalyzer` (`src/shieldops/analytics/db_performance.py`)
+   - Monitor queue health via `QueueHealthMonitor` (`src/shieldops/observability/queue_health.py`)
+   - Right-size resources via `CapacityRightSizer` (`src/shieldops/billing/right_sizer.py`)
+   - Optimize storage tiers via `StorageTierOptimizer` (`src/shieldops/billing/storage_optimizer.py`)
+   - Track resource lifecycle via `ResourceLifecycleTracker` (`src/shieldops/billing/resource_lifecycle.py`)
+   - Optimize alert routing via `AlertRoutingOptimizer` (`src/shieldops/observability/alert_routing.py`)
+   - Advise on SLO targets via `SLOTargetAdvisor` (`src/shieldops/sla/slo_advisor.py`)
 
 5. **Documentation**:
    - Write Architecture Decision Record (ADR) in `docs/architecture/`
