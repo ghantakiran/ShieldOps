@@ -266,6 +266,18 @@ ShieldOps/
 | **On-Call Fatigue** | `POST /api/v1/oncall-fatigue/pages`, `GET /api/v1/oncall-fatigue/burnout-risks` |
 | **Backup Verification** | `POST /api/v1/backup-verification/backups`, `GET /api/v1/backup-verification/recovery-readiness` |
 | **Cost Tag Enforcement** | `POST /api/v1/cost-tag-enforcer/policies`, `GET /api/v1/cost-tag-enforcer/compliance-summary` |
+| **DR Readiness** | `POST /api/v1/dr-readiness/plans`, `GET /api/v1/dr-readiness/readiness/{service}` |
+| **Service Catalog** | `POST /api/v1/service-catalog/services`, `POST /api/v1/service-catalog/validate` |
+| **Contract Testing** | `POST /api/v1/contract-testing/schemas`, `POST /api/v1/contract-testing/check` |
+| **Orphan Detector** | `POST /api/v1/orphan-detector/orphans`, `GET /api/v1/orphan-detector/summary` |
+| **Latency Profiler** | `POST /api/v1/latency-profiler/samples`, `POST /api/v1/latency-profiler/regressions` |
+| **License Scanner** | `POST /api/v1/license-scanner/dependencies`, `POST /api/v1/license-scanner/evaluate/{project}` |
+| **Release Manager** | `POST /api/v1/release-manager/releases`, `POST /api/v1/release-manager/{id}/approve` |
+| **Budget Manager** | `POST /api/v1/budget-manager/budgets`, `GET /api/v1/budget-manager/alerts` |
+| **Config Parity** | `POST /api/v1/config-parity/configs`, `POST /api/v1/config-parity/compare` |
+| **Incident Dedup** | `POST /api/v1/incident-dedup/incidents`, `POST /api/v1/incident-dedup/{id}/auto-merge` |
+| **Access Certification** | `POST /api/v1/access-certification/grants`, `POST /api/v1/access-certification/campaigns` |
+| **Toil Tracker** | `POST /api/v1/toil-tracker/entries`, `GET /api/v1/toil-tracker/candidates` |
 
 Full interactive API documentation is available at `/api/v1/docs` when the server is running.
 
