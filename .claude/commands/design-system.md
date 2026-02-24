@@ -49,6 +49,11 @@ Design new ShieldOps components, APIs, or agent workflows.
    - Track resource lifecycle via `ResourceLifecycleTracker` (`src/shieldops/billing/resource_lifecycle.py`)
    - Optimize alert routing via `AlertRoutingOptimizer` (`src/shieldops/observability/alert_routing.py`)
    - Advise on SLO targets via `SLOTargetAdvisor` (`src/shieldops/sla/slo_advisor.py`)
+   - Predict cascade failures via `CascadingFailurePredictor` (`src/shieldops/topology/cascade_predictor.py`)
+   - Score service resilience via `ResilienceScoreCalculator` (`src/shieldops/observability/resilience_scorer.py`)
+   - Optimize reserved instances via `ReservedInstanceOptimizer` (`src/shieldops/billing/reserved_instance_optimizer.py`)
+   - Allocate shared spend via `SpendAllocationEngine` (`src/shieldops/billing/spend_allocation.py`)
+   - Monitor dependency freshness via `DependencyFreshnessMonitor` (`src/shieldops/analytics/dependency_freshness.py`)
 
 5. **Documentation**:
    - Write Architecture Decision Record (ADR) in `docs/architecture/`

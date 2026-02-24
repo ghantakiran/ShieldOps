@@ -46,6 +46,10 @@ Review ShieldOps agent code for correctness, safety, and reliability.
 - [ ] Network flows monitored via `NetworkFlowAnalyzer` (`src/shieldops/security/network_flow.py`)
 - [ ] Database performance analyzed via `DatabasePerformanceAnalyzer` (`src/shieldops/analytics/db_performance.py`)
 - [ ] Escalation patterns detected via `EscalationPatternAnalyzer` (`src/shieldops/incidents/escalation_analyzer.py`)
+- [ ] Container images scanned via `ContainerImageScanner` (`src/shieldops/security/container_scanner.py`)
+- [ ] Cloud posture evaluated via `CloudSecurityPostureManager` (`src/shieldops/security/cloud_posture_manager.py`)
+- [ ] Secrets sprawl checked via `SecretsSprawlDetector` (`src/shieldops/security/secrets_detector.py`)
+- [ ] Cascade failures predicted via `CascadingFailurePredictor` (`src/shieldops/topology/cascade_predictor.py`)
 
 ### Testing
 - [ ] Unit tests for all node functions

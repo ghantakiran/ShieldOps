@@ -836,6 +836,66 @@ class Settings(BaseSettings):
     workload_scheduler_max_workloads: int = 50000
     workload_scheduler_conflict_window_seconds: int = 600
 
+    # Phase 24: Cascading Failure Predictor
+    cascade_predictor_enabled: bool = True
+    cascade_predictor_max_services: int = 50000
+    cascade_predictor_max_cascade_depth: int = 10
+
+    # Phase 24: Resilience Score Calculator
+    resilience_scorer_enabled: bool = True
+    resilience_scorer_max_profiles: int = 50000
+    resilience_scorer_minimum_score_threshold: float = 60.0
+
+    # Phase 24: Incident Timeline Reconstructor
+    timeline_reconstructor_enabled: bool = True
+    timeline_reconstructor_max_events: int = 200000
+    timeline_reconstructor_correlation_window_seconds: int = 300
+
+    # Phase 24: Reserved Instance Optimizer
+    reserved_instance_optimizer_enabled: bool = True
+    reserved_instance_optimizer_max_reservations: int = 100000
+    reserved_instance_optimizer_expiry_warning_days: int = 30
+
+    # Phase 24: Cost Anomaly Root Cause Analyzer
+    cost_anomaly_rca_enabled: bool = True
+    cost_anomaly_rca_max_spikes: int = 100000
+    cost_anomaly_rca_deviation_threshold_pct: float = 25.0
+
+    # Phase 24: Spend Allocation Engine
+    spend_allocation_enabled: bool = True
+    spend_allocation_max_pools: int = 50000
+    spend_allocation_min_allocation_threshold: float = 0.01
+
+    # Phase 24: Container Image Scanner
+    container_scanner_enabled: bool = True
+    container_scanner_max_images: int = 100000
+    container_scanner_stale_threshold_days: int = 90
+
+    # Phase 24: Cloud Security Posture Manager
+    cloud_posture_manager_enabled: bool = True
+    cloud_posture_manager_max_resources: int = 200000
+    cloud_posture_manager_auto_resolve_days: int = 30
+
+    # Phase 24: Secrets Sprawl Detector
+    secrets_detector_enabled: bool = True
+    secrets_detector_max_findings: int = 200000
+    secrets_detector_high_severity_threshold: int = 10
+
+    # Phase 24: Runbook Effectiveness Analyzer
+    runbook_effectiveness_enabled: bool = True
+    runbook_effectiveness_max_outcomes: int = 200000
+    runbook_effectiveness_decay_window_days: int = 90
+
+    # Phase 24: API Deprecation Tracker
+    api_deprecation_tracker_enabled: bool = True
+    api_deprecation_tracker_max_records: int = 100000
+    api_deprecation_tracker_sunset_warning_days: int = 30
+
+    # Phase 24: Dependency Freshness Monitor
+    dependency_freshness_enabled: bool = True
+    dependency_freshness_max_dependencies: int = 200000
+    dependency_freshness_stale_version_threshold: int = 3
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",

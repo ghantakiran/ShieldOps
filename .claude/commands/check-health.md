@@ -28,7 +28,7 @@ Run health checks on all ShieldOps platform dependencies.
    - Integration tests: `python3 -m pytest tests/integration/ -v --tb=short`
    - Report: total tests, passed, failed, coverage
 
-5. **Platform feature health** (Phase 11–22 modules):
+5. **Platform feature health** (Phase 11–24 modules):
    - Capacity trends: `src/shieldops/analytics/capacity_trends.py` — CapacityTrendAnalyzer
    - SRE metrics: `src/shieldops/analytics/sre_metrics.py` — SREMetricsAggregator
    - Health reports: `src/shieldops/observability/health_report.py` — ServiceHealthReportGenerator
@@ -83,6 +83,18 @@ Run health checks on all ShieldOps platform dependencies.
    - Alert routing: `src/shieldops/observability/alert_routing.py` — AlertRoutingOptimizer
    - SLO advisor: `src/shieldops/sla/slo_advisor.py` — SLOTargetAdvisor
    - Workload scheduler: `src/shieldops/operations/workload_scheduler.py` — WorkloadSchedulingOptimizer
+   - Cascade predictor: `src/shieldops/topology/cascade_predictor.py` — CascadingFailurePredictor
+   - Resilience scorer: `src/shieldops/observability/resilience_scorer.py` — ResilienceScoreCalculator
+   - Timeline reconstructor: `src/shieldops/incidents/timeline_reconstructor.py` — IncidentTimelineReconstructor
+   - RI optimizer: `src/shieldops/billing/reserved_instance_optimizer.py` — ReservedInstanceOptimizer
+   - Cost anomaly RCA: `src/shieldops/billing/cost_anomaly_rca.py` — CostAnomalyRootCauseAnalyzer
+   - Spend allocation: `src/shieldops/billing/spend_allocation.py` — SpendAllocationEngine
+   - Container scanner: `src/shieldops/security/container_scanner.py` — ContainerImageScanner
+   - Cloud posture: `src/shieldops/security/cloud_posture_manager.py` — CloudSecurityPostureManager
+   - Secrets detector: `src/shieldops/security/secrets_detector.py` — SecretsSprawlDetector
+   - Runbook effectiveness: `src/shieldops/operations/runbook_effectiveness.py` — RunbookEffectivenessAnalyzer
+   - API deprecation: `src/shieldops/analytics/api_deprecation_tracker.py` — APIDeprecationTracker
+   - Dependency freshness: `src/shieldops/analytics/dependency_freshness.py` — DependencyFreshnessMonitor
    - Verify each module initializes in `src/shieldops/api/app.py` lifespan
 
 6. **Check configuration**:

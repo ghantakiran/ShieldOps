@@ -279,6 +279,18 @@ module = [
     "shieldops.api.routes.alert_routing",
     "shieldops.api.routes.slo_advisor",
     "shieldops.api.routes.workload_scheduler",
+    "shieldops.api.routes.cascade_predictor",
+    "shieldops.api.routes.resilience_scorer",
+    "shieldops.api.routes.timeline_reconstructor",
+    "shieldops.api.routes.reserved_instance_optimizer",
+    "shieldops.api.routes.cost_anomaly_rca",
+    "shieldops.api.routes.spend_allocation",
+    "shieldops.api.routes.container_scanner",
+    "shieldops.api.routes.cloud_posture_manager",
+    "shieldops.api.routes.secrets_detector",
+    "shieldops.api.routes.runbook_effectiveness",
+    "shieldops.api.routes.api_deprecation_tracker",
+    "shieldops.api.routes.dependency_freshness",
 ]
 warn_return_any = false
 disallow_untyped_defs = false
