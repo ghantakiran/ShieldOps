@@ -33,6 +33,9 @@ Deploy ShieldOps agents to target environments.
    - Evaluate safety gate via `ChangeIntelligenceAnalyzer.evaluate_safety_gate()`
    - Predict SLO burn rate via `SLOBurnRatePredictor` (`src/shieldops/sla/burn_predictor.py`)
    - Check dependency health via `DependencyHealthScorer` (`src/shieldops/topology/dependency_scorer.py`)
+   - Analyze workload conflicts via `WorkloadSchedulingOptimizer` (`src/shieldops/operations/workload_scheduler.py`)
+   - Check certificate expiry via `CertificateExpiryMonitor` (`src/shieldops/security/cert_monitor.py`)
+   - Validate SLO targets via `SLOTargetAdvisor` (`src/shieldops/sla/slo_advisor.py`)
 4. **Deploy**:
    - Apply Kubernetes manifests from `infrastructure/kubernetes/`
    - For production: trigger approval workflow via Slack/Teams

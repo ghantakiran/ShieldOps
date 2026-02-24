@@ -42,6 +42,10 @@ Review ShieldOps agent code for correctness, safety, and reliability.
 - [ ] API endpoint threats monitored via `APISecurityMonitor` (`src/shieldops/security/api_security.py`)
 - [ ] Vulnerability patches tracked via `VulnerabilityLifecycleManager` (`src/shieldops/security/vuln_lifecycle.py`)
 - [ ] Runbook executions logged via `RunbookExecutionEngine` (`src/shieldops/operations/runbook_engine.py`)
+- [ ] Certificate expiry tracked via `CertificateExpiryMonitor` (`src/shieldops/security/cert_monitor.py`)
+- [ ] Network flows monitored via `NetworkFlowAnalyzer` (`src/shieldops/security/network_flow.py`)
+- [ ] Database performance analyzed via `DatabasePerformanceAnalyzer` (`src/shieldops/analytics/db_performance.py`)
+- [ ] Escalation patterns detected via `EscalationPatternAnalyzer` (`src/shieldops/incidents/escalation_analyzer.py`)
 
 ### Testing
 - [ ] Unit tests for all node functions

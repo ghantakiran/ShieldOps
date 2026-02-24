@@ -39,7 +39,9 @@ Run security audits on ShieldOps codebase and agent configurations.
 13. **Security Incident Review**: Check active incidents via `SecurityIncidentResponseTracker` (`src/shieldops/security/incident_response.py`)
 14. **Vulnerability Lifecycle**: Review overdue patches and exploit risk via `VulnerabilityLifecycleManager` (`src/shieldops/security/vuln_lifecycle.py`)
 15. **API Threat Detection**: Assess endpoint risk and suspicious patterns via `APISecurityMonitor` (`src/shieldops/security/api_security.py`)
-16. **Generate Report**: Severity-rated findings with remediation guidance
+16. **Certificate Expiry**: Check for expiring/expired TLS certs via `CertificateExpiryMonitor` (`src/shieldops/security/cert_monitor.py`)
+17. **Network Flow Analysis**: Detect anomalies and exfiltration via `NetworkFlowAnalyzer` (`src/shieldops/security/network_flow.py`)
+18. **Generate Report**: Severity-rated findings with remediation guidance
 
 ## Severity Levels
 - **CRITICAL**: Hardcoded secrets, SQL injection, unauthenticated endpoints

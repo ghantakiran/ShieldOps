@@ -86,11 +86,11 @@ ShieldOps is an enterprise SaaS platform that deploys autonomous AI agents for S
 - `src/shieldops/analytics/` — Deployment velocity, capacity trends, SRE metrics, latency profiling, toil tracking, trace analysis, log anomaly detection, event correlation, team performance
 - `src/shieldops/compliance/` — Compliance automation, gap analysis, license scanning, access certification
 - `src/shieldops/knowledge/` — Knowledge base article management
-- `src/shieldops/billing/` — Cost forecasting, cost tag enforcement, orphan detection, budget management, tag governance
+- `src/shieldops/billing/` — Cost forecasting, cost tag enforcement, orphan detection, budget management, tag governance, right-sizing, storage optimization, resource lifecycle
 - `src/shieldops/changes/` — Deployment risk, change advisory, release management, change intelligence
-- `src/shieldops/security/` — Security incident response, vulnerability lifecycle, API security monitoring
-- `src/shieldops/operations/` — Runbook execution engine
-- `src/shieldops/sla/` — SLA engine, SLO burn rate prediction
+- `src/shieldops/security/` — Security incident response, vulnerability lifecycle, API security monitoring, certificate monitoring, network flow analysis
+- `src/shieldops/operations/` — Runbook execution engine, workload scheduling optimization
+- `src/shieldops/sla/` — SLA engine, SLO burn rate prediction, SLO target advisory
 - `src/shieldops/config/` — Configuration, parity validation
 - `docs/prd/` — Product Requirements Documents
 - `docs/architecture/` — Architecture Decision Records
