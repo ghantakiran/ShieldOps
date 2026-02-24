@@ -28,7 +28,7 @@ Run health checks on all ShieldOps platform dependencies.
    - Integration tests: `python3 -m pytest tests/integration/ -v --tb=short`
    - Report: total tests, passed, failed, coverage
 
-5. **Platform feature health** (Phase 11–24 modules):
+5. **Platform feature health** (Phase 11–25 modules):
    - Capacity trends: `src/shieldops/analytics/capacity_trends.py` — CapacityTrendAnalyzer
    - SRE metrics: `src/shieldops/analytics/sre_metrics.py` — SREMetricsAggregator
    - Health reports: `src/shieldops/observability/health_report.py` — ServiceHealthReportGenerator
@@ -95,6 +95,18 @@ Run health checks on all ShieldOps platform dependencies.
    - Runbook effectiveness: `src/shieldops/operations/runbook_effectiveness.py` — RunbookEffectivenessAnalyzer
    - API deprecation: `src/shieldops/analytics/api_deprecation_tracker.py` — APIDeprecationTracker
    - Dependency freshness: `src/shieldops/analytics/dependency_freshness.py` — DependencyFreshnessMonitor
+   - Chaos designer: `src/shieldops/observability/chaos_designer.py` — ChaosExperimentDesigner
+   - Game day planner: `src/shieldops/operations/game_day_planner.py` — GameDayPlanner
+   - Failure mode catalog: `src/shieldops/topology/failure_mode_catalog.py` — FailureModeCatalog
+   - On-call optimizer: `src/shieldops/incidents/oncall_optimizer.py` — OnCallRotationOptimizer
+   - Alert correlation rules: `src/shieldops/observability/alert_correlation_rules.py` — AlertCorrelationRuleEngine
+   - Incident review board: `src/shieldops/incidents/review_board.py` — IncidentReviewBoard
+   - Commitment planner: `src/shieldops/billing/commitment_planner.py` — CloudCommitmentPlanner
+   - Cost simulator: `src/shieldops/billing/cost_simulator.py` — CostSimulationEngine
+   - FinOps maturity: `src/shieldops/billing/finops_maturity.py` — FinOpsMaturityScorer
+   - Change failure tracker: `src/shieldops/changes/change_failure_tracker.py` — ChangeFailureRateTracker
+   - Toil recommender: `src/shieldops/operations/toil_recommender.py` — ToilAutomationRecommender
+   - SLI pipeline: `src/shieldops/sla/sli_pipeline.py` — SLICalculationPipeline
    - Verify each module initializes in `src/shieldops/api/app.py` lifespan
 
 6. **Check configuration**:

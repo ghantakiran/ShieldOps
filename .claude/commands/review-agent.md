@@ -50,6 +50,10 @@ Review ShieldOps agent code for correctness, safety, and reliability.
 - [ ] Cloud posture evaluated via `CloudSecurityPostureManager` (`src/shieldops/security/cloud_posture_manager.py`)
 - [ ] Secrets sprawl checked via `SecretsSprawlDetector` (`src/shieldops/security/secrets_detector.py`)
 - [ ] Cascade failures predicted via `CascadingFailurePredictor` (`src/shieldops/topology/cascade_predictor.py`)
+- [ ] Chaos experiments designed via `ChaosExperimentDesigner` (`src/shieldops/observability/chaos_designer.py`)
+- [ ] Change failure rates tracked via `ChangeFailureRateTracker` (`src/shieldops/changes/change_failure_tracker.py`)
+- [ ] SLI calculations verified via `SLICalculationPipeline` (`src/shieldops/sla/sli_pipeline.py`)
+- [ ] FinOps maturity assessed via `FinOpsMaturityScorer` (`src/shieldops/billing/finops_maturity.py`)
 
 ### Testing
 - [ ] Unit tests for all node functions

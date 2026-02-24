@@ -346,6 +346,7 @@ Default policies ship with the platform and can be customized per environment:
 | Phase 22 | Proactive Intelligence & Security Operations | Completed |
 | Phase 23 | Infrastructure Intelligence & Resource Optimization | Completed |
 | Phase 24 | Autonomous Resilience & Platform Hardening | Completed |
+| Phase 25 | Chaos Engineering & Operational Intelligence | Completed |
 
 ## Documentation
 

@@ -4437,6 +4437,270 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         except Exception as e:
             logger.warning("dependency_freshness_init_failed", error=str(e))
 
+    # ── Phase 25: Chaos Experiment Designer ──────────────────────
+    if settings.chaos_designer_enabled:
+        try:
+            from shieldops.api.routes import chaos_designer as cd_route
+            from shieldops.observability.chaos_designer import (
+                ChaosExperimentDesigner,
+            )
+
+            cd_designer = ChaosExperimentDesigner(
+                max_experiments=settings.chaos_designer_max_experiments,
+                max_blast_radius=settings.chaos_designer_max_blast_radius,
+            )
+            cd_route.set_designer(cd_designer)
+            app.include_router(
+                cd_route.router,
+                prefix=settings.api_prefix,
+                tags=["Chaos Designer"],
+            )
+            logger.info("chaos_designer_initialized")
+        except Exception as e:
+            logger.warning("chaos_designer_init_failed", error=str(e))
+
+    # ── Phase 25: Game Day Planner ───────────────────────────────
+    if settings.game_day_planner_enabled:
+        try:
+            from shieldops.api.routes import game_day_planner as gdp_route
+            from shieldops.operations.game_day_planner import (
+                GameDayPlanner,
+            )
+
+            gdp_planner = GameDayPlanner(
+                max_game_days=settings.game_day_planner_max_game_days,
+                min_scenarios_per_day=settings.game_day_planner_min_scenarios_per_day,
+            )
+            gdp_route.set_planner(gdp_planner)
+            app.include_router(
+                gdp_route.router,
+                prefix=settings.api_prefix,
+                tags=["Game Day Planner"],
+            )
+            logger.info("game_day_planner_initialized")
+        except Exception as e:
+            logger.warning("game_day_planner_init_failed", error=str(e))
+
+    # ── Phase 25: Failure Mode Catalog ───────────────────────────
+    if settings.failure_mode_catalog_enabled:
+        try:
+            from shieldops.api.routes import failure_mode_catalog as fmc_route
+            from shieldops.topology.failure_mode_catalog import (
+                FailureModeCatalog,
+            )
+
+            fmc_catalog = FailureModeCatalog(
+                max_modes=settings.failure_mode_catalog_max_modes,
+                mtbf_window_days=settings.failure_mode_catalog_mtbf_window_days,
+            )
+            fmc_route.set_catalog(fmc_catalog)
+            app.include_router(
+                fmc_route.router,
+                prefix=settings.api_prefix,
+                tags=["Failure Mode Catalog"],
+            )
+            logger.info("failure_mode_catalog_initialized")
+        except Exception as e:
+            logger.warning("failure_mode_catalog_init_failed", error=str(e))
+
+    # ── Phase 25: On-Call Rotation Optimizer ─────────────────────
+    if settings.oncall_optimizer_enabled:
+        try:
+            from shieldops.api.routes import oncall_optimizer as oo_route
+            from shieldops.incidents.oncall_optimizer import (
+                OnCallRotationOptimizer,
+            )
+
+            oo_optimizer = OnCallRotationOptimizer(
+                max_members=settings.oncall_optimizer_max_members,
+                max_consecutive_days=settings.oncall_optimizer_max_consecutive_days,
+            )
+            oo_route.set_optimizer(oo_optimizer)
+            app.include_router(
+                oo_route.router,
+                prefix=settings.api_prefix,
+                tags=["On-Call Optimizer"],
+            )
+            logger.info("oncall_optimizer_initialized")
+        except Exception as e:
+            logger.warning("oncall_optimizer_init_failed", error=str(e))
+
+    # ── Phase 25: Alert Correlation Rule Engine ──────────────────
+    if settings.alert_correlation_rules_enabled:
+        try:
+            from shieldops.api.routes import alert_correlation_rules as acr_route
+            from shieldops.observability.alert_correlation_rules import (
+                AlertCorrelationRuleEngine,
+            )
+
+            acr_engine = AlertCorrelationRuleEngine(
+                max_rules=settings.alert_correlation_rules_max_rules,
+                time_window_seconds=settings.alert_correlation_rules_time_window_seconds,
+            )
+            acr_route.set_engine(acr_engine)
+            app.include_router(
+                acr_route.router,
+                prefix=settings.api_prefix,
+                tags=["Alert Correlation Rules"],
+            )
+            logger.info("alert_correlation_rules_initialized")
+        except Exception as e:
+            logger.warning("alert_correlation_rules_init_failed", error=str(e))
+
+    # ── Phase 25: Incident Review Board ──────────────────────────
+    if settings.review_board_enabled:
+        try:
+            from shieldops.api.routes import review_board as rb_route
+            from shieldops.incidents.review_board import (
+                IncidentReviewBoard,
+            )
+
+            rb_board = IncidentReviewBoard(
+                max_reviews=settings.review_board_max_reviews,
+                action_sla_days=settings.review_board_action_sla_days,
+            )
+            rb_route.set_board(rb_board)
+            app.include_router(
+                rb_route.router,
+                prefix=settings.api_prefix,
+                tags=["Review Board"],
+            )
+            logger.info("review_board_initialized")
+        except Exception as e:
+            logger.warning("review_board_init_failed", error=str(e))
+
+    # ── Phase 25: Cloud Commitment Planner ───────────────────────
+    if settings.commitment_planner_enabled:
+        try:
+            from shieldops.api.routes import commitment_planner as cpl_route
+            from shieldops.billing.commitment_planner import (
+                CloudCommitmentPlanner,
+            )
+
+            cpl_planner = CloudCommitmentPlanner(
+                max_workloads=settings.commitment_planner_max_workloads,
+                min_savings_threshold_pct=settings.commitment_planner_min_savings_threshold_pct,
+            )
+            cpl_route.set_planner(cpl_planner)
+            app.include_router(
+                cpl_route.router,
+                prefix=settings.api_prefix,
+                tags=["Commitment Planner"],
+            )
+            logger.info("commitment_planner_initialized")
+        except Exception as e:
+            logger.warning("commitment_planner_init_failed", error=str(e))
+
+    # ── Phase 25: Cost Simulation Engine ─────────────────────────
+    if settings.cost_simulator_enabled:
+        try:
+            from shieldops.api.routes import cost_simulator as csim_route
+            from shieldops.billing.cost_simulator import (
+                CostSimulationEngine,
+            )
+
+            csim_engine = CostSimulationEngine(
+                max_scenarios=settings.cost_simulator_max_scenarios,
+                budget_breach_threshold_pct=settings.cost_simulator_budget_breach_threshold_pct,
+            )
+            csim_route.set_engine(csim_engine)
+            app.include_router(
+                csim_route.router,
+                prefix=settings.api_prefix,
+                tags=["Cost Simulator"],
+            )
+            logger.info("cost_simulator_initialized")
+        except Exception as e:
+            logger.warning("cost_simulator_init_failed", error=str(e))
+
+    # ── Phase 25: FinOps Maturity Scorer ─────────────────────────
+    if settings.finops_maturity_enabled:
+        try:
+            from shieldops.api.routes import finops_maturity as fm_route
+            from shieldops.billing.finops_maturity import (
+                FinOpsMaturityScorer,
+            )
+
+            fm_scorer = FinOpsMaturityScorer(
+                max_assessments=settings.finops_maturity_max_assessments,
+                target_level=settings.finops_maturity_target_level,
+            )
+            fm_route.set_scorer(fm_scorer)
+            app.include_router(
+                fm_route.router,
+                prefix=settings.api_prefix,
+                tags=["FinOps Maturity"],
+            )
+            logger.info("finops_maturity_initialized")
+        except Exception as e:
+            logger.warning("finops_maturity_init_failed", error=str(e))
+
+    # ── Phase 25: Change Failure Rate Tracker ────────────────────
+    if settings.change_failure_tracker_enabled:
+        try:
+            from shieldops.api.routes import change_failure_tracker as cft_route
+            from shieldops.changes.change_failure_tracker import (
+                ChangeFailureRateTracker,
+            )
+
+            cft_tracker = ChangeFailureRateTracker(
+                max_deployments=settings.change_failure_tracker_max_deployments,
+                trend_window_days=settings.change_failure_tracker_trend_window_days,
+            )
+            cft_route.set_tracker(cft_tracker)
+            app.include_router(
+                cft_route.router,
+                prefix=settings.api_prefix,
+                tags=["Change Failure Tracker"],
+            )
+            logger.info("change_failure_tracker_initialized")
+        except Exception as e:
+            logger.warning("change_failure_tracker_init_failed", error=str(e))
+
+    # ── Phase 25: Toil Automation Recommender ────────────────────
+    if settings.toil_recommender_enabled:
+        try:
+            from shieldops.api.routes import toil_recommender as trec_route
+            from shieldops.operations.toil_recommender import (
+                ToilAutomationRecommender,
+            )
+
+            trec_recommender = ToilAutomationRecommender(
+                max_patterns=settings.toil_recommender_max_patterns,
+                min_roi_multiplier=settings.toil_recommender_min_roi_multiplier,
+            )
+            trec_route.set_recommender(trec_recommender)
+            app.include_router(
+                trec_route.router,
+                prefix=settings.api_prefix,
+                tags=["Toil Recommender"],
+            )
+            logger.info("toil_recommender_initialized")
+        except Exception as e:
+            logger.warning("toil_recommender_init_failed", error=str(e))
+
+    # ── Phase 25: SLI Calculation Pipeline ───────────────────────
+    if settings.sli_pipeline_enabled:
+        try:
+            from shieldops.api.routes import sli_pipeline as sli_route
+            from shieldops.sla.sli_pipeline import (
+                SLICalculationPipeline,
+            )
+
+            sli_pipe = SLICalculationPipeline(
+                max_definitions=settings.sli_pipeline_max_definitions,
+                data_retention_hours=settings.sli_pipeline_data_retention_hours,
+            )
+            sli_route.set_pipeline(sli_pipe)
+            app.include_router(
+                sli_route.router,
+                prefix=settings.api_prefix,
+                tags=["SLI Pipeline"],
+            )
+            logger.info("sli_pipeline_initialized")
+        except Exception as e:
+            logger.warning("sli_pipeline_init_failed", error=str(e))
+
     yield
 
     logger.info("shieldops_shutting_down")

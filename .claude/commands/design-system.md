@@ -54,6 +54,10 @@ Design new ShieldOps components, APIs, or agent workflows.
    - Optimize reserved instances via `ReservedInstanceOptimizer` (`src/shieldops/billing/reserved_instance_optimizer.py`)
    - Allocate shared spend via `SpendAllocationEngine` (`src/shieldops/billing/spend_allocation.py`)
    - Monitor dependency freshness via `DependencyFreshnessMonitor` (`src/shieldops/analytics/dependency_freshness.py`)
+   - Plan cloud commitments via `CloudCommitmentPlanner` (`src/shieldops/billing/commitment_planner.py`)
+   - Simulate cost scenarios via `CostSimulationEngine` (`src/shieldops/billing/cost_simulator.py`)
+   - Calculate SLIs via `SLICalculationPipeline` (`src/shieldops/sla/sli_pipeline.py`)
+   - Check failure modes via `FailureModeCatalog` (`src/shieldops/topology/failure_mode_catalog.py`)
 
 5. **Documentation**:
    - Write Architecture Decision Record (ADR) in `docs/architecture/`
