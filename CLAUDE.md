@@ -79,17 +79,17 @@ ShieldOps is an enterprise SaaS platform that deploys autonomous AI agents for S
 - `src/shieldops/policy/` — OPA policies, approval logic, tenant isolation
 - `src/shieldops/api/` — FastAPI routes and middleware
 - `src/shieldops/dashboard/` — React dashboard components
-- `src/shieldops/observability/` — Alert noise, threshold tuning, backup verification, resilience scoring, chaos experiment design, alert correlation rules
-- `src/shieldops/incidents/` — Severity prediction, on-call fatigue analysis, incident deduplication, timeline reconstruction, on-call rotation optimization, incident review board
-- `src/shieldops/topology/` — Service dependency impact analysis, service catalog, dependency health scoring, cascade failure prediction, failure mode catalog
+- `src/shieldops/observability/` — Alert noise, threshold tuning, backup verification, resilience scoring, chaos experiment design, alert correlation rules, metric baseline, alert fatigue
+- `src/shieldops/incidents/` — Severity prediction, on-call fatigue analysis, incident deduplication, timeline reconstruction, on-call rotation optimization, incident review board, incident timeline analyzer
+- `src/shieldops/topology/` — Service dependency impact analysis, service catalog, dependency health scoring, cascade failure prediction, failure mode catalog, service health aggregator, dependency update planner
 - `src/shieldops/audit/` — Configuration audit trail
-- `src/shieldops/analytics/` — Deployment velocity, capacity trends, SRE metrics, latency profiling, toil tracking, trace analysis, log anomaly detection, event correlation, team performance, API deprecation tracking, dependency freshness
-- `src/shieldops/compliance/` — Compliance automation, gap analysis, license scanning, access certification
+- `src/shieldops/analytics/` — Deployment velocity, capacity trends, SRE metrics, latency profiling, toil tracking, trace analysis, log anomaly detection, event correlation, team performance, API deprecation tracking, dependency freshness, deployment cadence, capacity forecast engine
+- `src/shieldops/compliance/` — Compliance automation, gap analysis, license scanning, access certification, evidence chain
 - `src/shieldops/knowledge/` — Knowledge base article management
-- `src/shieldops/billing/` — Cost forecasting, cost tag enforcement, orphan detection, budget management, tag governance, right-sizing, storage optimization, resource lifecycle, RI optimization, cost anomaly RCA, spend allocation, commitment planning, cost simulation, FinOps maturity
-- `src/shieldops/changes/` — Deployment risk, change advisory, release management, change intelligence, change failure rate tracking
+- `src/shieldops/billing/` — Cost forecasting, cost tag enforcement, orphan detection, budget management, tag governance, right-sizing, storage optimization, resource lifecycle, RI optimization, cost anomaly RCA, spend allocation, commitment planning, cost simulation, FinOps maturity, resource waste detector
+- `src/shieldops/changes/` — Deployment risk, change advisory, release management, change intelligence, change failure rate tracking, change window optimizer
 - `src/shieldops/security/` — Security incident response, vulnerability lifecycle, API security monitoring, certificate monitoring, network flow analysis, container scanning, cloud posture management, secrets detection
-- `src/shieldops/operations/` — Runbook execution engine, workload scheduling optimization, runbook effectiveness analysis, game day planning, toil automation recommendations
+- `src/shieldops/operations/` — Runbook execution engine, workload scheduling optimization, runbook effectiveness analysis, game day planning, toil automation recommendations, runbook versioner, team skill matrix
 - `src/shieldops/sla/` — SLA engine, SLO burn rate prediction, SLO target advisory, SLI calculation pipeline
 - `src/shieldops/config/` — Configuration, parity validation
 - `docs/prd/` — Product Requirements Documents

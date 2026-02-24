@@ -303,6 +303,18 @@ module = [
     "shieldops.api.routes.change_failure_tracker",
     "shieldops.api.routes.toil_recommender",
     "shieldops.api.routes.sli_pipeline",
+    "shieldops.api.routes.deployment_cadence",
+    "shieldops.api.routes.metric_baseline",
+    "shieldops.api.routes.incident_timeline",
+    "shieldops.api.routes.service_health_agg",
+    "shieldops.api.routes.alert_fatigue",
+    "shieldops.api.routes.change_window",
+    "shieldops.api.routes.resource_waste",
+    "shieldops.api.routes.evidence_chain",
+    "shieldops.api.routes.dependency_update_planner",
+    "shieldops.api.routes.capacity_forecast_engine",
+    "shieldops.api.routes.runbook_versioner",
+    "shieldops.api.routes.team_skill_matrix",
 ]
 warn_return_any = false
 disallow_untyped_defs = false

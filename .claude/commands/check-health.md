@@ -28,7 +28,7 @@ Run health checks on all ShieldOps platform dependencies.
    - Integration tests: `python3 -m pytest tests/integration/ -v --tb=short`
    - Report: total tests, passed, failed, coverage
 
-5. **Platform feature health** (Phase 11–25 modules):
+5. **Platform feature health** (Phase 11–26 modules):
    - Capacity trends: `src/shieldops/analytics/capacity_trends.py` — CapacityTrendAnalyzer
    - SRE metrics: `src/shieldops/analytics/sre_metrics.py` — SREMetricsAggregator
    - Health reports: `src/shieldops/observability/health_report.py` — ServiceHealthReportGenerator
@@ -107,6 +107,18 @@ Run health checks on all ShieldOps platform dependencies.
    - Change failure tracker: `src/shieldops/changes/change_failure_tracker.py` — ChangeFailureRateTracker
    - Toil recommender: `src/shieldops/operations/toil_recommender.py` — ToilAutomationRecommender
    - SLI pipeline: `src/shieldops/sla/sli_pipeline.py` — SLICalculationPipeline
+   - Deployment cadence: `src/shieldops/analytics/deployment_cadence.py` — DeploymentCadenceAnalyzer
+   - Metric baseline: `src/shieldops/observability/metric_baseline.py` — MetricBaselineManager
+   - Incident timeline: `src/shieldops/incidents/incident_timeline.py` — IncidentTimelineAnalyzer
+   - Service health agg: `src/shieldops/topology/service_health_agg.py` — ServiceHealthAggregator
+   - Alert fatigue: `src/shieldops/observability/alert_fatigue.py` — AlertFatigueScorer
+   - Change window: `src/shieldops/changes/change_window.py` — ChangeWindowOptimizer
+   - Resource waste: `src/shieldops/billing/resource_waste.py` — ResourceWasteDetector
+   - Evidence chain: `src/shieldops/compliance/evidence_chain.py` — ComplianceEvidenceChain
+   - Dependency update planner: `src/shieldops/topology/dependency_update_planner.py` — DependencyUpdatePlanner
+   - Capacity forecast engine: `src/shieldops/analytics/capacity_forecast_engine.py` — CapacityForecastEngine
+   - Runbook versioner: `src/shieldops/operations/runbook_versioner.py` — RunbookVersionManager
+   - Team skill matrix: `src/shieldops/operations/team_skill_matrix.py` — TeamSkillMatrix
    - Verify each module initializes in `src/shieldops/api/app.py` lifespan
 
 6. **Check configuration**:

@@ -46,7 +46,9 @@ Run security audits on ShieldOps codebase and agent configurations.
 20. **Secrets Sprawl Detection**: Detect hardcoded credentials via `SecretsSprawlDetector` (`src/shieldops/security/secrets_detector.py`)
 21. **Alert Correlation Rules**: Evaluate alert correlation patterns via `AlertCorrelationRuleEngine` (`src/shieldops/observability/alert_correlation_rules.py`)
 22. **Incident Review Board**: Review incident response quality via `IncidentReviewBoard` (`src/shieldops/incidents/review_board.py`)
-23. **Generate Report**: Severity-rated findings with remediation guidance
+23. **Compliance Evidence Chain**: Verify evidence integrity via `ComplianceEvidenceChain` (`src/shieldops/compliance/evidence_chain.py`)
+24. **Alert Fatigue Scoring**: Assess alert fatigue risk via `AlertFatigueScorer` (`src/shieldops/observability/alert_fatigue.py`)
+25. **Generate Report**: Severity-rated findings with remediation guidance
 
 ## Severity Levels
 - **CRITICAL**: Hardcoded secrets, SQL injection, unauthenticated endpoints

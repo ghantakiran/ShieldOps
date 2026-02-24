@@ -42,6 +42,9 @@ Deploy ShieldOps agents to target environments.
    - Design chaos experiments via `ChaosExperimentDesigner` (`src/shieldops/observability/chaos_designer.py`)
    - Plan game day exercises via `GameDayPlanner` (`src/shieldops/operations/game_day_planner.py`)
    - Check failure modes via `FailureModeCatalog` (`src/shieldops/topology/failure_mode_catalog.py`)
+   - Analyze deployment cadence via `DeploymentCadenceAnalyzer` (`src/shieldops/analytics/deployment_cadence.py`)
+   - Optimize change windows via `ChangeWindowOptimizer` (`src/shieldops/changes/change_window.py`)
+   - Verify service health aggregation via `ServiceHealthAggregator` (`src/shieldops/topology/service_health_agg.py`)
 4. **Deploy**:
    - Apply Kubernetes manifests from `infrastructure/kubernetes/`
    - For production: trigger approval workflow via Slack/Teams
