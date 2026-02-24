@@ -716,6 +716,66 @@ class Settings(BaseSettings):
     toil_tracker_max_entries: int = 100000
     toil_tracker_automation_min_occurrences: int = 3
 
+    # Phase 22: Distributed Trace Analyzer
+    trace_analyzer_enabled: bool = True
+    trace_analyzer_max_traces: int = 500000
+    trace_analyzer_bottleneck_threshold: float = 0.2
+
+    # Phase 22: Log Anomaly Detector
+    log_anomaly_enabled: bool = True
+    log_anomaly_max_patterns: int = 100000
+    log_anomaly_sensitivity: float = 0.7
+
+    # Phase 22: Event Correlation Engine
+    event_correlation_enabled: bool = True
+    event_correlation_max_events: int = 500000
+    event_correlation_window_minutes: int = 30
+
+    # Phase 22: Security Incident Response Tracker
+    security_incident_enabled: bool = True
+    security_incident_max_incidents: int = 50000
+    security_incident_auto_escalate_minutes: int = 30
+
+    # Phase 22: Vulnerability Lifecycle Manager
+    vuln_lifecycle_enabled: bool = True
+    vuln_lifecycle_max_records: int = 100000
+    vuln_lifecycle_patch_sla_days: int = 14
+
+    # Phase 22: API Security Monitor
+    api_security_enabled: bool = True
+    api_security_max_endpoints: int = 50000
+    api_security_alert_threshold: float = 0.75
+
+    # Phase 22: Resource Tag Governance Engine
+    tag_governance_enabled: bool = True
+    tag_governance_max_policies: int = 5000
+    tag_governance_max_reports: int = 100000
+
+    # Phase 22: Team Performance Analyzer
+    team_performance_enabled: bool = True
+    team_performance_max_members: int = 10000
+    team_performance_burnout_threshold: float = 0.8
+
+    # Phase 22: Runbook Execution Engine
+    runbook_engine_enabled: bool = True
+    runbook_engine_max_executions: int = 100000
+    runbook_engine_step_timeout: int = 300
+
+    # Phase 22: Dependency Health Scorer
+    dependency_scorer_enabled: bool = True
+    dependency_scorer_max_dependencies: int = 10000
+    dependency_scorer_check_interval: int = 60
+
+    # Phase 22: SLO Burn Rate Predictor
+    burn_predictor_enabled: bool = True
+    burn_predictor_max_slos: int = 5000
+    burn_predictor_forecast_hours: int = 24
+
+    # Phase 22: Change Intelligence Analyzer
+    change_intelligence_enabled: bool = True
+    change_intelligence_max_records: int = 200000
+    change_intelligence_risk_threshold: float = 0.6
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",
