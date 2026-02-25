@@ -1315,6 +1315,66 @@ class Settings(BaseSettings):
     cache_effectiveness_max_records: int = 200000
     cache_effectiveness_min_hit_rate_pct: float = 80.0
 
+    # Phase 32: Build Pipeline Analyzer
+    build_pipeline_enabled: bool = True
+    build_pipeline_max_records: int = 200000
+    build_pipeline_min_success_rate_pct: float = 90.0
+
+    # Phase 32: Code Review Velocity Tracker
+    review_velocity_enabled: bool = True
+    review_velocity_max_records: int = 200000
+    review_velocity_max_cycle_hours: float = 48.0
+
+    # Phase 32: Developer Environment Health Monitor
+    dev_environment_enabled: bool = True
+    dev_environment_max_records: int = 200000
+    dev_environment_max_drift_days: int = 14
+
+    # Phase 32: Traffic Pattern Analyzer
+    traffic_pattern_enabled: bool = True
+    traffic_pattern_max_records: int = 200000
+    traffic_pattern_error_threshold_pct: float = 5.0
+
+    # Phase 32: Rate Limit Policy Manager
+    rate_limit_policy_enabled: bool = True
+    rate_limit_policy_max_records: int = 200000
+    rate_limit_policy_violation_threshold: int = 100
+
+    # Phase 32: Circuit Breaker Health Monitor
+    circuit_breaker_health_enabled: bool = True
+    circuit_breaker_health_max_records: int = 200000
+    circuit_breaker_health_max_trip_count_24h: int = 10
+
+    # Phase 32: Data Pipeline Reliability Monitor
+    data_pipeline_enabled: bool = True
+    data_pipeline_max_records: int = 200000
+    data_pipeline_freshness_threshold_seconds: float = 3600.0
+
+    # Phase 32: Queue Depth Forecaster
+    queue_depth_forecast_enabled: bool = True
+    queue_depth_forecast_max_records: int = 200000
+    queue_depth_forecast_overflow_threshold: int = 100000
+
+    # Phase 32: Connection Pool Monitor
+    connection_pool_enabled: bool = True
+    connection_pool_max_records: int = 200000
+    connection_pool_saturation_threshold_pct: float = 85.0
+
+    # Phase 32: Dependency License Risk Analyzer
+    license_risk_enabled: bool = True
+    license_risk_max_records: int = 200000
+    license_risk_max_transitive_depth: int = 5
+
+    # Phase 32: Incident Communication Effectiveness Analyzer
+    comm_effectiveness_enabled: bool = True
+    comm_effectiveness_max_records: int = 200000
+    comm_effectiveness_min_delivery_rate_pct: float = 95.0
+
+    # Phase 32: Operational Readiness Scorer
+    readiness_scorer_enabled: bool = True
+    readiness_scorer_max_records: int = 200000
+    readiness_scorer_min_readiness_score: float = 70.0
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",

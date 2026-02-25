@@ -387,6 +387,18 @@ module = [
     "shieldops.api.routes.sre_maturity",
     "shieldops.api.routes.learning_tracker",
     "shieldops.api.routes.cache_effectiveness",
+    "shieldops.api.routes.build_pipeline",
+    "shieldops.api.routes.review_velocity",
+    "shieldops.api.routes.dev_environment",
+    "shieldops.api.routes.traffic_pattern",
+    "shieldops.api.routes.rate_limit_policy",
+    "shieldops.api.routes.circuit_breaker_health",
+    "shieldops.api.routes.data_pipeline",
+    "shieldops.api.routes.queue_depth_forecast",
+    "shieldops.api.routes.connection_pool",
+    "shieldops.api.routes.license_risk",
+    "shieldops.api.routes.comm_effectiveness",
+    "shieldops.api.routes.readiness_scorer",
 ]
 warn_return_any = false
 disallow_untyped_defs = false

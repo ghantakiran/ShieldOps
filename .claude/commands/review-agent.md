@@ -92,6 +92,18 @@ Review ShieldOps agent code for correctness, safety, and reliability.
 - [ ] SRE maturity assessed via `SREMaturityAssessor` (`src/shieldops/operations/sre_maturity.py`)
 - [ ] Incident lessons tracked via `IncidentLearningTracker` (`src/shieldops/incidents/learning_tracker.py`)
 - [ ] Cache effectiveness analyzed via `CacheEffectivenessAnalyzer` (`src/shieldops/analytics/cache_effectiveness.py`)
+- [ ] Build pipelines analyzed via `BuildPipelineAnalyzer` (`src/shieldops/analytics/build_pipeline.py`)
+- [ ] Code review velocity tracked via `CodeReviewVelocityTracker` (`src/shieldops/analytics/review_velocity.py`)
+- [ ] Dev environment health monitored via `DevEnvironmentHealthMonitor` (`src/shieldops/operations/dev_environment.py`)
+- [ ] Traffic patterns analyzed via `TrafficPatternAnalyzer` (`src/shieldops/topology/traffic_pattern.py`)
+- [ ] Rate limit policies managed via `RateLimitPolicyManager` (`src/shieldops/topology/rate_limit_policy.py`)
+- [ ] Circuit breaker health monitored via `CircuitBreakerHealthMonitor` (`src/shieldops/topology/circuit_breaker_health.py`)
+- [ ] Data pipeline reliability monitored via `DataPipelineReliabilityMonitor` (`src/shieldops/observability/data_pipeline.py`)
+- [ ] Queue depth forecasted via `QueueDepthForecaster` (`src/shieldops/observability/queue_depth_forecast.py`)
+- [ ] Connection pool monitored via `ConnectionPoolMonitor` (`src/shieldops/analytics/connection_pool.py`)
+- [ ] License risk analyzed via `DependencyLicenseRiskAnalyzer` (`src/shieldops/compliance/license_risk.py`)
+- [ ] Communication effectiveness analyzed via `CommEffectivenessAnalyzer` (`src/shieldops/incidents/comm_effectiveness.py`)
+- [ ] Operational readiness scored via `OperationalReadinessScorer` (`src/shieldops/operations/readiness_scorer.py`)
 
 ### Testing
 - [ ] Unit tests for all node functions

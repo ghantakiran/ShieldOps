@@ -96,6 +96,18 @@ Design new ShieldOps components, APIs, or agent workflows.
    - Assess SRE maturity via `SREMaturityAssessor` (`src/shieldops/operations/sre_maturity.py`)
    - Track incident lessons via `IncidentLearningTracker` (`src/shieldops/incidents/learning_tracker.py`)
    - Analyze cache effectiveness via `CacheEffectivenessAnalyzer` (`src/shieldops/analytics/cache_effectiveness.py`)
+   - Analyze build pipelines via `BuildPipelineAnalyzer` (`src/shieldops/analytics/build_pipeline.py`)
+   - Track code review velocity via `CodeReviewVelocityTracker` (`src/shieldops/analytics/review_velocity.py`)
+   - Monitor dev environments via `DevEnvironmentHealthMonitor` (`src/shieldops/operations/dev_environment.py`)
+   - Analyze traffic patterns via `TrafficPatternAnalyzer` (`src/shieldops/topology/traffic_pattern.py`)
+   - Manage rate limit policies via `RateLimitPolicyManager` (`src/shieldops/topology/rate_limit_policy.py`)
+   - Monitor circuit breaker health via `CircuitBreakerHealthMonitor` (`src/shieldops/topology/circuit_breaker_health.py`)
+   - Monitor data pipeline reliability via `DataPipelineReliabilityMonitor` (`src/shieldops/observability/data_pipeline.py`)
+   - Forecast queue depth via `QueueDepthForecaster` (`src/shieldops/observability/queue_depth_forecast.py`)
+   - Monitor connection pools via `ConnectionPoolMonitor` (`src/shieldops/analytics/connection_pool.py`)
+   - Analyze license risk via `DependencyLicenseRiskAnalyzer` (`src/shieldops/compliance/license_risk.py`)
+   - Analyze communication effectiveness via `CommEffectivenessAnalyzer` (`src/shieldops/incidents/comm_effectiveness.py`)
+   - Score operational readiness via `OperationalReadinessScorer` (`src/shieldops/operations/readiness_scorer.py`)
 
 5. **Documentation**:
    - Write Architecture Decision Record (ADR) in `docs/architecture/`

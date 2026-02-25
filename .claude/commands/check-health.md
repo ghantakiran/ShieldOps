@@ -28,7 +28,7 @@ Run health checks on all ShieldOps platform dependencies.
    - Integration tests: `python3 -m pytest tests/integration/ -v --tb=short`
    - Report: total tests, passed, failed, coverage
 
-5. **Platform feature health** (Phase 11–31 modules):
+5. **Platform feature health** (Phase 11–32 modules):
    - Capacity trends: `src/shieldops/analytics/capacity_trends.py` — CapacityTrendAnalyzer
    - SRE metrics: `src/shieldops/analytics/sre_metrics.py` — SREMetricsAggregator
    - Health reports: `src/shieldops/observability/health_report.py` — ServiceHealthReportGenerator
@@ -179,6 +179,18 @@ Run health checks on all ShieldOps platform dependencies.
    - SRE maturity: `src/shieldops/operations/sre_maturity.py` — SREMaturityAssessor
    - Learning tracker: `src/shieldops/incidents/learning_tracker.py` — IncidentLearningTracker
    - Cache effectiveness: `src/shieldops/analytics/cache_effectiveness.py` — CacheEffectivenessAnalyzer
+   - Build pipeline: `src/shieldops/analytics/build_pipeline.py` — BuildPipelineAnalyzer
+   - Review velocity: `src/shieldops/analytics/review_velocity.py` — CodeReviewVelocityTracker
+   - Dev environment: `src/shieldops/operations/dev_environment.py` — DevEnvironmentHealthMonitor
+   - Traffic pattern: `src/shieldops/topology/traffic_pattern.py` — TrafficPatternAnalyzer
+   - Rate limit policy: `src/shieldops/topology/rate_limit_policy.py` — RateLimitPolicyManager
+   - Circuit breaker health: `src/shieldops/topology/circuit_breaker_health.py` — CircuitBreakerHealthMonitor
+   - Data pipeline: `src/shieldops/observability/data_pipeline.py` — DataPipelineReliabilityMonitor
+   - Queue depth forecast: `src/shieldops/observability/queue_depth_forecast.py` — QueueDepthForecaster
+   - Connection pool: `src/shieldops/analytics/connection_pool.py` — ConnectionPoolMonitor
+   - License risk: `src/shieldops/compliance/license_risk.py` — DependencyLicenseRiskAnalyzer
+   - Comm effectiveness: `src/shieldops/incidents/comm_effectiveness.py` — CommEffectivenessAnalyzer
+   - Readiness scorer: `src/shieldops/operations/readiness_scorer.py` — OperationalReadinessScorer
    - Verify each module initializes in `src/shieldops/api/app.py` lifespan
 
 6. **Check configuration**:
