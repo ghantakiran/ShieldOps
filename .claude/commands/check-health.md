@@ -28,7 +28,7 @@ Run health checks on all ShieldOps platform dependencies.
    - Integration tests: `python3 -m pytest tests/integration/ -v --tb=short`
    - Report: total tests, passed, failed, coverage
 
-5. **Platform feature health** (Phase 11–28 modules):
+5. **Platform feature health** (Phase 11–29 modules):
    - Capacity trends: `src/shieldops/analytics/capacity_trends.py` — CapacityTrendAnalyzer
    - SRE metrics: `src/shieldops/analytics/sre_metrics.py` — SREMetricsAggregator
    - Health reports: `src/shieldops/observability/health_report.py` — ServiceHealthReportGenerator
@@ -143,6 +143,18 @@ Run health checks on all ShieldOps platform dependencies.
    - Evidence scheduler: `src/shieldops/compliance/evidence_scheduler.py` — ComplianceEvidenceScheduler
    - Latency budget tracker: `src/shieldops/analytics/latency_budget_tracker.py` — LatencyBudgetTracker
    - Change conflict detector: `src/shieldops/changes/change_conflict_detector.py` — ChangeConflictDetector
+   - Duration predictor: `src/shieldops/incidents/duration_predictor.py` — IncidentDurationPredictor
+   - Resource exhaustion: `src/shieldops/analytics/resource_exhaustion.py` — ResourceExhaustionForecaster
+   - Alert storm correlator: `src/shieldops/observability/alert_storm_correlator.py` — AlertStormCorrelator
+   - Canary analyzer: `src/shieldops/changes/canary_analyzer.py` — DeploymentCanaryAnalyzer
+   - SLA cascader: `src/shieldops/sla/sla_cascader.py` — ServiceSLACascader
+   - Handoff tracker: `src/shieldops/incidents/handoff_tracker.py` — IncidentHandoffTracker
+   - Unit economics: `src/shieldops/billing/unit_economics.py` — CostUnitEconomicsEngine
+   - Idle resource detector: `src/shieldops/billing/idle_resource_detector.py` — IdleResourceDetector
+   - Penalty calculator: `src/shieldops/sla/penalty_calculator.py` — SLAPenaltyCalculator
+   - Posture trend: `src/shieldops/security/posture_trend.py` — SecurityPostureTrendAnalyzer
+   - Evidence freshness: `src/shieldops/compliance/evidence_freshness.py` — EvidenceFreshnessMonitor
+   - Access anomaly: `src/shieldops/security/access_anomaly.py` — AccessAnomalyDetector
    - Verify each module initializes in `src/shieldops/api/app.py` lifespan
 
 6. **Check configuration**:

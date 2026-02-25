@@ -69,6 +69,9 @@ Design new ShieldOps components, APIs, or agent workflows.
    - Predict cost anomalies via `CostAnomalyPredictor` (`src/shieldops/billing/cost_anomaly_predictor.py`)
    - Advise capacity right-timing via `CapacityRightTimingAdvisor` (`src/shieldops/operations/capacity_right_timing.py`)
    - Analyze runbook gaps via `RunbookGapAnalyzer` (`src/shieldops/operations/runbook_gap_analyzer.py`)
+   - Compute unit economics via `CostUnitEconomicsEngine` (`src/shieldops/billing/unit_economics.py`)
+   - Forecast resource exhaustion via `ResourceExhaustionForecaster` (`src/shieldops/analytics/resource_exhaustion.py`)
+   - Detect idle resources via `IdleResourceDetector` (`src/shieldops/billing/idle_resource_detector.py`)
 
 5. **Documentation**:
    - Write Architecture Decision Record (ADR) in `docs/architecture/`

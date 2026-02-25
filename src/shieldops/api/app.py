@@ -5553,6 +5553,284 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         except Exception as e:
             logger.warning("change_conflict_detector_init_failed", error=str(e))
 
+    # ── Phase 29 ────────────────────────────────────────────────
+
+    if settings.duration_predictor_enabled:
+        try:
+            from shieldops.api.routes import (
+                duration_predictor as dp_mod,
+            )
+            from shieldops.incidents.duration_predictor import (
+                IncidentDurationPredictor,
+            )
+
+            dp = IncidentDurationPredictor(
+                max_records=settings.duration_predictor_max_records,
+                accuracy_target_pct=settings.duration_predictor_accuracy_target_pct,
+            )
+            dp_mod.set_engine(dp)
+            app.include_router(
+                dp_mod.dp_route,
+                prefix=settings.api_prefix,
+                tags=["Duration Predictor"],
+            )
+            logger.info("duration_predictor_initialized")
+        except Exception as e:
+            logger.warning("duration_predictor_init_failed", error=str(e))
+
+    if settings.resource_exhaustion_enabled:
+        try:
+            from shieldops.analytics.resource_exhaustion import (
+                ResourceExhaustionForecaster,
+            )
+            from shieldops.api.routes import (
+                resource_exhaustion as rex_mod,
+            )
+
+            rex = ResourceExhaustionForecaster(
+                max_records=settings.resource_exhaustion_max_records,
+                default_critical_hours=settings.resource_exhaustion_default_critical_hours,
+            )
+            rex_mod.set_engine(rex)
+            app.include_router(
+                rex_mod.rex_route,
+                prefix=settings.api_prefix,
+                tags=["Resource Exhaustion"],
+            )
+            logger.info("resource_exhaustion_initialized")
+        except Exception as e:
+            logger.warning("resource_exhaustion_init_failed", error=str(e))
+
+    if settings.alert_storm_correlator_enabled:
+        try:
+            from shieldops.api.routes import (
+                alert_storm_correlator as asc_mod,
+            )
+            from shieldops.observability.alert_storm_correlator import (
+                AlertStormCorrelator,
+            )
+
+            asc = AlertStormCorrelator(
+                max_records=settings.alert_storm_correlator_max_records,
+                storm_window_seconds=settings.alert_storm_correlator_storm_window_seconds,
+            )
+            asc_mod.set_engine(asc)
+            app.include_router(
+                asc_mod.asc_route,
+                prefix=settings.api_prefix,
+                tags=["Alert Storm Correlator"],
+            )
+            logger.info("alert_storm_correlator_initialized")
+        except Exception as e:
+            logger.warning("alert_storm_correlator_init_failed", error=str(e))
+
+    if settings.canary_analyzer_enabled:
+        try:
+            from shieldops.api.routes import (
+                canary_analyzer as ca_mod,
+            )
+            from shieldops.changes.canary_analyzer import (
+                DeploymentCanaryAnalyzer,
+            )
+
+            ca = DeploymentCanaryAnalyzer(
+                max_records=settings.canary_analyzer_max_records,
+                deviation_threshold_pct=settings.canary_analyzer_deviation_threshold_pct,
+            )
+            ca_mod.set_engine(ca)
+            app.include_router(
+                ca_mod.ca_route,
+                prefix=settings.api_prefix,
+                tags=["Canary Analyzer"],
+            )
+            logger.info("canary_analyzer_initialized")
+        except Exception as e:
+            logger.warning("canary_analyzer_init_failed", error=str(e))
+
+    if settings.sla_cascader_enabled:
+        try:
+            from shieldops.api.routes import (
+                sla_cascader as sc_mod,
+            )
+            from shieldops.sla.sla_cascader import (
+                ServiceSLACascader,
+            )
+
+            sc = ServiceSLACascader(
+                max_records=settings.sla_cascader_max_records,
+                min_acceptable_sla_pct=settings.sla_cascader_min_acceptable_sla_pct,
+            )
+            sc_mod.set_cascader(sc)
+            app.include_router(
+                sc_mod.sc_route,
+                prefix=settings.api_prefix,
+                tags=["SLA Cascader"],
+            )
+            logger.info("sla_cascader_initialized")
+        except Exception as e:
+            logger.warning("sla_cascader_init_failed", error=str(e))
+
+    if settings.handoff_tracker_enabled:
+        try:
+            from shieldops.api.routes import (
+                handoff_tracker as ht_mod,
+            )
+            from shieldops.incidents.handoff_tracker import (
+                IncidentHandoffTracker,
+            )
+
+            ht = IncidentHandoffTracker(
+                max_records=settings.handoff_tracker_max_records,
+                quality_threshold=settings.handoff_tracker_quality_threshold,
+            )
+            ht_mod.set_tracker(ht)
+            app.include_router(
+                ht_mod.ht_route,
+                prefix=settings.api_prefix,
+                tags=["Handoff Tracker"],
+            )
+            logger.info("handoff_tracker_initialized")
+        except Exception as e:
+            logger.warning("handoff_tracker_init_failed", error=str(e))
+
+    if settings.unit_economics_enabled:
+        try:
+            from shieldops.api.routes import (
+                unit_economics as ue_mod,
+            )
+            from shieldops.billing.unit_economics import (
+                CostUnitEconomicsEngine,
+            )
+
+            ue = CostUnitEconomicsEngine(
+                max_records=settings.unit_economics_max_records,
+                high_cost_threshold=settings.unit_economics_high_cost_threshold,
+            )
+            ue_mod.set_engine(ue)
+            app.include_router(
+                ue_mod.ue_route,
+                prefix=settings.api_prefix,
+                tags=["Unit Economics"],
+            )
+            logger.info("unit_economics_initialized")
+        except Exception as e:
+            logger.warning("unit_economics_init_failed", error=str(e))
+
+    if settings.idle_resource_detector_enabled:
+        try:
+            from shieldops.api.routes import (
+                idle_resource_detector as ird_mod,
+            )
+            from shieldops.billing.idle_resource_detector import (
+                IdleResourceDetector,
+            )
+
+            ird = IdleResourceDetector(
+                max_records=settings.idle_resource_detector_max_records,
+                idle_threshold_pct=settings.idle_resource_detector_idle_threshold_pct,
+            )
+            ird_mod.set_detector(ird)
+            app.include_router(
+                ird_mod.ird_route,
+                prefix=settings.api_prefix,
+                tags=["Idle Resource Detector"],
+            )
+            logger.info("idle_resource_detector_initialized")
+        except Exception as e:
+            logger.warning("idle_resource_detector_init_failed", error=str(e))
+
+    if settings.penalty_calculator_enabled:
+        try:
+            from shieldops.api.routes import (
+                penalty_calculator as pc_mod,
+            )
+            from shieldops.sla.penalty_calculator import (
+                SLAPenaltyCalculator,
+            )
+
+            pc = SLAPenaltyCalculator(
+                max_records=settings.penalty_calculator_max_records,
+                default_credit_multiplier=settings.penalty_calculator_default_credit_multiplier,
+            )
+            pc_mod.set_engine(pc)
+            app.include_router(
+                pc_mod.pc_route,
+                prefix=settings.api_prefix,
+                tags=["Penalty Calculator"],
+            )
+            logger.info("penalty_calculator_initialized")
+        except Exception as e:
+            logger.warning("penalty_calculator_init_failed", error=str(e))
+
+    if settings.posture_trend_enabled:
+        try:
+            from shieldops.api.routes import (
+                posture_trend as pt_mod,
+            )
+            from shieldops.security.posture_trend import (
+                SecurityPostureTrendAnalyzer,
+            )
+
+            pt = SecurityPostureTrendAnalyzer(
+                max_records=settings.posture_trend_max_records,
+                regression_threshold=settings.posture_trend_regression_threshold,
+            )
+            pt_mod.set_engine(pt)
+            app.include_router(
+                pt_mod.pt_route,
+                prefix=settings.api_prefix,
+                tags=["Posture Trend"],
+            )
+            logger.info("posture_trend_initialized")
+        except Exception as e:
+            logger.warning("posture_trend_init_failed", error=str(e))
+
+    if settings.evidence_freshness_enabled:
+        try:
+            from shieldops.api.routes import (
+                evidence_freshness as ef_mod,
+            )
+            from shieldops.compliance.evidence_freshness import (
+                EvidenceFreshnessMonitor,
+            )
+
+            ef = EvidenceFreshnessMonitor(
+                max_records=settings.evidence_freshness_max_records,
+                stale_days=settings.evidence_freshness_stale_days,
+            )
+            ef_mod.set_engine(ef)
+            app.include_router(
+                ef_mod.ef_route,
+                prefix=settings.api_prefix,
+                tags=["Evidence Freshness"],
+            )
+            logger.info("evidence_freshness_initialized")
+        except Exception as e:
+            logger.warning("evidence_freshness_init_failed", error=str(e))
+
+    if settings.access_anomaly_enabled:
+        try:
+            from shieldops.api.routes import (
+                access_anomaly as aa_mod,
+            )
+            from shieldops.security.access_anomaly import (
+                AccessAnomalyDetector,
+            )
+
+            aa = AccessAnomalyDetector(
+                max_records=settings.access_anomaly_max_records,
+                threat_threshold=settings.access_anomaly_threat_threshold,
+            )
+            aa_mod.set_engine(aa)
+            app.include_router(
+                aa_mod.aa_route,
+                prefix=settings.api_prefix,
+                tags=["Access Anomaly"],
+            )
+            logger.info("access_anomaly_initialized")
+        except Exception as e:
+            logger.warning("access_anomaly_init_failed", error=str(e))
+
     yield
 
     logger.info("shieldops_shutting_down")
