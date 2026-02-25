@@ -351,6 +351,18 @@ module = [
     "shieldops.api.routes.evidence_scheduler",
     "shieldops.api.routes.latency_budget_tracker",
     "shieldops.api.routes.change_conflict_detector",
+    "shieldops.api.routes.duration_predictor",
+    "shieldops.api.routes.resource_exhaustion",
+    "shieldops.api.routes.alert_storm_correlator",
+    "shieldops.api.routes.canary_analyzer",
+    "shieldops.api.routes.sla_cascader",
+    "shieldops.api.routes.handoff_tracker",
+    "shieldops.api.routes.unit_economics",
+    "shieldops.api.routes.idle_resource_detector",
+    "shieldops.api.routes.penalty_calculator",
+    "shieldops.api.routes.posture_trend",
+    "shieldops.api.routes.evidence_freshness",
+    "shieldops.api.routes.access_anomaly",
 ]
 warn_return_any = false
 disallow_untyped_defs = false

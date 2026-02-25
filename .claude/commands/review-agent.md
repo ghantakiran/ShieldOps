@@ -65,6 +65,9 @@ Review ShieldOps agent code for correctness, safety, and reliability.
 - [ ] Deploy health scored via `DeploymentHealthScorer` (`src/shieldops/changes/deploy_health_scorer.py`)
 - [ ] Latency budgets tracked via `LatencyBudgetTracker` (`src/shieldops/analytics/latency_budget_tracker.py`)
 - [ ] Change conflicts detected via `ChangeConflictDetector` (`src/shieldops/changes/change_conflict_detector.py`)
+- [ ] SLA cascading computed via `ServiceSLACascader` (`src/shieldops/sla/sla_cascader.py`)
+- [ ] SLA penalties calculated via `SLAPenaltyCalculator` (`src/shieldops/sla/penalty_calculator.py`)
+- [ ] Canary deployments analyzed via `DeploymentCanaryAnalyzer` (`src/shieldops/changes/canary_analyzer.py`)
 
 ### Testing
 - [ ] Unit tests for all node functions

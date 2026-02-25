@@ -52,7 +52,9 @@ Run security audits on ShieldOps codebase and agent configurations.
 26. **Alert Rule Linting**: Validate alert rule quality via `AlertRuleLinter` (`src/shieldops/observability/alert_rule_linter.py`)
 27. **Credential Expiry Forecasting**: Forecast credential renewal timelines via `CredentialExpiryForecaster` (`src/shieldops/security/credential_expiry_forecaster.py`)
 28. **Policy Violation Tracking**: Track OPA policy violations via `PolicyViolationTracker` (`src/shieldops/compliance/policy_violation_tracker.py`)
-27. **Generate Report**: Severity-rated findings with remediation guidance
+29. **Security Posture Trend Analysis**: Track posture over time via `SecurityPostureTrendAnalyzer` (`src/shieldops/security/posture_trend.py`)
+30. **Access Anomaly Detection**: Detect anomalous access patterns via `AccessAnomalyDetector` (`src/shieldops/security/access_anomaly.py`)
+31. **Generate Report**: Severity-rated findings with remediation guidance
 
 ## Severity Levels
 - **CRITICAL**: Hardcoded secrets, SQL injection, unauthenticated endpoints

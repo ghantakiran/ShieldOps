@@ -1135,6 +1135,66 @@ class Settings(BaseSettings):
     change_conflict_detector_max_records: int = 100000
     change_conflict_detector_lookahead_hours: int = 168
 
+    # Phase 29: Incident Duration Predictor
+    duration_predictor_enabled: bool = True
+    duration_predictor_max_records: int = 200000
+    duration_predictor_accuracy_target_pct: float = 80.0
+
+    # Phase 29: Resource Exhaustion Forecaster
+    resource_exhaustion_enabled: bool = True
+    resource_exhaustion_max_records: int = 200000
+    resource_exhaustion_default_critical_hours: float = 12.0
+
+    # Phase 29: Alert Storm Correlator
+    alert_storm_correlator_enabled: bool = True
+    alert_storm_correlator_max_records: int = 200000
+    alert_storm_correlator_storm_window_seconds: float = 300.0
+
+    # Phase 29: Deployment Canary Analyzer
+    canary_analyzer_enabled: bool = True
+    canary_analyzer_max_records: int = 200000
+    canary_analyzer_deviation_threshold_pct: float = 10.0
+
+    # Phase 29: Service Dependency SLA Cascader
+    sla_cascader_enabled: bool = True
+    sla_cascader_max_records: int = 200000
+    sla_cascader_min_acceptable_sla_pct: float = 99.0
+
+    # Phase 29: Incident Handoff Tracker
+    handoff_tracker_enabled: bool = True
+    handoff_tracker_max_records: int = 200000
+    handoff_tracker_quality_threshold: float = 0.7
+
+    # Phase 29: Cost Unit Economics Engine
+    unit_economics_enabled: bool = True
+    unit_economics_max_records: int = 200000
+    unit_economics_high_cost_threshold: float = 0.01
+
+    # Phase 29: Idle Resource Detector
+    idle_resource_detector_enabled: bool = True
+    idle_resource_detector_max_records: int = 200000
+    idle_resource_detector_idle_threshold_pct: float = 5.0
+
+    # Phase 29: SLA Penalty Calculator
+    penalty_calculator_enabled: bool = True
+    penalty_calculator_max_records: int = 200000
+    penalty_calculator_default_credit_multiplier: float = 1.0
+
+    # Phase 29: Security Posture Trend Analyzer
+    posture_trend_enabled: bool = True
+    posture_trend_max_records: int = 200000
+    posture_trend_regression_threshold: float = 5.0
+
+    # Phase 29: Compliance Evidence Freshness Monitor
+    evidence_freshness_enabled: bool = True
+    evidence_freshness_max_records: int = 200000
+    evidence_freshness_stale_days: int = 90
+
+    # Phase 29: Access Anomaly Detector
+    access_anomaly_enabled: bool = True
+    access_anomaly_max_records: int = 200000
+    access_anomaly_threat_threshold: float = 0.7
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",
