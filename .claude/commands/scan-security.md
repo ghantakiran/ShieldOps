@@ -50,6 +50,8 @@ Run security audits on ShieldOps codebase and agent configurations.
 24. **Alert Fatigue Scoring**: Assess alert fatigue risk via `AlertFatigueScorer` (`src/shieldops/observability/alert_fatigue.py`)
 25. **Compliance Drift Detection**: Detect compliance policy drift via `ComplianceDriftDetector` (`src/shieldops/compliance/compliance_drift.py`)
 26. **Alert Rule Linting**: Validate alert rule quality via `AlertRuleLinter` (`src/shieldops/observability/alert_rule_linter.py`)
+27. **Credential Expiry Forecasting**: Forecast credential renewal timelines via `CredentialExpiryForecaster` (`src/shieldops/security/credential_expiry_forecaster.py`)
+28. **Policy Violation Tracking**: Track OPA policy violations via `PolicyViolationTracker` (`src/shieldops/compliance/policy_violation_tracker.py`)
 27. **Generate Report**: Severity-rated findings with remediation guidance
 
 ## Severity Levels

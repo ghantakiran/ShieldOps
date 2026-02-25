@@ -349,6 +349,7 @@ Default policies ship with the platform and can be customized per environment:
 | Phase 25 | Chaos Engineering & Operational Intelligence | Completed |
 | Phase 26 | Platform Intelligence & Operational Excellence | Completed |
 | Phase 27 | Advanced Reliability & Cost Governance | Completed |
+| Phase 28 | Predictive Operations & Intelligent Governance | Completed |
 
 ## Documentation
 

@@ -62,6 +62,9 @@ Review ShieldOps agent code for correctness, safety, and reliability.
 - [ ] Incident severity calibrated via `IncidentSeverityCalibrator` (`src/shieldops/incidents/severity_calibrator.py`)
 - [ ] Service dependencies mapped via `ServiceDependencyMapper` (`src/shieldops/topology/dependency_mapper.py`)
 - [ ] Billing reconciled via `CloudBillingReconciler` (`src/shieldops/billing/billing_reconciler.py`)
+- [ ] Deploy health scored via `DeploymentHealthScorer` (`src/shieldops/changes/deploy_health_scorer.py`)
+- [ ] Latency budgets tracked via `LatencyBudgetTracker` (`src/shieldops/analytics/latency_budget_tracker.py`)
+- [ ] Change conflicts detected via `ChangeConflictDetector` (`src/shieldops/changes/change_conflict_detector.py`)
 
 ### Testing
 - [ ] Unit tests for all node functions

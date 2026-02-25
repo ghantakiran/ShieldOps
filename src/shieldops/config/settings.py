@@ -1075,6 +1075,66 @@ class Settings(BaseSettings):
     service_maturity_max_assessments: int = 100000
     service_maturity_target_level: int = 3
 
+    # Phase 28: Capacity Right-Timing Advisor
+    capacity_right_timing_enabled: bool = True
+    capacity_right_timing_max_records: int = 200000
+    capacity_right_timing_lookahead_hours: int = 24
+
+    # Phase 28: Predictive Outage Detector
+    outage_predictor_enabled: bool = True
+    outage_predictor_max_records: int = 300000
+    outage_predictor_composite_threshold: float = 0.75
+
+    # Phase 28: Incident Impact Quantifier
+    impact_quantifier_enabled: bool = True
+    impact_quantifier_max_assessments: int = 100000
+    impact_quantifier_default_hourly_rate_usd: float = 150.0
+
+    # Phase 28: Policy Violation Tracker
+    policy_violation_tracker_enabled: bool = True
+    policy_violation_tracker_max_records: int = 500000
+    policy_violation_tracker_repeat_threshold: int = 5
+
+    # Phase 28: Deployment Health Scorer
+    deploy_health_scorer_enabled: bool = True
+    deploy_health_scorer_max_records: int = 200000
+    deploy_health_scorer_failing_threshold: float = 40.0
+
+    # Phase 28: Runbook Gap Analyzer
+    runbook_gap_analyzer_enabled: bool = True
+    runbook_gap_analyzer_max_gaps: int = 100000
+    runbook_gap_analyzer_critical_incident_threshold: int = 3
+
+    # Phase 28: Credential Expiry Forecaster
+    credential_expiry_forecaster_enabled: bool = True
+    credential_expiry_forecaster_max_records: int = 200000
+    credential_expiry_forecaster_warning_days: int = 30
+
+    # Phase 28: On-Call Workload Balancer
+    oncall_workload_balancer_enabled: bool = True
+    oncall_workload_balancer_max_records: int = 200000
+    oncall_workload_balancer_imbalance_threshold_pct: float = 30.0
+
+    # Phase 28: Cost Anomaly Predictor
+    cost_anomaly_predictor_enabled: bool = True
+    cost_anomaly_predictor_max_records: int = 300000
+    cost_anomaly_predictor_spike_threshold_usd: float = 1000.0
+
+    # Phase 28: Compliance Evidence Scheduler
+    evidence_scheduler_enabled: bool = True
+    evidence_scheduler_max_schedules: int = 50000
+    evidence_scheduler_overdue_grace_days: int = 7
+
+    # Phase 28: API Latency Budget Tracker
+    latency_budget_tracker_enabled: bool = True
+    latency_budget_tracker_max_records: int = 500000
+    latency_budget_tracker_chronic_violation_threshold: int = 10
+
+    # Phase 28: Change Conflict Detector
+    change_conflict_detector_enabled: bool = True
+    change_conflict_detector_max_records: int = 100000
+    change_conflict_detector_lookahead_hours: int = 168
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",

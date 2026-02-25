@@ -66,6 +66,9 @@ Design new ShieldOps components, APIs, or agent workflows.
    - Assess service maturity via `ServiceMaturityModel` (`src/shieldops/topology/service_maturity.py`)
    - Allocate cost chargebacks via `CostChargebackEngine` (`src/shieldops/billing/chargeback_engine.py`)
    - Reconcile infrastructure drift via `InfrastructureDriftReconciler` (`src/shieldops/operations/infra_drift_reconciler.py`)
+   - Predict cost anomalies via `CostAnomalyPredictor` (`src/shieldops/billing/cost_anomaly_predictor.py`)
+   - Advise capacity right-timing via `CapacityRightTimingAdvisor` (`src/shieldops/operations/capacity_right_timing.py`)
+   - Analyze runbook gaps via `RunbookGapAnalyzer` (`src/shieldops/operations/runbook_gap_analyzer.py`)
 
 5. **Documentation**:
    - Write Architecture Decision Record (ADR) in `docs/architecture/`

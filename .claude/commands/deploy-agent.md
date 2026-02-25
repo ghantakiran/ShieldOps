@@ -48,6 +48,9 @@ Deploy ShieldOps agents to target environments.
    - Enforce deployment approval gate via `DeploymentApprovalGate` (`src/shieldops/changes/deployment_gate.py`)
    - Validate error budget policy via `ErrorBudgetPolicyEngine` (`src/shieldops/sla/error_budget_policy.py`)
    - Assess service maturity via `ServiceMaturityModel` (`src/shieldops/topology/service_maturity.py`)
+   - Predict outages via `PredictiveOutageDetector` (`src/shieldops/observability/outage_predictor.py`)
+   - Score deployment health via `DeploymentHealthScorer` (`src/shieldops/changes/deploy_health_scorer.py`)
+   - Detect change conflicts via `ChangeConflictDetector` (`src/shieldops/changes/change_conflict_detector.py`)
 4. **Deploy**:
    - Apply Kubernetes manifests from `infrastructure/kubernetes/`
    - For production: trigger approval workflow via Slack/Teams
