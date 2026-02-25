@@ -28,7 +28,7 @@ Run health checks on all ShieldOps platform dependencies.
    - Integration tests: `python3 -m pytest tests/integration/ -v --tb=short`
    - Report: total tests, passed, failed, coverage
 
-5. **Platform feature health** (Phase 11–29 modules):
+5. **Platform feature health** (Phase 11–30 modules):
    - Capacity trends: `src/shieldops/analytics/capacity_trends.py` — CapacityTrendAnalyzer
    - SRE metrics: `src/shieldops/analytics/sre_metrics.py` — SREMetricsAggregator
    - Health reports: `src/shieldops/observability/health_report.py` — ServiceHealthReportGenerator
@@ -155,6 +155,18 @@ Run health checks on all ShieldOps platform dependencies.
    - Posture trend: `src/shieldops/security/posture_trend.py` — SecurityPostureTrendAnalyzer
    - Evidence freshness: `src/shieldops/compliance/evidence_freshness.py` — EvidenceFreshnessMonitor
    - Access anomaly: `src/shieldops/security/access_anomaly.py` — AccessAnomalyDetector
+   - Response advisor: `src/shieldops/incidents/response_advisor.py` — IncidentResponseAdvisor
+   - Metric RCA: `src/shieldops/analytics/metric_rca.py` — MetricRootCauseAnalyzer
+   - SLO forecast: `src/shieldops/sla/slo_forecast.py` — SLOComplianceForecaster
+   - Remediation decision: `src/shieldops/operations/remediation_decision.py` — AutoRemediationDecisionEngine
+   - Dependency lag: `src/shieldops/topology/dependency_lag.py` — DependencyLagMonitor
+   - Escalation effectiveness: `src/shieldops/incidents/escalation_effectiveness.py` — EscalationEffectivenessTracker
+   - Discount optimizer: `src/shieldops/billing/discount_optimizer.py` — CloudDiscountOptimizer
+   - Audit trail analyzer: `src/shieldops/compliance/audit_trail_analyzer.py` — ComplianceAuditTrailAnalyzer
+   - Velocity throttle: `src/shieldops/changes/velocity_throttle.py` — ChangeVelocityThrottle
+   - Alert tuning feedback: `src/shieldops/observability/alert_tuning_feedback.py` — AlertTuningFeedbackLoop
+   - Knowledge decay: `src/shieldops/knowledge/knowledge_decay.py` — KnowledgeDecayDetector
+   - Coverage scorer: `src/shieldops/observability/coverage_scorer.py` — ObservabilityCoverageScorer
    - Verify each module initializes in `src/shieldops/api/app.py` lifespan
 
 6. **Check configuration**:

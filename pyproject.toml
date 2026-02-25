@@ -363,6 +363,18 @@ module = [
     "shieldops.api.routes.posture_trend",
     "shieldops.api.routes.evidence_freshness",
     "shieldops.api.routes.access_anomaly",
+    "shieldops.api.routes.response_advisor",
+    "shieldops.api.routes.metric_rca",
+    "shieldops.api.routes.slo_forecast",
+    "shieldops.api.routes.remediation_decision",
+    "shieldops.api.routes.dependency_lag",
+    "shieldops.api.routes.escalation_effectiveness",
+    "shieldops.api.routes.discount_optimizer",
+    "shieldops.api.routes.audit_trail_analyzer",
+    "shieldops.api.routes.velocity_throttle",
+    "shieldops.api.routes.alert_tuning_feedback",
+    "shieldops.api.routes.knowledge_decay",
+    "shieldops.api.routes.coverage_scorer",
 ]
 warn_return_any = false
 disallow_untyped_defs = false

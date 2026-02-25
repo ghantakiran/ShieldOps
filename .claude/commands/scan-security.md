@@ -54,6 +54,10 @@ Run security audits on ShieldOps codebase and agent configurations.
 28. **Policy Violation Tracking**: Track OPA policy violations via `PolicyViolationTracker` (`src/shieldops/compliance/policy_violation_tracker.py`)
 29. **Security Posture Trend Analysis**: Track posture over time via `SecurityPostureTrendAnalyzer` (`src/shieldops/security/posture_trend.py`)
 30. **Access Anomaly Detection**: Detect anomalous access patterns via `AccessAnomalyDetector` (`src/shieldops/security/access_anomaly.py`)
+31. **Audit Trail Analysis**: Analyze audit trail for suspicious patterns via `ComplianceAuditTrailAnalyzer` (`src/shieldops/compliance/audit_trail_analyzer.py`)
+32. **Alert Tuning Feedback**: Evaluate alert rule effectiveness via `AlertTuningFeedbackLoop` (`src/shieldops/observability/alert_tuning_feedback.py`)
+33. **Discount Coverage**: Identify uncovered resources via `CloudDiscountOptimizer` (`src/shieldops/billing/discount_optimizer.py`)
+34. **Knowledge Decay**: Detect stale knowledge articles via `KnowledgeDecayDetector` (`src/shieldops/knowledge/knowledge_decay.py`)
 31. **Generate Report**: Severity-rated findings with remediation guidance
 
 ## Severity Levels

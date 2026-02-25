@@ -5831,6 +5831,284 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         except Exception as e:
             logger.warning("access_anomaly_init_failed", error=str(e))
 
+    # ── Phase 30 ────────────────────────────────────────────────
+
+    if settings.response_advisor_enabled:
+        try:
+            from shieldops.api.routes import (
+                response_advisor as rad_mod,
+            )
+            from shieldops.incidents.response_advisor import (
+                IncidentResponseAdvisor,
+            )
+
+            rad = IncidentResponseAdvisor(
+                max_records=settings.response_advisor_max_records,
+                confidence_threshold=settings.response_advisor_confidence_threshold,
+            )
+            rad_mod.set_engine(rad)
+            app.include_router(
+                rad_mod.rad_route,
+                prefix=settings.api_prefix,
+                tags=["Response Advisor"],
+            )
+            logger.info("response_advisor_initialized")
+        except Exception as e:
+            logger.warning("response_advisor_init_failed", error=str(e))
+
+    if settings.metric_rca_enabled:
+        try:
+            from shieldops.analytics.metric_rca import (
+                MetricRootCauseAnalyzer,
+            )
+            from shieldops.api.routes import (
+                metric_rca as mrc_mod,
+            )
+
+            mrc = MetricRootCauseAnalyzer(
+                max_records=settings.metric_rca_max_records,
+                deviation_threshold_pct=settings.metric_rca_deviation_threshold_pct,
+            )
+            mrc_mod.set_engine(mrc)
+            app.include_router(
+                mrc_mod.mrc_route,
+                prefix=settings.api_prefix,
+                tags=["Metric RCA"],
+            )
+            logger.info("metric_rca_initialized")
+        except Exception as e:
+            logger.warning("metric_rca_init_failed", error=str(e))
+
+    if settings.slo_forecast_enabled:
+        try:
+            from shieldops.api.routes import (
+                slo_forecast as sf_mod,
+            )
+            from shieldops.sla.slo_forecast import (
+                SLOComplianceForecaster,
+            )
+
+            sf = SLOComplianceForecaster(
+                max_records=settings.slo_forecast_max_records,
+                risk_threshold_pct=settings.slo_forecast_risk_threshold_pct,
+            )
+            sf_mod.set_engine(sf)
+            app.include_router(
+                sf_mod.sf_route,
+                prefix=settings.api_prefix,
+                tags=["SLO Forecast"],
+            )
+            logger.info("slo_forecast_initialized")
+        except Exception as e:
+            logger.warning("slo_forecast_init_failed", error=str(e))
+
+    if settings.remediation_decision_enabled:
+        try:
+            from shieldops.api.routes import (
+                remediation_decision as rde_mod,
+            )
+            from shieldops.operations.remediation_decision import (
+                AutoRemediationDecisionEngine,
+            )
+
+            rde = AutoRemediationDecisionEngine(
+                max_records=settings.remediation_decision_max_records,
+                max_risk_score=settings.remediation_decision_max_risk_score,
+            )
+            rde_mod.set_engine(rde)
+            app.include_router(
+                rde_mod.rde_route,
+                prefix=settings.api_prefix,
+                tags=["Remediation Decision"],
+            )
+            logger.info("remediation_decision_initialized")
+        except Exception as e:
+            logger.warning("remediation_decision_init_failed", error=str(e))
+
+    if settings.dependency_lag_enabled:
+        try:
+            from shieldops.api.routes import (
+                dependency_lag as dl_mod,
+            )
+            from shieldops.topology.dependency_lag import (
+                DependencyLagMonitor,
+            )
+
+            dl = DependencyLagMonitor(
+                max_records=settings.dependency_lag_max_records,
+                degradation_threshold_pct=settings.dependency_lag_degradation_threshold_pct,
+            )
+            dl_mod.set_engine(dl)
+            app.include_router(
+                dl_mod.dl_route,
+                prefix=settings.api_prefix,
+                tags=["Dependency Lag"],
+            )
+            logger.info("dependency_lag_initialized")
+        except Exception as e:
+            logger.warning("dependency_lag_init_failed", error=str(e))
+
+    if settings.escalation_effectiveness_enabled:
+        try:
+            from shieldops.api.routes import (
+                escalation_effectiveness as ee_mod,
+            )
+            from shieldops.incidents.escalation_effectiveness import (
+                EscalationEffectivenessTracker,
+            )
+
+            ee = EscalationEffectivenessTracker(
+                max_records=settings.escalation_effectiveness_max_records,
+                false_rate_threshold=settings.escalation_effectiveness_false_rate_threshold,
+            )
+            ee_mod.set_engine(ee)
+            app.include_router(
+                ee_mod.ee_route,
+                prefix=settings.api_prefix,
+                tags=["Escalation Effectiveness"],
+            )
+            logger.info("escalation_effectiveness_initialized")
+        except Exception as e:
+            logger.warning("escalation_effectiveness_init_failed", error=str(e))
+
+    if settings.discount_optimizer_enabled:
+        try:
+            from shieldops.api.routes import (
+                discount_optimizer as do_mod,
+            )
+            from shieldops.billing.discount_optimizer import (
+                CloudDiscountOptimizer,
+            )
+
+            do = CloudDiscountOptimizer(
+                max_records=settings.discount_optimizer_max_records,
+                min_coverage_pct=settings.discount_optimizer_min_coverage_pct,
+            )
+            do_mod.set_engine(do)
+            app.include_router(
+                do_mod.do_route,
+                prefix=settings.api_prefix,
+                tags=["Discount Optimizer"],
+            )
+            logger.info("discount_optimizer_initialized")
+        except Exception as e:
+            logger.warning("discount_optimizer_init_failed", error=str(e))
+
+    if settings.audit_trail_analyzer_enabled:
+        try:
+            from shieldops.api.routes import (
+                audit_trail_analyzer as ata_mod,
+            )
+            from shieldops.compliance.audit_trail_analyzer import (
+                ComplianceAuditTrailAnalyzer,
+            )
+
+            ata = ComplianceAuditTrailAnalyzer(
+                max_records=settings.audit_trail_analyzer_max_records,
+                min_completeness_pct=settings.audit_trail_analyzer_min_completeness_pct,
+            )
+            ata_mod.set_engine(ata)
+            app.include_router(
+                ata_mod.ata_route,
+                prefix=settings.api_prefix,
+                tags=["Audit Trail Analyzer"],
+            )
+            logger.info("audit_trail_analyzer_initialized")
+        except Exception as e:
+            logger.warning("audit_trail_analyzer_init_failed", error=str(e))
+
+    if settings.velocity_throttle_enabled:
+        try:
+            from shieldops.api.routes import (
+                velocity_throttle as vt_mod,
+            )
+            from shieldops.changes.velocity_throttle import (
+                ChangeVelocityThrottle,
+            )
+
+            vt = ChangeVelocityThrottle(
+                max_records=settings.velocity_throttle_max_records,
+                max_changes_per_hour=settings.velocity_throttle_max_changes_per_hour,
+            )
+            vt_mod.set_engine(vt)
+            app.include_router(
+                vt_mod.vt_route,
+                prefix=settings.api_prefix,
+                tags=["Velocity Throttle"],
+            )
+            logger.info("velocity_throttle_initialized")
+        except Exception as e:
+            logger.warning("velocity_throttle_init_failed", error=str(e))
+
+    if settings.alert_tuning_feedback_enabled:
+        try:
+            from shieldops.api.routes import (
+                alert_tuning_feedback as atf_mod,
+            )
+            from shieldops.observability.alert_tuning_feedback import (
+                AlertTuningFeedbackLoop,
+            )
+
+            atf = AlertTuningFeedbackLoop(
+                max_records=settings.alert_tuning_feedback_max_records,
+                precision_threshold=settings.alert_tuning_feedback_precision_threshold,
+            )
+            atf_mod.set_engine(atf)
+            app.include_router(
+                atf_mod.atf_route,
+                prefix=settings.api_prefix,
+                tags=["Alert Tuning Feedback"],
+            )
+            logger.info("alert_tuning_feedback_initialized")
+        except Exception as e:
+            logger.warning("alert_tuning_feedback_init_failed", error=str(e))
+
+    if settings.knowledge_decay_enabled:
+        try:
+            from shieldops.api.routes import (
+                knowledge_decay as kd_mod,
+            )
+            from shieldops.knowledge.knowledge_decay import (
+                KnowledgeDecayDetector,
+            )
+
+            kd = KnowledgeDecayDetector(
+                max_records=settings.knowledge_decay_max_records,
+                stale_days=settings.knowledge_decay_stale_days,
+            )
+            kd_mod.set_engine(kd)
+            app.include_router(
+                kd_mod.kd_route,
+                prefix=settings.api_prefix,
+                tags=["Knowledge Decay"],
+            )
+            logger.info("knowledge_decay_initialized")
+        except Exception as e:
+            logger.warning("knowledge_decay_init_failed", error=str(e))
+
+    if settings.coverage_scorer_enabled:
+        try:
+            from shieldops.api.routes import (
+                coverage_scorer as ocs_mod,
+            )
+            from shieldops.observability.coverage_scorer import (
+                ObservabilityCoverageScorer,
+            )
+
+            ocs = ObservabilityCoverageScorer(
+                max_records=settings.coverage_scorer_max_records,
+                min_coverage_pct=settings.coverage_scorer_min_coverage_pct,
+            )
+            ocs_mod.set_engine(ocs)
+            app.include_router(
+                ocs_mod.ocs_route,
+                prefix=settings.api_prefix,
+                tags=["Observability Coverage"],
+            )
+            logger.info("coverage_scorer_initialized")
+        except Exception as e:
+            logger.warning("coverage_scorer_init_failed", error=str(e))
+
     yield
 
     logger.info("shieldops_shutting_down")

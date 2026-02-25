@@ -67,6 +67,18 @@ Review ShieldOps agent code for correctness, safety, and reliability.
 - [ ] Change conflicts detected via `ChangeConflictDetector` (`src/shieldops/changes/change_conflict_detector.py`)
 - [ ] SLA cascading computed via `ServiceSLACascader` (`src/shieldops/sla/sla_cascader.py`)
 - [ ] SLA penalties calculated via `SLAPenaltyCalculator` (`src/shieldops/sla/penalty_calculator.py`)
+- [ ] Incident response advised via `IncidentResponseAdvisor` (`src/shieldops/incidents/response_advisor.py`)
+- [ ] Metric root causes analyzed via `MetricRootCauseAnalyzer` (`src/shieldops/analytics/metric_rca.py`)
+- [ ] SLO compliance forecasted via `SLOComplianceForecaster` (`src/shieldops/sla/slo_forecast.py`)
+- [ ] Remediation decisions evaluated via `AutoRemediationDecisionEngine` (`src/shieldops/operations/remediation_decision.py`)
+- [ ] Dependency lag monitored via `DependencyLagMonitor` (`src/shieldops/topology/dependency_lag.py`)
+- [ ] Escalation effectiveness tracked via `EscalationEffectivenessTracker` (`src/shieldops/incidents/escalation_effectiveness.py`)
+- [ ] Cloud discounts optimized via `CloudDiscountOptimizer` (`src/shieldops/billing/discount_optimizer.py`)
+- [ ] Audit trail analyzed via `ComplianceAuditTrailAnalyzer` (`src/shieldops/compliance/audit_trail_analyzer.py`)
+- [ ] Change velocity throttled via `ChangeVelocityThrottle` (`src/shieldops/changes/velocity_throttle.py`)
+- [ ] Alert tuning feedback recorded via `AlertTuningFeedbackLoop` (`src/shieldops/observability/alert_tuning_feedback.py`)
+- [ ] Knowledge decay detected via `KnowledgeDecayDetector` (`src/shieldops/knowledge/knowledge_decay.py`)
+- [ ] Observability coverage scored via `ObservabilityCoverageScorer` (`src/shieldops/observability/coverage_scorer.py`)
 - [ ] Canary deployments analyzed via `DeploymentCanaryAnalyzer` (`src/shieldops/changes/canary_analyzer.py`)
 
 ### Testing

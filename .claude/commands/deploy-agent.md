@@ -52,6 +52,11 @@ Deploy ShieldOps agents to target environments.
    - Score deployment health via `DeploymentHealthScorer` (`src/shieldops/changes/deploy_health_scorer.py`)
    - Detect change conflicts via `ChangeConflictDetector` (`src/shieldops/changes/change_conflict_detector.py`)
    - Analyze canary metrics via `DeploymentCanaryAnalyzer` (`src/shieldops/changes/canary_analyzer.py`)
+   - Enforce velocity throttling via `ChangeVelocityThrottle` (`src/shieldops/changes/velocity_throttle.py`)
+   - Evaluate remediation decisions via `AutoRemediationDecisionEngine` (`src/shieldops/operations/remediation_decision.py`)
+   - Monitor dependency lag via `DependencyLagMonitor` (`src/shieldops/topology/dependency_lag.py`)
+   - Forecast SLO compliance via `SLOComplianceForecaster` (`src/shieldops/sla/slo_forecast.py`)
+   - Score observability coverage via `ObservabilityCoverageScorer` (`src/shieldops/observability/coverage_scorer.py`)
 4. **Deploy**:
    - Apply Kubernetes manifests from `infrastructure/kubernetes/`
    - For production: trigger approval workflow via Slack/Teams
