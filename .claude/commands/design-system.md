@@ -72,6 +72,18 @@ Design new ShieldOps components, APIs, or agent workflows.
    - Compute unit economics via `CostUnitEconomicsEngine` (`src/shieldops/billing/unit_economics.py`)
    - Forecast resource exhaustion via `ResourceExhaustionForecaster` (`src/shieldops/analytics/resource_exhaustion.py`)
    - Detect idle resources via `IdleResourceDetector` (`src/shieldops/billing/idle_resource_detector.py`)
+   - Advise incident response via `IncidentResponseAdvisor` (`src/shieldops/incidents/response_advisor.py`)
+   - Analyze metric root cause via `MetricRootCauseAnalyzer` (`src/shieldops/analytics/metric_rca.py`)
+   - Forecast SLO compliance via `SLOComplianceForecaster` (`src/shieldops/sla/slo_forecast.py`)
+   - Evaluate remediation decisions via `AutoRemediationDecisionEngine` (`src/shieldops/operations/remediation_decision.py`)
+   - Monitor dependency lag via `DependencyLagMonitor` (`src/shieldops/topology/dependency_lag.py`)
+   - Track escalation effectiveness via `EscalationEffectivenessTracker` (`src/shieldops/incidents/escalation_effectiveness.py`)
+   - Optimize cloud discounts via `CloudDiscountOptimizer` (`src/shieldops/billing/discount_optimizer.py`)
+   - Analyze audit trails via `ComplianceAuditTrailAnalyzer` (`src/shieldops/compliance/audit_trail_analyzer.py`)
+   - Throttle change velocity via `ChangeVelocityThrottle` (`src/shieldops/changes/velocity_throttle.py`)
+   - Tune alerts via feedback via `AlertTuningFeedbackLoop` (`src/shieldops/observability/alert_tuning_feedback.py`)
+   - Detect knowledge decay via `KnowledgeDecayDetector` (`src/shieldops/knowledge/knowledge_decay.py`)
+   - Score observability coverage via `ObservabilityCoverageScorer` (`src/shieldops/observability/coverage_scorer.py`)
 
 5. **Documentation**:
    - Write Architecture Decision Record (ADR) in `docs/architecture/`

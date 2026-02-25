@@ -1195,6 +1195,66 @@ class Settings(BaseSettings):
     access_anomaly_max_records: int = 200000
     access_anomaly_threat_threshold: float = 0.7
 
+    # Phase 30: Incident Response Advisor
+    response_advisor_enabled: bool = True
+    response_advisor_max_records: int = 200000
+    response_advisor_confidence_threshold: float = 0.6
+
+    # Phase 30: Metric Root Cause Analyzer
+    metric_rca_enabled: bool = True
+    metric_rca_max_records: int = 200000
+    metric_rca_deviation_threshold_pct: float = 25.0
+
+    # Phase 30: SLO Compliance Forecaster
+    slo_forecast_enabled: bool = True
+    slo_forecast_max_records: int = 200000
+    slo_forecast_risk_threshold_pct: float = 95.0
+
+    # Phase 30: Auto-Remediation Decision Engine
+    remediation_decision_enabled: bool = True
+    remediation_decision_max_records: int = 200000
+    remediation_decision_max_risk_score: float = 0.8
+
+    # Phase 30: Dependency Lag Monitor
+    dependency_lag_enabled: bool = True
+    dependency_lag_max_records: int = 200000
+    dependency_lag_degradation_threshold_pct: float = 50.0
+
+    # Phase 30: Escalation Effectiveness Tracker
+    escalation_effectiveness_enabled: bool = True
+    escalation_effectiveness_max_records: int = 200000
+    escalation_effectiveness_false_rate_threshold: float = 20.0
+
+    # Phase 30: Cloud Discount Optimizer
+    discount_optimizer_enabled: bool = True
+    discount_optimizer_max_records: int = 200000
+    discount_optimizer_min_coverage_pct: float = 70.0
+
+    # Phase 30: Compliance Audit Trail Analyzer
+    audit_trail_analyzer_enabled: bool = True
+    audit_trail_analyzer_max_records: int = 200000
+    audit_trail_analyzer_min_completeness_pct: float = 90.0
+
+    # Phase 30: Change Velocity Throttle
+    velocity_throttle_enabled: bool = True
+    velocity_throttle_max_records: int = 200000
+    velocity_throttle_max_changes_per_hour: int = 10
+
+    # Phase 30: Alert Tuning Feedback Loop
+    alert_tuning_feedback_enabled: bool = True
+    alert_tuning_feedback_max_records: int = 200000
+    alert_tuning_feedback_precision_threshold: float = 70.0
+
+    # Phase 30: Knowledge Decay Detector
+    knowledge_decay_enabled: bool = True
+    knowledge_decay_max_records: int = 200000
+    knowledge_decay_stale_days: int = 180
+
+    # Phase 30: Observability Coverage Scorer
+    coverage_scorer_enabled: bool = True
+    coverage_scorer_max_records: int = 200000
+    coverage_scorer_min_coverage_pct: float = 80.0
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",
