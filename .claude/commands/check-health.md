@@ -28,7 +28,7 @@ Run health checks on all ShieldOps platform dependencies.
    - Integration tests: `python3 -m pytest tests/integration/ -v --tb=short`
    - Report: total tests, passed, failed, coverage
 
-5. **Platform feature health** (Phase 11–27 modules):
+5. **Platform feature health** (Phase 11–28 modules):
    - Capacity trends: `src/shieldops/analytics/capacity_trends.py` — CapacityTrendAnalyzer
    - SRE metrics: `src/shieldops/analytics/sre_metrics.py` — SREMetricsAggregator
    - Health reports: `src/shieldops/observability/health_report.py` — ServiceHealthReportGenerator
@@ -131,6 +131,18 @@ Run health checks on all ShieldOps platform dependencies.
    - Comm planner: `src/shieldops/incidents/comm_planner.py` — IncidentCommunicationPlanner
    - Infra drift reconciler: `src/shieldops/operations/infra_drift_reconciler.py` — InfrastructureDriftReconciler
    - Service maturity: `src/shieldops/topology/service_maturity.py` — ServiceMaturityModel
+   - Capacity right-timing: `src/shieldops/operations/capacity_right_timing.py` — CapacityRightTimingAdvisor
+   - Outage predictor: `src/shieldops/observability/outage_predictor.py` — PredictiveOutageDetector
+   - Impact quantifier: `src/shieldops/incidents/impact_quantifier.py` — IncidentImpactQuantifier
+   - Policy violation tracker: `src/shieldops/compliance/policy_violation_tracker.py` — PolicyViolationTracker
+   - Deploy health scorer: `src/shieldops/changes/deploy_health_scorer.py` — DeploymentHealthScorer
+   - Runbook gap analyzer: `src/shieldops/operations/runbook_gap_analyzer.py` — RunbookGapAnalyzer
+   - Credential expiry forecaster: `src/shieldops/security/credential_expiry_forecaster.py` — CredentialExpiryForecaster
+   - On-call workload balancer: `src/shieldops/incidents/oncall_workload_balancer.py` — OnCallWorkloadBalancer
+   - Cost anomaly predictor: `src/shieldops/billing/cost_anomaly_predictor.py` — CostAnomalyPredictor
+   - Evidence scheduler: `src/shieldops/compliance/evidence_scheduler.py` — ComplianceEvidenceScheduler
+   - Latency budget tracker: `src/shieldops/analytics/latency_budget_tracker.py` — LatencyBudgetTracker
+   - Change conflict detector: `src/shieldops/changes/change_conflict_detector.py` — ChangeConflictDetector
    - Verify each module initializes in `src/shieldops/api/app.py` lifespan
 
 6. **Check configuration**:

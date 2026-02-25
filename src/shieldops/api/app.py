@@ -5265,6 +5265,294 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         except Exception as e:
             logger.warning("service_maturity_init_failed", error=str(e))
 
+    # Phase 28: Capacity Right-Timing Advisor
+    if settings.capacity_right_timing_enabled:
+        try:
+            from shieldops.api.routes import (
+                capacity_right_timing as crt_mod,
+            )
+            from shieldops.operations.capacity_right_timing import (
+                CapacityRightTimingAdvisor,
+            )
+
+            crt = CapacityRightTimingAdvisor(
+                max_records=settings.capacity_right_timing_max_records,
+                lookahead_hours=settings.capacity_right_timing_lookahead_hours,
+            )
+            crt_mod.set_engine(crt)
+            app.include_router(
+                crt_mod.crt_route,
+                prefix=settings.api_prefix,
+                tags=["Capacity Right-Timing"],
+            )
+            logger.info("capacity_right_timing_initialized")
+        except Exception as e:
+            logger.warning("capacity_right_timing_init_failed", error=str(e))
+
+    # Phase 28: Predictive Outage Detector
+    if settings.outage_predictor_enabled:
+        try:
+            from shieldops.api.routes import (
+                outage_predictor as op_mod,
+            )
+            from shieldops.observability.outage_predictor import (
+                PredictiveOutageDetector,
+            )
+
+            op = PredictiveOutageDetector(
+                max_records=settings.outage_predictor_max_records,
+                composite_threshold=settings.outage_predictor_composite_threshold,
+            )
+            op_mod.set_engine(op)
+            app.include_router(
+                op_mod.op_route,
+                prefix=settings.api_prefix,
+                tags=["Outage Predictor"],
+            )
+            logger.info("outage_predictor_initialized")
+        except Exception as e:
+            logger.warning("outage_predictor_init_failed", error=str(e))
+
+    # Phase 28: Incident Impact Quantifier
+    if settings.impact_quantifier_enabled:
+        try:
+            from shieldops.api.routes import (
+                impact_quantifier as iq_mod,
+            )
+            from shieldops.incidents.impact_quantifier import (
+                IncidentImpactQuantifier,
+            )
+
+            iq = IncidentImpactQuantifier(
+                max_assessments=settings.impact_quantifier_max_assessments,
+                default_hourly_rate_usd=settings.impact_quantifier_default_hourly_rate_usd,
+            )
+            iq_mod.set_engine(iq)
+            app.include_router(
+                iq_mod.iq_route,
+                prefix=settings.api_prefix,
+                tags=["Impact Quantifier"],
+            )
+            logger.info("impact_quantifier_initialized")
+        except Exception as e:
+            logger.warning("impact_quantifier_init_failed", error=str(e))
+
+    # Phase 28: Policy Violation Tracker
+    if settings.policy_violation_tracker_enabled:
+        try:
+            from shieldops.api.routes import (
+                policy_violation_tracker as pvt_mod,
+            )
+            from shieldops.compliance.policy_violation_tracker import (
+                PolicyViolationTracker,
+            )
+
+            pvt = PolicyViolationTracker(
+                max_records=settings.policy_violation_tracker_max_records,
+                repeat_threshold=settings.policy_violation_tracker_repeat_threshold,
+            )
+            pvt_mod.set_engine(pvt)
+            app.include_router(
+                pvt_mod.pvt_route,
+                prefix=settings.api_prefix,
+                tags=["Policy Violation Tracker"],
+            )
+            logger.info("policy_violation_tracker_initialized")
+        except Exception as e:
+            logger.warning("policy_violation_tracker_init_failed", error=str(e))
+
+    # Phase 28: Deployment Health Scorer
+    if settings.deploy_health_scorer_enabled:
+        try:
+            from shieldops.api.routes import (
+                deploy_health_scorer as dhs_mod,
+            )
+            from shieldops.changes.deploy_health_scorer import (
+                DeploymentHealthScorer,
+            )
+
+            dhs = DeploymentHealthScorer(
+                max_records=settings.deploy_health_scorer_max_records,
+                failing_threshold=settings.deploy_health_scorer_failing_threshold,
+            )
+            dhs_mod.set_engine(dhs)
+            app.include_router(
+                dhs_mod.dhs_route,
+                prefix=settings.api_prefix,
+                tags=["Deploy Health Scorer"],
+            )
+            logger.info("deploy_health_scorer_initialized")
+        except Exception as e:
+            logger.warning("deploy_health_scorer_init_failed", error=str(e))
+
+    # Phase 28: Runbook Gap Analyzer
+    if settings.runbook_gap_analyzer_enabled:
+        try:
+            from shieldops.api.routes import (
+                runbook_gap_analyzer as rga_mod,
+            )
+            from shieldops.operations.runbook_gap_analyzer import (
+                RunbookGapAnalyzer,
+            )
+
+            rga = RunbookGapAnalyzer(
+                max_gaps=settings.runbook_gap_analyzer_max_gaps,
+                critical_incident_threshold=settings.runbook_gap_analyzer_critical_incident_threshold,
+            )
+            rga_mod.set_engine(rga)
+            app.include_router(
+                rga_mod.rga_route,
+                prefix=settings.api_prefix,
+                tags=["Runbook Gap Analyzer"],
+            )
+            logger.info("runbook_gap_analyzer_initialized")
+        except Exception as e:
+            logger.warning("runbook_gap_analyzer_init_failed", error=str(e))
+
+    # Phase 28: Credential Expiry Forecaster
+    if settings.credential_expiry_forecaster_enabled:
+        try:
+            from shieldops.api.routes import (
+                credential_expiry_forecaster as cef_mod,
+            )
+            from shieldops.security.credential_expiry_forecaster import (
+                CredentialExpiryForecaster,
+            )
+
+            cef = CredentialExpiryForecaster(
+                max_records=settings.credential_expiry_forecaster_max_records,
+                warning_days=settings.credential_expiry_forecaster_warning_days,
+            )
+            cef_mod.set_engine(cef)
+            app.include_router(
+                cef_mod.cef_route,
+                prefix=settings.api_prefix,
+                tags=["Credential Expiry Forecaster"],
+            )
+            logger.info("credential_expiry_forecaster_initialized")
+        except Exception as e:
+            logger.warning("credential_expiry_forecaster_init_failed", error=str(e))
+
+    # Phase 28: On-Call Workload Balancer
+    if settings.oncall_workload_balancer_enabled:
+        try:
+            from shieldops.api.routes import (
+                oncall_workload_balancer as owb_mod,
+            )
+            from shieldops.incidents.oncall_workload_balancer import (
+                OnCallWorkloadBalancer,
+            )
+
+            owb = OnCallWorkloadBalancer(
+                max_records=settings.oncall_workload_balancer_max_records,
+                imbalance_threshold_pct=settings.oncall_workload_balancer_imbalance_threshold_pct,
+            )
+            owb_mod.set_engine(owb)
+            app.include_router(
+                owb_mod.owb_route,
+                prefix=settings.api_prefix,
+                tags=["On-Call Workload Balancer"],
+            )
+            logger.info("oncall_workload_balancer_initialized")
+        except Exception as e:
+            logger.warning("oncall_workload_balancer_init_failed", error=str(e))
+
+    # Phase 28: Cost Anomaly Predictor
+    if settings.cost_anomaly_predictor_enabled:
+        try:
+            from shieldops.api.routes import (
+                cost_anomaly_predictor as cap_mod,
+            )
+            from shieldops.billing.cost_anomaly_predictor import (
+                CostAnomalyPredictor,
+            )
+
+            cap = CostAnomalyPredictor(
+                max_records=settings.cost_anomaly_predictor_max_records,
+                spike_threshold_usd=settings.cost_anomaly_predictor_spike_threshold_usd,
+            )
+            cap_mod.set_engine(cap)
+            app.include_router(
+                cap_mod.cap_route,
+                prefix=settings.api_prefix,
+                tags=["Cost Anomaly Predictor"],
+            )
+            logger.info("cost_anomaly_predictor_initialized")
+        except Exception as e:
+            logger.warning("cost_anomaly_predictor_init_failed", error=str(e))
+
+    # Phase 28: Compliance Evidence Scheduler
+    if settings.evidence_scheduler_enabled:
+        try:
+            from shieldops.api.routes import (
+                evidence_scheduler as es_mod,
+            )
+            from shieldops.compliance.evidence_scheduler import (
+                ComplianceEvidenceScheduler,
+            )
+
+            es = ComplianceEvidenceScheduler(
+                max_schedules=settings.evidence_scheduler_max_schedules,
+                overdue_grace_days=settings.evidence_scheduler_overdue_grace_days,
+            )
+            es_mod.set_engine(es)
+            app.include_router(
+                es_mod.es_route,
+                prefix=settings.api_prefix,
+                tags=["Evidence Scheduler"],
+            )
+            logger.info("evidence_scheduler_initialized")
+        except Exception as e:
+            logger.warning("evidence_scheduler_init_failed", error=str(e))
+
+    # Phase 28: API Latency Budget Tracker
+    if settings.latency_budget_tracker_enabled:
+        try:
+            from shieldops.analytics.latency_budget_tracker import (
+                LatencyBudgetTracker,
+            )
+            from shieldops.api.routes import (
+                latency_budget_tracker as lbt_mod,
+            )
+
+            lbt = LatencyBudgetTracker(
+                max_records=settings.latency_budget_tracker_max_records,
+                chronic_violation_threshold=settings.latency_budget_tracker_chronic_violation_threshold,
+            )
+            lbt_mod.set_engine(lbt)
+            app.include_router(
+                lbt_mod.lbt_route,
+                prefix=settings.api_prefix,
+                tags=["Latency Budget Tracker"],
+            )
+            logger.info("latency_budget_tracker_initialized")
+        except Exception as e:
+            logger.warning("latency_budget_tracker_init_failed", error=str(e))
+
+    # Phase 28: Change Conflict Detector
+    if settings.change_conflict_detector_enabled:
+        try:
+            from shieldops.api.routes import (
+                change_conflict_detector as ccd_mod,
+            )
+            from shieldops.changes.change_conflict_detector import (
+                ChangeConflictDetector,
+            )
+
+            ccd = ChangeConflictDetector(
+                max_records=settings.change_conflict_detector_max_records,
+                lookahead_hours=settings.change_conflict_detector_lookahead_hours,
+            )
+            ccd_mod.set_engine(ccd)
+            app.include_router(
+                ccd_mod.ccd_route,
+                prefix=settings.api_prefix,
+                tags=["Change Conflict Detector"],
+            )
+            logger.info("change_conflict_detector_initialized")
+        except Exception as e:
+            logger.warning("change_conflict_detector_init_failed", error=str(e))
+
     yield
 
     logger.info("shieldops_shutting_down")
