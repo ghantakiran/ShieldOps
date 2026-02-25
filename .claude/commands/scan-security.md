@@ -61,7 +61,11 @@ Run security audits on ShieldOps codebase and agent configurations.
 35. **Permission Drift Detection**: Detect IAM/RBAC permission creep via `PermissionDriftDetector` (`src/shieldops/security/permission_drift.py`)
 36. **Feature Flag Lifecycle**: Track stale/risky feature flags via `FeatureFlagLifecycleManager` (`src/shieldops/config/flag_lifecycle.py`)
 37. **Cache Effectiveness**: Analyze cache health and hit rates via `CacheEffectivenessAnalyzer` (`src/shieldops/analytics/cache_effectiveness.py`)
-38. **Generate Report**: Severity-rated findings with remediation guidance
+38. **License Risk Analysis**: Analyze transitive dependency license risks via `DependencyLicenseRiskAnalyzer` (`src/shieldops/compliance/license_risk.py`)
+39. **Rate Limit Policy**: Evaluate service-to-service rate limit policies via `RateLimitPolicyManager` (`src/shieldops/topology/rate_limit_policy.py`)
+40. **Permission Drift Detection**: Detect IAM/RBAC permission creep via `PermissionDriftDetector` (`src/shieldops/security/permission_drift.py`)
+41. **Data Pipeline Reliability**: Monitor data pipeline health via `DataPipelineReliabilityMonitor` (`src/shieldops/observability/data_pipeline.py`)
+42. **Generate Report**: Severity-rated findings with remediation guidance
 
 ## Severity Levels
 - **CRITICAL**: Hardcoded secrets, SQL injection, unauthenticated endpoints

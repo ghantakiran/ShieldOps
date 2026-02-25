@@ -6385,6 +6385,282 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         except Exception as e:
             logger.warning("cache_effectiveness_init_failed", error=str(e))
 
+    if settings.build_pipeline_enabled:
+        try:
+            from shieldops.analytics.build_pipeline import (
+                BuildPipelineAnalyzer,
+            )
+            from shieldops.api.routes import (
+                build_pipeline as bp_mod,
+            )
+
+            bp_engine = BuildPipelineAnalyzer(
+                max_records=settings.build_pipeline_max_records,
+                min_success_rate_pct=settings.build_pipeline_min_success_rate_pct,
+            )
+            bp_mod.set_engine(bp_engine)
+            app.include_router(
+                bp_mod.bp_route,
+                prefix=settings.api_prefix,
+                tags=["Build Pipeline"],
+            )
+            logger.info("build_pipeline_initialized")
+        except Exception as e:
+            logger.warning("build_pipeline_init_failed", error=str(e))
+
+    if settings.review_velocity_enabled:
+        try:
+            from shieldops.analytics.review_velocity import (
+                CodeReviewVelocityTracker,
+            )
+            from shieldops.api.routes import (
+                review_velocity as rv_mod,
+            )
+
+            rv_engine = CodeReviewVelocityTracker(
+                max_records=settings.review_velocity_max_records,
+                max_cycle_hours=settings.review_velocity_max_cycle_hours,
+            )
+            rv_mod.set_engine(rv_engine)
+            app.include_router(
+                rv_mod.rv_route,
+                prefix=settings.api_prefix,
+                tags=["Review Velocity"],
+            )
+            logger.info("review_velocity_initialized")
+        except Exception as e:
+            logger.warning("review_velocity_init_failed", error=str(e))
+
+    if settings.dev_environment_enabled:
+        try:
+            from shieldops.api.routes import (
+                dev_environment as deh_mod,
+            )
+            from shieldops.operations.dev_environment import (
+                DevEnvironmentHealthMonitor,
+            )
+
+            deh_engine = DevEnvironmentHealthMonitor(
+                max_records=settings.dev_environment_max_records,
+                max_drift_days=settings.dev_environment_max_drift_days,
+            )
+            deh_mod.set_engine(deh_engine)
+            app.include_router(
+                deh_mod.deh_route,
+                prefix=settings.api_prefix,
+                tags=["Dev Environment"],
+            )
+            logger.info("dev_environment_initialized")
+        except Exception as e:
+            logger.warning("dev_environment_init_failed", error=str(e))
+
+    if settings.traffic_pattern_enabled:
+        try:
+            from shieldops.api.routes import (
+                traffic_pattern as tp_mod,
+            )
+            from shieldops.topology.traffic_pattern import (
+                TrafficPatternAnalyzer,
+            )
+
+            tp_engine = TrafficPatternAnalyzer(
+                max_records=settings.traffic_pattern_max_records,
+                error_threshold_pct=settings.traffic_pattern_error_threshold_pct,
+            )
+            tp_mod.set_engine(tp_engine)
+            app.include_router(
+                tp_mod.tp_route,
+                prefix=settings.api_prefix,
+                tags=["Traffic Pattern"],
+            )
+            logger.info("traffic_pattern_initialized")
+        except Exception as e:
+            logger.warning("traffic_pattern_init_failed", error=str(e))
+
+    if settings.rate_limit_policy_enabled:
+        try:
+            from shieldops.api.routes import (
+                rate_limit_policy as rlp_mod,
+            )
+            from shieldops.topology.rate_limit_policy import (
+                RateLimitPolicyManager,
+            )
+
+            rlp_engine = RateLimitPolicyManager(
+                max_records=settings.rate_limit_policy_max_records,
+                violation_threshold=settings.rate_limit_policy_violation_threshold,
+            )
+            rlp_mod.set_engine(rlp_engine)
+            app.include_router(
+                rlp_mod.rlp_route,
+                prefix=settings.api_prefix,
+                tags=["Rate Limit Policy"],
+            )
+            logger.info("rate_limit_policy_initialized")
+        except Exception as e:
+            logger.warning("rate_limit_policy_init_failed", error=str(e))
+
+    if settings.circuit_breaker_health_enabled:
+        try:
+            from shieldops.api.routes import (
+                circuit_breaker_health as cbh_mod,
+            )
+            from shieldops.topology.circuit_breaker_health import (
+                CircuitBreakerHealthMonitor,
+            )
+
+            cbh_engine = CircuitBreakerHealthMonitor(
+                max_records=settings.circuit_breaker_health_max_records,
+                max_trip_count_24h=settings.circuit_breaker_health_max_trip_count_24h,
+            )
+            cbh_mod.set_engine(cbh_engine)
+            app.include_router(
+                cbh_mod.cbh_route,
+                prefix=settings.api_prefix,
+                tags=["Circuit Breaker Health"],
+            )
+            logger.info("circuit_breaker_health_initialized")
+        except Exception as e:
+            logger.warning("circuit_breaker_health_init_failed", error=str(e))
+
+    if settings.data_pipeline_enabled:
+        try:
+            from shieldops.api.routes import (
+                data_pipeline as dpr_mod,
+            )
+            from shieldops.observability.data_pipeline import (
+                DataPipelineReliabilityMonitor,
+            )
+
+            dpr_engine = DataPipelineReliabilityMonitor(
+                max_records=settings.data_pipeline_max_records,
+                freshness_threshold_seconds=settings.data_pipeline_freshness_threshold_seconds,
+            )
+            dpr_mod.set_engine(dpr_engine)
+            app.include_router(
+                dpr_mod.dpr_route,
+                prefix=settings.api_prefix,
+                tags=["Data Pipeline"],
+            )
+            logger.info("data_pipeline_initialized")
+        except Exception as e:
+            logger.warning("data_pipeline_init_failed", error=str(e))
+
+    if settings.queue_depth_forecast_enabled:
+        try:
+            from shieldops.api.routes import (
+                queue_depth_forecast as qdf_mod,
+            )
+            from shieldops.observability.queue_depth_forecast import (
+                QueueDepthForecaster,
+            )
+
+            qdf_engine = QueueDepthForecaster(
+                max_records=settings.queue_depth_forecast_max_records,
+                overflow_threshold=settings.queue_depth_forecast_overflow_threshold,
+            )
+            qdf_mod.set_engine(qdf_engine)
+            app.include_router(
+                qdf_mod.qdf_route,
+                prefix=settings.api_prefix,
+                tags=["Queue Depth Forecast"],
+            )
+            logger.info("queue_depth_forecast_initialized")
+        except Exception as e:
+            logger.warning("queue_depth_forecast_init_failed", error=str(e))
+
+    if settings.connection_pool_enabled:
+        try:
+            from shieldops.analytics.connection_pool import (
+                ConnectionPoolMonitor,
+            )
+            from shieldops.api.routes import (
+                connection_pool as cpm_mod,
+            )
+
+            cpm_engine = ConnectionPoolMonitor(
+                max_records=settings.connection_pool_max_records,
+                saturation_threshold_pct=settings.connection_pool_saturation_threshold_pct,
+            )
+            cpm_mod.set_engine(cpm_engine)
+            app.include_router(
+                cpm_mod.cpm_route,
+                prefix=settings.api_prefix,
+                tags=["Connection Pool"],
+            )
+            logger.info("connection_pool_initialized")
+        except Exception as e:
+            logger.warning("connection_pool_init_failed", error=str(e))
+
+    if settings.license_risk_enabled:
+        try:
+            from shieldops.api.routes import (
+                license_risk as lr_mod,
+            )
+            from shieldops.compliance.license_risk import (
+                DependencyLicenseRiskAnalyzer,
+            )
+
+            lr_engine = DependencyLicenseRiskAnalyzer(
+                max_records=settings.license_risk_max_records,
+                max_transitive_depth=settings.license_risk_max_transitive_depth,
+            )
+            lr_mod.set_engine(lr_engine)
+            app.include_router(
+                lr_mod.lr_route,
+                prefix=settings.api_prefix,
+                tags=["License Risk"],
+            )
+            logger.info("license_risk_initialized")
+        except Exception as e:
+            logger.warning("license_risk_init_failed", error=str(e))
+
+    if settings.comm_effectiveness_enabled:
+        try:
+            from shieldops.api.routes import (
+                comm_effectiveness as comeff_mod,
+            )
+            from shieldops.incidents.comm_effectiveness import (
+                CommEffectivenessAnalyzer,
+            )
+
+            comeff_engine = CommEffectivenessAnalyzer(
+                max_records=settings.comm_effectiveness_max_records,
+                min_delivery_rate_pct=settings.comm_effectiveness_min_delivery_rate_pct,
+            )
+            comeff_mod.set_engine(comeff_engine)
+            app.include_router(
+                comeff_mod.cef_route,
+                prefix=settings.api_prefix,
+                tags=["Comm Effectiveness"],
+            )
+            logger.info("comm_effectiveness_initialized")
+        except Exception as e:
+            logger.warning("comm_effectiveness_init_failed", error=str(e))
+
+    if settings.readiness_scorer_enabled:
+        try:
+            from shieldops.api.routes import (
+                readiness_scorer as ors_mod,
+            )
+            from shieldops.operations.readiness_scorer import (
+                OperationalReadinessScorer,
+            )
+
+            ors_engine = OperationalReadinessScorer(
+                max_records=settings.readiness_scorer_max_records,
+                min_readiness_score=settings.readiness_scorer_min_readiness_score,
+            )
+            ors_mod.set_engine(ors_engine)
+            app.include_router(
+                ors_mod.ors_route,
+                prefix=settings.api_prefix,
+                tags=["Readiness Scorer"],
+            )
+            logger.info("readiness_scorer_initialized")
+        except Exception as e:
+            logger.warning("readiness_scorer_init_failed", error=str(e))
+
     yield
 
     logger.info("shieldops_shutting_down")
