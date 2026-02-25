@@ -57,6 +57,11 @@ Deploy ShieldOps agents to target environments.
    - Monitor dependency lag via `DependencyLagMonitor` (`src/shieldops/topology/dependency_lag.py`)
    - Forecast SLO compliance via `SLOComplianceForecaster` (`src/shieldops/sla/slo_forecast.py`)
    - Score observability coverage via `ObservabilityCoverageScorer` (`src/shieldops/observability/coverage_scorer.py`)
+   - Score deployment confidence via `DeploymentConfidenceScorer` (`src/shieldops/changes/deployment_confidence.py`)
+   - Detect reliability regressions via `ReliabilityRegressionDetector` (`src/shieldops/sla/reliability_regression.py`)
+   - Track post-incident actions via `PostIncidentActionTracker` (`src/shieldops/incidents/action_tracker.py`)
+   - Check feature flag lifecycle via `FeatureFlagLifecycleManager` (`src/shieldops/config/flag_lifecycle.py`)
+   - Monitor API version health via `APIVersionHealthMonitor` (`src/shieldops/topology/api_version_health.py`)
 4. **Deploy**:
    - Apply Kubernetes manifests from `infrastructure/kubernetes/`
    - For production: trigger approval workflow via Slack/Teams

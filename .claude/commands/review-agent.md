@@ -80,6 +80,18 @@ Review ShieldOps agent code for correctness, safety, and reliability.
 - [ ] Knowledge decay detected via `KnowledgeDecayDetector` (`src/shieldops/knowledge/knowledge_decay.py`)
 - [ ] Observability coverage scored via `ObservabilityCoverageScorer` (`src/shieldops/observability/coverage_scorer.py`)
 - [ ] Canary deployments analyzed via `DeploymentCanaryAnalyzer` (`src/shieldops/changes/canary_analyzer.py`)
+- [ ] Metric cardinality managed via `MetricCardinalityManager` (`src/shieldops/observability/cardinality_manager.py`)
+- [ ] Log retention optimized via `LogRetentionOptimizer` (`src/shieldops/observability/log_retention_optimizer.py`)
+- [ ] Dashboard quality scored via `DashboardQualityScorer` (`src/shieldops/observability/dashboard_quality.py`)
+- [ ] Post-incident actions tracked via `PostIncidentActionTracker` (`src/shieldops/incidents/action_tracker.py`)
+- [ ] Deployment confidence scored via `DeploymentConfidenceScorer` (`src/shieldops/changes/deployment_confidence.py`)
+- [ ] Reliability regressions detected via `ReliabilityRegressionDetector` (`src/shieldops/sla/reliability_regression.py`)
+- [ ] Permission drift detected via `PermissionDriftDetector` (`src/shieldops/security/permission_drift.py`)
+- [ ] Feature flag lifecycle managed via `FeatureFlagLifecycleManager` (`src/shieldops/config/flag_lifecycle.py`)
+- [ ] API version health monitored via `APIVersionHealthMonitor` (`src/shieldops/topology/api_version_health.py`)
+- [ ] SRE maturity assessed via `SREMaturityAssessor` (`src/shieldops/operations/sre_maturity.py`)
+- [ ] Incident lessons tracked via `IncidentLearningTracker` (`src/shieldops/incidents/learning_tracker.py`)
+- [ ] Cache effectiveness analyzed via `CacheEffectivenessAnalyzer` (`src/shieldops/analytics/cache_effectiveness.py`)
 
 ### Testing
 - [ ] Unit tests for all node functions

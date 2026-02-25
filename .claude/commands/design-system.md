@@ -84,6 +84,18 @@ Design new ShieldOps components, APIs, or agent workflows.
    - Tune alerts via feedback via `AlertTuningFeedbackLoop` (`src/shieldops/observability/alert_tuning_feedback.py`)
    - Detect knowledge decay via `KnowledgeDecayDetector` (`src/shieldops/knowledge/knowledge_decay.py`)
    - Score observability coverage via `ObservabilityCoverageScorer` (`src/shieldops/observability/coverage_scorer.py`)
+   - Manage metric cardinality via `MetricCardinalityManager` (`src/shieldops/observability/cardinality_manager.py`)
+   - Optimize log retention via `LogRetentionOptimizer` (`src/shieldops/observability/log_retention_optimizer.py`)
+   - Score dashboard quality via `DashboardQualityScorer` (`src/shieldops/observability/dashboard_quality.py`)
+   - Track post-incident actions via `PostIncidentActionTracker` (`src/shieldops/incidents/action_tracker.py`)
+   - Score deployment confidence via `DeploymentConfidenceScorer` (`src/shieldops/changes/deployment_confidence.py`)
+   - Detect reliability regressions via `ReliabilityRegressionDetector` (`src/shieldops/sla/reliability_regression.py`)
+   - Detect permission drift via `PermissionDriftDetector` (`src/shieldops/security/permission_drift.py`)
+   - Manage feature flag lifecycle via `FeatureFlagLifecycleManager` (`src/shieldops/config/flag_lifecycle.py`)
+   - Monitor API version health via `APIVersionHealthMonitor` (`src/shieldops/topology/api_version_health.py`)
+   - Assess SRE maturity via `SREMaturityAssessor` (`src/shieldops/operations/sre_maturity.py`)
+   - Track incident lessons via `IncidentLearningTracker` (`src/shieldops/incidents/learning_tracker.py`)
+   - Analyze cache effectiveness via `CacheEffectivenessAnalyzer` (`src/shieldops/analytics/cache_effectiveness.py`)
 
 5. **Documentation**:
    - Write Architecture Decision Record (ADR) in `docs/architecture/`

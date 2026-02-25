@@ -6109,6 +6109,282 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         except Exception as e:
             logger.warning("coverage_scorer_init_failed", error=str(e))
 
+    if settings.cardinality_manager_enabled:
+        try:
+            from shieldops.api.routes import (
+                cardinality_manager as cm_mod,
+            )
+            from shieldops.observability.cardinality_manager import (
+                MetricCardinalityManager,
+            )
+
+            cm_engine = MetricCardinalityManager(
+                max_records=settings.cardinality_manager_max_records,
+                max_cardinality_threshold=settings.cardinality_manager_max_cardinality_threshold,
+            )
+            cm_mod.set_engine(cm_engine)
+            app.include_router(
+                cm_mod.cm_route,
+                prefix=settings.api_prefix,
+                tags=["Metric Cardinality"],
+            )
+            logger.info("cardinality_manager_initialized")
+        except Exception as e:
+            logger.warning("cardinality_manager_init_failed", error=str(e))
+
+    if settings.log_retention_optimizer_enabled:
+        try:
+            from shieldops.api.routes import (
+                log_retention_optimizer as lro_mod,
+            )
+            from shieldops.observability.log_retention_optimizer import (
+                LogRetentionOptimizer,
+            )
+
+            lro_engine = LogRetentionOptimizer(
+                max_records=settings.log_retention_optimizer_max_records,
+                default_retention_days=settings.log_retention_optimizer_default_retention_days,
+            )
+            lro_mod.set_engine(lro_engine)
+            app.include_router(
+                lro_mod.lro_route,
+                prefix=settings.api_prefix,
+                tags=["Log Retention"],
+            )
+            logger.info("log_retention_optimizer_initialized")
+        except Exception as e:
+            logger.warning("log_retention_optimizer_init_failed", error=str(e))
+
+    if settings.dashboard_quality_enabled:
+        try:
+            from shieldops.api.routes import (
+                dashboard_quality as dq_mod,
+            )
+            from shieldops.observability.dashboard_quality import (
+                DashboardQualityScorer,
+            )
+
+            dq_engine = DashboardQualityScorer(
+                max_records=settings.dashboard_quality_max_records,
+                min_quality_score=settings.dashboard_quality_min_quality_score,
+            )
+            dq_mod.set_engine(dq_engine)
+            app.include_router(
+                dq_mod.dq_route,
+                prefix=settings.api_prefix,
+                tags=["Dashboard Quality"],
+            )
+            logger.info("dashboard_quality_initialized")
+        except Exception as e:
+            logger.warning("dashboard_quality_init_failed", error=str(e))
+
+    if settings.action_tracker_enabled:
+        try:
+            from shieldops.api.routes import (
+                action_tracker as pia_mod,
+            )
+            from shieldops.incidents.action_tracker import (
+                PostIncidentActionTracker,
+            )
+
+            pia_engine = PostIncidentActionTracker(
+                max_records=settings.action_tracker_max_records,
+                overdue_threshold_days=settings.action_tracker_overdue_threshold_days,
+            )
+            pia_mod.set_engine(pia_engine)
+            app.include_router(
+                pia_mod.pia_route,
+                prefix=settings.api_prefix,
+                tags=["Post-Incident Actions"],
+            )
+            logger.info("action_tracker_initialized")
+        except Exception as e:
+            logger.warning("action_tracker_init_failed", error=str(e))
+
+    if settings.deployment_confidence_enabled:
+        try:
+            from shieldops.api.routes import (
+                deployment_confidence as dc_mod,
+            )
+            from shieldops.changes.deployment_confidence import (
+                DeploymentConfidenceScorer,
+            )
+
+            dc_engine = DeploymentConfidenceScorer(
+                max_records=settings.deployment_confidence_max_records,
+                min_confidence_score=settings.deployment_confidence_min_confidence_score,
+            )
+            dc_mod.set_engine(dc_engine)
+            app.include_router(
+                dc_mod.dc_route,
+                prefix=settings.api_prefix,
+                tags=["Deployment Confidence"],
+            )
+            logger.info("deployment_confidence_initialized")
+        except Exception as e:
+            logger.warning("deployment_confidence_init_failed", error=str(e))
+
+    if settings.reliability_regression_enabled:
+        try:
+            from shieldops.api.routes import (
+                reliability_regression as rr_mod,
+            )
+            from shieldops.sla.reliability_regression import (
+                ReliabilityRegressionDetector,
+            )
+
+            rr_engine = ReliabilityRegressionDetector(
+                max_records=settings.reliability_regression_max_records,
+                deviation_threshold_pct=settings.reliability_regression_deviation_threshold_pct,
+            )
+            rr_mod.set_engine(rr_engine)
+            app.include_router(
+                rr_mod.rr_route,
+                prefix=settings.api_prefix,
+                tags=["Reliability Regression"],
+            )
+            logger.info("reliability_regression_initialized")
+        except Exception as e:
+            logger.warning("reliability_regression_init_failed", error=str(e))
+
+    if settings.permission_drift_enabled:
+        try:
+            from shieldops.api.routes import (
+                permission_drift as pd_mod,
+            )
+            from shieldops.security.permission_drift import (
+                PermissionDriftDetector,
+            )
+
+            pd_engine = PermissionDriftDetector(
+                max_records=settings.permission_drift_max_records,
+                unused_days_threshold=settings.permission_drift_unused_days_threshold,
+            )
+            pd_mod.set_engine(pd_engine)
+            app.include_router(
+                pd_mod.pd_route,
+                prefix=settings.api_prefix,
+                tags=["Permission Drift"],
+            )
+            logger.info("permission_drift_initialized")
+        except Exception as e:
+            logger.warning("permission_drift_init_failed", error=str(e))
+
+    if settings.flag_lifecycle_enabled:
+        try:
+            from shieldops.api.routes import (
+                flag_lifecycle as fl_mod,
+            )
+            from shieldops.config.flag_lifecycle import (
+                FeatureFlagLifecycleManager,
+            )
+
+            fl_engine = FeatureFlagLifecycleManager(
+                max_records=settings.flag_lifecycle_max_records,
+                stale_days_threshold=settings.flag_lifecycle_stale_days_threshold,
+            )
+            fl_mod.set_engine(fl_engine)
+            app.include_router(
+                fl_mod.fl_route,
+                prefix=settings.api_prefix,
+                tags=["Flag Lifecycle"],
+            )
+            logger.info("flag_lifecycle_initialized")
+        except Exception as e:
+            logger.warning("flag_lifecycle_init_failed", error=str(e))
+
+    if settings.api_version_health_enabled:
+        try:
+            from shieldops.api.routes import (
+                api_version_health as avh_mod,
+            )
+            from shieldops.topology.api_version_health import (
+                APIVersionHealthMonitor,
+            )
+
+            avh_engine = APIVersionHealthMonitor(
+                max_records=settings.api_version_health_max_records,
+                sunset_warning_days=settings.api_version_health_sunset_warning_days,
+            )
+            avh_mod.set_engine(avh_engine)
+            app.include_router(
+                avh_mod.avh_route,
+                prefix=settings.api_prefix,
+                tags=["API Version Health"],
+            )
+            logger.info("api_version_health_initialized")
+        except Exception as e:
+            logger.warning("api_version_health_init_failed", error=str(e))
+
+    if settings.sre_maturity_enabled:
+        try:
+            from shieldops.api.routes import (
+                sre_maturity as sm_mod,
+            )
+            from shieldops.operations.sre_maturity import (
+                SREMaturityAssessor,
+            )
+
+            sm_engine = SREMaturityAssessor(
+                max_records=settings.sre_maturity_max_records,
+                target_maturity_score=settings.sre_maturity_target_maturity_score,
+            )
+            sm_mod.set_engine(sm_engine)
+            app.include_router(
+                sm_mod.sm_route,
+                prefix=settings.api_prefix,
+                tags=["SRE Maturity"],
+            )
+            logger.info("sre_maturity_initialized")
+        except Exception as e:
+            logger.warning("sre_maturity_init_failed", error=str(e))
+
+    if settings.learning_tracker_enabled:
+        try:
+            from shieldops.api.routes import (
+                learning_tracker as lt_mod,
+            )
+            from shieldops.incidents.learning_tracker import (
+                IncidentLearningTracker as LTEngine,
+            )
+
+            lt_engine = LTEngine(
+                max_records=settings.learning_tracker_max_records,
+                min_adoption_rate_pct=settings.learning_tracker_min_adoption_rate_pct,
+            )
+            lt_mod.set_engine(lt_engine)
+            app.include_router(
+                lt_mod.lt_route,
+                prefix=settings.api_prefix,
+                tags=["Incident Learning"],
+            )
+            logger.info("learning_tracker_initialized")
+        except Exception as e:
+            logger.warning("learning_tracker_init_failed", error=str(e))
+
+    if settings.cache_effectiveness_enabled:
+        try:
+            from shieldops.analytics.cache_effectiveness import (
+                CacheEffectivenessAnalyzer,
+            )
+            from shieldops.api.routes import (
+                cache_effectiveness as ce_mod,
+            )
+
+            ce_engine = CacheEffectivenessAnalyzer(
+                max_records=settings.cache_effectiveness_max_records,
+                min_hit_rate_pct=settings.cache_effectiveness_min_hit_rate_pct,
+            )
+            ce_mod.set_engine(ce_engine)
+            app.include_router(
+                ce_mod.ce_route,
+                prefix=settings.api_prefix,
+                tags=["Cache Effectiveness"],
+            )
+            logger.info("cache_effectiveness_initialized")
+        except Exception as e:
+            logger.warning("cache_effectiveness_init_failed", error=str(e))
+
     yield
 
     logger.info("shieldops_shutting_down")

@@ -28,7 +28,7 @@ Run health checks on all ShieldOps platform dependencies.
    - Integration tests: `python3 -m pytest tests/integration/ -v --tb=short`
    - Report: total tests, passed, failed, coverage
 
-5. **Platform feature health** (Phase 11–30 modules):
+5. **Platform feature health** (Phase 11–31 modules):
    - Capacity trends: `src/shieldops/analytics/capacity_trends.py` — CapacityTrendAnalyzer
    - SRE metrics: `src/shieldops/analytics/sre_metrics.py` — SREMetricsAggregator
    - Health reports: `src/shieldops/observability/health_report.py` — ServiceHealthReportGenerator
@@ -167,6 +167,18 @@ Run health checks on all ShieldOps platform dependencies.
    - Alert tuning feedback: `src/shieldops/observability/alert_tuning_feedback.py` — AlertTuningFeedbackLoop
    - Knowledge decay: `src/shieldops/knowledge/knowledge_decay.py` — KnowledgeDecayDetector
    - Coverage scorer: `src/shieldops/observability/coverage_scorer.py` — ObservabilityCoverageScorer
+   - Cardinality manager: `src/shieldops/observability/cardinality_manager.py` — MetricCardinalityManager
+   - Log retention optimizer: `src/shieldops/observability/log_retention_optimizer.py` — LogRetentionOptimizer
+   - Dashboard quality: `src/shieldops/observability/dashboard_quality.py` — DashboardQualityScorer
+   - Action tracker: `src/shieldops/incidents/action_tracker.py` — PostIncidentActionTracker
+   - Deployment confidence: `src/shieldops/changes/deployment_confidence.py` — DeploymentConfidenceScorer
+   - Reliability regression: `src/shieldops/sla/reliability_regression.py` — ReliabilityRegressionDetector
+   - Permission drift: `src/shieldops/security/permission_drift.py` — PermissionDriftDetector
+   - Flag lifecycle: `src/shieldops/config/flag_lifecycle.py` — FeatureFlagLifecycleManager
+   - API version health: `src/shieldops/topology/api_version_health.py` — APIVersionHealthMonitor
+   - SRE maturity: `src/shieldops/operations/sre_maturity.py` — SREMaturityAssessor
+   - Learning tracker: `src/shieldops/incidents/learning_tracker.py` — IncidentLearningTracker
+   - Cache effectiveness: `src/shieldops/analytics/cache_effectiveness.py` — CacheEffectivenessAnalyzer
    - Verify each module initializes in `src/shieldops/api/app.py` lifespan
 
 6. **Check configuration**:
