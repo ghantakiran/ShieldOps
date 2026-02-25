@@ -1255,6 +1255,66 @@ class Settings(BaseSettings):
     coverage_scorer_max_records: int = 200000
     coverage_scorer_min_coverage_pct: float = 80.0
 
+    # Phase 31: Metric Cardinality Manager
+    cardinality_manager_enabled: bool = True
+    cardinality_manager_max_records: int = 200000
+    cardinality_manager_max_cardinality_threshold: int = 10000
+
+    # Phase 31: Log Retention Optimizer
+    log_retention_optimizer_enabled: bool = True
+    log_retention_optimizer_max_records: int = 200000
+    log_retention_optimizer_default_retention_days: int = 90
+
+    # Phase 31: Dashboard Quality Scorer
+    dashboard_quality_enabled: bool = True
+    dashboard_quality_max_records: int = 200000
+    dashboard_quality_min_quality_score: float = 60.0
+
+    # Phase 31: Post-Incident Action Tracker
+    action_tracker_enabled: bool = True
+    action_tracker_max_records: int = 200000
+    action_tracker_overdue_threshold_days: int = 30
+
+    # Phase 31: Deployment Confidence Scorer
+    deployment_confidence_enabled: bool = True
+    deployment_confidence_max_records: int = 200000
+    deployment_confidence_min_confidence_score: float = 70.0
+
+    # Phase 31: Reliability Regression Detector
+    reliability_regression_enabled: bool = True
+    reliability_regression_max_records: int = 200000
+    reliability_regression_deviation_threshold_pct: float = 10.0
+
+    # Phase 31: Permission Drift Detector
+    permission_drift_enabled: bool = True
+    permission_drift_max_records: int = 200000
+    permission_drift_unused_days_threshold: int = 90
+
+    # Phase 31: Feature Flag Lifecycle Manager
+    flag_lifecycle_enabled: bool = True
+    flag_lifecycle_max_records: int = 200000
+    flag_lifecycle_stale_days_threshold: int = 90
+
+    # Phase 31: API Version Health Monitor
+    api_version_health_enabled: bool = True
+    api_version_health_max_records: int = 200000
+    api_version_health_sunset_warning_days: int = 30
+
+    # Phase 31: SRE Maturity Assessor
+    sre_maturity_enabled: bool = True
+    sre_maturity_max_records: int = 200000
+    sre_maturity_target_maturity_score: float = 3.0
+
+    # Phase 31: Incident Learning Tracker
+    learning_tracker_enabled: bool = True
+    learning_tracker_max_records: int = 200000
+    learning_tracker_min_adoption_rate_pct: float = 80.0
+
+    # Phase 31: Cache Effectiveness Analyzer
+    cache_effectiveness_enabled: bool = True
+    cache_effectiveness_max_records: int = 200000
+    cache_effectiveness_min_hit_rate_pct: float = 80.0
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",

@@ -58,7 +58,10 @@ Run security audits on ShieldOps codebase and agent configurations.
 32. **Alert Tuning Feedback**: Evaluate alert rule effectiveness via `AlertTuningFeedbackLoop` (`src/shieldops/observability/alert_tuning_feedback.py`)
 33. **Discount Coverage**: Identify uncovered resources via `CloudDiscountOptimizer` (`src/shieldops/billing/discount_optimizer.py`)
 34. **Knowledge Decay**: Detect stale knowledge articles via `KnowledgeDecayDetector` (`src/shieldops/knowledge/knowledge_decay.py`)
-31. **Generate Report**: Severity-rated findings with remediation guidance
+35. **Permission Drift Detection**: Detect IAM/RBAC permission creep via `PermissionDriftDetector` (`src/shieldops/security/permission_drift.py`)
+36. **Feature Flag Lifecycle**: Track stale/risky feature flags via `FeatureFlagLifecycleManager` (`src/shieldops/config/flag_lifecycle.py`)
+37. **Cache Effectiveness**: Analyze cache health and hit rates via `CacheEffectivenessAnalyzer` (`src/shieldops/analytics/cache_effectiveness.py`)
+38. **Generate Report**: Severity-rated findings with remediation guidance
 
 ## Severity Levels
 - **CRITICAL**: Hardcoded secrets, SQL injection, unauthenticated endpoints
