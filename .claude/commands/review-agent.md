@@ -116,6 +116,18 @@ Review ShieldOps agent code for correctness, safety, and reliability.
 - [ ] Reliability antipatterns detected via `ReliabilityAntiPatternDetector` (`src/shieldops/topology/reliability_antipattern.py`)
 - [ ] Error budget forecasted via `ErrorBudgetForecaster` (`src/shieldops/sla/error_budget_forecast.py`)
 - [ ] Dependency risk scored via `DependencyRiskScorer` (`src/shieldops/topology/dependency_risk.py`)
+- [ ] Incident similarity matched via `IncidentSimilarityEngine` (`src/shieldops/incidents/incident_similarity.py`)
+- [ ] Incident costs calculated via `IncidentCostCalculator` (`src/shieldops/incidents/incident_cost.py`)
+- [ ] Post-incident follow-ups tracked via `PostIncidentFollowupTracker` (`src/shieldops/incidents/followup_tracker.py`)
+- [ ] Team cognitive load tracked via `TeamCognitiveLoadTracker` (`src/shieldops/operations/cognitive_load.py`)
+- [ ] Cross-team collaboration scored via `CrossTeamCollaborationScorer` (`src/shieldops/analytics/collaboration_scorer.py`)
+- [ ] Knowledge contributions tracked via `KnowledgeContributionTracker` (`src/shieldops/knowledge/contribution_tracker.py`)
+- [ ] API performance profiled via `APIPerformanceProfiler` (`src/shieldops/analytics/api_performance.py`)
+- [ ] Resource contention detected via `ResourceContentionDetector` (`src/shieldops/analytics/resource_contention.py`)
+- [ ] Deployment rollbacks analyzed via `DeploymentRollbackAnalyzer` (`src/shieldops/changes/rollback_analyzer.py`)
+- [ ] Attack surface monitored via `AttackSurfaceMonitor` (`src/shieldops/security/attack_surface.py`)
+- [ ] Runbooks recommended via `RunbookRecommendationEngine` (`src/shieldops/operations/runbook_recommender.py`)
+- [ ] Platform reliability scored via `PlatformReliabilityScorecard` (`src/shieldops/sla/reliability_scorecard.py`)
 
 ### Testing
 - [ ] Unit tests for all node functions

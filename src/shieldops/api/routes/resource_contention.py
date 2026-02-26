@@ -1,4 +1,4 @@
-"""Runbook recommendation engine API routes."""
+"""Resource contention detector API routes."""
 
 from __future__ import annotations
 
@@ -8,17 +8,17 @@ import structlog
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
-from shieldops.api.auth.dependencies import require_role
-from shieldops.operations.runbook_recommender import (
-    MatchCriteria,
-    RecommendationConfidence,
-    RunbookRelevance,
+from shieldops.analytics.resource_contention import (
+    ContentionSeverity,
+    ContentionSource,
+    ContentionType,
 )
+from shieldops.api.auth.dependencies import require_role
 
 logger = structlog.get_logger()
 router = APIRouter(
-    prefix="/runbook-recommender",
-    tags=["Runbook Recommender"],
+    prefix="/resource-contention",
+    tags=["Resource Contention"],
 )
 
 _engine: Any = None
@@ -31,106 +31,108 @@ def set_engine(engine: Any) -> None:
 
 def _get_engine() -> Any:
     if _engine is None:
-        raise HTTPException(503, "Runbook recommender service unavailable")
+        raise HTTPException(503, "Resource contention service unavailable")
     return _engine
 
 
-class RecordRecommendationRequest(BaseModel):
+class RecordContentionRequest(BaseModel):
     service_name: str
-    criteria: MatchCriteria = MatchCriteria.KEYWORD_MATCH
-    confidence: RecommendationConfidence = RecommendationConfidence.LOW
-    relevance: RunbookRelevance = RunbookRelevance.GENERIC
-    accuracy_score: float = 0.0
+    contention_type: ContentionType = ContentionType.CPU_THROTTLING
+    severity: ContentionSeverity = ContentionSeverity.LOW
+    source: ContentionSource = ContentionSource.RESOURCE_LIMIT
+    impact_duration_hours: float = 0.0
     details: str = ""
 
 
-class AddMatchRequest(BaseModel):
-    match_name: str
-    criteria: MatchCriteria = MatchCriteria.KEYWORD_MATCH
-    confidence: RecommendationConfidence = RecommendationConfidence.LOW
-    effectiveness_score: float = 0.0
+class AddEventRequest(BaseModel):
+    event_name: str
+    contention_type: ContentionType = ContentionType.CPU_THROTTLING
+    severity: ContentionSeverity = ContentionSeverity.LOW
+    duration_hours: float = 0.0
     description: str = ""
 
 
-@router.post("/recommendations")
-async def record_recommendation(
-    body: RecordRecommendationRequest,
+@router.post("/contentions")
+async def record_contention(
+    body: RecordContentionRequest,
     _user: Any = Depends(require_role("operator")),  # type: ignore[arg-type]
 ) -> dict[str, Any]:
     engine = _get_engine()
-    result = engine.record_recommendation(**body.model_dump())
+    result = engine.record_contention(**body.model_dump())
     return result.model_dump()
 
 
-@router.get("/recommendations")
-async def list_recommendations(
+@router.get("/contentions")
+async def list_contentions(
     service_name: str | None = None,
-    criteria: MatchCriteria | None = None,
+    contention_type: ContentionType | None = None,
     limit: int = 50,
     _user: Any = Depends(require_role("viewer")),  # type: ignore[arg-type]
 ) -> list[dict[str, Any]]:
     engine = _get_engine()
     return [
         r.model_dump()
-        for r in engine.list_recommendations(
-            service_name=service_name, criteria=criteria, limit=limit
+        for r in engine.list_contentions(
+            service_name=service_name,
+            contention_type=contention_type,
+            limit=limit,
         )
     ]
 
 
-@router.get("/recommendations/{record_id}")
-async def get_recommendation(
+@router.get("/contentions/{record_id}")
+async def get_contention(
     record_id: str,
     _user: Any = Depends(require_role("viewer")),  # type: ignore[arg-type]
 ) -> dict[str, Any]:
     engine = _get_engine()
-    result = engine.get_recommendation(record_id)
+    result = engine.get_contention(record_id)
     if result is None:
-        raise HTTPException(404, f"Recommendation '{record_id}' not found")
+        raise HTTPException(404, f"Contention '{record_id}' not found")
     return result.model_dump()
 
 
-@router.post("/matches")
-async def add_match(
-    body: AddMatchRequest,
+@router.post("/events")
+async def add_event(
+    body: AddEventRequest,
     _user: Any = Depends(require_role("operator")),  # type: ignore[arg-type]
 ) -> dict[str, Any]:
     engine = _get_engine()
-    result = engine.add_match(**body.model_dump())
+    result = engine.add_event(**body.model_dump())
     return result.model_dump()
 
 
-@router.get("/accuracy/{service_name}")
-async def analyze_recommendation_accuracy(
+@router.get("/patterns/{service_name}")
+async def analyze_contention_patterns(
     service_name: str,
     _user: Any = Depends(require_role("viewer")),  # type: ignore[arg-type]
 ) -> dict[str, Any]:
     engine = _get_engine()
-    return engine.analyze_recommendation_accuracy(service_name)
+    return engine.analyze_contention_patterns(service_name)
 
 
-@router.get("/top-runbooks")
-async def identify_top_runbooks(
+@router.get("/critical")
+async def identify_critical_contentions(
     _user: Any = Depends(require_role("viewer")),  # type: ignore[arg-type]
 ) -> list[dict[str, Any]]:
     engine = _get_engine()
-    return engine.identify_top_runbooks()
+    return engine.identify_critical_contentions()
 
 
 @router.get("/rankings")
-async def rank_by_effectiveness(
+async def rank_by_impact_duration(
     _user: Any = Depends(require_role("viewer")),  # type: ignore[arg-type]
 ) -> list[dict[str, Any]]:
     engine = _get_engine()
-    return engine.rank_by_effectiveness()
+    return engine.rank_by_impact_duration()
 
 
-@router.get("/gaps")
-async def detect_recommendation_gaps(
+@router.get("/recurring")
+async def detect_recurring_contentions(
     _user: Any = Depends(require_role("viewer")),  # type: ignore[arg-type]
 ) -> list[dict[str, Any]]:
     engine = _get_engine()
-    return engine.detect_recommendation_gaps()
+    return engine.detect_recurring_contentions()
 
 
 @router.get("/report")
@@ -157,7 +159,4 @@ async def clear_data(
     return engine.clear_data()
 
 
-rbr_route = router
-
-# Phase 19 backward-compat alias
-set_recommender = set_engine
+rcd_route = router

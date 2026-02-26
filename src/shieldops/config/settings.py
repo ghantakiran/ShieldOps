@@ -1435,6 +1435,66 @@ class Settings(BaseSettings):
     dependency_risk_max_records: int = 200000
     dependency_risk_critical_threshold: float = 80.0
 
+    # Phase 34: Incident Similarity Engine
+    incident_similarity_enabled: bool = True
+    incident_similarity_max_records: int = 200000
+    incident_similarity_min_confidence_pct: float = 70.0
+
+    # Phase 34: Incident Cost Calculator
+    incident_cost_enabled: bool = True
+    incident_cost_max_records: int = 200000
+    incident_cost_high_threshold: float = 10000.0
+
+    # Phase 34: Post-Incident Follow-up Tracker
+    followup_tracker_enabled: bool = True
+    followup_tracker_max_records: int = 200000
+    followup_tracker_overdue_days: int = 30
+
+    # Phase 34: Team Cognitive Load Tracker
+    cognitive_load_enabled: bool = True
+    cognitive_load_max_records: int = 200000
+    cognitive_load_critical_threshold: float = 80.0
+
+    # Phase 34: Cross-Team Collaboration Scorer
+    collaboration_scorer_enabled: bool = True
+    collaboration_scorer_max_records: int = 200000
+    collaboration_scorer_min_score: float = 60.0
+
+    # Phase 34: Knowledge Contribution Tracker
+    contribution_tracker_enabled: bool = True
+    contribution_tracker_max_records: int = 200000
+    contribution_tracker_min_quality_score: float = 60.0
+
+    # Phase 34: API Performance Profiler
+    api_performance_enabled: bool = True
+    api_performance_max_records: int = 200000
+    api_performance_slow_threshold_ms: float = 500.0
+
+    # Phase 34: Resource Contention Detector
+    resource_contention_enabled: bool = True
+    resource_contention_max_records: int = 200000
+    resource_contention_critical_threshold_pct: float = 90.0
+
+    # Phase 34: Deployment Rollback Analyzer
+    rollback_analyzer_enabled: bool = True
+    rollback_analyzer_max_records: int = 200000
+    rollback_analyzer_max_rate_pct: float = 10.0
+
+    # Phase 34: Attack Surface Monitor
+    attack_surface_enabled: bool = True
+    attack_surface_max_records: int = 200000
+    attack_surface_max_critical_exposures: int = 5
+
+    # Phase 34: Runbook Recommendation Engine
+    runbook_recommendation_enabled: bool = True
+    runbook_recommendation_max_records: int = 200000
+    runbook_recommendation_min_confidence_pct: float = 60.0
+
+    # Phase 34: Platform Reliability Scorecard
+    reliability_scorecard_enabled: bool = True
+    reliability_scorecard_max_records: int = 200000
+    reliability_scorecard_min_grade_score: float = 70.0
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",

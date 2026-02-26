@@ -1,4 +1,4 @@
-"""Runbook recommendation engine API routes."""
+"""Knowledge contribution tracker API routes."""
 
 from __future__ import annotations
 
@@ -9,16 +9,16 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 from shieldops.api.auth.dependencies import require_role
-from shieldops.operations.runbook_recommender import (
-    MatchCriteria,
-    RecommendationConfidence,
-    RunbookRelevance,
+from shieldops.knowledge.contribution_tracker import (
+    ContributionImpact,
+    ContributionQuality,
+    ContributionType,
 )
 
 logger = structlog.get_logger()
 router = APIRouter(
-    prefix="/runbook-recommender",
-    tags=["Runbook Recommender"],
+    prefix="/contribution-tracker",
+    tags=["Contribution Tracker"],
 )
 
 _engine: Any = None
@@ -31,106 +31,108 @@ def set_engine(engine: Any) -> None:
 
 def _get_engine() -> Any:
     if _engine is None:
-        raise HTTPException(503, "Runbook recommender service unavailable")
+        raise HTTPException(503, "Contribution tracker service unavailable")
     return _engine
 
 
-class RecordRecommendationRequest(BaseModel):
-    service_name: str
-    criteria: MatchCriteria = MatchCriteria.KEYWORD_MATCH
-    confidence: RecommendationConfidence = RecommendationConfidence.LOW
-    relevance: RunbookRelevance = RunbookRelevance.GENERIC
-    accuracy_score: float = 0.0
+class RecordContributionRequest(BaseModel):
+    contributor_name: str
+    contribution_type: ContributionType = ContributionType.DOCUMENTATION
+    quality: ContributionQuality = ContributionQuality.ADEQUATE
+    impact: ContributionImpact = ContributionImpact.UNKNOWN
+    quality_score: float = 0.0
     details: str = ""
 
 
-class AddMatchRequest(BaseModel):
-    match_name: str
-    criteria: MatchCriteria = MatchCriteria.KEYWORD_MATCH
-    confidence: RecommendationConfidence = RecommendationConfidence.LOW
-    effectiveness_score: float = 0.0
+class AddContributorProfileRequest(BaseModel):
+    profile_name: str
+    contribution_type: ContributionType = ContributionType.DOCUMENTATION
+    quality: ContributionQuality = ContributionQuality.ADEQUATE
+    total_contributions: int = 0
     description: str = ""
 
 
-@router.post("/recommendations")
-async def record_recommendation(
-    body: RecordRecommendationRequest,
+@router.post("/contributions")
+async def record_contribution(
+    body: RecordContributionRequest,
     _user: Any = Depends(require_role("operator")),  # type: ignore[arg-type]
 ) -> dict[str, Any]:
     engine = _get_engine()
-    result = engine.record_recommendation(**body.model_dump())
+    result = engine.record_contribution(**body.model_dump())
     return result.model_dump()
 
 
-@router.get("/recommendations")
-async def list_recommendations(
-    service_name: str | None = None,
-    criteria: MatchCriteria | None = None,
+@router.get("/contributions")
+async def list_contributions(
+    contributor_name: str | None = None,
+    contribution_type: ContributionType | None = None,
     limit: int = 50,
     _user: Any = Depends(require_role("viewer")),  # type: ignore[arg-type]
 ) -> list[dict[str, Any]]:
     engine = _get_engine()
     return [
         r.model_dump()
-        for r in engine.list_recommendations(
-            service_name=service_name, criteria=criteria, limit=limit
+        for r in engine.list_contributions(
+            contributor_name=contributor_name,
+            contribution_type=contribution_type,
+            limit=limit,
         )
     ]
 
 
-@router.get("/recommendations/{record_id}")
-async def get_recommendation(
+@router.get("/contributions/{record_id}")
+async def get_contribution(
     record_id: str,
     _user: Any = Depends(require_role("viewer")),  # type: ignore[arg-type]
 ) -> dict[str, Any]:
     engine = _get_engine()
-    result = engine.get_recommendation(record_id)
+    result = engine.get_contribution(record_id)
     if result is None:
-        raise HTTPException(404, f"Recommendation '{record_id}' not found")
+        raise HTTPException(404, f"Contribution '{record_id}' not found")
     return result.model_dump()
 
 
-@router.post("/matches")
-async def add_match(
-    body: AddMatchRequest,
+@router.post("/profiles")
+async def add_contributor_profile(
+    body: AddContributorProfileRequest,
     _user: Any = Depends(require_role("operator")),  # type: ignore[arg-type]
 ) -> dict[str, Any]:
     engine = _get_engine()
-    result = engine.add_match(**body.model_dump())
+    result = engine.add_contributor_profile(**body.model_dump())
     return result.model_dump()
 
 
-@router.get("/accuracy/{service_name}")
-async def analyze_recommendation_accuracy(
-    service_name: str,
+@router.get("/patterns/{contributor_name}")
+async def analyze_contribution_patterns(
+    contributor_name: str,
     _user: Any = Depends(require_role("viewer")),  # type: ignore[arg-type]
 ) -> dict[str, Any]:
     engine = _get_engine()
-    return engine.analyze_recommendation_accuracy(service_name)
+    return engine.analyze_contribution_patterns(contributor_name)
 
 
-@router.get("/top-runbooks")
-async def identify_top_runbooks(
+@router.get("/top-contributors")
+async def identify_top_contributors(
     _user: Any = Depends(require_role("viewer")),  # type: ignore[arg-type]
 ) -> list[dict[str, Any]]:
     engine = _get_engine()
-    return engine.identify_top_runbooks()
+    return engine.identify_top_contributors()
 
 
 @router.get("/rankings")
-async def rank_by_effectiveness(
+async def rank_by_impact(
     _user: Any = Depends(require_role("viewer")),  # type: ignore[arg-type]
 ) -> list[dict[str, Any]]:
     engine = _get_engine()
-    return engine.rank_by_effectiveness()
+    return engine.rank_by_impact()
 
 
 @router.get("/gaps")
-async def detect_recommendation_gaps(
+async def detect_knowledge_gaps(
     _user: Any = Depends(require_role("viewer")),  # type: ignore[arg-type]
 ) -> list[dict[str, Any]]:
     engine = _get_engine()
-    return engine.detect_recommendation_gaps()
+    return engine.detect_knowledge_gaps()
 
 
 @router.get("/report")
@@ -157,7 +159,4 @@ async def clear_data(
     return engine.clear_data()
 
 
-rbr_route = router
-
-# Phase 19 backward-compat alias
-set_recommender = set_engine
+kct_route = router

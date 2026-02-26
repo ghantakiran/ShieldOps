@@ -6939,6 +6939,282 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         except Exception as e:
             logger.warning("dependency_risk_init_failed", error=str(e))
 
+    if settings.incident_similarity_enabled:
+        try:
+            from shieldops.api.routes import (
+                incident_similarity as ism_mod,
+            )
+            from shieldops.incidents.incident_similarity import (
+                IncidentSimilarityEngine,
+            )
+
+            ism_engine = IncidentSimilarityEngine(
+                max_records=settings.incident_similarity_max_records,
+                min_confidence_pct=settings.incident_similarity_min_confidence_pct,
+            )
+            ism_mod.set_engine(ism_engine)
+            app.include_router(
+                ism_mod.ism_route,
+                prefix=settings.api_prefix,
+                tags=["Incident Similarity"],
+            )
+            logger.info("incident_similarity_initialized")
+        except Exception as e:
+            logger.warning("incident_similarity_init_failed", error=str(e))
+
+    if settings.incident_cost_enabled:
+        try:
+            from shieldops.api.routes import (
+                incident_cost as icl_mod,
+            )
+            from shieldops.incidents.incident_cost import (
+                IncidentCostCalculator,
+            )
+
+            icl_engine = IncidentCostCalculator(
+                max_records=settings.incident_cost_max_records,
+                high_threshold=settings.incident_cost_high_threshold,
+            )
+            icl_mod.set_engine(icl_engine)
+            app.include_router(
+                icl_mod.icl_route,
+                prefix=settings.api_prefix,
+                tags=["Incident Cost"],
+            )
+            logger.info("incident_cost_initialized")
+        except Exception as e:
+            logger.warning("incident_cost_init_failed", error=str(e))
+
+    if settings.followup_tracker_enabled:
+        try:
+            from shieldops.api.routes import (
+                followup_tracker as fut_mod,
+            )
+            from shieldops.incidents.followup_tracker import (
+                PostIncidentFollowupTracker,
+            )
+
+            fut_engine = PostIncidentFollowupTracker(
+                max_records=settings.followup_tracker_max_records,
+                overdue_days=settings.followup_tracker_overdue_days,
+            )
+            fut_mod.set_engine(fut_engine)
+            app.include_router(
+                fut_mod.fut_route,
+                prefix=settings.api_prefix,
+                tags=["Follow-up Tracker"],
+            )
+            logger.info("followup_tracker_initialized")
+        except Exception as e:
+            logger.warning("followup_tracker_init_failed", error=str(e))
+
+    if settings.cognitive_load_enabled:
+        try:
+            from shieldops.api.routes import (
+                cognitive_load as clt_mod,
+            )
+            from shieldops.operations.cognitive_load import (
+                TeamCognitiveLoadTracker,
+            )
+
+            clt_engine = TeamCognitiveLoadTracker(
+                max_records=settings.cognitive_load_max_records,
+                critical_threshold=settings.cognitive_load_critical_threshold,
+            )
+            clt_mod.set_engine(clt_engine)
+            app.include_router(
+                clt_mod.clt_route,
+                prefix=settings.api_prefix,
+                tags=["Cognitive Load"],
+            )
+            logger.info("cognitive_load_initialized")
+        except Exception as e:
+            logger.warning("cognitive_load_init_failed", error=str(e))
+
+    if settings.collaboration_scorer_enabled:
+        try:
+            from shieldops.analytics.collaboration_scorer import (
+                CrossTeamCollaborationScorer,
+            )
+            from shieldops.api.routes import (
+                collaboration_scorer as css_mod,
+            )
+
+            css_engine = CrossTeamCollaborationScorer(
+                max_records=settings.collaboration_scorer_max_records,
+                min_score=settings.collaboration_scorer_min_score,
+            )
+            css_mod.set_engine(css_engine)
+            app.include_router(
+                css_mod.css_route,
+                prefix=settings.api_prefix,
+                tags=["Collaboration Scorer"],
+            )
+            logger.info("collaboration_scorer_initialized")
+        except Exception as e:
+            logger.warning("collaboration_scorer_init_failed", error=str(e))
+
+    if settings.contribution_tracker_enabled:
+        try:
+            from shieldops.api.routes import (
+                contribution_tracker as kct_mod,
+            )
+            from shieldops.knowledge.contribution_tracker import (
+                KnowledgeContributionTracker,
+            )
+
+            kct_engine = KnowledgeContributionTracker(
+                max_records=settings.contribution_tracker_max_records,
+                min_quality_score=settings.contribution_tracker_min_quality_score,
+            )
+            kct_mod.set_engine(kct_engine)
+            app.include_router(
+                kct_mod.kct_route,
+                prefix=settings.api_prefix,
+                tags=["Contribution Tracker"],
+            )
+            logger.info("contribution_tracker_initialized")
+        except Exception as e:
+            logger.warning("contribution_tracker_init_failed", error=str(e))
+
+    if settings.api_performance_enabled:
+        try:
+            from shieldops.analytics.api_performance import (
+                APIPerformanceProfiler,
+            )
+            from shieldops.api.routes import (
+                api_performance as apf_mod,
+            )
+
+            apf_engine = APIPerformanceProfiler(
+                max_records=settings.api_performance_max_records,
+                slow_threshold_ms=settings.api_performance_slow_threshold_ms,
+            )
+            apf_mod.set_engine(apf_engine)
+            app.include_router(
+                apf_mod.apf_route,
+                prefix=settings.api_prefix,
+                tags=["API Performance"],
+            )
+            logger.info("api_performance_initialized")
+        except Exception as e:
+            logger.warning("api_performance_init_failed", error=str(e))
+
+    if settings.resource_contention_enabled:
+        try:
+            from shieldops.analytics.resource_contention import (
+                ResourceContentionDetector,
+            )
+            from shieldops.api.routes import (
+                resource_contention as rcd_mod,
+            )
+
+            rcd_engine = ResourceContentionDetector(
+                max_records=settings.resource_contention_max_records,
+                critical_threshold_pct=settings.resource_contention_critical_threshold_pct,
+            )
+            rcd_mod.set_engine(rcd_engine)
+            app.include_router(
+                rcd_mod.rcd_route,
+                prefix=settings.api_prefix,
+                tags=["Resource Contention"],
+            )
+            logger.info("resource_contention_initialized")
+        except Exception as e:
+            logger.warning("resource_contention_init_failed", error=str(e))
+
+    if settings.rollback_analyzer_enabled:
+        try:
+            from shieldops.api.routes import (
+                rollback_analyzer as rba_mod,
+            )
+            from shieldops.changes.rollback_analyzer import (
+                DeploymentRollbackAnalyzer,
+            )
+
+            rba_engine = DeploymentRollbackAnalyzer(
+                max_records=settings.rollback_analyzer_max_records,
+                max_rate_pct=settings.rollback_analyzer_max_rate_pct,
+            )
+            rba_mod.set_engine(rba_engine)
+            app.include_router(
+                rba_mod.rba_route,
+                prefix=settings.api_prefix,
+                tags=["Rollback Analyzer"],
+            )
+            logger.info("rollback_analyzer_initialized")
+        except Exception as e:
+            logger.warning("rollback_analyzer_init_failed", error=str(e))
+
+    if settings.attack_surface_enabled:
+        try:
+            from shieldops.api.routes import (
+                attack_surface_monitor as asm_mod,
+            )
+            from shieldops.security.attack_surface import (
+                AttackSurfaceMonitor,
+            )
+
+            asm_engine = AttackSurfaceMonitor(
+                max_records=settings.attack_surface_max_records,
+                max_critical_exposures=settings.attack_surface_max_critical_exposures,
+            )
+            asm_mod.set_engine(asm_engine)
+            app.include_router(
+                asm_mod.asm_route,
+                prefix=settings.api_prefix,
+                tags=["Attack Surface Monitor"],
+            )
+            logger.info("attack_surface_monitor_initialized")
+        except Exception as e:
+            logger.warning("attack_surface_monitor_init_failed", error=str(e))
+
+    if settings.runbook_recommendation_enabled:
+        try:
+            from shieldops.api.routes import (
+                runbook_recommender as rbr_mod,
+            )
+            from shieldops.operations.runbook_recommender import (
+                RunbookRecommendationEngine,
+            )
+
+            rbr_engine = RunbookRecommendationEngine(
+                max_records=settings.runbook_recommendation_max_records,
+                min_confidence_pct=settings.runbook_recommendation_min_confidence_pct,
+            )
+            rbr_mod.set_engine(rbr_engine)
+            app.include_router(
+                rbr_mod.rbr_route,
+                prefix=settings.api_prefix,
+                tags=["Runbook Recommender"],
+            )
+            logger.info("runbook_recommender_initialized")
+        except Exception as e:
+            logger.warning("runbook_recommender_init_failed", error=str(e))
+
+    if settings.reliability_scorecard_enabled:
+        try:
+            from shieldops.api.routes import (
+                reliability_scorecard as prs_mod,
+            )
+            from shieldops.sla.reliability_scorecard import (
+                PlatformReliabilityScorecard,
+            )
+
+            prs_engine = PlatformReliabilityScorecard(
+                max_records=settings.reliability_scorecard_max_records,
+                min_grade_score=settings.reliability_scorecard_min_grade_score,
+            )
+            prs_mod.set_engine(prs_engine)
+            app.include_router(
+                prs_mod.prs_route,
+                prefix=settings.api_prefix,
+                tags=["Reliability Scorecard"],
+            )
+            logger.info("reliability_scorecard_initialized")
+        except Exception as e:
+            logger.warning("reliability_scorecard_init_failed", error=str(e))
+
     yield
 
     logger.info("shieldops_shutting_down")

@@ -1,4 +1,4 @@
-"""Runbook recommendation engine API routes."""
+"""Platform reliability scorecard API routes."""
 
 from __future__ import annotations
 
@@ -9,16 +9,16 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 from shieldops.api.auth.dependencies import require_role
-from shieldops.operations.runbook_recommender import (
-    MatchCriteria,
-    RecommendationConfidence,
-    RunbookRelevance,
+from shieldops.sla.reliability_scorecard import (
+    ScoreCategory,
+    ScoreGrade,
+    ScoreTrend,
 )
 
 logger = structlog.get_logger()
 router = APIRouter(
-    prefix="/runbook-recommender",
-    tags=["Runbook Recommender"],
+    prefix="/reliability-scorecard",
+    tags=["Reliability Scorecard"],
 )
 
 _engine: Any = None
@@ -31,106 +31,104 @@ def set_engine(engine: Any) -> None:
 
 def _get_engine() -> Any:
     if _engine is None:
-        raise HTTPException(503, "Runbook recommender service unavailable")
+        raise HTTPException(503, "Reliability scorecard service unavailable")
     return _engine
 
 
-class RecordRecommendationRequest(BaseModel):
+class RecordScorecardRequest(BaseModel):
     service_name: str
-    criteria: MatchCriteria = MatchCriteria.KEYWORD_MATCH
-    confidence: RecommendationConfidence = RecommendationConfidence.LOW
-    relevance: RunbookRelevance = RunbookRelevance.GENERIC
-    accuracy_score: float = 0.0
+    category: ScoreCategory = ScoreCategory.SLO_COMPLIANCE
+    grade: ScoreGrade = ScoreGrade.C_ADEQUATE
+    trend: ScoreTrend = ScoreTrend.NEW
+    overall_score: float = 0.0
     details: str = ""
 
 
-class AddMatchRequest(BaseModel):
-    match_name: str
-    criteria: MatchCriteria = MatchCriteria.KEYWORD_MATCH
-    confidence: RecommendationConfidence = RecommendationConfidence.LOW
-    effectiveness_score: float = 0.0
+class AddCategoryScoreRequest(BaseModel):
+    category_name: str
+    category: ScoreCategory = ScoreCategory.SLO_COMPLIANCE
+    grade: ScoreGrade = ScoreGrade.C_ADEQUATE
+    score: float = 0.0
     description: str = ""
 
 
-@router.post("/recommendations")
-async def record_recommendation(
-    body: RecordRecommendationRequest,
+@router.post("/scorecards")
+async def record_scorecard(
+    body: RecordScorecardRequest,
     _user: Any = Depends(require_role("operator")),  # type: ignore[arg-type]
 ) -> dict[str, Any]:
     engine = _get_engine()
-    result = engine.record_recommendation(**body.model_dump())
+    result = engine.record_scorecard(**body.model_dump())
     return result.model_dump()
 
 
-@router.get("/recommendations")
-async def list_recommendations(
+@router.get("/scorecards")
+async def list_scorecards(
     service_name: str | None = None,
-    criteria: MatchCriteria | None = None,
+    category: ScoreCategory | None = None,
     limit: int = 50,
     _user: Any = Depends(require_role("viewer")),  # type: ignore[arg-type]
 ) -> list[dict[str, Any]]:
     engine = _get_engine()
     return [
         r.model_dump()
-        for r in engine.list_recommendations(
-            service_name=service_name, criteria=criteria, limit=limit
-        )
+        for r in engine.list_scorecards(service_name=service_name, category=category, limit=limit)
     ]
 
 
-@router.get("/recommendations/{record_id}")
-async def get_recommendation(
+@router.get("/scorecards/{record_id}")
+async def get_scorecard(
     record_id: str,
     _user: Any = Depends(require_role("viewer")),  # type: ignore[arg-type]
 ) -> dict[str, Any]:
     engine = _get_engine()
-    result = engine.get_recommendation(record_id)
+    result = engine.get_scorecard(record_id)
     if result is None:
-        raise HTTPException(404, f"Recommendation '{record_id}' not found")
+        raise HTTPException(404, f"Scorecard '{record_id}' not found")
     return result.model_dump()
 
 
-@router.post("/matches")
-async def add_match(
-    body: AddMatchRequest,
+@router.post("/category-scores")
+async def add_category_score(
+    body: AddCategoryScoreRequest,
     _user: Any = Depends(require_role("operator")),  # type: ignore[arg-type]
 ) -> dict[str, Any]:
     engine = _get_engine()
-    result = engine.add_match(**body.model_dump())
+    result = engine.add_category_score(**body.model_dump())
     return result.model_dump()
 
 
-@router.get("/accuracy/{service_name}")
-async def analyze_recommendation_accuracy(
+@router.get("/reliability/{service_name}")
+async def analyze_service_reliability(
     service_name: str,
     _user: Any = Depends(require_role("viewer")),  # type: ignore[arg-type]
 ) -> dict[str, Any]:
     engine = _get_engine()
-    return engine.analyze_recommendation_accuracy(service_name)
+    return engine.analyze_service_reliability(service_name)
 
 
-@router.get("/top-runbooks")
-async def identify_top_runbooks(
+@router.get("/low-scoring")
+async def identify_low_scoring_services(
     _user: Any = Depends(require_role("viewer")),  # type: ignore[arg-type]
 ) -> list[dict[str, Any]]:
     engine = _get_engine()
-    return engine.identify_top_runbooks()
+    return engine.identify_low_scoring_services()
 
 
 @router.get("/rankings")
-async def rank_by_effectiveness(
+async def rank_by_overall_score(
     _user: Any = Depends(require_role("viewer")),  # type: ignore[arg-type]
 ) -> list[dict[str, Any]]:
     engine = _get_engine()
-    return engine.rank_by_effectiveness()
+    return engine.rank_by_overall_score()
 
 
-@router.get("/gaps")
-async def detect_recommendation_gaps(
+@router.get("/trends")
+async def detect_score_trends(
     _user: Any = Depends(require_role("viewer")),  # type: ignore[arg-type]
 ) -> list[dict[str, Any]]:
     engine = _get_engine()
-    return engine.detect_recommendation_gaps()
+    return engine.detect_score_trends()
 
 
 @router.get("/report")
@@ -157,7 +155,4 @@ async def clear_data(
     return engine.clear_data()
 
 
-rbr_route = router
-
-# Phase 19 backward-compat alias
-set_recommender = set_engine
+prs_route = router
