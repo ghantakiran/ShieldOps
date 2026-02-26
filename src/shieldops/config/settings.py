@@ -1375,6 +1375,66 @@ class Settings(BaseSettings):
     readiness_scorer_max_records: int = 200000
     readiness_scorer_min_readiness_score: float = 70.0
 
+    # Phase 33: Incident Auto-Triage Engine
+    auto_triage_enabled: bool = True
+    auto_triage_max_records: int = 200000
+    auto_triage_min_confidence_pct: float = 75.0
+
+    # Phase 33: Self-Healing Orchestrator
+    self_healing_enabled: bool = True
+    self_healing_max_records: int = 200000
+    self_healing_min_success_rate_pct: float = 80.0
+
+    # Phase 33: Recurrence Pattern Detector
+    recurrence_pattern_enabled: bool = True
+    recurrence_pattern_max_records: int = 200000
+    recurrence_pattern_min_incidents: int = 3
+
+    # Phase 33: Policy Impact Scorer
+    policy_impact_enabled: bool = True
+    policy_impact_max_records: int = 200000
+    policy_impact_max_conflict_count: int = 50
+
+    # Phase 33: Audit Intelligence Analyzer
+    audit_intelligence_enabled: bool = True
+    audit_intelligence_max_records: int = 200000
+    audit_intelligence_anomaly_threshold_pct: float = 200.0
+
+    # Phase 33: Automation Gap Identifier
+    automation_gap_enabled: bool = True
+    automation_gap_max_records: int = 200000
+    automation_gap_min_roi_score: float = 50.0
+
+    # Phase 33: Capacity Demand Modeler
+    capacity_demand_enabled: bool = True
+    capacity_demand_max_records: int = 200000
+    capacity_demand_deficit_threshold_pct: float = 85.0
+
+    # Phase 33: Spot Instance Advisor
+    spot_advisor_enabled: bool = True
+    spot_advisor_max_records: int = 200000
+    spot_advisor_min_savings_pct: float = 20.0
+
+    # Phase 33: Scaling Efficiency Tracker
+    scaling_efficiency_enabled: bool = True
+    scaling_efficiency_max_records: int = 200000
+    scaling_efficiency_max_duration_seconds: float = 300.0
+
+    # Phase 33: Reliability Anti-Pattern Detector
+    reliability_antipattern_enabled: bool = True
+    reliability_antipattern_max_records: int = 200000
+    reliability_antipattern_max_accepted_risks: int = 10
+
+    # Phase 33: Error Budget Forecaster
+    error_budget_forecast_enabled: bool = True
+    error_budget_forecast_max_records: int = 200000
+    error_budget_forecast_risk_threshold_pct: float = 30.0
+
+    # Phase 33: Dependency Risk Scorer
+    dependency_risk_enabled: bool = True
+    dependency_risk_max_records: int = 200000
+    dependency_risk_critical_threshold: float = 80.0
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",

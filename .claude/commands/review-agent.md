@@ -104,6 +104,18 @@ Review ShieldOps agent code for correctness, safety, and reliability.
 - [ ] License risk analyzed via `DependencyLicenseRiskAnalyzer` (`src/shieldops/compliance/license_risk.py`)
 - [ ] Communication effectiveness analyzed via `CommEffectivenessAnalyzer` (`src/shieldops/incidents/comm_effectiveness.py`)
 - [ ] Operational readiness scored via `OperationalReadinessScorer` (`src/shieldops/operations/readiness_scorer.py`)
+- [ ] Incident auto-triage validated via `IncidentAutoTriageEngine` (`src/shieldops/incidents/auto_triage.py`)
+- [ ] Self-healing orchestrated via `SelfHealingOrchestrator` (`src/shieldops/operations/self_healing.py`)
+- [ ] Recurrence patterns detected via `RecurrencePatternDetector` (`src/shieldops/incidents/recurrence_pattern.py`)
+- [ ] Policy impact scored via `PolicyImpactScorer` (`src/shieldops/compliance/policy_impact.py`)
+- [ ] Audit intelligence analyzed via `AuditIntelligenceAnalyzer` (`src/shieldops/audit/audit_intelligence.py`)
+- [ ] Automation gaps identified via `AutomationGapIdentifier` (`src/shieldops/operations/automation_gap.py`)
+- [ ] Capacity demand modeled via `CapacityDemandModeler` (`src/shieldops/analytics/capacity_demand.py`)
+- [ ] Spot instances advised via `SpotInstanceAdvisor` (`src/shieldops/billing/spot_advisor.py`)
+- [ ] Scaling efficiency tracked via `ScalingEfficiencyTracker` (`src/shieldops/operations/scaling_efficiency.py`)
+- [ ] Reliability antipatterns detected via `ReliabilityAntiPatternDetector` (`src/shieldops/topology/reliability_antipattern.py`)
+- [ ] Error budget forecasted via `ErrorBudgetForecaster` (`src/shieldops/sla/error_budget_forecast.py`)
+- [ ] Dependency risk scored via `DependencyRiskScorer` (`src/shieldops/topology/dependency_risk.py`)
 
 ### Testing
 - [ ] Unit tests for all node functions

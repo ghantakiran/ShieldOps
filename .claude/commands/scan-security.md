@@ -66,6 +66,10 @@ Run security audits on ShieldOps codebase and agent configurations.
 40. **Permission Drift Detection**: Detect IAM/RBAC permission creep via `PermissionDriftDetector` (`src/shieldops/security/permission_drift.py`)
 41. **Data Pipeline Reliability**: Monitor data pipeline health via `DataPipelineReliabilityMonitor` (`src/shieldops/observability/data_pipeline.py`)
 42. **Generate Report**: Severity-rated findings with remediation guidance
+43. **Audit Intelligence**: AI-powered audit analysis via `AuditIntelligenceAnalyzer` (`src/shieldops/audit/audit_intelligence.py`)
+44. **Policy Impact Scoring**: Analyze impact of policy changes via `PolicyImpactScorer` (`src/shieldops/compliance/policy_impact.py`)
+45. **Dependency Risk Scoring**: Score dependency failure risk via `DependencyRiskScorer` (`src/shieldops/topology/dependency_risk.py`)
+46. **Automation Gap Analysis**: Identify manual security processes via `AutomationGapIdentifier` (`src/shieldops/operations/automation_gap.py`)
 
 ## Severity Levels
 - **CRITICAL**: Hardcoded secrets, SQL injection, unauthenticated endpoints
