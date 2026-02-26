@@ -1,4 +1,4 @@
-"""Runbook recommendation engine API routes."""
+"""Team cognitive load tracker API routes."""
 
 from __future__ import annotations
 
@@ -9,16 +9,15 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 from shieldops.api.auth.dependencies import require_role
-from shieldops.operations.runbook_recommender import (
-    MatchCriteria,
-    RecommendationConfidence,
-    RunbookRelevance,
+from shieldops.operations.cognitive_load import (
+    LoadLevel,
+    LoadSource,
 )
 
 logger = structlog.get_logger()
 router = APIRouter(
-    prefix="/runbook-recommender",
-    tags=["Runbook Recommender"],
+    prefix="/cognitive-load",
+    tags=["Cognitive Load"],
 )
 
 _engine: Any = None
@@ -31,106 +30,102 @@ def set_engine(engine: Any) -> None:
 
 def _get_engine() -> Any:
     if _engine is None:
-        raise HTTPException(503, "Runbook recommender service unavailable")
+        raise HTTPException(503, "Cognitive load service unavailable")
     return _engine
 
 
-class RecordRecommendationRequest(BaseModel):
-    service_name: str
-    criteria: MatchCriteria = MatchCriteria.KEYWORD_MATCH
-    confidence: RecommendationConfidence = RecommendationConfidence.LOW
-    relevance: RunbookRelevance = RunbookRelevance.GENERIC
-    accuracy_score: float = 0.0
+class RecordLoadRequest(BaseModel):
+    team_name: str
+    source: LoadSource = LoadSource.ALERT_VOLUME
+    level: LoadLevel = LoadLevel.MODERATE
+    load_score: float = 0.0
     details: str = ""
 
 
-class AddMatchRequest(BaseModel):
-    match_name: str
-    criteria: MatchCriteria = MatchCriteria.KEYWORD_MATCH
-    confidence: RecommendationConfidence = RecommendationConfidence.LOW
-    effectiveness_score: float = 0.0
+class AddContributorRequest(BaseModel):
+    contributor_name: str
+    source: LoadSource = LoadSource.ALERT_VOLUME
+    level: LoadLevel = LoadLevel.MODERATE
+    impact_score: float = 0.0
     description: str = ""
 
 
-@router.post("/recommendations")
-async def record_recommendation(
-    body: RecordRecommendationRequest,
+@router.post("/loads")
+async def record_load(
+    body: RecordLoadRequest,
     _user: Any = Depends(require_role("operator")),  # type: ignore[arg-type]
 ) -> dict[str, Any]:
     engine = _get_engine()
-    result = engine.record_recommendation(**body.model_dump())
+    result = engine.record_load(**body.model_dump())
     return result.model_dump()
 
 
-@router.get("/recommendations")
-async def list_recommendations(
-    service_name: str | None = None,
-    criteria: MatchCriteria | None = None,
+@router.get("/loads")
+async def list_loads(
+    team_name: str | None = None,
+    source: LoadSource | None = None,
     limit: int = 50,
     _user: Any = Depends(require_role("viewer")),  # type: ignore[arg-type]
 ) -> list[dict[str, Any]]:
     engine = _get_engine()
     return [
-        r.model_dump()
-        for r in engine.list_recommendations(
-            service_name=service_name, criteria=criteria, limit=limit
-        )
+        r.model_dump() for r in engine.list_loads(team_name=team_name, source=source, limit=limit)
     ]
 
 
-@router.get("/recommendations/{record_id}")
-async def get_recommendation(
+@router.get("/loads/{record_id}")
+async def get_load(
     record_id: str,
     _user: Any = Depends(require_role("viewer")),  # type: ignore[arg-type]
 ) -> dict[str, Any]:
     engine = _get_engine()
-    result = engine.get_recommendation(record_id)
+    result = engine.get_load(record_id)
     if result is None:
-        raise HTTPException(404, f"Recommendation '{record_id}' not found")
+        raise HTTPException(404, f"Load record '{record_id}' not found")
     return result.model_dump()
 
 
-@router.post("/matches")
-async def add_match(
-    body: AddMatchRequest,
+@router.post("/contributors")
+async def add_contributor(
+    body: AddContributorRequest,
     _user: Any = Depends(require_role("operator")),  # type: ignore[arg-type]
 ) -> dict[str, Any]:
     engine = _get_engine()
-    result = engine.add_match(**body.model_dump())
+    result = engine.add_contributor(**body.model_dump())
     return result.model_dump()
 
 
-@router.get("/accuracy/{service_name}")
-async def analyze_recommendation_accuracy(
-    service_name: str,
+@router.get("/analysis/{team_name}")
+async def analyze_team_load(
+    team_name: str,
     _user: Any = Depends(require_role("viewer")),  # type: ignore[arg-type]
 ) -> dict[str, Any]:
     engine = _get_engine()
-    return engine.analyze_recommendation_accuracy(service_name)
+    return engine.analyze_team_load(team_name)
 
 
-@router.get("/top-runbooks")
-async def identify_top_runbooks(
+@router.get("/overloaded")
+async def identify_overloaded_teams(
     _user: Any = Depends(require_role("viewer")),  # type: ignore[arg-type]
 ) -> list[dict[str, Any]]:
     engine = _get_engine()
-    return engine.identify_top_runbooks()
+    return engine.identify_overloaded_teams()
 
 
 @router.get("/rankings")
-async def rank_by_effectiveness(
+async def rank_by_load_score(
     _user: Any = Depends(require_role("viewer")),  # type: ignore[arg-type]
 ) -> list[dict[str, Any]]:
     engine = _get_engine()
-    return engine.rank_by_effectiveness()
+    return engine.rank_by_load_score()
 
 
-@router.get("/gaps")
-async def detect_recommendation_gaps(
+@router.get("/trends")
+async def detect_load_trends(
     _user: Any = Depends(require_role("viewer")),  # type: ignore[arg-type]
 ) -> list[dict[str, Any]]:
     engine = _get_engine()
-    return engine.detect_recommendation_gaps()
+    return engine.detect_load_trends()
 
 
 @router.get("/report")
@@ -157,7 +152,4 @@ async def clear_data(
     return engine.clear_data()
 
 
-rbr_route = router
-
-# Phase 19 backward-compat alias
-set_recommender = set_engine
+clt_route = router

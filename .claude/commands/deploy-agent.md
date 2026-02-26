@@ -72,6 +72,11 @@ Deploy ShieldOps agents to target environments.
    - Detect reliability antipatterns via `ReliabilityAntiPatternDetector` (`src/shieldops/topology/reliability_antipattern.py`)
    - Auto-triage incidents via `IncidentAutoTriageEngine` (`src/shieldops/incidents/auto_triage.py`)
    - Forecast error budget via `ErrorBudgetForecaster` (`src/shieldops/sla/error_budget_forecast.py`)
+   - Recommend runbooks via `RunbookRecommendationEngine` (`src/shieldops/operations/runbook_recommender.py`)
+   - Track cognitive load via `TeamCognitiveLoadTracker` (`src/shieldops/operations/cognitive_load.py`)
+   - Monitor attack surface via `AttackSurfaceMonitor` (`src/shieldops/security/attack_surface.py`)
+   - Score platform reliability via `PlatformReliabilityScorecard` (`src/shieldops/sla/reliability_scorecard.py`)
+   - Analyze rollback patterns via `DeploymentRollbackAnalyzer` (`src/shieldops/changes/rollback_analyzer.py`)
 4. **Deploy**:
    - Apply Kubernetes manifests from `infrastructure/kubernetes/`
    - For production: trigger approval workflow via Slack/Teams

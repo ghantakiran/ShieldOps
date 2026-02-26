@@ -70,6 +70,10 @@ Run security audits on ShieldOps codebase and agent configurations.
 44. **Policy Impact Scoring**: Analyze impact of policy changes via `PolicyImpactScorer` (`src/shieldops/compliance/policy_impact.py`)
 45. **Dependency Risk Scoring**: Score dependency failure risk via `DependencyRiskScorer` (`src/shieldops/topology/dependency_risk.py`)
 46. **Automation Gap Analysis**: Identify manual security processes via `AutomationGapIdentifier` (`src/shieldops/operations/automation_gap.py`)
+47. **Attack Surface Monitoring**: Monitor exposed endpoints and services via `AttackSurfaceMonitor` (`src/shieldops/security/attack_surface.py`)
+48. **Incident Cost Analysis**: Calculate financial impact of security incidents via `IncidentCostCalculator` (`src/shieldops/incidents/incident_cost.py`)
+49. **Resource Contention Detection**: Detect resource contention from security events via `ResourceContentionDetector` (`src/shieldops/analytics/resource_contention.py`)
+50. **Cross-Team Collaboration Scoring**: Assess security collaboration across teams via `CrossTeamCollaborationScorer` (`src/shieldops/analytics/collaboration_scorer.py`)
 
 ## Severity Levels
 - **CRITICAL**: Hardcoded secrets, SQL injection, unauthenticated endpoints

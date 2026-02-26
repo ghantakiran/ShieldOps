@@ -28,7 +28,7 @@ Run health checks on all ShieldOps platform dependencies.
    - Integration tests: `python3 -m pytest tests/integration/ -v --tb=short`
    - Report: total tests, passed, failed, coverage
 
-5. **Platform feature health** (Phase 11–33 modules):
+5. **Platform feature health** (Phase 11–34 modules):
    - Capacity trends: `src/shieldops/analytics/capacity_trends.py` — CapacityTrendAnalyzer
    - SRE metrics: `src/shieldops/analytics/sre_metrics.py` — SREMetricsAggregator
    - Health reports: `src/shieldops/observability/health_report.py` — ServiceHealthReportGenerator
@@ -203,6 +203,18 @@ Run health checks on all ShieldOps platform dependencies.
    - Reliability antipattern: `src/shieldops/topology/reliability_antipattern.py` — ReliabilityAntiPatternDetector
    - Error budget forecast: `src/shieldops/sla/error_budget_forecast.py` — ErrorBudgetForecaster
    - Dependency risk: `src/shieldops/topology/dependency_risk.py` — DependencyRiskScorer
+   - Incident similarity: `src/shieldops/incidents/incident_similarity.py` — IncidentSimilarityEngine
+   - Incident cost: `src/shieldops/incidents/incident_cost.py` — IncidentCostCalculator
+   - Followup tracker: `src/shieldops/incidents/followup_tracker.py` — PostIncidentFollowupTracker
+   - Cognitive load: `src/shieldops/operations/cognitive_load.py` — TeamCognitiveLoadTracker
+   - Collaboration scorer: `src/shieldops/analytics/collaboration_scorer.py` — CrossTeamCollaborationScorer
+   - Contribution tracker: `src/shieldops/knowledge/contribution_tracker.py` — KnowledgeContributionTracker
+   - API performance: `src/shieldops/analytics/api_performance.py` — APIPerformanceProfiler
+   - Resource contention: `src/shieldops/analytics/resource_contention.py` — ResourceContentionDetector
+   - Rollback analyzer: `src/shieldops/changes/rollback_analyzer.py` — DeploymentRollbackAnalyzer
+   - Attack surface: `src/shieldops/security/attack_surface.py` — AttackSurfaceMonitor
+   - Runbook recommender: `src/shieldops/operations/runbook_recommender.py` — RunbookRecommendationEngine
+   - Reliability scorecard: `src/shieldops/sla/reliability_scorecard.py` — PlatformReliabilityScorecard
    - Verify each module initializes in `src/shieldops/api/app.py` lifespan
 
 6. **Check configuration**:

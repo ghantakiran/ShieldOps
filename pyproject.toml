@@ -411,6 +411,18 @@ module = [
     "shieldops.api.routes.reliability_antipattern",
     "shieldops.api.routes.error_budget_forecast",
     "shieldops.api.routes.dependency_risk",
+    "shieldops.api.routes.incident_similarity",
+    "shieldops.api.routes.incident_cost",
+    "shieldops.api.routes.followup_tracker",
+    "shieldops.api.routes.cognitive_load",
+    "shieldops.api.routes.collaboration_scorer",
+    "shieldops.api.routes.contribution_tracker",
+    "shieldops.api.routes.api_performance",
+    "shieldops.api.routes.resource_contention",
+    "shieldops.api.routes.rollback_analyzer",
+    "shieldops.api.routes.attack_surface_monitor",
+    "shieldops.api.routes.runbook_recommender",
+    "shieldops.api.routes.reliability_scorecard",
 ]
 warn_return_any = false
 disallow_untyped_defs = false

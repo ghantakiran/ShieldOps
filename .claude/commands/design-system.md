@@ -120,6 +120,18 @@ Design new ShieldOps components, APIs, or agent workflows.
    - Detect reliability antipatterns via `ReliabilityAntiPatternDetector` (`src/shieldops/topology/reliability_antipattern.py`)
    - Forecast error budgets via `ErrorBudgetForecaster` (`src/shieldops/sla/error_budget_forecast.py`)
    - Score dependency risk via `DependencyRiskScorer` (`src/shieldops/topology/dependency_risk.py`)
+   - Match similar incidents via `IncidentSimilarityEngine` (`src/shieldops/incidents/incident_similarity.py`)
+   - Calculate incident costs via `IncidentCostCalculator` (`src/shieldops/incidents/incident_cost.py`)
+   - Track post-incident follow-ups via `PostIncidentFollowupTracker` (`src/shieldops/incidents/followup_tracker.py`)
+   - Track team cognitive load via `TeamCognitiveLoadTracker` (`src/shieldops/operations/cognitive_load.py`)
+   - Score cross-team collaboration via `CrossTeamCollaborationScorer` (`src/shieldops/analytics/collaboration_scorer.py`)
+   - Track knowledge contributions via `KnowledgeContributionTracker` (`src/shieldops/knowledge/contribution_tracker.py`)
+   - Profile API performance via `APIPerformanceProfiler` (`src/shieldops/analytics/api_performance.py`)
+   - Detect resource contention via `ResourceContentionDetector` (`src/shieldops/analytics/resource_contention.py`)
+   - Analyze deployment rollbacks via `DeploymentRollbackAnalyzer` (`src/shieldops/changes/rollback_analyzer.py`)
+   - Monitor attack surface via `AttackSurfaceMonitor` (`src/shieldops/security/attack_surface.py`)
+   - Recommend runbooks via `RunbookRecommendationEngine` (`src/shieldops/operations/runbook_recommender.py`)
+   - Score platform reliability via `PlatformReliabilityScorecard` (`src/shieldops/sla/reliability_scorecard.py`)
 
 5. **Documentation**:
    - Write Architecture Decision Record (ADR) in `docs/architecture/`
