@@ -67,6 +67,11 @@ Deploy ShieldOps agents to target environments.
    - Monitor circuit breaker health via `CircuitBreakerHealthMonitor` (`src/shieldops/topology/circuit_breaker_health.py`)
    - Score operational readiness via `OperationalReadinessScorer` (`src/shieldops/operations/readiness_scorer.py`)
    - Score deployment confidence via `DeploymentConfidenceScorer` (`src/shieldops/changes/deployment_confidence.py`)
+   - Orchestrate self-healing via `SelfHealingOrchestrator` (`src/shieldops/operations/self_healing.py`)
+   - Track scaling efficiency via `ScalingEfficiencyTracker` (`src/shieldops/operations/scaling_efficiency.py`)
+   - Detect reliability antipatterns via `ReliabilityAntiPatternDetector` (`src/shieldops/topology/reliability_antipattern.py`)
+   - Auto-triage incidents via `IncidentAutoTriageEngine` (`src/shieldops/incidents/auto_triage.py`)
+   - Forecast error budget via `ErrorBudgetForecaster` (`src/shieldops/sla/error_budget_forecast.py`)
 4. **Deploy**:
    - Apply Kubernetes manifests from `infrastructure/kubernetes/`
    - For production: trigger approval workflow via Slack/Teams

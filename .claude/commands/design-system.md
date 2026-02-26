@@ -108,6 +108,18 @@ Design new ShieldOps components, APIs, or agent workflows.
    - Analyze license risk via `DependencyLicenseRiskAnalyzer` (`src/shieldops/compliance/license_risk.py`)
    - Analyze communication effectiveness via `CommEffectivenessAnalyzer` (`src/shieldops/incidents/comm_effectiveness.py`)
    - Score operational readiness via `OperationalReadinessScorer` (`src/shieldops/operations/readiness_scorer.py`)
+   - Auto-triage incidents via `IncidentAutoTriageEngine` (`src/shieldops/incidents/auto_triage.py`)
+   - Orchestrate self-healing via `SelfHealingOrchestrator` (`src/shieldops/operations/self_healing.py`)
+   - Detect recurrence patterns via `RecurrencePatternDetector` (`src/shieldops/incidents/recurrence_pattern.py`)
+   - Score policy impact via `PolicyImpactScorer` (`src/shieldops/compliance/policy_impact.py`)
+   - Analyze audit intelligence via `AuditIntelligenceAnalyzer` (`src/shieldops/audit/audit_intelligence.py`)
+   - Identify automation gaps via `AutomationGapIdentifier` (`src/shieldops/operations/automation_gap.py`)
+   - Model capacity demand via `CapacityDemandModeler` (`src/shieldops/analytics/capacity_demand.py`)
+   - Advise on spot instances via `SpotInstanceAdvisor` (`src/shieldops/billing/spot_advisor.py`)
+   - Track scaling efficiency via `ScalingEfficiencyTracker` (`src/shieldops/operations/scaling_efficiency.py`)
+   - Detect reliability antipatterns via `ReliabilityAntiPatternDetector` (`src/shieldops/topology/reliability_antipattern.py`)
+   - Forecast error budgets via `ErrorBudgetForecaster` (`src/shieldops/sla/error_budget_forecast.py`)
+   - Score dependency risk via `DependencyRiskScorer` (`src/shieldops/topology/dependency_risk.py`)
 
 5. **Documentation**:
    - Write Architecture Decision Record (ADR) in `docs/architecture/`

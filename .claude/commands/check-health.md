@@ -28,7 +28,7 @@ Run health checks on all ShieldOps platform dependencies.
    - Integration tests: `python3 -m pytest tests/integration/ -v --tb=short`
    - Report: total tests, passed, failed, coverage
 
-5. **Platform feature health** (Phase 11–32 modules):
+5. **Platform feature health** (Phase 11–33 modules):
    - Capacity trends: `src/shieldops/analytics/capacity_trends.py` — CapacityTrendAnalyzer
    - SRE metrics: `src/shieldops/analytics/sre_metrics.py` — SREMetricsAggregator
    - Health reports: `src/shieldops/observability/health_report.py` — ServiceHealthReportGenerator
@@ -191,6 +191,18 @@ Run health checks on all ShieldOps platform dependencies.
    - License risk: `src/shieldops/compliance/license_risk.py` — DependencyLicenseRiskAnalyzer
    - Comm effectiveness: `src/shieldops/incidents/comm_effectiveness.py` — CommEffectivenessAnalyzer
    - Readiness scorer: `src/shieldops/operations/readiness_scorer.py` — OperationalReadinessScorer
+   - Auto triage: `src/shieldops/incidents/auto_triage.py` — IncidentAutoTriageEngine
+   - Self healing: `src/shieldops/operations/self_healing.py` — SelfHealingOrchestrator
+   - Recurrence pattern: `src/shieldops/incidents/recurrence_pattern.py` — RecurrencePatternDetector
+   - Policy impact: `src/shieldops/compliance/policy_impact.py` — PolicyImpactScorer
+   - Audit intelligence: `src/shieldops/audit/audit_intelligence.py` — AuditIntelligenceAnalyzer
+   - Automation gap: `src/shieldops/operations/automation_gap.py` — AutomationGapIdentifier
+   - Capacity demand: `src/shieldops/analytics/capacity_demand.py` — CapacityDemandModeler
+   - Spot advisor: `src/shieldops/billing/spot_advisor.py` — SpotInstanceAdvisor
+   - Scaling efficiency: `src/shieldops/operations/scaling_efficiency.py` — ScalingEfficiencyTracker
+   - Reliability antipattern: `src/shieldops/topology/reliability_antipattern.py` — ReliabilityAntiPatternDetector
+   - Error budget forecast: `src/shieldops/sla/error_budget_forecast.py` — ErrorBudgetForecaster
+   - Dependency risk: `src/shieldops/topology/dependency_risk.py` — DependencyRiskScorer
    - Verify each module initializes in `src/shieldops/api/app.py` lifespan
 
 6. **Check configuration**:

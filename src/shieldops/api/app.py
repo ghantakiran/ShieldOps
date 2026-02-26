@@ -6661,6 +6661,284 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         except Exception as e:
             logger.warning("readiness_scorer_init_failed", error=str(e))
 
+    # ── Phase 33: Incident Self-Healing & Platform Governance ──
+
+    if settings.auto_triage_enabled:
+        try:
+            from shieldops.api.routes import (
+                auto_triage as iat_mod,
+            )
+            from shieldops.incidents.auto_triage import (
+                IncidentAutoTriageEngine,
+            )
+
+            iat_engine = IncidentAutoTriageEngine(
+                max_records=settings.auto_triage_max_records,
+                min_confidence_pct=settings.auto_triage_min_confidence_pct,
+            )
+            iat_mod.set_engine(iat_engine)
+            app.include_router(
+                iat_mod.iat_route,
+                prefix=settings.api_prefix,
+                tags=["Auto Triage"],
+            )
+            logger.info("auto_triage_initialized")
+        except Exception as e:
+            logger.warning("auto_triage_init_failed", error=str(e))
+
+    if settings.self_healing_enabled:
+        try:
+            from shieldops.api.routes import (
+                self_healing as slh_mod,
+            )
+            from shieldops.operations.self_healing import (
+                SelfHealingOrchestrator,
+            )
+
+            slh_engine = SelfHealingOrchestrator(
+                max_records=settings.self_healing_max_records,
+                min_success_rate_pct=settings.self_healing_min_success_rate_pct,
+            )
+            slh_mod.set_engine(slh_engine)
+            app.include_router(
+                slh_mod.slh_route,
+                prefix=settings.api_prefix,
+                tags=["Self Healing"],
+            )
+            logger.info("self_healing_initialized")
+        except Exception as e:
+            logger.warning("self_healing_init_failed", error=str(e))
+
+    if settings.recurrence_pattern_enabled:
+        try:
+            from shieldops.api.routes import (
+                recurrence_pattern as rpa_mod,
+            )
+            from shieldops.incidents.recurrence_pattern import (
+                RecurrencePatternDetector,
+            )
+
+            rpa_engine = RecurrencePatternDetector(
+                max_records=settings.recurrence_pattern_max_records,
+                min_incidents=settings.recurrence_pattern_min_incidents,
+            )
+            rpa_mod.set_engine(rpa_engine)
+            app.include_router(
+                rpa_mod.rpa_route,
+                prefix=settings.api_prefix,
+                tags=["Recurrence Pattern"],
+            )
+            logger.info("recurrence_pattern_initialized")
+        except Exception as e:
+            logger.warning("recurrence_pattern_init_failed", error=str(e))
+
+    if settings.policy_impact_enabled:
+        try:
+            from shieldops.api.routes import (
+                policy_impact as pis_mod,
+            )
+            from shieldops.compliance.policy_impact import (
+                PolicyImpactScorer,
+            )
+
+            pis_engine = PolicyImpactScorer(
+                max_records=settings.policy_impact_max_records,
+                max_conflict_count=settings.policy_impact_max_conflict_count,
+            )
+            pis_mod.set_engine(pis_engine)
+            app.include_router(
+                pis_mod.pis_route,
+                prefix=settings.api_prefix,
+                tags=["Policy Impact"],
+            )
+            logger.info("policy_impact_initialized")
+        except Exception as e:
+            logger.warning("policy_impact_init_failed", error=str(e))
+
+    if settings.audit_intelligence_enabled:
+        try:
+            from shieldops.api.routes import (
+                audit_intelligence as ais_mod,
+            )
+            from shieldops.audit.audit_intelligence import (
+                AuditIntelligenceAnalyzer,
+            )
+
+            ais_engine = AuditIntelligenceAnalyzer(
+                max_records=settings.audit_intelligence_max_records,
+                anomaly_threshold_pct=settings.audit_intelligence_anomaly_threshold_pct,
+            )
+            ais_mod.set_engine(ais_engine)
+            app.include_router(
+                ais_mod.ais_route,
+                prefix=settings.api_prefix,
+                tags=["Audit Intelligence"],
+            )
+            logger.info("audit_intelligence_initialized")
+        except Exception as e:
+            logger.warning("audit_intelligence_init_failed", error=str(e))
+
+    if settings.automation_gap_enabled:
+        try:
+            from shieldops.api.routes import (
+                automation_gap as agp_mod,
+            )
+            from shieldops.operations.automation_gap import (
+                AutomationGapIdentifier,
+            )
+
+            agp_engine = AutomationGapIdentifier(
+                max_records=settings.automation_gap_max_records,
+                min_roi_score=settings.automation_gap_min_roi_score,
+            )
+            agp_mod.set_engine(agp_engine)
+            app.include_router(
+                agp_mod.agp_route,
+                prefix=settings.api_prefix,
+                tags=["Automation Gap"],
+            )
+            logger.info("automation_gap_initialized")
+        except Exception as e:
+            logger.warning("automation_gap_init_failed", error=str(e))
+
+    if settings.capacity_demand_enabled:
+        try:
+            from shieldops.analytics.capacity_demand import (
+                CapacityDemandModeler,
+            )
+            from shieldops.api.routes import (
+                capacity_demand as cdm_mod,
+            )
+
+            cdm_engine = CapacityDemandModeler(
+                max_records=settings.capacity_demand_max_records,
+                deficit_threshold_pct=settings.capacity_demand_deficit_threshold_pct,
+            )
+            cdm_mod.set_engine(cdm_engine)
+            app.include_router(
+                cdm_mod.cdm_route,
+                prefix=settings.api_prefix,
+                tags=["Capacity Demand"],
+            )
+            logger.info("capacity_demand_initialized")
+        except Exception as e:
+            logger.warning("capacity_demand_init_failed", error=str(e))
+
+    if settings.spot_advisor_enabled:
+        try:
+            from shieldops.api.routes import (
+                spot_advisor as spa_mod,
+            )
+            from shieldops.billing.spot_advisor import (
+                SpotInstanceAdvisor,
+            )
+
+            spad_engine = SpotInstanceAdvisor(
+                max_records=settings.spot_advisor_max_records,
+                min_savings_pct=settings.spot_advisor_min_savings_pct,
+            )
+            spa_mod.set_engine(spad_engine)
+            app.include_router(
+                spa_mod.spa_route,
+                prefix=settings.api_prefix,
+                tags=["Spot Advisor"],
+            )
+            logger.info("spot_advisor_initialized")
+        except Exception as e:
+            logger.warning("spot_advisor_init_failed", error=str(e))
+
+    if settings.scaling_efficiency_enabled:
+        try:
+            from shieldops.api.routes import (
+                scaling_efficiency as sef_mod,
+            )
+            from shieldops.operations.scaling_efficiency import (
+                ScalingEfficiencyTracker,
+            )
+
+            sef_engine = ScalingEfficiencyTracker(
+                max_records=settings.scaling_efficiency_max_records,
+                max_duration_seconds=settings.scaling_efficiency_max_duration_seconds,
+            )
+            sef_mod.set_engine(sef_engine)
+            app.include_router(
+                sef_mod.sef_route,
+                prefix=settings.api_prefix,
+                tags=["Scaling Efficiency"],
+            )
+            logger.info("scaling_efficiency_initialized")
+        except Exception as e:
+            logger.warning("scaling_efficiency_init_failed", error=str(e))
+
+    if settings.reliability_antipattern_enabled:
+        try:
+            from shieldops.api.routes import (
+                reliability_antipattern as rap_mod,
+            )
+            from shieldops.topology.reliability_antipattern import (
+                ReliabilityAntiPatternDetector,
+            )
+
+            rap_engine = ReliabilityAntiPatternDetector(
+                max_records=settings.reliability_antipattern_max_records,
+                max_accepted_risks=settings.reliability_antipattern_max_accepted_risks,
+            )
+            rap_mod.set_engine(rap_engine)
+            app.include_router(
+                rap_mod.rap_route,
+                prefix=settings.api_prefix,
+                tags=["Reliability Antipattern"],
+            )
+            logger.info("reliability_antipattern_initialized")
+        except Exception as e:
+            logger.warning("reliability_antipattern_init_failed", error=str(e))
+
+    if settings.error_budget_forecast_enabled:
+        try:
+            from shieldops.api.routes import (
+                error_budget_forecast as ebf_mod,
+            )
+            from shieldops.sla.error_budget_forecast import (
+                ErrorBudgetForecaster,
+            )
+
+            ebf_engine = ErrorBudgetForecaster(
+                max_records=settings.error_budget_forecast_max_records,
+                risk_threshold_pct=settings.error_budget_forecast_risk_threshold_pct,
+            )
+            ebf_mod.set_engine(ebf_engine)
+            app.include_router(
+                ebf_mod.ebf_route,
+                prefix=settings.api_prefix,
+                tags=["Error Budget Forecast"],
+            )
+            logger.info("error_budget_forecast_initialized")
+        except Exception as e:
+            logger.warning("error_budget_forecast_init_failed", error=str(e))
+
+    if settings.dependency_risk_enabled:
+        try:
+            from shieldops.api.routes import (
+                dependency_risk as drs_mod,
+            )
+            from shieldops.topology.dependency_risk import (
+                DependencyRiskScorer,
+            )
+
+            drs_engine = DependencyRiskScorer(
+                max_records=settings.dependency_risk_max_records,
+                critical_threshold=settings.dependency_risk_critical_threshold,
+            )
+            drs_mod.set_engine(drs_engine)
+            app.include_router(
+                drs_mod.drs_route,
+                prefix=settings.api_prefix,
+                tags=["Dependency Risk"],
+            )
+            logger.info("dependency_risk_initialized")
+        except Exception as e:
+            logger.warning("dependency_risk_init_failed", error=str(e))
+
     yield
 
     logger.info("shieldops_shutting_down")

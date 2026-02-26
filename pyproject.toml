@@ -399,6 +399,18 @@ module = [
     "shieldops.api.routes.license_risk",
     "shieldops.api.routes.comm_effectiveness",
     "shieldops.api.routes.readiness_scorer",
+    "shieldops.api.routes.auto_triage",
+    "shieldops.api.routes.self_healing",
+    "shieldops.api.routes.recurrence_pattern",
+    "shieldops.api.routes.policy_impact",
+    "shieldops.api.routes.audit_intelligence",
+    "shieldops.api.routes.automation_gap",
+    "shieldops.api.routes.capacity_demand",
+    "shieldops.api.routes.spot_advisor",
+    "shieldops.api.routes.scaling_efficiency",
+    "shieldops.api.routes.reliability_antipattern",
+    "shieldops.api.routes.error_budget_forecast",
+    "shieldops.api.routes.dependency_risk",
 ]
 warn_return_any = false
 disallow_untyped_defs = false
