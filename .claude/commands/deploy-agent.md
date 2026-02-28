@@ -115,6 +115,11 @@ Deploy ShieldOps agents to target environments.
    - Track service deprecation status via `ServiceDeprecationTracker` (`src/shieldops/topology/deprecation_tracker.py`)
    - Analyze change approval workflow via `ChangeApprovalAnalyzer` (`src/shieldops/changes/approval_analyzer.py`)
    - Verify SLO compliance via `SLOComplianceChecker` (`src/shieldops/sla/slo_compliance.py`)
+   - Advise predictive scaling via `PredictiveScalingAdvisor` (`src/shieldops/operations/scaling_advisor.py`)
+   - Analyze deployment frequency via `DeploymentFrequencyAnalyzer` (`src/shieldops/changes/deploy_frequency.py`)
+   - Track team velocity via `TeamVelocityTracker` (`src/shieldops/analytics/team_velocity.py`)
+   - Score capacity utilization via `CapacityUtilizationScorer` (`src/shieldops/analytics/utilization_scorer.py`)
+   - Map service communications via `ServiceCommunicationMapper` (`src/shieldops/topology/comm_mapper.py`)
 4. **Deploy**:
    - Apply Kubernetes manifests from `infrastructure/kubernetes/`
    - For production: trigger approval workflow via Slack/Teams

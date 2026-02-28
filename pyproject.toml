@@ -507,6 +507,18 @@ module = [
     "shieldops.api.routes.severity_validator",
     "shieldops.api.routes.approval_analyzer",
     "shieldops.api.routes.slo_compliance",
+    "shieldops.api.routes.alert_dedup",
+    "shieldops.api.routes.priority_ranker",
+    "shieldops.api.routes.deploy_frequency",
+    "shieldops.api.routes.infra_cost_allocator",
+    "shieldops.api.routes.team_velocity",
+    "shieldops.api.routes.comm_mapper",
+    "shieldops.api.routes.automation_scorer",
+    "shieldops.api.routes.scaling_advisor",
+    "shieldops.api.routes.error_classifier",
+    "shieldops.api.routes.compliance_bridge",
+    "shieldops.api.routes.utilization_scorer",
+    "shieldops.api.routes.knowledge_linker",
 ]
 warn_return_any = false
 disallow_untyped_defs = false

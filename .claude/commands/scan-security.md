@@ -103,6 +103,10 @@ Run security audits on ShieldOps codebase and agent configurations.
 77. **Compliance Evidence Validation**: Validate compliance evidence completeness and freshness via `ComplianceEvidenceValidator` (`src/shieldops/compliance/evidence_validator.py`)
 78. **Audit Readiness Scoring**: Score audit readiness across all compliance frameworks via `AuditReadinessScorer` (`src/shieldops/audit/audit_readiness.py`)
 79. **Vendor Lock-in Analysis**: Analyze vendor lock-in risk and portability across cloud providers via `VendorLockinAnalyzer` (`src/shieldops/billing/vendor_lockin.py`)
+80. **Security Compliance Bridge**: Map security findings to compliance control failures via `SecurityComplianceBridge` (`src/shieldops/security/compliance_bridge.py`)
+81. **Alert Deduplication**: Deduplicate noisy alerts and surface unique security incidents via `AlertDeduplicationEngine` (`src/shieldops/observability/alert_dedup.py`)
+82. **Compliance Automation Scoring**: Score automation coverage for each compliance control via `ComplianceAutomationScorer` (`src/shieldops/compliance/automation_scorer.py`)
+83. **Error Pattern Classification**: Classify error patterns by type and detect novel security-related error signatures via `ErrorPatternClassifier` (`src/shieldops/analytics/error_classifier.py`)
 
 ## Severity Levels
 - **CRITICAL**: Hardcoded secrets, SQL injection, unauthenticated endpoints

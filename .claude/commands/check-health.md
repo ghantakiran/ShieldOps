@@ -28,7 +28,7 @@ Run health checks on all ShieldOps platform dependencies.
    - Integration tests: `python3 -m pytest tests/integration/ -v --tb=short`
    - Report: total tests, passed, failed, coverage
 
-5. **Platform feature health** (Phase 11–41 modules):
+5. **Platform feature health** (Phase 11–42 modules):
    - Capacity trends: `src/shieldops/analytics/capacity_trends.py` — CapacityTrendAnalyzer
    - SRE metrics: `src/shieldops/analytics/sre_metrics.py` — SREMetricsAggregator
    - Health reports: `src/shieldops/observability/health_report.py` — ServiceHealthReportGenerator
@@ -254,6 +254,18 @@ Run health checks on all ShieldOps platform dependencies.
    - Incident severity validator: `src/shieldops/incidents/severity_validator.py` — IncidentSeverityValidator
    - Change approval analyzer: `src/shieldops/changes/approval_analyzer.py` — ChangeApprovalAnalyzer
    - SLO compliance checker: `src/shieldops/sla/slo_compliance.py` — SLOComplianceChecker
+   - **Phase 42:** Alert dedup: `src/shieldops/observability/alert_dedup.py` — AlertDeduplicationEngine
+   - Incident priority ranker: `src/shieldops/incidents/priority_ranker.py` — IncidentPriorityRanker
+   - Deploy frequency analyzer: `src/shieldops/changes/deploy_frequency.py` — DeploymentFrequencyAnalyzer
+   - Infra cost allocator: `src/shieldops/billing/infra_cost_allocator.py` — InfrastructureCostAllocator
+   - Team velocity tracker: `src/shieldops/analytics/team_velocity.py` — TeamVelocityTracker
+   - Service comm mapper: `src/shieldops/topology/comm_mapper.py` — ServiceCommunicationMapper
+   - Compliance automation scorer: `src/shieldops/compliance/automation_scorer.py` — ComplianceAutomationScorer
+   - Predictive scaling advisor: `src/shieldops/operations/scaling_advisor.py` — PredictiveScalingAdvisor
+   - Error pattern classifier: `src/shieldops/analytics/error_classifier.py` — ErrorPatternClassifier
+   - Security compliance bridge: `src/shieldops/security/compliance_bridge.py` — SecurityComplianceBridge
+   - Capacity utilization scorer: `src/shieldops/analytics/utilization_scorer.py` — CapacityUtilizationScorer
+   - Incident knowledge linker: `src/shieldops/incidents/knowledge_linker.py` — IncidentKnowledgeLinker
    - Verify each module initializes in `src/shieldops/api/app.py` lifespan
 
 6. **Check configuration**:

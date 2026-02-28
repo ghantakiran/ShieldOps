@@ -189,6 +189,18 @@ Review ShieldOps agent code for correctness, safety, and reliability.
 - [ ] Incident severity validated via `IncidentSeverityValidator` (`src/shieldops/incidents/severity_validator.py`)
 - [ ] Change approval analyzed via `ChangeApprovalAnalyzer` (`src/shieldops/changes/approval_analyzer.py`)
 - [ ] SLO compliance checked via `SLOComplianceChecker` (`src/shieldops/sla/slo_compliance.py`)
+- [ ] Alerts deduplicated via `AlertDeduplicationEngine` (`src/shieldops/observability/alert_dedup.py`)
+- [ ] Incidents priority ranked via `IncidentPriorityRanker` (`src/shieldops/incidents/priority_ranker.py`)
+- [ ] Deployment frequency analyzed via `DeploymentFrequencyAnalyzer` (`src/shieldops/changes/deploy_frequency.py`)
+- [ ] Infrastructure costs allocated via `InfrastructureCostAllocator` (`src/shieldops/billing/infra_cost_allocator.py`)
+- [ ] Team velocity tracked via `TeamVelocityTracker` (`src/shieldops/analytics/team_velocity.py`)
+- [ ] Service communications mapped via `ServiceCommunicationMapper` (`src/shieldops/topology/comm_mapper.py`)
+- [ ] Compliance automation scored via `ComplianceAutomationScorer` (`src/shieldops/compliance/automation_scorer.py`)
+- [ ] Scaling needs predicted via `PredictiveScalingAdvisor` (`src/shieldops/operations/scaling_advisor.py`)
+- [ ] Error patterns classified via `ErrorPatternClassifier` (`src/shieldops/analytics/error_classifier.py`)
+- [ ] Security findings bridged to compliance via `SecurityComplianceBridge` (`src/shieldops/security/compliance_bridge.py`)
+- [ ] Capacity utilization scored via `CapacityUtilizationScorer` (`src/shieldops/analytics/utilization_scorer.py`)
+- [ ] Incidents linked to knowledge via `IncidentKnowledgeLinker` (`src/shieldops/incidents/knowledge_linker.py`)
 
 ### Testing
 - [ ] Unit tests for all node functions

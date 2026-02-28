@@ -206,6 +206,18 @@ Design new ShieldOps components, APIs, or agent workflows.
    - Validate incident severity via `IncidentSeverityValidator` (`src/shieldops/incidents/severity_validator.py`)
    - Analyze change approval workflow via `ChangeApprovalAnalyzer` (`src/shieldops/changes/approval_analyzer.py`)
    - Check SLO compliance via `SLOComplianceChecker` (`src/shieldops/sla/slo_compliance.py`)
+   - Deduplicate alerts via `AlertDeduplicationEngine` (`src/shieldops/observability/alert_dedup.py`)
+   - Rank incident priority via `IncidentPriorityRanker` (`src/shieldops/incidents/priority_ranker.py`)
+   - Analyze deployment frequency via `DeploymentFrequencyAnalyzer` (`src/shieldops/changes/deploy_frequency.py`)
+   - Allocate infrastructure costs via `InfrastructureCostAllocator` (`src/shieldops/billing/infra_cost_allocator.py`)
+   - Track team velocity via `TeamVelocityTracker` (`src/shieldops/analytics/team_velocity.py`)
+   - Map service communications via `ServiceCommunicationMapper` (`src/shieldops/topology/comm_mapper.py`)
+   - Score compliance automation via `ComplianceAutomationScorer` (`src/shieldops/compliance/automation_scorer.py`)
+   - Advise predictive scaling via `PredictiveScalingAdvisor` (`src/shieldops/operations/scaling_advisor.py`)
+   - Classify error patterns via `ErrorPatternClassifier` (`src/shieldops/analytics/error_classifier.py`)
+   - Bridge security to compliance via `SecurityComplianceBridge` (`src/shieldops/security/compliance_bridge.py`)
+   - Score capacity utilization via `CapacityUtilizationScorer` (`src/shieldops/analytics/utilization_scorer.py`)
+   - Link incidents to knowledge via `IncidentKnowledgeLinker` (`src/shieldops/incidents/knowledge_linker.py`)
 
 5. **Documentation**:
    - Write Architecture Decision Record (ADR) in `docs/architecture/`
