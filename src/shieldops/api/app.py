@@ -8479,6 +8479,246 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         except Exception as e:
             logger.warning("governance_dashboard_init_failed", error=str(e))
 
+    # ── Phase 40: Incident Replay Engine ──
+    if settings.incident_replay_enabled:
+        try:
+            from shieldops.api.routes import incident_replay as ire_mod
+            from shieldops.incidents.incident_replay import IncidentReplayEngine
+
+            ire_engine = IncidentReplayEngine(
+                max_records=settings.incident_replay_max_records,
+                min_effectiveness_pct=settings.incident_replay_min_effectiveness_pct,
+            )
+            ire_mod.set_engine(ire_engine)
+            app.include_router(
+                ire_mod.ire_route,
+                prefix=settings.api_prefix,
+                tags=["Incident Replay Engine"],
+            )
+            logger.info("incident_replay_initialized")
+        except Exception as e:
+            logger.warning("incident_replay_init_failed", error=str(e))
+
+    # ── Phase 40: Incident Response Timer ──
+    if settings.response_timer_enabled:
+        try:
+            from shieldops.api.routes import response_timer as irt_mod
+            from shieldops.incidents.response_timer import IncidentResponseTimer
+
+            irt_engine = IncidentResponseTimer(
+                max_records=settings.response_timer_max_records,
+                target_minutes=settings.response_timer_target_minutes,
+            )
+            irt_mod.set_engine(irt_engine)
+            app.include_router(
+                irt_mod.irt_route,
+                prefix=settings.api_prefix,
+                tags=["Incident Response Timer"],
+            )
+            logger.info("response_timer_initialized")
+        except Exception as e:
+            logger.warning("response_timer_init_failed", error=str(e))
+
+    # ── Phase 40: SLO Aggregation Dashboard ──
+    if settings.slo_aggregator_enabled:
+        try:
+            from shieldops.api.routes import slo_aggregator as sad_mod
+            from shieldops.sla.slo_aggregator import SLOAggregationDashboard
+
+            sad_engine = SLOAggregationDashboard(
+                max_records=settings.slo_aggregator_max_records,
+                min_compliance_pct=settings.slo_aggregator_min_compliance_pct,
+            )
+            sad_mod.set_engine(sad_engine)
+            app.include_router(
+                sad_mod.sad_route,
+                prefix=settings.api_prefix,
+                tags=["SLO Aggregation Dashboard"],
+            )
+            logger.info("slo_aggregator_initialized")
+        except Exception as e:
+            logger.warning("slo_aggregator_init_failed", error=str(e))
+
+    # ── Phase 40: Network Latency Mapper ──
+    if settings.network_latency_enabled:
+        try:
+            from shieldops.api.routes import network_latency as nlm_mod
+            from shieldops.topology.network_latency import NetworkLatencyMapper
+
+            nlm_engine = NetworkLatencyMapper(
+                max_records=settings.network_latency_max_records,
+                max_acceptable_ms=settings.network_latency_max_acceptable_ms,
+            )
+            nlm_mod.set_engine(nlm_engine)
+            app.include_router(
+                nlm_mod.nlm_route,
+                prefix=settings.api_prefix,
+                tags=["Network Latency Mapper"],
+            )
+            logger.info("network_latency_initialized")
+        except Exception as e:
+            logger.warning("network_latency_init_failed", error=str(e))
+
+    # ── Phase 40: Platform Health Index ──
+    if settings.health_index_enabled:
+        try:
+            from shieldops.api.routes import health_index as phi_mod
+            from shieldops.observability.health_index import PlatformHealthIndex
+
+            phi_engine = PlatformHealthIndex(
+                max_records=settings.health_index_max_records,
+                min_score_pct=settings.health_index_min_score_pct,
+            )
+            phi_mod.set_engine(phi_engine)
+            app.include_router(
+                phi_mod.phi_route,
+                prefix=settings.api_prefix,
+                tags=["Platform Health Index"],
+            )
+            logger.info("health_index_initialized")
+        except Exception as e:
+            logger.warning("health_index_init_failed", error=str(e))
+
+    # ── Phase 40: Observability Gap Detector ──
+    if settings.observability_gap_enabled:
+        try:
+            from shieldops.api.routes import observability_gap as ogd_mod
+            from shieldops.observability.observability_gap import ObservabilityGapDetector
+
+            ogd_engine = ObservabilityGapDetector(
+                max_records=settings.observability_gap_max_records,
+                min_coverage_pct=settings.observability_gap_min_coverage_pct,
+            )
+            ogd_mod.set_engine(ogd_engine)
+            app.include_router(
+                ogd_mod.ogd_route,
+                prefix=settings.api_prefix,
+                tags=["Observability Gap Detector"],
+            )
+            logger.info("observability_gap_initialized")
+        except Exception as e:
+            logger.warning("observability_gap_init_failed", error=str(e))
+
+    # ── Phase 40: Capacity Anomaly Detector ──
+    if settings.capacity_anomaly_enabled:
+        try:
+            from shieldops.analytics.capacity_anomaly import CapacityAnomalyDetector
+            from shieldops.api.routes import capacity_anomaly as cad_mod
+
+            cad_engine = CapacityAnomalyDetector(
+                max_records=settings.capacity_anomaly_max_records,
+                min_confidence_pct=settings.capacity_anomaly_min_confidence_pct,
+            )
+            cad_mod.set_engine(cad_engine)
+            app.include_router(
+                cad_mod.cad_route,
+                prefix=settings.api_prefix,
+                tags=["Capacity Anomaly Detector"],
+            )
+            logger.info("capacity_anomaly_initialized")
+        except Exception as e:
+            logger.warning("capacity_anomaly_init_failed", error=str(e))
+
+    # ── Phase 40: Change Freeze Manager ──
+    if settings.change_freeze_enabled:
+        try:
+            from shieldops.api.routes import change_freeze as cfm_mod
+            from shieldops.changes.change_freeze import ChangeFreezeManager
+
+            cfm_engine = ChangeFreezeManager(
+                max_records=settings.change_freeze_max_records,
+                max_exception_rate_pct=settings.change_freeze_max_exception_rate_pct,
+            )
+            cfm_mod.set_engine(cfm_engine)
+            app.include_router(
+                cfm_mod.cfm_route,
+                prefix=settings.api_prefix,
+                tags=["Change Freeze Manager"],
+            )
+            logger.info("change_freeze_initialized")
+        except Exception as e:
+            logger.warning("change_freeze_init_failed", error=str(e))
+
+    # ── Phase 40: Deployment Pipeline Analyzer ──
+    if settings.pipeline_analyzer_enabled:
+        try:
+            from shieldops.api.routes import pipeline_analyzer as dpa_mod
+            from shieldops.changes.pipeline_analyzer import DeploymentPipelineAnalyzer
+
+            dpa_engine = DeploymentPipelineAnalyzer(
+                max_records=settings.pipeline_analyzer_max_records,
+                max_duration_minutes=settings.pipeline_analyzer_max_duration_minutes,
+            )
+            dpa_mod.set_engine(dpa_engine)
+            app.include_router(
+                dpa_mod.dpa_route,
+                prefix=settings.api_prefix,
+                tags=["Deployment Pipeline Analyzer"],
+            )
+            logger.info("pipeline_analyzer_initialized")
+        except Exception as e:
+            logger.warning("pipeline_analyzer_init_failed", error=str(e))
+
+    # ── Phase 40: Release Readiness Checker ──
+    if settings.release_readiness_enabled:
+        try:
+            from shieldops.api.routes import release_readiness as rrc_mod
+            from shieldops.changes.release_readiness import ReleaseReadinessChecker
+
+            rrc_engine = ReleaseReadinessChecker(
+                max_records=settings.release_readiness_max_records,
+                min_score_pct=settings.release_readiness_min_score_pct,
+            )
+            rrc_mod.set_engine(rrc_engine)
+            app.include_router(
+                rrc_mod.rrc_route,
+                prefix=settings.api_prefix,
+                tags=["Release Readiness Checker"],
+            )
+            logger.info("release_readiness_initialized")
+        except Exception as e:
+            logger.warning("release_readiness_init_failed", error=str(e))
+
+    # ── Phase 40: Config Validation Engine ──
+    if settings.config_validator_enabled:
+        try:
+            from shieldops.api.routes import config_validator as cvn_mod
+            from shieldops.config.config_validator import ConfigValidationEngine
+
+            cvn_engine = ConfigValidationEngine(
+                max_records=settings.config_validator_max_records,
+                max_failure_rate_pct=settings.config_validator_max_failure_rate_pct,
+            )
+            cvn_mod.set_engine(cvn_engine)
+            app.include_router(
+                cvn_mod.cvn_route,
+                prefix=settings.api_prefix,
+                tags=["Config Validation Engine"],
+            )
+            logger.info("config_validator_initialized")
+        except Exception as e:
+            logger.warning("config_validator_init_failed", error=str(e))
+
+    # ── Phase 40: Service Ownership Tracker ──
+    if settings.ownership_tracker_enabled:
+        try:
+            from shieldops.api.routes import ownership_tracker as sot_mod
+            from shieldops.topology.ownership_tracker import ServiceOwnershipTracker
+
+            sot_engine = ServiceOwnershipTracker(
+                max_records=settings.ownership_tracker_max_records,
+                max_orphan_days=settings.ownership_tracker_max_orphan_days,
+            )
+            sot_mod.set_engine(sot_engine)
+            app.include_router(
+                sot_mod.sot_route,
+                prefix=settings.api_prefix,
+                tags=["Service Ownership Tracker"],
+            )
+            logger.info("ownership_tracker_initialized")
+        except Exception as e:
+            logger.warning("ownership_tracker_init_failed", error=str(e))
+
     yield
 
     logger.info("shieldops_shutting_down")

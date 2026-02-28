@@ -95,6 +95,10 @@ Run security audits on ShieldOps codebase and agent configurations.
 69. **Configuration Drift Analysis**: Detect infrastructure and config drift via `DriftAnalyzer` (`src/shieldops/operations/drift_analyzer.py`)
 70. **Attack Surface Assessment**: Map and monitor exposed attack surfaces via `AttackSurfaceMonitor` (`src/shieldops/security/attack_surface.py`)
 71. **Deployment Impact Analysis**: Assess security impact of deployments via `DeploymentImpactAnalyzer` (`src/shieldops/changes/deployment_impact.py`)
+72. **Configuration Validation**: Validate configuration consistency and security via `ConfigurationValidator` (`src/shieldops/config/config_validator.py`)
+73. **Observability Gap Detection**: Identify missing observability and monitoring via `ObservabilityGapAnalyzer` (`src/shieldops/observability/observability_gap.py`)
+74. **Change Freeze Policy Enforcement**: Monitor and enforce change freeze windows via `ChangeFreezePolicyManager` (`src/shieldops/changes/change_freeze.py`)
+75. **Service Ownership Tracking**: Verify service ownership and accountability via `ServiceOwnershipTracker` (`src/shieldops/operations/ownership_tracker.py`)
 
 ## Severity Levels
 - **CRITICAL**: Hardcoded secrets, SQL injection, unauthenticated endpoints

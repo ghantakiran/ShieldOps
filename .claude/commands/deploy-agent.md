@@ -100,6 +100,16 @@ Deploy ShieldOps agents to target environments.
    - Analyze configuration drift via `DriftAnalyzer` (`src/shieldops/operations/drift_analyzer.py`)
    - Assess deployment impact via `DeploymentImpactAnalyzer` (`src/shieldops/changes/deployment_impact.py`)
    - Monitor governance posture via `GovernanceDashboard` (`src/shieldops/compliance/governance_dashboard.py`)
+   - Replay incidents via `IncidentReplayEngine` (`src/shieldops/incidents/incident_replay.py`)
+   - Track response timing via `IncidentResponseTimer` (`src/shieldops/incidents/response_timer.py`)
+   - Aggregate SLO data via `SLOAggregationEngine` (`src/shieldops/sla/slo_aggregator.py`)
+   - Analyze network latency via `NetworkLatencyAnalyzer` (`src/shieldops/analytics/network_latency.py`)
+   - Enforce change freeze via `ChangeFreezePolicyManager` (`src/shieldops/changes/change_freeze.py`)
+   - Analyze pipeline performance via `PipelinePerformanceAnalyzer` (`src/shieldops/analytics/pipeline_analyzer.py`)
+   - Validate release readiness via `ReleaseReadinessValidator` (`src/shieldops/changes/release_readiness.py`)
+   - Track service ownership via `ServiceOwnershipTracker` (`src/shieldops/operations/ownership_tracker.py`)
+   - Validate configuration via `ConfigurationValidator` (`src/shieldops/config/config_validator.py`)
+   - Detect observability gaps via `ObservabilityGapAnalyzer` (`src/shieldops/observability/observability_gap.py`)
 4. **Deploy**:
    - Apply Kubernetes manifests from `infrastructure/kubernetes/`
    - For production: trigger approval workflow via Slack/Teams
