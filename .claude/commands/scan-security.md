@@ -99,6 +99,10 @@ Run security audits on ShieldOps codebase and agent configurations.
 73. **Observability Gap Detection**: Identify missing observability and monitoring via `ObservabilityGapAnalyzer` (`src/shieldops/observability/observability_gap.py`)
 74. **Change Freeze Policy Enforcement**: Monitor and enforce change freeze windows via `ChangeFreezePolicyManager` (`src/shieldops/changes/change_freeze.py`)
 75. **Service Ownership Tracking**: Verify service ownership and accountability via `ServiceOwnershipTracker` (`src/shieldops/operations/ownership_tracker.py`)
+76. **Policy Enforcement Monitoring**: Monitor real-time policy enforcement across agents and infrastructure via `PolicyEnforcementMonitor` (`src/shieldops/compliance/policy_enforcer.py`)
+77. **Compliance Evidence Validation**: Validate compliance evidence completeness and freshness via `ComplianceEvidenceValidator` (`src/shieldops/compliance/evidence_validator.py`)
+78. **Audit Readiness Scoring**: Score audit readiness across all compliance frameworks via `AuditReadinessScorer` (`src/shieldops/audit/audit_readiness.py`)
+79. **Vendor Lock-in Analysis**: Analyze vendor lock-in risk and portability across cloud providers via `VendorLockinAnalyzer` (`src/shieldops/billing/vendor_lockin.py`)
 
 ## Severity Levels
 - **CRITICAL**: Hardcoded secrets, SQL injection, unauthenticated endpoints

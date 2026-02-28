@@ -1855,6 +1855,66 @@ class Settings(BaseSettings):
     ownership_tracker_max_records: int = 200000
     ownership_tracker_max_orphan_days: float = 30.0
 
+    # Phase 41: Vendor Lock-in Analyzer
+    vendor_lockin_enabled: bool = True
+    vendor_lockin_max_records: int = 200000
+    vendor_lockin_max_risk_score: float = 80.0
+
+    # Phase 41: Cost Efficiency Scorer
+    cost_efficiency_enabled: bool = True
+    cost_efficiency_max_records: int = 200000
+    cost_efficiency_min_efficiency_pct: float = 70.0
+
+    # Phase 41: Budget Variance Tracker
+    budget_variance_enabled: bool = True
+    budget_variance_max_records: int = 200000
+    budget_variance_max_variance_pct: float = 15.0
+
+    # Phase 41: Compliance Evidence Validator
+    evidence_validator_enabled: bool = True
+    evidence_validator_max_records: int = 200000
+    evidence_validator_min_validity_pct: float = 90.0
+
+    # Phase 41: Policy Enforcement Monitor
+    policy_enforcer_enabled: bool = True
+    policy_enforcer_max_records: int = 200000
+    policy_enforcer_max_violation_rate_pct: float = 10.0
+
+    # Phase 41: Audit Readiness Scorer
+    audit_readiness_enabled: bool = True
+    audit_readiness_max_records: int = 200000
+    audit_readiness_min_readiness_pct: float = 80.0
+
+    # Phase 41: Operational Toil Classifier
+    toil_classifier_enabled: bool = True
+    toil_classifier_max_records: int = 200000
+    toil_classifier_max_toil_hours_weekly: float = 20.0
+
+    # Phase 41: Platform Governance Scorer
+    governance_scorer_enabled: bool = True
+    governance_scorer_max_records: int = 200000
+    governance_scorer_min_governance_score: float = 70.0
+
+    # Phase 41: Service Deprecation Tracker
+    deprecation_tracker_enabled: bool = True
+    deprecation_tracker_max_records: int = 200000
+    deprecation_tracker_max_overdue_days: float = 90.0
+
+    # Phase 41: Incident Severity Validator
+    severity_validator_enabled: bool = True
+    severity_validator_max_records: int = 200000
+    severity_validator_min_accuracy_pct: float = 85.0
+
+    # Phase 41: Change Approval Analyzer
+    approval_analyzer_enabled: bool = True
+    approval_analyzer_max_records: int = 200000
+    approval_analyzer_max_approval_hours: float = 24.0
+
+    # Phase 41: SLO Compliance Checker
+    slo_compliance_enabled: bool = True
+    slo_compliance_max_records: int = 200000
+    slo_compliance_min_compliance_pct: float = 99.0
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",

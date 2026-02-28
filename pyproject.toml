@@ -495,6 +495,18 @@ module = [
     "shieldops.api.routes.release_readiness",
     "shieldops.api.routes.config_validator",
     "shieldops.api.routes.ownership_tracker",
+    "shieldops.api.routes.vendor_lockin",
+    "shieldops.api.routes.cost_efficiency",
+    "shieldops.api.routes.budget_variance",
+    "shieldops.api.routes.evidence_validator",
+    "shieldops.api.routes.policy_enforcer",
+    "shieldops.api.routes.audit_readiness",
+    "shieldops.api.routes.toil_classifier",
+    "shieldops.api.routes.governance_scorer",
+    "shieldops.api.routes.deprecation_tracker",
+    "shieldops.api.routes.severity_validator",
+    "shieldops.api.routes.approval_analyzer",
+    "shieldops.api.routes.slo_compliance",
 ]
 warn_return_any = false
 disallow_untyped_defs = false

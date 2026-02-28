@@ -177,6 +177,18 @@ Review ShieldOps agent code for correctness, safety, and reliability.
 - [ ] Service ownership tracked via `ServiceOwnershipTracker` (`src/shieldops/operations/ownership_tracker.py`)
 - [ ] Configuration validated via `ConfigurationValidator` (`src/shieldops/config/config_validator.py`)
 - [ ] Observability gaps detected via `ObservabilityGapAnalyzer` (`src/shieldops/observability/observability_gap.py`)
+- [ ] Vendor lock-in risk analyzed via `VendorLockinAnalyzer` (`src/shieldops/billing/vendor_lockin.py`)
+- [ ] Cost efficiency scored via `CostEfficiencyScorer` (`src/shieldops/billing/cost_efficiency.py`)
+- [ ] Budget variance tracked via `BudgetVarianceTracker` (`src/shieldops/billing/budget_variance.py`)
+- [ ] Compliance evidence validated via `ComplianceEvidenceValidator` (`src/shieldops/compliance/evidence_validator.py`)
+- [ ] Policy enforcement monitored via `PolicyEnforcementMonitor` (`src/shieldops/compliance/policy_enforcer.py`)
+- [ ] Audit readiness scored via `AuditReadinessScorer` (`src/shieldops/audit/audit_readiness.py`)
+- [ ] Operational toil classified via `OperationalToilClassifier` (`src/shieldops/operations/toil_classifier.py`)
+- [ ] Platform governance scored via `PlatformGovernanceScorer` (`src/shieldops/policy/governance_scorer.py`)
+- [ ] Service deprecation tracked via `ServiceDeprecationTracker` (`src/shieldops/topology/deprecation_tracker.py`)
+- [ ] Incident severity validated via `IncidentSeverityValidator` (`src/shieldops/incidents/severity_validator.py`)
+- [ ] Change approval analyzed via `ChangeApprovalAnalyzer` (`src/shieldops/changes/approval_analyzer.py`)
+- [ ] SLO compliance checked via `SLOComplianceChecker` (`src/shieldops/sla/slo_compliance.py`)
 
 ### Testing
 - [ ] Unit tests for all node functions

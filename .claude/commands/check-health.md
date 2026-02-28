@@ -28,7 +28,7 @@ Run health checks on all ShieldOps platform dependencies.
    - Integration tests: `python3 -m pytest tests/integration/ -v --tb=short`
    - Report: total tests, passed, failed, coverage
 
-5. **Platform feature health** (Phase 11–40 modules):
+5. **Platform feature health** (Phase 11–41 modules):
    - Capacity trends: `src/shieldops/analytics/capacity_trends.py` — CapacityTrendAnalyzer
    - SRE metrics: `src/shieldops/analytics/sre_metrics.py` — SREMetricsAggregator
    - Health reports: `src/shieldops/observability/health_report.py` — ServiceHealthReportGenerator
@@ -241,6 +241,19 @@ Run health checks on all ShieldOps platform dependencies.
    - **Phase 37 (Planned):** Threat hunt orchestrator, security response automator, zero trust verifier, remediation pipeline orchestrator, recovery coordinator, runbook chain executor, SLO auto-scaler, reliability automation engine, incident prevention engine, cross-agent policy enforcer, agent telemetry analyzer, agent compliance auditor
    - **Phase 38 (Planned):** War room orchestrator, root cause verifier, comm automator, security posture simulator, credential rotation orchestrator, compliance evidence automator, chaos experiment automator, multi-region failover coordinator, capacity burst manager, platform cost optimizer, service mesh intelligence, operational runbook generator
    - **Phase 39 (Planned):** Breach predictor, error budget allocator, dependency topology analyzer, infra capacity planner, DNS health monitor, drift analyzer, deployment impact analyzer, governance dashboard
+   - **Phase 40:** Incident replay engine, incident response timer, SLO aggregator, network latency mapper, platform health index, observability gap detector, capacity anomaly detector, change freeze manager, deployment pipeline analyzer, release readiness checker, config validation engine
+   - **Phase 41:** Vendor lock-in analyzer: `src/shieldops/billing/vendor_lockin.py` — VendorLockinAnalyzer
+   - Cost efficiency scorer: `src/shieldops/billing/cost_efficiency.py` — CostEfficiencyScorer
+   - Budget variance tracker: `src/shieldops/billing/budget_variance.py` — BudgetVarianceTracker
+   - Compliance evidence validator: `src/shieldops/compliance/evidence_validator.py` — ComplianceEvidenceValidator
+   - Policy enforcement monitor: `src/shieldops/compliance/policy_enforcer.py` — PolicyEnforcementMonitor
+   - Audit readiness scorer: `src/shieldops/audit/audit_readiness.py` — AuditReadinessScorer
+   - Operational toil classifier: `src/shieldops/operations/toil_classifier.py` — OperationalToilClassifier
+   - Platform governance scorer: `src/shieldops/policy/governance_scorer.py` — PlatformGovernanceScorer
+   - Service deprecation tracker: `src/shieldops/topology/deprecation_tracker.py` — ServiceDeprecationTracker
+   - Incident severity validator: `src/shieldops/incidents/severity_validator.py` — IncidentSeverityValidator
+   - Change approval analyzer: `src/shieldops/changes/approval_analyzer.py` — ChangeApprovalAnalyzer
+   - SLO compliance checker: `src/shieldops/sla/slo_compliance.py` — SLOComplianceChecker
    - Verify each module initializes in `src/shieldops/api/app.py` lifespan
 
 6. **Check configuration**:

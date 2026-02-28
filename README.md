@@ -362,6 +362,7 @@ Default policies ship with the platform and can be customized per environment:
 | Phase 38 | Intelligent Operations & Platform Resilience | Completed |
 | Phase 39 | Advanced Platform Intelligence & Operational Excellence | Completed |
 | Phase 40 | Platform Observability & Release Intelligence | Completed |
+| Phase 41 | Platform Economics & Governance Intelligence | Completed |
 
 ## Documentation
 

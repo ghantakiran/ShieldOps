@@ -110,6 +110,11 @@ Deploy ShieldOps agents to target environments.
    - Track service ownership via `ServiceOwnershipTracker` (`src/shieldops/operations/ownership_tracker.py`)
    - Validate configuration via `ConfigurationValidator` (`src/shieldops/config/config_validator.py`)
    - Detect observability gaps via `ObservabilityGapAnalyzer` (`src/shieldops/observability/observability_gap.py`)
+   - Score platform governance via `PlatformGovernanceScorer` (`src/shieldops/policy/governance_scorer.py`)
+   - Classify operational toil via `OperationalToilClassifier` (`src/shieldops/operations/toil_classifier.py`)
+   - Track service deprecation status via `ServiceDeprecationTracker` (`src/shieldops/topology/deprecation_tracker.py`)
+   - Analyze change approval workflow via `ChangeApprovalAnalyzer` (`src/shieldops/changes/approval_analyzer.py`)
+   - Verify SLO compliance via `SLOComplianceChecker` (`src/shieldops/sla/slo_compliance.py`)
 4. **Deploy**:
    - Apply Kubernetes manifests from `infrastructure/kubernetes/`
    - For production: trigger approval workflow via Slack/Teams

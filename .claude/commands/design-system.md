@@ -194,6 +194,18 @@ Design new ShieldOps components, APIs, or agent workflows.
    - Track service ownership via `ServiceOwnershipTracker` (`src/shieldops/operations/ownership_tracker.py`)
    - Validate configuration via `ConfigurationValidator` (`src/shieldops/config/config_validator.py`)
    - Detect observability gaps via `ObservabilityGapAnalyzer` (`src/shieldops/observability/observability_gap.py`)
+   - Analyze vendor lock-in risk via `VendorLockinAnalyzer` (`src/shieldops/billing/vendor_lockin.py`)
+   - Score cost efficiency via `CostEfficiencyScorer` (`src/shieldops/billing/cost_efficiency.py`)
+   - Track budget variance via `BudgetVarianceTracker` (`src/shieldops/billing/budget_variance.py`)
+   - Validate compliance evidence via `ComplianceEvidenceValidator` (`src/shieldops/compliance/evidence_validator.py`)
+   - Monitor policy enforcement via `PolicyEnforcementMonitor` (`src/shieldops/compliance/policy_enforcer.py`)
+   - Score audit readiness via `AuditReadinessScorer` (`src/shieldops/audit/audit_readiness.py`)
+   - Classify operational toil via `OperationalToilClassifier` (`src/shieldops/operations/toil_classifier.py`)
+   - Score platform governance via `PlatformGovernanceScorer` (`src/shieldops/policy/governance_scorer.py`)
+   - Track service deprecation via `ServiceDeprecationTracker` (`src/shieldops/topology/deprecation_tracker.py`)
+   - Validate incident severity via `IncidentSeverityValidator` (`src/shieldops/incidents/severity_validator.py`)
+   - Analyze change approval workflow via `ChangeApprovalAnalyzer` (`src/shieldops/changes/approval_analyzer.py`)
+   - Check SLO compliance via `SLOComplianceChecker` (`src/shieldops/sla/slo_compliance.py`)
 
 5. **Documentation**:
    - Write Architecture Decision Record (ADR) in `docs/architecture/`
