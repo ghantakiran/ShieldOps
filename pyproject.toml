@@ -447,6 +447,18 @@ module = [
     "shieldops.api.routes.token_optimizer",
     "shieldops.api.routes.prompt_cache",
     "shieldops.api.routes.routing_optimizer",
+    "shieldops.api.routes.threat_hunt",
+    "shieldops.api.routes.response_automator",
+    "shieldops.api.routes.zero_trust_verifier",
+    "shieldops.api.routes.remediation_pipeline",
+    "shieldops.api.routes.recovery_coordinator",
+    "shieldops.api.routes.runbook_chainer",
+    "shieldops.api.routes.slo_auto_scaler",
+    "shieldops.api.routes.reliability_automator",
+    "shieldops.api.routes.prevention_engine",
+    "shieldops.api.routes.cross_agent_enforcer",
+    "shieldops.api.routes.telemetry_analyzer",
+    "shieldops.api.routes.compliance_auditor",
 ]
 warn_return_any = false
 disallow_untyped_defs = false
