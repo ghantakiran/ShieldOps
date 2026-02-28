@@ -218,6 +218,18 @@ Design new ShieldOps components, APIs, or agent workflows.
    - Bridge security to compliance via `SecurityComplianceBridge` (`src/shieldops/security/compliance_bridge.py`)
    - Score capacity utilization via `CapacityUtilizationScorer` (`src/shieldops/analytics/utilization_scorer.py`)
    - Link incidents to knowledge via `IncidentKnowledgeLinker` (`src/shieldops/incidents/knowledge_linker.py`)
+   - Map dependency vulnerabilities via `DependencyVulnerabilityMapper` (`src/shieldops/topology/dep_vuln_mapper.py`)
+   - Forecast incident trends via `IncidentTrendForecaster` (`src/shieldops/incidents/trend_forecaster.py`)
+   - Predict change risk via `ChangeRiskPredictor` (`src/shieldops/changes/risk_predictor.py`)
+   - Plan cost optimization via `CostOptimizationPlanner` (`src/shieldops/billing/optimization_planner.py`)
+   - Classify alert noise via `AlertNoiseClassifier` (`src/shieldops/observability/noise_classifier.py`)
+   - Analyze SLA impact via `SLAImpactAnalyzer` (`src/shieldops/sla/impact_analyzer.py`)
+   - Analyze runbook coverage via `RunbookCoverageAnalyzer` (`src/shieldops/operations/runbook_coverage.py`)
+   - Benchmark security posture via `SecurityPostureBenchmarker` (`src/shieldops/security/posture_benchmark.py`)
+   - Balance team workload via `TeamWorkloadBalancer` (`src/shieldops/operations/workload_balancer.py`)
+   - Automate compliance reports via `ComplianceReportAutomator` (`src/shieldops/compliance/report_automator.py`)
+   - Score infrastructure health via `InfrastructureHealthScorer` (`src/shieldops/topology/infra_health_scorer.py`)
+   - Predict deployment impact via `DeploymentImpactPredictor` (`src/shieldops/changes/impact_predictor.py`)
 
 5. **Documentation**:
    - Write Architecture Decision Record (ADR) in `docs/architecture/`

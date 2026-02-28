@@ -201,6 +201,18 @@ Review ShieldOps agent code for correctness, safety, and reliability.
 - [ ] Security findings bridged to compliance via `SecurityComplianceBridge` (`src/shieldops/security/compliance_bridge.py`)
 - [ ] Capacity utilization scored via `CapacityUtilizationScorer` (`src/shieldops/analytics/utilization_scorer.py`)
 - [ ] Incidents linked to knowledge via `IncidentKnowledgeLinker` (`src/shieldops/incidents/knowledge_linker.py`)
+- [ ] Dependency vulnerabilities mapped via `DependencyVulnerabilityMapper` (`src/shieldops/topology/dep_vuln_mapper.py`)
+- [ ] Incident trends forecasted via `IncidentTrendForecaster` (`src/shieldops/incidents/trend_forecaster.py`)
+- [ ] Change risk predicted via `ChangeRiskPredictor` (`src/shieldops/changes/risk_predictor.py`)
+- [ ] Cost optimization planned via `CostOptimizationPlanner` (`src/shieldops/billing/optimization_planner.py`)
+- [ ] Alert noise classified via `AlertNoiseClassifier` (`src/shieldops/observability/noise_classifier.py`)
+- [ ] SLA impact analyzed via `SLAImpactAnalyzer` (`src/shieldops/sla/impact_analyzer.py`)
+- [ ] Runbook coverage analyzed via `RunbookCoverageAnalyzer` (`src/shieldops/operations/runbook_coverage.py`)
+- [ ] Security posture benchmarked via `SecurityPostureBenchmarker` (`src/shieldops/security/posture_benchmark.py`)
+- [ ] Team workload balanced via `TeamWorkloadBalancer` (`src/shieldops/operations/workload_balancer.py`)
+- [ ] Compliance reports automated via `ComplianceReportAutomator` (`src/shieldops/compliance/report_automator.py`)
+- [ ] Infrastructure health scored via `InfrastructureHealthScorer` (`src/shieldops/topology/infra_health_scorer.py`)
+- [ ] Deployment impact predicted via `DeploymentImpactPredictor` (`src/shieldops/changes/impact_predictor.py`)
 
 ### Testing
 - [ ] Unit tests for all node functions

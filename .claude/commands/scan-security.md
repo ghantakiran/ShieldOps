@@ -107,6 +107,10 @@ Run security audits on ShieldOps codebase and agent configurations.
 81. **Alert Deduplication**: Deduplicate noisy alerts and surface unique security incidents via `AlertDeduplicationEngine` (`src/shieldops/observability/alert_dedup.py`)
 82. **Compliance Automation Scoring**: Score automation coverage for each compliance control via `ComplianceAutomationScorer` (`src/shieldops/compliance/automation_scorer.py`)
 83. **Error Pattern Classification**: Classify error patterns by type and detect novel security-related error signatures via `ErrorPatternClassifier` (`src/shieldops/analytics/error_classifier.py`)
+84. **Dependency Vulnerability Mapping**: Map vulnerabilities across service dependencies via `DependencyVulnerabilityMapper` (`src/shieldops/topology/dep_vuln_mapper.py`)
+85. **Security Posture Benchmarking**: Benchmark security posture against industry standards via `SecurityPostureBenchmarker` (`src/shieldops/security/posture_benchmark.py`)
+86. **Alert Noise Classification**: Classify alerts as actionable vs noise to reduce alert fatigue via `AlertNoiseClassifier` (`src/shieldops/observability/noise_classifier.py`)
+87. **Compliance Report Automation**: Automate compliance report generation and evidence aggregation via `ComplianceReportAutomator` (`src/shieldops/compliance/report_automator.py`)
 
 ## Severity Levels
 - **CRITICAL**: Hardcoded secrets, SQL injection, unauthenticated endpoints

@@ -519,6 +519,18 @@ module = [
     "shieldops.api.routes.compliance_bridge",
     "shieldops.api.routes.utilization_scorer",
     "shieldops.api.routes.knowledge_linker",
+    "shieldops.api.routes.dep_vuln_mapper",
+    "shieldops.api.routes.trend_forecaster",
+    "shieldops.api.routes.risk_predictor",
+    "shieldops.api.routes.optimization_planner",
+    "shieldops.api.routes.noise_classifier",
+    "shieldops.api.routes.sla_impact",
+    "shieldops.api.routes.runbook_coverage",
+    "shieldops.api.routes.posture_benchmark",
+    "shieldops.api.routes.workload_balancer",
+    "shieldops.api.routes.report_automator",
+    "shieldops.api.routes.infra_health_scorer",
+    "shieldops.api.routes.impact_predictor",
 ]
 warn_return_any = false
 disallow_untyped_defs = false

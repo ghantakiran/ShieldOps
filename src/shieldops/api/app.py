@@ -9199,6 +9199,248 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         except Exception as e:
             logger.warning("knowledge_linker_init_failed", error=str(e))
 
+    # Phase 43: Dependency Vulnerability Mapper
+    if settings.dep_vuln_mapper_enabled:
+        try:
+            from shieldops.api.routes import dep_vuln_mapper as dvm_mod
+            from shieldops.topology.dep_vuln_mapper import (
+                DependencyVulnerabilityMapper as TopoDependencyVulnMapper,
+            )
+
+            dvm_engine = TopoDependencyVulnMapper(
+                max_records=settings.dep_vuln_mapper_max_records,
+                max_critical_vulns=settings.dep_vuln_mapper_max_critical_vulns,
+            )
+            dvm_mod.set_engine(dvm_engine)
+            app.include_router(
+                dvm_mod.dvm_route,
+                prefix=settings.api_prefix,
+                tags=["Dependency Vulnerability Mapper"],
+            )
+            logger.info("dep_vuln_mapper_initialized")
+        except Exception as e:
+            logger.warning("dep_vuln_mapper_init_failed", error=str(e))
+
+    # Phase 43: Incident Trend Forecaster
+    if settings.trend_forecaster_enabled:
+        try:
+            from shieldops.api.routes import trend_forecaster as itf_mod
+            from shieldops.incidents.trend_forecaster import IncidentTrendForecaster
+
+            itf_engine = IncidentTrendForecaster(
+                max_records=settings.trend_forecaster_max_records,
+                max_growth_rate_pct=settings.trend_forecaster_max_growth_rate_pct,
+            )
+            itf_mod.set_engine(itf_engine)
+            app.include_router(
+                itf_mod.itf_route,
+                prefix=settings.api_prefix,
+                tags=["Incident Trend Forecaster"],
+            )
+            logger.info("trend_forecaster_initialized")
+        except Exception as e:
+            logger.warning("trend_forecaster_init_failed", error=str(e))
+
+    # Phase 43: Change Risk Predictor
+    if settings.risk_predictor_enabled:
+        try:
+            from shieldops.api.routes import risk_predictor as crp_mod
+            from shieldops.changes.risk_predictor import ChangeRiskPredictor
+
+            crp_engine = ChangeRiskPredictor(
+                max_records=settings.risk_predictor_max_records,
+                max_risk_threshold=settings.risk_predictor_max_risk_threshold,
+            )
+            crp_mod.set_engine(crp_engine)
+            app.include_router(
+                crp_mod.crp_route,
+                prefix=settings.api_prefix,
+                tags=["Change Risk Predictor"],
+            )
+            logger.info("risk_predictor_initialized")
+        except Exception as e:
+            logger.warning("risk_predictor_init_failed", error=str(e))
+
+    # Phase 43: Cost Optimization Planner
+    if settings.optimization_planner_enabled:
+        try:
+            from shieldops.api.routes import optimization_planner as cop_mod
+            from shieldops.billing.optimization_planner import CostOptimizationPlanner
+
+            cop_engine = CostOptimizationPlanner(
+                max_records=settings.optimization_planner_max_records,
+                min_savings_pct=settings.optimization_planner_min_savings_pct,
+            )
+            cop_mod.set_engine(cop_engine)
+            app.include_router(
+                cop_mod.cop_route,
+                prefix=settings.api_prefix,
+                tags=["Cost Optimization Planner"],
+            )
+            logger.info("optimization_planner_initialized")
+        except Exception as e:
+            logger.warning("optimization_planner_init_failed", error=str(e))
+
+    # Phase 43: Alert Noise Classifier
+    if settings.noise_classifier_enabled:
+        try:
+            from shieldops.api.routes import noise_classifier as anc_mod
+            from shieldops.observability.noise_classifier import AlertNoiseClassifier
+
+            anc_engine = AlertNoiseClassifier(
+                max_records=settings.noise_classifier_max_records,
+                max_noise_ratio_pct=settings.noise_classifier_max_noise_ratio_pct,
+            )
+            anc_mod.set_engine(anc_engine)
+            app.include_router(
+                anc_mod.anc_route,
+                prefix=settings.api_prefix,
+                tags=["Alert Noise Classifier"],
+            )
+            logger.info("noise_classifier_initialized")
+        except Exception as e:
+            logger.warning("noise_classifier_init_failed", error=str(e))
+
+    # Phase 43: SLA Impact Analyzer
+    if settings.sla_impact_analyzer_enabled:
+        try:
+            from shieldops.api.routes import sla_impact as sia_mod
+            from shieldops.sla.impact_analyzer import SLAImpactAnalyzer
+
+            sia_engine = SLAImpactAnalyzer(
+                max_records=settings.sla_impact_analyzer_max_records,
+                max_breach_count=settings.sla_impact_analyzer_max_breach_count,
+            )
+            sia_mod.set_engine(sia_engine)
+            app.include_router(
+                sia_mod.sia_route,
+                prefix=settings.api_prefix,
+                tags=["SLA Impact Analyzer"],
+            )
+            logger.info("sla_impact_analyzer_initialized")
+        except Exception as e:
+            logger.warning("sla_impact_analyzer_init_failed", error=str(e))
+
+    # Phase 43: Runbook Coverage Analyzer
+    if settings.runbook_coverage_enabled:
+        try:
+            from shieldops.api.routes import runbook_coverage as rca_mod
+            from shieldops.operations.runbook_coverage import RunbookCoverageAnalyzer
+
+            rca_engine = RunbookCoverageAnalyzer(
+                max_records=settings.runbook_coverage_max_records,
+                min_coverage_pct=settings.runbook_coverage_min_coverage_pct,
+            )
+            rca_mod.set_engine(rca_engine)
+            app.include_router(
+                rca_mod.rca_route,
+                prefix=settings.api_prefix,
+                tags=["Runbook Coverage Analyzer"],
+            )
+            logger.info("runbook_coverage_initialized")
+        except Exception as e:
+            logger.warning("runbook_coverage_init_failed", error=str(e))
+
+    # Phase 43: Security Posture Benchmarker
+    if settings.posture_benchmark_enabled:
+        try:
+            from shieldops.api.routes import posture_benchmark as spb_mod
+            from shieldops.security.posture_benchmark import SecurityPostureBenchmarker
+
+            spb_engine = SecurityPostureBenchmarker(
+                max_records=settings.posture_benchmark_max_records,
+                min_benchmark_score=settings.posture_benchmark_min_benchmark_score,
+            )
+            spb_mod.set_engine(spb_engine)
+            app.include_router(
+                spb_mod.spb_route,
+                prefix=settings.api_prefix,
+                tags=["Security Posture Benchmarker"],
+            )
+            logger.info("posture_benchmark_initialized")
+        except Exception as e:
+            logger.warning("posture_benchmark_init_failed", error=str(e))
+
+    # Phase 43: Team Workload Balancer
+    if settings.workload_balancer_enabled:
+        try:
+            from shieldops.api.routes import workload_balancer as twb_mod
+            from shieldops.operations.workload_balancer import TeamWorkloadBalancer
+
+            twb_engine = TeamWorkloadBalancer(
+                max_records=settings.workload_balancer_max_records,
+                max_imbalance_pct=settings.workload_balancer_max_imbalance_pct,
+            )
+            twb_mod.set_engine(twb_engine)
+            app.include_router(
+                twb_mod.twb_route,
+                prefix=settings.api_prefix,
+                tags=["Team Workload Balancer"],
+            )
+            logger.info("workload_balancer_initialized")
+        except Exception as e:
+            logger.warning("workload_balancer_init_failed", error=str(e))
+
+    # Phase 43: Compliance Report Automator
+    if settings.report_automator_enabled:
+        try:
+            from shieldops.api.routes import report_automator as cra_mod
+            from shieldops.compliance.report_automator import ComplianceReportAutomator
+
+            cra_engine = ComplianceReportAutomator(
+                max_records=settings.report_automator_max_records,
+                max_overdue_days=settings.report_automator_max_overdue_days,
+            )
+            cra_mod.set_engine(cra_engine)
+            app.include_router(
+                cra_mod.cra_route,
+                prefix=settings.api_prefix,
+                tags=["Compliance Report Automator"],
+            )
+            logger.info("report_automator_initialized")
+        except Exception as e:
+            logger.warning("report_automator_init_failed", error=str(e))
+
+    # Phase 43: Infrastructure Health Scorer
+    if settings.infra_health_scorer_enabled:
+        try:
+            from shieldops.api.routes import infra_health_scorer as ihs_mod
+            from shieldops.topology.infra_health_scorer import InfrastructureHealthScorer
+
+            ihs_engine = InfrastructureHealthScorer(
+                max_records=settings.infra_health_scorer_max_records,
+                min_health_score=settings.infra_health_scorer_min_health_score,
+            )
+            ihs_mod.set_engine(ihs_engine)
+            app.include_router(
+                ihs_mod.ihs_route,
+                prefix=settings.api_prefix,
+                tags=["Infrastructure Health Scorer"],
+            )
+            logger.info("infra_health_scorer_initialized")
+        except Exception as e:
+            logger.warning("infra_health_scorer_init_failed", error=str(e))
+
+    # Phase 43: Deployment Impact Predictor
+    if settings.impact_predictor_enabled:
+        try:
+            from shieldops.api.routes import impact_predictor as dip_mod
+            from shieldops.changes.impact_predictor import DeploymentImpactPredictor
+
+            dip_engine = DeploymentImpactPredictor(
+                max_records=settings.impact_predictor_max_records,
+                max_impact_score=settings.impact_predictor_max_impact_score,
+            )
+            dip_mod.set_engine(dip_engine)
+            app.include_router(
+                dip_mod.dip_route,
+                prefix=settings.api_prefix,
+                tags=["Deployment Impact Predictor"],
+            )
+            logger.info("impact_predictor_initialized")
+        except Exception as e:
+            logger.warning("impact_predictor_init_failed", error=str(e))
+
     yield
 
     logger.info("shieldops_shutting_down")

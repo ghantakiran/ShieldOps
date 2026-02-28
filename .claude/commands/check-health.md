@@ -28,7 +28,7 @@ Run health checks on all ShieldOps platform dependencies.
    - Integration tests: `python3 -m pytest tests/integration/ -v --tb=short`
    - Report: total tests, passed, failed, coverage
 
-5. **Platform feature health** (Phase 11–42 modules):
+5. **Platform feature health** (Phase 11–43 modules):
    - Capacity trends: `src/shieldops/analytics/capacity_trends.py` — CapacityTrendAnalyzer
    - SRE metrics: `src/shieldops/analytics/sre_metrics.py` — SREMetricsAggregator
    - Health reports: `src/shieldops/observability/health_report.py` — ServiceHealthReportGenerator
@@ -266,6 +266,18 @@ Run health checks on all ShieldOps platform dependencies.
    - Security compliance bridge: `src/shieldops/security/compliance_bridge.py` — SecurityComplianceBridge
    - Capacity utilization scorer: `src/shieldops/analytics/utilization_scorer.py` — CapacityUtilizationScorer
    - Incident knowledge linker: `src/shieldops/incidents/knowledge_linker.py` — IncidentKnowledgeLinker
+   - **Phase 43:** Dep vuln mapper: `src/shieldops/topology/dep_vuln_mapper.py` — DependencyVulnerabilityMapper
+   - Incident trend forecaster: `src/shieldops/incidents/trend_forecaster.py` — IncidentTrendForecaster
+   - Change risk predictor: `src/shieldops/changes/risk_predictor.py` — ChangeRiskPredictor
+   - Cost optimization planner: `src/shieldops/billing/optimization_planner.py` — CostOptimizationPlanner
+   - Alert noise classifier: `src/shieldops/observability/noise_classifier.py` — AlertNoiseClassifier
+   - SLA impact analyzer: `src/shieldops/sla/impact_analyzer.py` — SLAImpactAnalyzer
+   - Runbook coverage analyzer: `src/shieldops/operations/runbook_coverage.py` — RunbookCoverageAnalyzer
+   - Security posture benchmarker: `src/shieldops/security/posture_benchmark.py` — SecurityPostureBenchmarker
+   - Team workload balancer: `src/shieldops/operations/workload_balancer.py` — TeamWorkloadBalancer
+   - Compliance report automator: `src/shieldops/compliance/report_automator.py` — ComplianceReportAutomator
+   - Infrastructure health scorer: `src/shieldops/topology/infra_health_scorer.py` — InfrastructureHealthScorer
+   - Deployment impact predictor: `src/shieldops/changes/impact_predictor.py` — DeploymentImpactPredictor
    - Verify each module initializes in `src/shieldops/api/app.py` lifespan
 
 6. **Check configuration**:
