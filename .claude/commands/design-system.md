@@ -132,6 +132,18 @@ Design new ShieldOps components, APIs, or agent workflows.
    - Monitor attack surface via `AttackSurfaceMonitor` (`src/shieldops/security/attack_surface.py`)
    - Recommend runbooks via `RunbookRecommendationEngine` (`src/shieldops/operations/runbook_recommender.py`)
    - Score platform reliability via `PlatformReliabilityScorecard` (`src/shieldops/sla/reliability_scorecard.py`)
+   - Track LLM token costs via `LLMTokenCostTracker` (`src/shieldops/billing/llm_cost_tracker.py`)
+   - Analyze cloud cost arbitrage via `CloudCostArbitrageAnalyzer` (`src/shieldops/billing/cloud_arbitrage.py`)
+   - Allocate observability costs via `ObservabilityCostAllocator` (`src/shieldops/observability/observability_cost.py`)
+   - Analyze change lead time via `ChangeLeadTimeAnalyzer` (`src/shieldops/changes/lead_time_analyzer.py`)
+   - Analyze feature flag impact via `FeatureFlagImpactAnalyzer` (`src/shieldops/config/flag_impact.py`)
+   - Track deployment dependencies via `DeploymentDependencyTracker` (`src/shieldops/changes/deployment_dependency.py`)
+   - Score postmortem quality via `PostmortemQualityScorer` (`src/shieldops/incidents/postmortem_quality.py`)
+   - Track DR drills via `DRDrillTracker` (`src/shieldops/operations/dr_drill_tracker.py`)
+   - Optimize escalation paths via `IncidentEscalationPathOptimizer` (`src/shieldops/incidents/escalation_optimizer.py`)
+   - Manage tenant resource quotas via `TenantResourceQuotaManager` (`src/shieldops/operations/tenant_quota.py`)
+   - Log agent decisions via `DecisionAuditLogger` (`src/shieldops/audit/decision_audit.py`)
+   - Manage data retention policies via `DataRetentionPolicyManager` (`src/shieldops/observability/retention_policy.py`)
 
 5. **Documentation**:
    - Write Architecture Decision Record (ADR) in `docs/architecture/`

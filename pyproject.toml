@@ -423,6 +423,18 @@ module = [
     "shieldops.api.routes.attack_surface_monitor",
     "shieldops.api.routes.runbook_recommender",
     "shieldops.api.routes.reliability_scorecard",
+    "shieldops.api.routes.llm_cost_tracker",
+    "shieldops.api.routes.cloud_arbitrage",
+    "shieldops.api.routes.observability_cost",
+    "shieldops.api.routes.lead_time_analyzer",
+    "shieldops.api.routes.flag_impact",
+    "shieldops.api.routes.deployment_dependency",
+    "shieldops.api.routes.postmortem_quality",
+    "shieldops.api.routes.dr_drill_tracker",
+    "shieldops.api.routes.escalation_optimizer",
+    "shieldops.api.routes.tenant_quota",
+    "shieldops.api.routes.decision_audit",
+    "shieldops.api.routes.retention_policy",
 ]
 warn_return_any = false
 disallow_untyped_defs = false

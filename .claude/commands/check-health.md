@@ -28,7 +28,7 @@ Run health checks on all ShieldOps platform dependencies.
    - Integration tests: `python3 -m pytest tests/integration/ -v --tb=short`
    - Report: total tests, passed, failed, coverage
 
-5. **Platform feature health** (Phase 11–34 modules):
+5. **Platform feature health** (Phase 11–35 modules):
    - Capacity trends: `src/shieldops/analytics/capacity_trends.py` — CapacityTrendAnalyzer
    - SRE metrics: `src/shieldops/analytics/sre_metrics.py` — SREMetricsAggregator
    - Health reports: `src/shieldops/observability/health_report.py` — ServiceHealthReportGenerator
@@ -215,6 +215,18 @@ Run health checks on all ShieldOps platform dependencies.
    - Attack surface: `src/shieldops/security/attack_surface.py` — AttackSurfaceMonitor
    - Runbook recommender: `src/shieldops/operations/runbook_recommender.py` — RunbookRecommendationEngine
    - Reliability scorecard: `src/shieldops/sla/reliability_scorecard.py` — PlatformReliabilityScorecard
+   - LLM cost tracker: `src/shieldops/billing/llm_cost_tracker.py` — LLMTokenCostTracker
+   - Cloud arbitrage: `src/shieldops/billing/cloud_arbitrage.py` — CloudCostArbitrageAnalyzer
+   - Observability cost: `src/shieldops/observability/observability_cost.py` — ObservabilityCostAllocator
+   - Lead time analyzer: `src/shieldops/changes/lead_time_analyzer.py` — ChangeLeadTimeAnalyzer
+   - Flag impact: `src/shieldops/config/flag_impact.py` — FeatureFlagImpactAnalyzer
+   - Deployment dependency: `src/shieldops/changes/deployment_dependency.py` — DeploymentDependencyTracker
+   - Postmortem quality: `src/shieldops/incidents/postmortem_quality.py` — PostmortemQualityScorer
+   - DR drill tracker: `src/shieldops/operations/dr_drill_tracker.py` — DRDrillTracker
+   - Escalation optimizer: `src/shieldops/incidents/escalation_optimizer.py` — IncidentEscalationPathOptimizer
+   - Tenant quota: `src/shieldops/operations/tenant_quota.py` — TenantResourceQuotaManager
+   - Decision audit: `src/shieldops/audit/decision_audit.py` — DecisionAuditLogger
+   - Retention policy: `src/shieldops/observability/retention_policy.py` — DataRetentionPolicyManager
    - Verify each module initializes in `src/shieldops/api/app.py` lifespan
 
 6. **Check configuration**:
