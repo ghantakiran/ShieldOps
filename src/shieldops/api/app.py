@@ -7767,6 +7767,220 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         except Exception as e:
             logger.warning("routing_optimizer_init_failed", error=str(e))
 
+    if settings.threat_hunt_enabled:
+        try:
+            from shieldops.api.routes import threat_hunt as tho_mod
+            from shieldops.security.threat_hunt import ThreatHuntOrchestrator
+
+            tho_engine = ThreatHuntOrchestrator(
+                max_records=settings.threat_hunt_max_records,
+                min_detection_rate_pct=settings.threat_hunt_min_detection_rate_pct,
+            )
+            tho_mod.set_engine(tho_engine)
+            app.include_router(tho_mod.tho_route, prefix=settings.api_prefix, tags=["Threat Hunt"])
+            logger.info("threat_hunt_initialized")
+        except Exception as e:
+            logger.warning("threat_hunt_init_failed", error=str(e))
+
+    if settings.response_automator_enabled:
+        try:
+            from shieldops.api.routes import response_automator as sra_mod
+            from shieldops.security.response_automator import SecurityResponseAutomator
+
+            sra_engine = SecurityResponseAutomator(
+                max_records=settings.response_automator_max_records,
+                min_success_rate_pct=settings.response_automator_min_success_rate_pct,
+            )
+            sra_mod.set_engine(sra_engine)
+            app.include_router(
+                sra_mod.sra_route, prefix=settings.api_prefix, tags=["Response Automator"]
+            )
+            logger.info("response_automator_initialized")
+        except Exception as e:
+            logger.warning("response_automator_init_failed", error=str(e))
+
+    if settings.zero_trust_enabled:
+        try:
+            from shieldops.api.routes import zero_trust_verifier as ztv_mod
+            from shieldops.security.zero_trust_verifier import ZeroTrustVerifier
+
+            ztv_engine = ZeroTrustVerifier(
+                max_records=settings.zero_trust_max_records,
+                min_trust_score=settings.zero_trust_min_trust_score,
+            )
+            ztv_mod.set_engine(ztv_engine)
+            app.include_router(ztv_mod.ztv_route, prefix=settings.api_prefix, tags=["Zero Trust"])
+            logger.info("zero_trust_initialized")
+        except Exception as e:
+            logger.warning("zero_trust_init_failed", error=str(e))
+
+    if settings.remediation_pipeline_enabled:
+        try:
+            from shieldops.api.routes import remediation_pipeline as rpo_mod
+            from shieldops.operations.remediation_pipeline import (
+                RemediationPipelineOrchestrator,
+            )
+
+            rpo_engine = RemediationPipelineOrchestrator(
+                max_records=settings.remediation_pipeline_max_records,
+                max_step_count=settings.remediation_pipeline_max_step_count,
+            )
+            rpo_mod.set_engine(rpo_engine)
+            app.include_router(
+                rpo_mod.rpo_route,
+                prefix=settings.api_prefix,
+                tags=["Remediation Pipeline"],
+            )
+            logger.info("remediation_pipeline_initialized")
+        except Exception as e:
+            logger.warning("remediation_pipeline_init_failed", error=str(e))
+
+    if settings.recovery_coordinator_enabled:
+        try:
+            from shieldops.api.routes import recovery_coordinator as rcc_mod
+            from shieldops.operations.recovery_coordinator import RecoveryCoordinator
+
+            rcc_engine = RecoveryCoordinator(
+                max_records=settings.recovery_coordinator_max_records,
+                max_recovery_hours=settings.recovery_coordinator_max_recovery_hours,
+            )
+            rcc_mod.set_engine(rcc_engine)
+            app.include_router(
+                rcc_mod.rcc_route,
+                prefix=settings.api_prefix,
+                tags=["Recovery Coordinator"],
+            )
+            logger.info("recovery_coordinator_initialized")
+        except Exception as e:
+            logger.warning("recovery_coordinator_init_failed", error=str(e))
+
+    if settings.runbook_chainer_enabled:
+        try:
+            from shieldops.api.routes import runbook_chainer as rce_mod
+            from shieldops.operations.runbook_chainer import RunbookChainExecutor
+
+            rce_engine = RunbookChainExecutor(
+                max_records=settings.runbook_chainer_max_records,
+                max_chain_length=settings.runbook_chainer_max_chain_length,
+            )
+            rce_mod.set_engine(rce_engine)
+            app.include_router(
+                rce_mod.rce_route, prefix=settings.api_prefix, tags=["Runbook Chainer"]
+            )
+            logger.info("runbook_chainer_initialized")
+        except Exception as e:
+            logger.warning("runbook_chainer_init_failed", error=str(e))
+
+    if settings.slo_auto_scaler_enabled:
+        try:
+            from shieldops.api.routes import slo_auto_scaler as sas_mod
+            from shieldops.sla.slo_auto_scaler import SLOAutoScaler
+
+            sas_engine = SLOAutoScaler(
+                max_records=settings.slo_auto_scaler_max_records,
+                max_replica_delta=settings.slo_auto_scaler_max_replica_delta,
+            )
+            sas_mod.set_engine(sas_engine)
+            app.include_router(
+                sas_mod.sas_route, prefix=settings.api_prefix, tags=["SLO Auto-Scaler"]
+            )
+            logger.info("slo_auto_scaler_initialized")
+        except Exception as e:
+            logger.warning("slo_auto_scaler_init_failed", error=str(e))
+
+    if settings.reliability_automator_enabled:
+        try:
+            from shieldops.api.routes import reliability_automator as rae_mod
+            from shieldops.sla.reliability_automator import ReliabilityAutomationEngine
+
+            rae_engine = ReliabilityAutomationEngine(
+                max_records=settings.reliability_automator_max_records,
+                min_impact_score=settings.reliability_automator_min_impact_score,
+            )
+            rae_mod.set_engine(rae_engine)
+            app.include_router(
+                rae_mod.rae_route,
+                prefix=settings.api_prefix,
+                tags=["Reliability Automator"],
+            )
+            logger.info("reliability_automator_initialized")
+        except Exception as e:
+            logger.warning("reliability_automator_init_failed", error=str(e))
+
+    if settings.prevention_engine_enabled:
+        try:
+            from shieldops.api.routes import prevention_engine as ipe_mod
+            from shieldops.incidents.prevention_engine import IncidentPreventionEngine
+
+            ipe_engine = IncidentPreventionEngine(
+                max_records=settings.prevention_engine_max_records,
+                min_confidence_pct=settings.prevention_engine_min_confidence_pct,
+            )
+            ipe_mod.set_engine(ipe_engine)
+            app.include_router(
+                ipe_mod.ipe_route, prefix=settings.api_prefix, tags=["Prevention Engine"]
+            )
+            logger.info("prevention_engine_initialized")
+        except Exception as e:
+            logger.warning("prevention_engine_init_failed", error=str(e))
+
+    if settings.cross_agent_enforcer_enabled:
+        try:
+            from shieldops.api.routes import cross_agent_enforcer as cae_mod
+            from shieldops.policy.cross_agent_enforcer import CrossAgentPolicyEnforcer
+
+            cae_engine = CrossAgentPolicyEnforcer(
+                max_records=settings.cross_agent_enforcer_max_records,
+                max_violations_per_agent=settings.cross_agent_enforcer_max_violations,
+            )
+            cae_mod.set_engine(cae_engine)
+            app.include_router(
+                cae_mod.cap_route,
+                prefix=settings.api_prefix,
+                tags=["Cross-Agent Enforcer"],
+            )
+            logger.info("cross_agent_enforcer_initialized")
+        except Exception as e:
+            logger.warning("cross_agent_enforcer_init_failed", error=str(e))
+
+    if settings.telemetry_analyzer_enabled:
+        try:
+            from shieldops.agents.telemetry_analyzer import AgentTelemetryAnalyzer
+            from shieldops.api.routes import telemetry_analyzer as tla_mod
+
+            tla_engine = AgentTelemetryAnalyzer(
+                max_records=settings.telemetry_analyzer_max_records,
+                min_performance_pct=settings.telemetry_analyzer_min_performance_pct,
+            )
+            tla_mod.set_engine(tla_engine)
+            app.include_router(
+                tla_mod.ata_route,
+                prefix=settings.api_prefix,
+                tags=["Telemetry Analyzer"],
+            )
+            logger.info("telemetry_analyzer_initialized")
+        except Exception as e:
+            logger.warning("telemetry_analyzer_init_failed", error=str(e))
+
+    if settings.compliance_auditor_enabled:
+        try:
+            from shieldops.agents.compliance_auditor import AgentComplianceAuditor
+            from shieldops.api.routes import compliance_auditor as aca_mod
+
+            aca_engine = AgentComplianceAuditor(
+                max_records=settings.compliance_auditor_max_records,
+                min_pass_rate_pct=settings.compliance_auditor_min_pass_rate_pct,
+            )
+            aca_mod.set_engine(aca_engine)
+            app.include_router(
+                aca_mod.aca_route,
+                prefix=settings.api_prefix,
+                tags=["Compliance Auditor"],
+            )
+            logger.info("compliance_auditor_initialized")
+        except Exception as e:
+            logger.warning("compliance_auditor_init_failed", error=str(e))
+
     yield
 
     logger.info("shieldops_shutting_down")

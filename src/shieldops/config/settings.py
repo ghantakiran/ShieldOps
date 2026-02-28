@@ -1615,6 +1615,66 @@ class Settings(BaseSettings):
     routing_optimizer_max_records: int = 200000
     routing_optimizer_cost_limit: float = 10.0
 
+    # Phase 37: Threat Hunt Orchestrator
+    threat_hunt_enabled: bool = True
+    threat_hunt_max_records: int = 200000
+    threat_hunt_min_detection_rate_pct: float = 50.0
+
+    # Phase 37: Security Response Automator
+    response_automator_enabled: bool = True
+    response_automator_max_records: int = 200000
+    response_automator_min_success_rate_pct: float = 90.0
+
+    # Phase 37: Zero Trust Verifier
+    zero_trust_enabled: bool = True
+    zero_trust_max_records: int = 200000
+    zero_trust_min_trust_score: float = 70.0
+
+    # Phase 37: Remediation Pipeline Orchestrator
+    remediation_pipeline_enabled: bool = True
+    remediation_pipeline_max_records: int = 200000
+    remediation_pipeline_max_step_count: int = 50
+
+    # Phase 37: Recovery Coordinator
+    recovery_coordinator_enabled: bool = True
+    recovery_coordinator_max_records: int = 200000
+    recovery_coordinator_max_recovery_hours: float = 24.0
+
+    # Phase 37: Runbook Chain Executor
+    runbook_chainer_enabled: bool = True
+    runbook_chainer_max_records: int = 200000
+    runbook_chainer_max_chain_length: int = 20
+
+    # Phase 37: SLO-Driven Auto-Scaler
+    slo_auto_scaler_enabled: bool = True
+    slo_auto_scaler_max_records: int = 200000
+    slo_auto_scaler_max_replica_delta: int = 10
+
+    # Phase 37: Reliability Automation Engine
+    reliability_automator_enabled: bool = True
+    reliability_automator_max_records: int = 200000
+    reliability_automator_min_impact_score: float = 50.0
+
+    # Phase 37: Incident Prevention Engine
+    prevention_engine_enabled: bool = True
+    prevention_engine_max_records: int = 200000
+    prevention_engine_min_confidence_pct: float = 60.0
+
+    # Phase 37: Cross-Agent Policy Enforcer
+    cross_agent_enforcer_enabled: bool = True
+    cross_agent_enforcer_max_records: int = 200000
+    cross_agent_enforcer_max_violations: int = 10
+
+    # Phase 37: Agent Telemetry Analyzer
+    telemetry_analyzer_enabled: bool = True
+    telemetry_analyzer_max_records: int = 200000
+    telemetry_analyzer_min_performance_pct: float = 70.0
+
+    # Phase 37: Agent Compliance Auditor
+    compliance_auditor_enabled: bool = True
+    compliance_auditor_max_records: int = 200000
+    compliance_auditor_min_pass_rate_pct: float = 90.0
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",
