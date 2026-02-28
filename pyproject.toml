@@ -483,6 +483,18 @@ module = [
     "shieldops.api.routes.compliance_posture",
     "shieldops.api.routes.toil_quantifier",
     "shieldops.api.routes.governance_dashboard",
+    "shieldops.api.routes.incident_replay",
+    "shieldops.api.routes.response_timer",
+    "shieldops.api.routes.slo_aggregator",
+    "shieldops.api.routes.network_latency",
+    "shieldops.api.routes.health_index",
+    "shieldops.api.routes.observability_gap",
+    "shieldops.api.routes.capacity_anomaly",
+    "shieldops.api.routes.change_freeze",
+    "shieldops.api.routes.pipeline_analyzer",
+    "shieldops.api.routes.release_readiness",
+    "shieldops.api.routes.config_validator",
+    "shieldops.api.routes.ownership_tracker",
 ]
 warn_return_any = false
 disallow_untyped_defs = false

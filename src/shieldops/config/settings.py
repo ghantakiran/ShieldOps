@@ -1795,6 +1795,66 @@ class Settings(BaseSettings):
     governance_dashboard_max_records: int = 200000
     governance_dashboard_min_governance_score_pct: float = 70.0
 
+    # Phase 40: Incident Replay Engine
+    incident_replay_enabled: bool = True
+    incident_replay_max_records: int = 200000
+    incident_replay_min_effectiveness_pct: float = 70.0
+
+    # Phase 40: Incident Response Timer
+    response_timer_enabled: bool = True
+    response_timer_max_records: int = 200000
+    response_timer_target_minutes: float = 30.0
+
+    # Phase 40: SLO Aggregation Dashboard
+    slo_aggregator_enabled: bool = True
+    slo_aggregator_max_records: int = 200000
+    slo_aggregator_min_compliance_pct: float = 95.0
+
+    # Phase 40: Network Latency Mapper
+    network_latency_enabled: bool = True
+    network_latency_max_records: int = 200000
+    network_latency_max_acceptable_ms: float = 100.0
+
+    # Phase 40: Platform Health Index
+    health_index_enabled: bool = True
+    health_index_max_records: int = 200000
+    health_index_min_score_pct: float = 70.0
+
+    # Phase 40: Observability Gap Detector
+    observability_gap_enabled: bool = True
+    observability_gap_max_records: int = 200000
+    observability_gap_min_coverage_pct: float = 80.0
+
+    # Phase 40: Capacity Anomaly Detector
+    capacity_anomaly_enabled: bool = True
+    capacity_anomaly_max_records: int = 200000
+    capacity_anomaly_min_confidence_pct: float = 70.0
+
+    # Phase 40: Change Freeze Manager
+    change_freeze_enabled: bool = True
+    change_freeze_max_records: int = 200000
+    change_freeze_max_exception_rate_pct: float = 10.0
+
+    # Phase 40: Deployment Pipeline Analyzer
+    pipeline_analyzer_enabled: bool = True
+    pipeline_analyzer_max_records: int = 200000
+    pipeline_analyzer_max_duration_minutes: float = 30.0
+
+    # Phase 40: Release Readiness Checker
+    release_readiness_enabled: bool = True
+    release_readiness_max_records: int = 200000
+    release_readiness_min_score_pct: float = 80.0
+
+    # Phase 40: Config Validation Engine
+    config_validator_enabled: bool = True
+    config_validator_max_records: int = 200000
+    config_validator_max_failure_rate_pct: float = 5.0
+
+    # Phase 40: Service Ownership Tracker
+    ownership_tracker_enabled: bool = True
+    ownership_tracker_max_records: int = 200000
+    ownership_tracker_max_orphan_days: float = 30.0
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",

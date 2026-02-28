@@ -184,6 +184,16 @@ Design new ShieldOps components, APIs, or agent workflows.
    - Optimize alert routing to responders via `AlertRoutingOptimizer` (`src/shieldops/observability/alert_routing.py`)
    - Monitor attack surface exposure via `AttackSurfaceMonitor` (`src/shieldops/security/attack_surface.py`)
    - Assess deployment compliance impact via `DeploymentImpactAnalyzer.compliance_impact()` (`src/shieldops/changes/deployment_impact.py`)
+   - Replay incidents via `IncidentReplayEngine` (`src/shieldops/incidents/incident_replay.py`)
+   - Track response timing via `IncidentResponseTimer` (`src/shieldops/incidents/response_timer.py`)
+   - Aggregate SLO data via `SLOAggregationEngine` (`src/shieldops/sla/slo_aggregator.py`)
+   - Analyze network latency via `NetworkLatencyAnalyzer` (`src/shieldops/analytics/network_latency.py`)
+   - Enforce change freeze via `ChangeFreezePolicyManager` (`src/shieldops/changes/change_freeze.py`)
+   - Analyze pipeline performance via `PipelinePerformanceAnalyzer` (`src/shieldops/analytics/pipeline_analyzer.py`)
+   - Validate release readiness via `ReleaseReadinessValidator` (`src/shieldops/changes/release_readiness.py`)
+   - Track service ownership via `ServiceOwnershipTracker` (`src/shieldops/operations/ownership_tracker.py`)
+   - Validate configuration via `ConfigurationValidator` (`src/shieldops/config/config_validator.py`)
+   - Detect observability gaps via `ObservabilityGapAnalyzer` (`src/shieldops/observability/observability_gap.py`)
 
 5. **Documentation**:
    - Write Architecture Decision Record (ADR) in `docs/architecture/`

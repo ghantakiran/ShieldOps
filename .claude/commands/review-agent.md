@@ -167,6 +167,16 @@ Review ShieldOps agent code for correctness, safety, and reliability.
 - [ ] Compliance posture scored via `GovernanceDashboard.score_posture()` (`src/shieldops/compliance/governance_dashboard.py`)
 - [ ] Alert routing optimized via `AlertRoutingOptimizer` (`src/shieldops/observability/alert_routing.py`)
 - [ ] Attack surface assessed via `AttackSurfaceMonitor` (`src/shieldops/security/attack_surface.py`)
+- [ ] Incidents replayed via `IncidentReplayEngine` (`src/shieldops/incidents/incident_replay.py`)
+- [ ] Response timing tracked via `IncidentResponseTimer` (`src/shieldops/incidents/response_timer.py`)
+- [ ] SLO data aggregated via `SLOAggregationEngine` (`src/shieldops/sla/slo_aggregator.py`)
+- [ ] Network latency analyzed via `NetworkLatencyAnalyzer` (`src/shieldops/analytics/network_latency.py`)
+- [ ] Change freeze enforced via `ChangeFreezePolicyManager` (`src/shieldops/changes/change_freeze.py`)
+- [ ] Pipeline performance analyzed via `PipelinePerformanceAnalyzer` (`src/shieldops/analytics/pipeline_analyzer.py`)
+- [ ] Release readiness validated via `ReleaseReadinessValidator` (`src/shieldops/changes/release_readiness.py`)
+- [ ] Service ownership tracked via `ServiceOwnershipTracker` (`src/shieldops/operations/ownership_tracker.py`)
+- [ ] Configuration validated via `ConfigurationValidator` (`src/shieldops/config/config_validator.py`)
+- [ ] Observability gaps detected via `ObservabilityGapAnalyzer` (`src/shieldops/observability/observability_gap.py`)
 
 ### Testing
 - [ ] Unit tests for all node functions
