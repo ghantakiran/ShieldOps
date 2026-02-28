@@ -85,9 +85,9 @@ Run security audits on ShieldOps codebase and agent configurations.
 59. **Security Response Automation**: Automated containment via `SecurityResponseAutomator` (`src/shieldops/security/response_automator.py`)
 60. **Zero Trust Verification**: Continuous trust verification via `ZeroTrustVerifier` (`src/shieldops/security/zero_trust_verifier.py`)
 61. **Agent Compliance Audit**: Audit agent actions against compliance via `AgentComplianceAuditor` (`src/shieldops/agents/compliance_auditor.py`)
-62. **(Phase 38)** **Security Posture Simulation**: Simulate attack scenarios via `SecurityPostureSimulator` (`src/shieldops/security/posture_simulator.py`)
-63. **(Phase 38)** **Credential Rotation**: Automated credential rotation via `CredentialRotationOrchestrator` (`src/shieldops/security/credential_rotator.py`)
-64. **(Phase 38)** **Compliance Evidence Automation**: Auto-collect compliance evidence via `ComplianceEvidenceAutomator` (`src/shieldops/compliance/evidence_automator.py`)
+62. **Security Posture Simulation**: Simulate attack scenarios via `SecurityPostureSimulator` (`src/shieldops/security/posture_simulator.py`)
+63. **Credential Rotation**: Automated credential rotation via `CredentialRotationOrchestrator` (`src/shieldops/security/credential_rotator.py`)
+64. **Compliance Evidence Automation**: Auto-collect compliance evidence via `ComplianceEvidenceAutomator` (`src/shieldops/compliance/evidence_automator.py`)
 
 ## Severity Levels
 - **CRITICAL**: Hardcoded secrets, SQL injection, unauthenticated endpoints

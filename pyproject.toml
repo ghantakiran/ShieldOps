@@ -459,6 +459,18 @@ module = [
     "shieldops.api.routes.cross_agent_enforcer",
     "shieldops.api.routes.telemetry_analyzer",
     "shieldops.api.routes.compliance_auditor",
+    "shieldops.api.routes.war_room_orchestrator",
+    "shieldops.api.routes.root_cause_verifier",
+    "shieldops.api.routes.comm_automator",
+    "shieldops.api.routes.posture_simulator",
+    "shieldops.api.routes.credential_rotator",
+    "shieldops.api.routes.evidence_automator",
+    "shieldops.api.routes.chaos_automator",
+    "shieldops.api.routes.failover_coordinator",
+    "shieldops.api.routes.burst_manager",
+    "shieldops.api.routes.platform_cost_optimizer",
+    "shieldops.api.routes.service_mesh_intel",
+    "shieldops.api.routes.runbook_generator",
 ]
 warn_return_any = false
 disallow_untyped_defs = false

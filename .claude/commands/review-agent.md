@@ -153,9 +153,9 @@ Review ShieldOps agent code for correctness, safety, and reliability.
 - [ ] Remediation pipelines validated via `RemediationPipelineOrchestrator` (`src/shieldops/operations/remediation_pipeline.py`)
 - [ ] Cross-agent policy enforcement checked via `CrossAgentPolicyEnforcer` (`src/shieldops/policy/cross_agent_enforcer.py`)
 - [ ] Agent compliance audited via `AgentComplianceAuditor` (`src/shieldops/agents/compliance_auditor.py`)
-- [ ] **(Phase 38)** War room orchestration validated via `IncidentWarRoomOrchestrator` (`src/shieldops/incidents/war_room_orchestrator.py`)
-- [ ] **(Phase 38)** Credential rotation verified via `CredentialRotationOrchestrator` (`src/shieldops/security/credential_rotator.py`)
-- [ ] **(Phase 38)** Multi-region failover tested via `MultiRegionFailoverCoordinator` (`src/shieldops/operations/failover_coordinator.py`)
+- [ ] War room orchestration validated via `IncidentWarRoomOrchestrator` (`src/shieldops/incidents/war_room_orchestrator.py`)
+- [ ] Credential rotation verified via `CredentialRotationOrchestrator` (`src/shieldops/security/credential_rotator.py`)
+- [ ] Multi-region failover tested via `MultiRegionFailoverCoordinator` (`src/shieldops/operations/failover_coordinator.py`)
 
 ### Testing
 - [ ] Unit tests for all node functions
