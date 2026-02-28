@@ -1975,6 +1975,66 @@ class Settings(BaseSettings):
     knowledge_linker_max_records: int = 200000
     knowledge_linker_min_relevance_pct: float = 60.0
 
+    # Phase 43: Dependency Vulnerability Mapper
+    dep_vuln_mapper_enabled: bool = True
+    dep_vuln_mapper_max_records: int = 200000
+    dep_vuln_mapper_max_critical_vulns: float = 5.0
+
+    # Phase 43: Incident Trend Forecaster
+    trend_forecaster_enabled: bool = True
+    trend_forecaster_max_records: int = 200000
+    trend_forecaster_max_growth_rate_pct: float = 20.0
+
+    # Phase 43: Change Risk Predictor
+    risk_predictor_enabled: bool = True
+    risk_predictor_max_records: int = 200000
+    risk_predictor_max_risk_threshold: float = 75.0
+
+    # Phase 43: Cost Optimization Planner
+    optimization_planner_enabled: bool = True
+    optimization_planner_max_records: int = 200000
+    optimization_planner_min_savings_pct: float = 10.0
+
+    # Phase 43: Alert Noise Classifier
+    noise_classifier_enabled: bool = True
+    noise_classifier_max_records: int = 200000
+    noise_classifier_max_noise_ratio_pct: float = 30.0
+
+    # Phase 43: SLA Impact Analyzer
+    sla_impact_analyzer_enabled: bool = True
+    sla_impact_analyzer_max_records: int = 200000
+    sla_impact_analyzer_max_breach_count: float = 3.0
+
+    # Phase 43: Runbook Coverage Analyzer
+    runbook_coverage_enabled: bool = True
+    runbook_coverage_max_records: int = 200000
+    runbook_coverage_min_coverage_pct: float = 80.0
+
+    # Phase 43: Security Posture Benchmarker
+    posture_benchmark_enabled: bool = True
+    posture_benchmark_max_records: int = 200000
+    posture_benchmark_min_benchmark_score: float = 70.0
+
+    # Phase 43: Team Workload Balancer
+    workload_balancer_enabled: bool = True
+    workload_balancer_max_records: int = 200000
+    workload_balancer_max_imbalance_pct: float = 30.0
+
+    # Phase 43: Compliance Report Automator
+    report_automator_enabled: bool = True
+    report_automator_max_records: int = 200000
+    report_automator_max_overdue_days: float = 14.0
+
+    # Phase 43: Infrastructure Health Scorer
+    infra_health_scorer_enabled: bool = True
+    infra_health_scorer_max_records: int = 200000
+    infra_health_scorer_min_health_score: float = 70.0
+
+    # Phase 43: Deployment Impact Predictor
+    impact_predictor_enabled: bool = True
+    impact_predictor_max_records: int = 200000
+    impact_predictor_max_impact_score: float = 80.0
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",

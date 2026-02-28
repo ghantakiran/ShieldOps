@@ -120,6 +120,11 @@ Deploy ShieldOps agents to target environments.
    - Track team velocity via `TeamVelocityTracker` (`src/shieldops/analytics/team_velocity.py`)
    - Score capacity utilization via `CapacityUtilizationScorer` (`src/shieldops/analytics/utilization_scorer.py`)
    - Map service communications via `ServiceCommunicationMapper` (`src/shieldops/topology/comm_mapper.py`)
+   - Analyze runbook coverage via `RunbookCoverageAnalyzer` (`src/shieldops/operations/runbook_coverage.py`)
+   - Balance team workload via `TeamWorkloadBalancer` (`src/shieldops/operations/workload_balancer.py`)
+   - Predict change risk via `ChangeRiskPredictor` (`src/shieldops/changes/risk_predictor.py`)
+   - Predict deployment impact via `DeploymentImpactPredictor` (`src/shieldops/changes/impact_predictor.py`)
+   - Benchmark security posture via `SecurityPostureBenchmarker` (`src/shieldops/security/posture_benchmark.py`)
 4. **Deploy**:
    - Apply Kubernetes manifests from `infrastructure/kubernetes/`
    - For production: trigger approval workflow via Slack/Teams
