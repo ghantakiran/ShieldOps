@@ -1915,6 +1915,66 @@ class Settings(BaseSettings):
     slo_compliance_max_records: int = 200000
     slo_compliance_min_compliance_pct: float = 99.0
 
+    # Phase 42: Alert Deduplication Engine
+    alert_dedup_enabled: bool = True
+    alert_dedup_max_records: int = 200000
+    alert_dedup_min_dedup_ratio_pct: float = 50.0
+
+    # Phase 42: Incident Priority Ranker
+    priority_ranker_enabled: bool = True
+    priority_ranker_max_records: int = 200000
+    priority_ranker_min_accuracy_pct: float = 80.0
+
+    # Phase 42: Deployment Frequency Analyzer
+    deploy_frequency_enabled: bool = True
+    deploy_frequency_max_records: int = 200000
+    deploy_frequency_min_deploy_per_week: float = 1.0
+
+    # Phase 42: Infrastructure Cost Allocator
+    infra_cost_allocator_enabled: bool = True
+    infra_cost_allocator_max_records: int = 200000
+    infra_cost_allocator_max_unallocated_pct: float = 5.0
+
+    # Phase 42: Team Velocity Tracker
+    team_velocity_enabled: bool = True
+    team_velocity_max_records: int = 200000
+    team_velocity_min_velocity_score: float = 60.0
+
+    # Phase 42: Service Communication Mapper
+    comm_mapper_enabled: bool = True
+    comm_mapper_max_records: int = 200000
+    comm_mapper_max_unhealthy_links: int = 10
+
+    # Phase 42: Compliance Automation Scorer
+    automation_scorer_enabled: bool = True
+    automation_scorer_max_records: int = 200000
+    automation_scorer_min_automation_pct: float = 70.0
+
+    # Phase 42: Predictive Scaling Advisor
+    scaling_advisor_enabled: bool = True
+    scaling_advisor_max_records: int = 200000
+    scaling_advisor_min_confidence_pct: float = 75.0
+
+    # Phase 42: Error Pattern Classifier
+    error_classifier_enabled: bool = True
+    error_classifier_max_records: int = 200000
+    error_classifier_max_error_rate_pct: float = 5.0
+
+    # Phase 42: Security Compliance Bridge
+    compliance_bridge_enabled: bool = True
+    compliance_bridge_max_records: int = 200000
+    compliance_bridge_min_alignment_pct: float = 80.0
+
+    # Phase 42: Capacity Utilization Scorer
+    utilization_scorer_enabled: bool = True
+    utilization_scorer_max_records: int = 200000
+    utilization_scorer_optimal_utilization_pct: float = 70.0
+
+    # Phase 42: Incident Knowledge Linker
+    knowledge_linker_enabled: bool = True
+    knowledge_linker_max_records: int = 200000
+    knowledge_linker_min_relevance_pct: float = 60.0
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",

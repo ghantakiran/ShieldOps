@@ -8955,6 +8955,250 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         except Exception as e:
             logger.warning("slo_compliance_init_failed", error=str(e))
 
+    # ── Phase 42 ────────────────────────────────────────────
+
+    if settings.alert_dedup_enabled:
+        try:
+            from shieldops.api.routes import alert_dedup as ade_mod
+            from shieldops.observability.alert_dedup import (
+                AlertDeduplicationEngine,
+            )
+
+            ade_engine = AlertDeduplicationEngine(
+                max_records=settings.alert_dedup_max_records,
+                min_dedup_ratio_pct=settings.alert_dedup_min_dedup_ratio_pct,
+            )
+            ade_mod.set_engine(ade_engine)
+            app.include_router(
+                ade_mod.ade_route,
+                prefix=settings.api_prefix,
+                tags=["Alert Dedup"],
+            )
+            logger.info("alert_dedup_initialized")
+        except Exception as e:
+            logger.warning("alert_dedup_init_failed", error=str(e))
+
+    if settings.priority_ranker_enabled:
+        try:
+            from shieldops.api.routes import priority_ranker as ipr_mod
+            from shieldops.incidents.priority_ranker import IncidentPriorityRanker
+
+            ipr_engine = IncidentPriorityRanker(
+                max_records=settings.priority_ranker_max_records,
+                min_accuracy_pct=settings.priority_ranker_min_accuracy_pct,
+            )
+            ipr_mod.set_engine(ipr_engine)
+            app.include_router(
+                ipr_mod.ipr_route,
+                prefix=settings.api_prefix,
+                tags=["Priority Ranker"],
+            )
+            logger.info("priority_ranker_initialized")
+        except Exception as e:
+            logger.warning("priority_ranker_init_failed", error=str(e))
+
+    if settings.deploy_frequency_enabled:
+        try:
+            from shieldops.api.routes import deploy_frequency as dfa_mod
+            from shieldops.changes.deploy_frequency import (
+                DeploymentFrequencyAnalyzer,
+            )
+
+            dfa_engine = DeploymentFrequencyAnalyzer(
+                max_records=settings.deploy_frequency_max_records,
+                min_deploy_per_week=settings.deploy_frequency_min_deploy_per_week,
+            )
+            dfa_mod.set_engine(dfa_engine)
+            app.include_router(
+                dfa_mod.dfa_route,
+                prefix=settings.api_prefix,
+                tags=["Deploy Frequency"],
+            )
+            logger.info("deploy_frequency_initialized")
+        except Exception as e:
+            logger.warning("deploy_frequency_init_failed", error=str(e))
+
+    if settings.infra_cost_allocator_enabled:
+        try:
+            from shieldops.api.routes import infra_cost_allocator as icalloc_mod
+            from shieldops.billing.infra_cost_allocator import (
+                InfrastructureCostAllocator,
+            )
+
+            icalloc_engine = InfrastructureCostAllocator(
+                max_records=settings.infra_cost_allocator_max_records,
+                max_unallocated_pct=settings.infra_cost_allocator_max_unallocated_pct,
+            )
+            icalloc_mod.set_engine(icalloc_engine)
+            app.include_router(
+                icalloc_mod.ica_route,
+                prefix=settings.api_prefix,
+                tags=["Infra Cost Allocator"],
+            )
+            logger.info("infra_cost_allocator_initialized")
+        except Exception as e:
+            logger.warning("infra_cost_allocator_init_failed", error=str(e))
+
+    if settings.team_velocity_enabled:
+        try:
+            from shieldops.analytics.team_velocity import TeamVelocityTracker
+            from shieldops.api.routes import team_velocity as tvt_mod
+
+            tvt_engine = TeamVelocityTracker(
+                max_records=settings.team_velocity_max_records,
+                min_velocity_score=settings.team_velocity_min_velocity_score,
+            )
+            tvt_mod.set_engine(tvt_engine)
+            app.include_router(
+                tvt_mod.tvt_route,
+                prefix=settings.api_prefix,
+                tags=["Team Velocity"],
+            )
+            logger.info("team_velocity_initialized")
+        except Exception as e:
+            logger.warning("team_velocity_init_failed", error=str(e))
+
+    if settings.comm_mapper_enabled:
+        try:
+            from shieldops.api.routes import comm_mapper as scm_mod
+            from shieldops.topology.comm_mapper import ServiceCommunicationMapper
+
+            scm_engine = ServiceCommunicationMapper(
+                max_records=settings.comm_mapper_max_records,
+                max_unhealthy_links=settings.comm_mapper_max_unhealthy_links,
+            )
+            scm_mod.set_engine(scm_engine)
+            app.include_router(
+                scm_mod.scm_route,
+                prefix=settings.api_prefix,
+                tags=["Comm Mapper"],
+            )
+            logger.info("comm_mapper_initialized")
+        except Exception as e:
+            logger.warning("comm_mapper_init_failed", error=str(e))
+
+    if settings.automation_scorer_enabled:
+        try:
+            from shieldops.api.routes import automation_scorer as cas_mod
+            from shieldops.compliance.automation_scorer import (
+                ComplianceAutomationScorer,
+            )
+
+            cas_engine = ComplianceAutomationScorer(
+                max_records=settings.automation_scorer_max_records,
+                min_automation_pct=settings.automation_scorer_min_automation_pct,
+            )
+            cas_mod.set_engine(cas_engine)
+            app.include_router(
+                cas_mod.cas_route,
+                prefix=settings.api_prefix,
+                tags=["Automation Scorer"],
+            )
+            logger.info("automation_scorer_initialized")
+        except Exception as e:
+            logger.warning("automation_scorer_init_failed", error=str(e))
+
+    if settings.scaling_advisor_enabled:
+        try:
+            from shieldops.api.routes import scaling_advisor as psa_mod
+            from shieldops.operations.scaling_advisor import PredictiveScalingAdvisor
+
+            psa_engine = PredictiveScalingAdvisor(
+                max_records=settings.scaling_advisor_max_records,
+                min_confidence_pct=settings.scaling_advisor_min_confidence_pct,
+            )
+            psa_mod.set_engine(psa_engine)
+            app.include_router(
+                psa_mod.psa_route,
+                prefix=settings.api_prefix,
+                tags=["Scaling Advisor"],
+            )
+            logger.info("scaling_advisor_initialized")
+        except Exception as e:
+            logger.warning("scaling_advisor_init_failed", error=str(e))
+
+    if settings.error_classifier_enabled:
+        try:
+            from shieldops.analytics.error_classifier import ErrorPatternClassifier
+            from shieldops.api.routes import error_classifier as ecl_mod
+
+            ecl_engine = ErrorPatternClassifier(
+                max_records=settings.error_classifier_max_records,
+                max_error_rate_pct=settings.error_classifier_max_error_rate_pct,
+            )
+            ecl_mod.set_engine(ecl_engine)
+            app.include_router(
+                ecl_mod.ecl_route,
+                prefix=settings.api_prefix,
+                tags=["Error Classifier"],
+            )
+            logger.info("error_classifier_initialized")
+        except Exception as e:
+            logger.warning("error_classifier_init_failed", error=str(e))
+
+    if settings.compliance_bridge_enabled:
+        try:
+            from shieldops.api.routes import compliance_bridge as scb_mod
+            from shieldops.security.compliance_bridge import (
+                SecurityComplianceBridge,
+            )
+
+            scb_engine = SecurityComplianceBridge(
+                max_records=settings.compliance_bridge_max_records,
+                min_alignment_pct=settings.compliance_bridge_min_alignment_pct,
+            )
+            scb_mod.set_engine(scb_engine)
+            app.include_router(
+                scb_mod.scb_route,
+                prefix=settings.api_prefix,
+                tags=["Compliance Bridge"],
+            )
+            logger.info("compliance_bridge_initialized")
+        except Exception as e:
+            logger.warning("compliance_bridge_init_failed", error=str(e))
+
+    if settings.utilization_scorer_enabled:
+        try:
+            from shieldops.analytics.utilization_scorer import (
+                CapacityUtilizationScorer,
+            )
+            from shieldops.api.routes import utilization_scorer as cus_mod
+
+            cus_engine = CapacityUtilizationScorer(
+                max_records=settings.utilization_scorer_max_records,
+                optimal_utilization_pct=settings.utilization_scorer_optimal_utilization_pct,
+            )
+            cus_mod.set_engine(cus_engine)
+            app.include_router(
+                cus_mod.cus_route,
+                prefix=settings.api_prefix,
+                tags=["Utilization Scorer"],
+            )
+            logger.info("utilization_scorer_initialized")
+        except Exception as e:
+            logger.warning("utilization_scorer_init_failed", error=str(e))
+
+    if settings.knowledge_linker_enabled:
+        try:
+            from shieldops.api.routes import knowledge_linker as ikl_mod
+            from shieldops.incidents.knowledge_linker import (
+                IncidentKnowledgeLinker,
+            )
+
+            ikl_engine = IncidentKnowledgeLinker(
+                max_records=settings.knowledge_linker_max_records,
+                min_relevance_pct=settings.knowledge_linker_min_relevance_pct,
+            )
+            ikl_mod.set_engine(ikl_engine)
+            app.include_router(
+                ikl_mod.ikl_route,
+                prefix=settings.api_prefix,
+                tags=["Knowledge Linker"],
+            )
+            logger.info("knowledge_linker_initialized")
+        except Exception as e:
+            logger.warning("knowledge_linker_init_failed", error=str(e))
+
     yield
 
     logger.info("shieldops_shutting_down")
