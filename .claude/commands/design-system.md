@@ -173,6 +173,17 @@ Design new ShieldOps components, APIs, or agent workflows.
    - Optimize platform-wide costs via `PlatformCostOptimizer` (`src/shieldops/billing/platform_cost_optimizer.py`)
    - Analyze service mesh intelligence via `ServiceMeshIntelligence` (`src/shieldops/topology/service_mesh_intel.py`)
    - Generate operational runbooks via `OperationalRunbookGenerator` (`src/shieldops/operations/runbook_generator.py`)
+   - Predict security breaches via `BreachPredictor` (`src/shieldops/security/breach_predictor.py`)
+   - Allocate error budgets across services via `ErrorBudgetAllocator` (`src/shieldops/sla/error_budget_allocator.py`)
+   - Analyze full dependency topology via `DependencyTopologyAnalyzer` (`src/shieldops/topology/dependency_topology.py`)
+   - Plan infrastructure capacity via `InfraCapacityPlanner` (`src/shieldops/operations/infra_capacity_planner.py`)
+   - Monitor DNS health and anomalies via `DNSHealthMonitor` (`src/shieldops/observability/dns_health_monitor.py`)
+   - Detect configuration and infra drift via `DriftAnalyzer` (`src/shieldops/operations/drift_analyzer.py`)
+   - Assess deployment blast-radius impact via `DeploymentImpactAnalyzer` (`src/shieldops/changes/deployment_impact.py`)
+   - Monitor governance and compliance posture via `GovernanceDashboard` (`src/shieldops/compliance/governance_dashboard.py`)
+   - Optimize alert routing to responders via `AlertRoutingOptimizer` (`src/shieldops/observability/alert_routing.py`)
+   - Monitor attack surface exposure via `AttackSurfaceMonitor` (`src/shieldops/security/attack_surface.py`)
+   - Assess deployment compliance impact via `DeploymentImpactAnalyzer.compliance_impact()` (`src/shieldops/changes/deployment_impact.py`)
 
 5. **Documentation**:
    - Write Architecture Decision Record (ADR) in `docs/architecture/`

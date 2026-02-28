@@ -1735,6 +1735,66 @@ class Settings(BaseSettings):
     runbook_generator_max_records: int = 200000
     runbook_generator_min_accuracy_pct: float = 80.0
 
+    # Phase 39: SLA Breach Predictor
+    breach_predictor_enabled: bool = True
+    breach_predictor_max_records: int = 200000
+    breach_predictor_min_confidence_pct: float = 70.0
+
+    # Phase 39: Error Budget Allocator
+    error_budget_allocator_enabled: bool = True
+    error_budget_allocator_max_records: int = 200000
+    error_budget_allocator_min_healthy_rate_pct: float = 80.0
+
+    # Phase 39: Dependency Topology Analyzer
+    dependency_topology_enabled: bool = True
+    dependency_topology_max_records: int = 200000
+    dependency_topology_max_coupling_depth: float = 5.0
+
+    # Phase 39: Infra Capacity Planner
+    infra_capacity_planner_enabled: bool = True
+    infra_capacity_planner_max_records: int = 200000
+    infra_capacity_planner_target_utilization_pct: float = 70.0
+
+    # Phase 39: DNS Health Monitor
+    dns_health_monitor_enabled: bool = True
+    dns_health_monitor_max_records: int = 200000
+    dns_health_monitor_max_resolution_ms: float = 100.0
+
+    # Phase 39: Config Drift Analyzer
+    drift_analyzer_enabled: bool = True
+    drift_analyzer_max_records: int = 200000
+    drift_analyzer_max_deviation_pct: float = 5.0
+
+    # Phase 39: Incident Timeline Correlator
+    timeline_correlator_enabled: bool = True
+    timeline_correlator_max_records: int = 200000
+    timeline_correlator_min_confidence_pct: float = 60.0
+
+    # Phase 39: Deployment Impact Analyzer
+    deployment_impact_enabled: bool = True
+    deployment_impact_max_records: int = 200000
+    deployment_impact_max_impact_score: float = 50.0
+
+    # Phase 39: Alert Routing Optimizer
+    alert_routing_optimizer_enabled: bool = True
+    alert_routing_optimizer_max_records: int = 200000
+    alert_routing_optimizer_max_response_seconds: float = 300.0
+
+    # Phase 39: Compliance Posture Scorer
+    compliance_posture_enabled: bool = True
+    compliance_posture_max_records: int = 200000
+    compliance_posture_min_score_pct: float = 70.0
+
+    # Phase 39: Team Toil Quantifier
+    toil_quantifier_enabled: bool = True
+    toil_quantifier_max_records: int = 200000
+    toil_quantifier_max_toil_hours_weekly: float = 10.0
+
+    # Phase 39: Platform Governance Dashboard
+    governance_dashboard_enabled: bool = True
+    governance_dashboard_max_records: int = 200000
+    governance_dashboard_min_governance_score_pct: float = 70.0
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",

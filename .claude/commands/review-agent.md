@@ -156,6 +156,17 @@ Review ShieldOps agent code for correctness, safety, and reliability.
 - [ ] War room orchestration validated via `IncidentWarRoomOrchestrator` (`src/shieldops/incidents/war_room_orchestrator.py`)
 - [ ] Credential rotation verified via `CredentialRotationOrchestrator` (`src/shieldops/security/credential_rotator.py`)
 - [ ] Multi-region failover tested via `MultiRegionFailoverCoordinator` (`src/shieldops/operations/failover_coordinator.py`)
+- [ ] Breach predictions validated via `BreachPredictor` (`src/shieldops/security/breach_predictor.py`)
+- [ ] Error budgets allocated via `ErrorBudgetAllocator` (`src/shieldops/sla/error_budget_allocator.py`)
+- [ ] Dependency topology analyzed via `DependencyTopologyAnalyzer` (`src/shieldops/topology/dependency_topology.py`)
+- [ ] Infra capacity planned via `InfraCapacityPlanner` (`src/shieldops/operations/infra_capacity_planner.py`)
+- [ ] DNS health monitored via `DNSHealthMonitor` (`src/shieldops/observability/dns_health_monitor.py`)
+- [ ] Configuration drift analyzed via `DriftAnalyzer` (`src/shieldops/operations/drift_analyzer.py`)
+- [ ] Deployment impact assessed via `DeploymentImpactAnalyzer` (`src/shieldops/changes/deployment_impact.py`)
+- [ ] Governance posture monitored via `GovernanceDashboard` (`src/shieldops/compliance/governance_dashboard.py`)
+- [ ] Compliance posture scored via `GovernanceDashboard.score_posture()` (`src/shieldops/compliance/governance_dashboard.py`)
+- [ ] Alert routing optimized via `AlertRoutingOptimizer` (`src/shieldops/observability/alert_routing.py`)
+- [ ] Attack surface assessed via `AttackSurfaceMonitor` (`src/shieldops/security/attack_surface.py`)
 
 ### Testing
 - [ ] Unit tests for all node functions
