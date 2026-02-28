@@ -8719,6 +8719,242 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         except Exception as e:
             logger.warning("ownership_tracker_init_failed", error=str(e))
 
+    # ── Phase 41 ────────────────────────────────────────────
+
+    if settings.vendor_lockin_enabled:
+        try:
+            from shieldops.api.routes import vendor_lockin as vla_mod
+            from shieldops.billing.vendor_lockin import VendorLockinAnalyzer
+
+            vla_engine = VendorLockinAnalyzer(
+                max_records=settings.vendor_lockin_max_records,
+                max_risk_score=settings.vendor_lockin_max_risk_score,
+            )
+            vla_mod.set_engine(vla_engine)
+            app.include_router(
+                vla_mod.vla_route,
+                prefix=settings.api_prefix,
+                tags=["Vendor Lock-in"],
+            )
+            logger.info("vendor_lockin_initialized")
+        except Exception as e:
+            logger.warning("vendor_lockin_init_failed", error=str(e))
+
+    if settings.cost_efficiency_enabled:
+        try:
+            from shieldops.api.routes import cost_efficiency as ces_mod
+            from shieldops.billing.cost_efficiency import CostEfficiencyScorer
+
+            ces_engine = CostEfficiencyScorer(
+                max_records=settings.cost_efficiency_max_records,
+                min_efficiency_pct=settings.cost_efficiency_min_efficiency_pct,
+            )
+            ces_mod.set_engine(ces_engine)
+            app.include_router(
+                ces_mod.ces_route,
+                prefix=settings.api_prefix,
+                tags=["Cost Efficiency"],
+            )
+            logger.info("cost_efficiency_initialized")
+        except Exception as e:
+            logger.warning("cost_efficiency_init_failed", error=str(e))
+
+    if settings.budget_variance_enabled:
+        try:
+            from shieldops.api.routes import budget_variance as bvt_mod
+            from shieldops.billing.budget_variance import BudgetVarianceTracker
+
+            bvt_engine = BudgetVarianceTracker(
+                max_records=settings.budget_variance_max_records,
+                max_variance_pct=settings.budget_variance_max_variance_pct,
+            )
+            bvt_mod.set_engine(bvt_engine)
+            app.include_router(
+                bvt_mod.bvt_route,
+                prefix=settings.api_prefix,
+                tags=["Budget Variance"],
+            )
+            logger.info("budget_variance_initialized")
+        except Exception as e:
+            logger.warning("budget_variance_init_failed", error=str(e))
+
+    if settings.evidence_validator_enabled:
+        try:
+            from shieldops.api.routes import evidence_validator as evl_mod
+            from shieldops.compliance.evidence_validator import (
+                ComplianceEvidenceValidator,
+            )
+
+            evl_engine = ComplianceEvidenceValidator(
+                max_records=settings.evidence_validator_max_records,
+                min_validity_pct=settings.evidence_validator_min_validity_pct,
+            )
+            evl_mod.set_engine(evl_engine)
+            app.include_router(
+                evl_mod.evl_route,
+                prefix=settings.api_prefix,
+                tags=["Evidence Validator"],
+            )
+            logger.info("evidence_validator_initialized")
+        except Exception as e:
+            logger.warning("evidence_validator_init_failed", error=str(e))
+
+    if settings.policy_enforcer_enabled:
+        try:
+            from shieldops.api.routes import policy_enforcer as pen_mod
+            from shieldops.compliance.policy_enforcer import PolicyEnforcementMonitor
+
+            pen_engine = PolicyEnforcementMonitor(
+                max_records=settings.policy_enforcer_max_records,
+                max_violation_rate_pct=settings.policy_enforcer_max_violation_rate_pct,
+            )
+            pen_mod.set_engine(pen_engine)
+            app.include_router(
+                pen_mod.pen_route,
+                prefix=settings.api_prefix,
+                tags=["Policy Enforcer"],
+            )
+            logger.info("policy_enforcer_initialized")
+        except Exception as e:
+            logger.warning("policy_enforcer_init_failed", error=str(e))
+
+    if settings.audit_readiness_enabled:
+        try:
+            from shieldops.api.routes import audit_readiness as ard_mod
+            from shieldops.audit.audit_readiness import AuditReadinessScorer
+
+            ard_engine = AuditReadinessScorer(
+                max_records=settings.audit_readiness_max_records,
+                min_readiness_pct=settings.audit_readiness_min_readiness_pct,
+            )
+            ard_mod.set_engine(ard_engine)
+            app.include_router(
+                ard_mod.ard_route,
+                prefix=settings.api_prefix,
+                tags=["Audit Readiness"],
+            )
+            logger.info("audit_readiness_initialized")
+        except Exception as e:
+            logger.warning("audit_readiness_init_failed", error=str(e))
+
+    if settings.toil_classifier_enabled:
+        try:
+            from shieldops.api.routes import toil_classifier as tcl_mod
+            from shieldops.operations.toil_classifier import OperationalToilClassifier
+
+            tcl_engine = OperationalToilClassifier(
+                max_records=settings.toil_classifier_max_records,
+                max_toil_hours_weekly=settings.toil_classifier_max_toil_hours_weekly,
+            )
+            tcl_mod.set_engine(tcl_engine)
+            app.include_router(
+                tcl_mod.tcl_route,
+                prefix=settings.api_prefix,
+                tags=["Toil Classifier"],
+            )
+            logger.info("toil_classifier_initialized")
+        except Exception as e:
+            logger.warning("toil_classifier_init_failed", error=str(e))
+
+    if settings.governance_scorer_enabled:
+        try:
+            from shieldops.api.routes import governance_scorer as pgs_mod
+            from shieldops.policy.governance_scorer import PlatformGovernanceScorer
+
+            pgs_engine = PlatformGovernanceScorer(
+                max_records=settings.governance_scorer_max_records,
+                min_governance_score=settings.governance_scorer_min_governance_score,
+            )
+            pgs_mod.set_engine(pgs_engine)
+            app.include_router(
+                pgs_mod.pgs_route,
+                prefix=settings.api_prefix,
+                tags=["Governance Scorer"],
+            )
+            logger.info("governance_scorer_initialized")
+        except Exception as e:
+            logger.warning("governance_scorer_init_failed", error=str(e))
+
+    if settings.deprecation_tracker_enabled:
+        try:
+            from shieldops.api.routes import deprecation_tracker as sdt_mod
+            from shieldops.topology.deprecation_tracker import (
+                ServiceDeprecationTracker,
+            )
+
+            sdt_engine = ServiceDeprecationTracker(
+                max_records=settings.deprecation_tracker_max_records,
+                max_overdue_days=settings.deprecation_tracker_max_overdue_days,
+            )
+            sdt_mod.set_engine(sdt_engine)
+            app.include_router(
+                sdt_mod.sdt_route,
+                prefix=settings.api_prefix,
+                tags=["Deprecation Tracker"],
+            )
+            logger.info("deprecation_tracker_initialized")
+        except Exception as e:
+            logger.warning("deprecation_tracker_init_failed", error=str(e))
+
+    if settings.severity_validator_enabled:
+        try:
+            from shieldops.api.routes import severity_validator as svl_mod
+            from shieldops.incidents.severity_validator import (
+                IncidentSeverityValidator,
+            )
+
+            svl_engine = IncidentSeverityValidator(
+                max_records=settings.severity_validator_max_records,
+                min_accuracy_pct=settings.severity_validator_min_accuracy_pct,
+            )
+            svl_mod.set_engine(svl_engine)
+            app.include_router(
+                svl_mod.svl_route,
+                prefix=settings.api_prefix,
+                tags=["Severity Validator"],
+            )
+            logger.info("severity_validator_initialized")
+        except Exception as e:
+            logger.warning("severity_validator_init_failed", error=str(e))
+
+    if settings.approval_analyzer_enabled:
+        try:
+            from shieldops.api.routes import approval_analyzer as caa_mod
+            from shieldops.changes.approval_analyzer import ChangeApprovalAnalyzer
+
+            caa_engine = ChangeApprovalAnalyzer(
+                max_records=settings.approval_analyzer_max_records,
+                max_approval_hours=settings.approval_analyzer_max_approval_hours,
+            )
+            caa_mod.set_engine(caa_engine)
+            app.include_router(
+                caa_mod.caa_route,
+                prefix=settings.api_prefix,
+                tags=["Approval Analyzer"],
+            )
+            logger.info("approval_analyzer_initialized")
+        except Exception as e:
+            logger.warning("approval_analyzer_init_failed", error=str(e))
+
+    if settings.slo_compliance_enabled:
+        try:
+            from shieldops.api.routes import slo_compliance as scc_mod
+            from shieldops.sla.slo_compliance import SLOComplianceChecker
+
+            scc_engine = SLOComplianceChecker(
+                max_records=settings.slo_compliance_max_records,
+                min_compliance_pct=settings.slo_compliance_min_compliance_pct,
+            )
+            scc_mod.set_engine(scc_engine)
+            app.include_router(
+                scc_mod.scc_route,
+                prefix=settings.api_prefix,
+                tags=["SLO Compliance"],
+            )
+            logger.info("slo_compliance_initialized")
+        except Exception as e:
+            logger.warning("slo_compliance_init_failed", error=str(e))
+
     yield
 
     logger.info("shieldops_shutting_down")
