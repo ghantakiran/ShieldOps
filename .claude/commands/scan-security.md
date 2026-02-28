@@ -78,6 +78,16 @@ Run security audits on ShieldOps codebase and agent configurations.
 52. **Data Retention Policy**: Validate data retention compliance via `DataRetentionPolicyManager` (`src/shieldops/observability/retention_policy.py`)
 53. **Tenant Resource Quotas**: Verify per-tenant resource quota enforcement via `TenantResourceQuotaManager` (`src/shieldops/operations/tenant_quota.py`)
 54. **LLM Cost Tracking**: Audit AI/LLM token usage and costs via `LLMTokenCostTracker` (`src/shieldops/billing/llm_cost_tracker.py`)
+55. **(Phase 36)** **Risk Signal Aggregation**: Aggregate multi-domain risk signals via `RiskSignalAggregator` (`src/shieldops/security/risk_aggregator.py`)
+56. **(Phase 36)** **Dynamic Risk Scoring**: Real-time risk scoring via `DynamicRiskScorer` (`src/shieldops/analytics/dynamic_risk_scorer.py`)
+57. **(Phase 36)** **Predictive Alerting**: Pre-incident alerting via `PredictiveAlertEngine` (`src/shieldops/observability/predictive_alert.py`)
+58. **(Phase 37)** **Threat Hunting**: Automated threat hunting campaigns via `ThreatHuntOrchestrator` (`src/shieldops/security/threat_hunt.py`)
+59. **(Phase 37)** **Security Response Automation**: Automated containment via `SecurityResponseAutomator` (`src/shieldops/security/response_automator.py`)
+60. **(Phase 37)** **Zero Trust Verification**: Continuous trust verification via `ZeroTrustVerifier` (`src/shieldops/security/zero_trust_verifier.py`)
+61. **(Phase 37)** **Agent Compliance Audit**: Audit agent actions against compliance via `AgentComplianceAuditor` (`src/shieldops/agents/compliance_auditor.py`)
+62. **(Phase 38)** **Security Posture Simulation**: Simulate attack scenarios via `SecurityPostureSimulator` (`src/shieldops/security/posture_simulator.py`)
+63. **(Phase 38)** **Credential Rotation**: Automated credential rotation via `CredentialRotationOrchestrator` (`src/shieldops/security/credential_rotator.py`)
+64. **(Phase 38)** **Compliance Evidence Automation**: Auto-collect compliance evidence via `ComplianceEvidenceAutomator` (`src/shieldops/compliance/evidence_automator.py`)
 
 ## Severity Levels
 - **CRITICAL**: Hardcoded secrets, SQL injection, unauthenticated endpoints

@@ -82,6 +82,16 @@ Deploy ShieldOps agents to target environments.
    - Enforce tenant resource quotas via `TenantResourceQuotaManager` (`src/shieldops/operations/tenant_quota.py`)
    - Log agent decisions via `DecisionAuditLogger` (`src/shieldops/audit/decision_audit.py`)
    - Track deployment dependencies via `DeploymentDependencyTracker` (`src/shieldops/changes/deployment_dependency.py`)
+   - **(Phase 36)** Aggregate risk signals via `RiskSignalAggregator` (`src/shieldops/security/risk_aggregator.py`)
+   - **(Phase 36)** Score dynamic risk via `DynamicRiskScorer` (`src/shieldops/analytics/dynamic_risk_scorer.py`)
+   - **(Phase 36)** Optimize agent token usage via `AgentTokenOptimizer` (`src/shieldops/agents/token_optimizer.py`)
+   - **(Phase 36)** Route agent tasks via `AgentRoutingOptimizer` (`src/shieldops/agents/routing_optimizer.py`)
+   - **(Phase 37)** Verify zero trust posture via `ZeroTrustVerifier` (`src/shieldops/security/zero_trust_verifier.py`)
+   - **(Phase 37)** Orchestrate remediation pipelines via `RemediationPipelineOrchestrator` (`src/shieldops/operations/remediation_pipeline.py`)
+   - **(Phase 37)** Coordinate recovery across services via `RecoveryCoordinator` (`src/shieldops/operations/recovery_coordinator.py`)
+   - **(Phase 37)** Enforce cross-agent policies via `CrossAgentPolicyEnforcer` (`src/shieldops/policy/cross_agent_enforcer.py`)
+   - **(Phase 38)** Coordinate multi-region failover via `MultiRegionFailoverCoordinator` (`src/shieldops/operations/failover_coordinator.py`)
+   - **(Phase 38)** Manage capacity bursts via `CapacityBurstManager` (`src/shieldops/operations/burst_manager.py`)
 4. **Deploy**:
    - Apply Kubernetes manifests from `infrastructure/kubernetes/`
    - For production: trigger approval workflow via Slack/Teams
