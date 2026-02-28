@@ -7491,6 +7491,282 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         except Exception as e:
             logger.warning("retention_policy_init_failed", error=str(e))
 
+    if settings.twilio_sms_enabled:
+        try:
+            from shieldops.api.routes import (
+                twilio_sms as tsg_mod,
+            )
+            from shieldops.integrations.notifications.twilio_sms import (
+                TwilioSMSGateway,
+            )
+
+            tsg_engine = TwilioSMSGateway(
+                max_records=settings.twilio_sms_max_records,
+                max_retries=settings.twilio_sms_max_retries,
+            )
+            tsg_mod.set_engine(tsg_engine)
+            app.include_router(
+                tsg_mod.tsg_route,
+                prefix=settings.api_prefix,
+                tags=["Twilio SMS"],
+            )
+            logger.info("twilio_sms_initialized")
+        except Exception as e:
+            logger.warning("twilio_sms_init_failed", error=str(e))
+
+    if settings.twilio_voice_enabled:
+        try:
+            from shieldops.api.routes import (
+                twilio_voice as tva_mod,
+            )
+            from shieldops.integrations.notifications.twilio_voice import (
+                TwilioVoiceAlertSystem,
+            )
+
+            tva_engine = TwilioVoiceAlertSystem(
+                max_records=settings.twilio_voice_max_records,
+                max_ring_seconds=settings.twilio_voice_max_ring_seconds,
+            )
+            tva_mod.set_engine(tva_engine)
+            app.include_router(
+                tva_mod.tva_route,
+                prefix=settings.api_prefix,
+                tags=["Twilio Voice"],
+            )
+            logger.info("twilio_voice_initialized")
+        except Exception as e:
+            logger.warning("twilio_voice_init_failed", error=str(e))
+
+    if settings.teams_notifier_enabled:
+        try:
+            from shieldops.api.routes import (
+                teams_notifier as mtn_mod,
+            )
+            from shieldops.integrations.notifications.teams import (
+                MicrosoftTeamsNotifier,
+            )
+
+            mtn_engine = MicrosoftTeamsNotifier(
+                max_records=settings.teams_notifier_max_records,
+                max_retries=settings.teams_notifier_max_retries,
+            )
+            mtn_mod.set_engine(mtn_engine)
+            app.include_router(
+                mtn_mod.mtn_route,
+                prefix=settings.api_prefix,
+                tags=["Teams Notifier"],
+            )
+            logger.info("teams_notifier_initialized")
+        except Exception as e:
+            logger.warning("teams_notifier_init_failed", error=str(e))
+
+    if settings.swarm_coordinator_enabled:
+        try:
+            from shieldops.agents.swarm_coordinator import (
+                AgentSwarmCoordinator,
+            )
+            from shieldops.api.routes import (
+                swarm_coordinator as swc_mod,
+            )
+
+            swc_engine = AgentSwarmCoordinator(
+                max_records=settings.swarm_coordinator_max_records,
+                max_agents=settings.swarm_coordinator_max_agents,
+            )
+            swc_mod.set_engine(swc_engine)
+            app.include_router(
+                swc_mod.swc_route,
+                prefix=settings.api_prefix,
+                tags=["Swarm Coordinator"],
+            )
+            logger.info("swarm_coordinator_initialized")
+        except Exception as e:
+            logger.warning("swarm_coordinator_init_failed", error=str(e))
+
+    if settings.consensus_engine_enabled:
+        try:
+            from shieldops.agents.consensus_engine import (
+                AgentConsensusEngine,
+            )
+            from shieldops.api.routes import (
+                consensus_engine as ace_mod,
+            )
+
+            ace_engine = AgentConsensusEngine(
+                max_records=settings.consensus_engine_max_records,
+                quorum_pct=settings.consensus_engine_quorum_pct,
+            )
+            ace_mod.set_engine(ace_engine)
+            app.include_router(
+                ace_mod.ace_route,
+                prefix=settings.api_prefix,
+                tags=["Consensus Engine"],
+            )
+            logger.info("consensus_engine_initialized")
+        except Exception as e:
+            logger.warning("consensus_engine_init_failed", error=str(e))
+
+    if settings.knowledge_mesh_enabled:
+        try:
+            from shieldops.agents.knowledge_mesh import (
+                AgentKnowledgeMesh,
+            )
+            from shieldops.api.routes import (
+                knowledge_mesh as akm_mod,
+            )
+
+            akm_engine = AgentKnowledgeMesh(
+                max_records=settings.knowledge_mesh_max_records,
+                ttl_seconds=settings.knowledge_mesh_ttl_seconds,
+            )
+            akm_mod.set_engine(akm_engine)
+            app.include_router(
+                akm_mod.akm_route,
+                prefix=settings.api_prefix,
+                tags=["Knowledge Mesh"],
+            )
+            logger.info("knowledge_mesh_initialized")
+        except Exception as e:
+            logger.warning("knowledge_mesh_init_failed", error=str(e))
+
+    if settings.risk_aggregator_enabled:
+        try:
+            from shieldops.api.routes import (
+                risk_aggregator as rsa_mod,
+            )
+            from shieldops.security.risk_aggregator import (
+                RiskSignalAggregator,
+            )
+
+            rsa_engine = RiskSignalAggregator(
+                max_records=settings.risk_aggregator_max_records,
+                critical_threshold=settings.risk_aggregator_critical_threshold,
+            )
+            rsa_mod.set_engine(rsa_engine)
+            app.include_router(
+                rsa_mod.rsa_route,
+                prefix=settings.api_prefix,
+                tags=["Risk Aggregator"],
+            )
+            logger.info("risk_aggregator_initialized")
+        except Exception as e:
+            logger.warning("risk_aggregator_init_failed", error=str(e))
+
+    if settings.dynamic_risk_scorer_enabled:
+        try:
+            from shieldops.analytics.dynamic_risk_scorer import (
+                DynamicRiskScorer,
+            )
+            from shieldops.api.routes import (
+                dynamic_risk_scorer as dks_mod,
+            )
+
+            dks_engine = DynamicRiskScorer(
+                max_records=settings.dynamic_risk_scorer_max_records,
+                high_threshold=settings.dynamic_risk_scorer_high_threshold,
+            )
+            dks_mod.set_engine(dks_engine)
+            app.include_router(
+                dks_mod.drs_route,
+                prefix=settings.api_prefix,
+                tags=["Dynamic Risk Scorer"],
+            )
+            logger.info("dynamic_risk_scorer_initialized")
+        except Exception as e:
+            logger.warning("dynamic_risk_scorer_init_failed", error=str(e))
+
+    if settings.predictive_alert_enabled:
+        try:
+            from shieldops.api.routes import (
+                predictive_alert as pae_mod,
+            )
+            from shieldops.observability.predictive_alert import (
+                PredictiveAlertEngine,
+            )
+
+            pae_engine = PredictiveAlertEngine(
+                max_records=settings.predictive_alert_max_records,
+                min_confidence_pct=settings.predictive_alert_min_confidence_pct,
+            )
+            pae_mod.set_engine(pae_engine)
+            app.include_router(
+                pae_mod.pae_route,
+                prefix=settings.api_prefix,
+                tags=["Predictive Alert"],
+            )
+            logger.info("predictive_alert_initialized")
+        except Exception as e:
+            logger.warning("predictive_alert_init_failed", error=str(e))
+
+    if settings.token_optimizer_enabled:
+        try:
+            from shieldops.agents.token_optimizer import (
+                AgentTokenOptimizer,
+            )
+            from shieldops.api.routes import (
+                token_optimizer as ato_mod,
+            )
+
+            ato_engine = AgentTokenOptimizer(
+                max_records=settings.token_optimizer_max_records,
+                target_savings_pct=settings.token_optimizer_target_savings_pct,
+            )
+            ato_mod.set_engine(ato_engine)
+            app.include_router(
+                ato_mod.ato_route,
+                prefix=settings.api_prefix,
+                tags=["Token Optimizer"],
+            )
+            logger.info("token_optimizer_initialized")
+        except Exception as e:
+            logger.warning("token_optimizer_init_failed", error=str(e))
+
+    if settings.prompt_cache_enabled:
+        try:
+            from shieldops.agents.prompt_cache import (
+                PromptCacheManager,
+            )
+            from shieldops.api.routes import (
+                prompt_cache as pcm_mod,
+            )
+
+            pcm_engine = PromptCacheManager(
+                max_records=settings.prompt_cache_max_records,
+                ttl_seconds=settings.prompt_cache_ttl_seconds,
+            )
+            pcm_mod.set_engine(pcm_engine)
+            app.include_router(
+                pcm_mod.pcm_route,
+                prefix=settings.api_prefix,
+                tags=["Prompt Cache"],
+            )
+            logger.info("prompt_cache_initialized")
+        except Exception as e:
+            logger.warning("prompt_cache_init_failed", error=str(e))
+
+    if settings.routing_optimizer_enabled:
+        try:
+            from shieldops.agents.routing_optimizer import (
+                AgentRoutingOptimizer,
+            )
+            from shieldops.api.routes import (
+                routing_optimizer as aro_mod,
+            )
+
+            aro_engine = AgentRoutingOptimizer(
+                max_records=settings.routing_optimizer_max_records,
+                cost_limit=settings.routing_optimizer_cost_limit,
+            )
+            aro_mod.set_engine(aro_engine)
+            app.include_router(
+                aro_mod.aro_route,
+                prefix=settings.api_prefix,
+                tags=["Routing Optimizer"],
+            )
+            logger.info("routing_optimizer_initialized")
+        except Exception as e:
+            logger.warning("routing_optimizer_init_failed", error=str(e))
+
     yield
 
     logger.info("shieldops_shutting_down")

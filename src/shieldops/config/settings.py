@@ -1555,6 +1555,66 @@ class Settings(BaseSettings):
     retention_policy_max_records: int = 200000
     retention_policy_max_retention_days: int = 365
 
+    # Phase 36: Twilio SMS Gateway
+    twilio_sms_enabled: bool = True
+    twilio_sms_max_records: int = 200000
+    twilio_sms_max_retries: int = 3
+
+    # Phase 36: Twilio Voice Alert System
+    twilio_voice_enabled: bool = True
+    twilio_voice_max_records: int = 200000
+    twilio_voice_max_ring_seconds: int = 30
+
+    # Phase 36: Microsoft Teams Notifier
+    teams_notifier_enabled: bool = True
+    teams_notifier_max_records: int = 200000
+    teams_notifier_max_retries: int = 3
+
+    # Phase 36: Agent Swarm Coordinator
+    swarm_coordinator_enabled: bool = True
+    swarm_coordinator_max_records: int = 200000
+    swarm_coordinator_max_agents: int = 10
+
+    # Phase 36: Agent Consensus Engine
+    consensus_engine_enabled: bool = True
+    consensus_engine_max_records: int = 200000
+    consensus_engine_quorum_pct: float = 60.0
+
+    # Phase 36: Agent Knowledge Mesh
+    knowledge_mesh_enabled: bool = True
+    knowledge_mesh_max_records: int = 200000
+    knowledge_mesh_ttl_seconds: int = 3600
+
+    # Phase 36: Risk Signal Aggregator
+    risk_aggregator_enabled: bool = True
+    risk_aggregator_max_records: int = 200000
+    risk_aggregator_critical_threshold: float = 80.0
+
+    # Phase 36: Dynamic Risk Scorer
+    dynamic_risk_scorer_enabled: bool = True
+    dynamic_risk_scorer_max_records: int = 200000
+    dynamic_risk_scorer_high_threshold: float = 75.0
+
+    # Phase 36: Predictive Alert Engine
+    predictive_alert_enabled: bool = True
+    predictive_alert_max_records: int = 200000
+    predictive_alert_min_confidence_pct: float = 70.0
+
+    # Phase 36: Agent Token Optimizer
+    token_optimizer_enabled: bool = True
+    token_optimizer_max_records: int = 200000
+    token_optimizer_target_savings_pct: float = 30.0
+
+    # Phase 36: Prompt Cache Manager
+    prompt_cache_enabled: bool = True
+    prompt_cache_max_records: int = 200000
+    prompt_cache_ttl_seconds: int = 1800
+
+    # Phase 36: Agent Routing Optimizer
+    routing_optimizer_enabled: bool = True
+    routing_optimizer_max_records: int = 200000
+    routing_optimizer_cost_limit: float = 10.0
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",
