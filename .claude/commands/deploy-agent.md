@@ -90,8 +90,8 @@ Deploy ShieldOps agents to target environments.
    - Orchestrate remediation pipelines via `RemediationPipelineOrchestrator` (`src/shieldops/operations/remediation_pipeline.py`)
    - Coordinate recovery across services via `RecoveryCoordinator` (`src/shieldops/operations/recovery_coordinator.py`)
    - Enforce cross-agent policies via `CrossAgentPolicyEnforcer` (`src/shieldops/policy/cross_agent_enforcer.py`)
-   - **(Phase 38)** Coordinate multi-region failover via `MultiRegionFailoverCoordinator` (`src/shieldops/operations/failover_coordinator.py`)
-   - **(Phase 38)** Manage capacity bursts via `CapacityBurstManager` (`src/shieldops/operations/burst_manager.py`)
+   - Coordinate multi-region failover via `MultiRegionFailoverCoordinator` (`src/shieldops/operations/failover_coordinator.py`)
+   - Manage capacity bursts via `CapacityBurstManager` (`src/shieldops/operations/burst_manager.py`)
 4. **Deploy**:
    - Apply Kubernetes manifests from `infrastructure/kubernetes/`
    - For production: trigger approval workflow via Slack/Teams

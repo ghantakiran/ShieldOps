@@ -1675,6 +1675,66 @@ class Settings(BaseSettings):
     compliance_auditor_max_records: int = 200000
     compliance_auditor_min_pass_rate_pct: float = 90.0
 
+    # Phase 38: Incident War Room Orchestrator
+    war_room_orchestrator_enabled: bool = True
+    war_room_orchestrator_max_records: int = 200000
+    war_room_orchestrator_min_resolution_rate_pct: float = 80.0
+
+    # Phase 38: Root Cause Verification Engine
+    root_cause_verifier_enabled: bool = True
+    root_cause_verifier_max_records: int = 200000
+    root_cause_verifier_min_confidence_pct: float = 70.0
+
+    # Phase 38: Incident Communication Automator
+    comm_automator_enabled: bool = True
+    comm_automator_max_records: int = 200000
+    comm_automator_min_delivery_rate_pct: float = 95.0
+
+    # Phase 38: Security Posture Simulator
+    posture_simulator_enabled: bool = True
+    posture_simulator_max_records: int = 200000
+    posture_simulator_min_blocked_rate_pct: float = 80.0
+
+    # Phase 38: Credential Rotation Orchestrator
+    credential_rotator_enabled: bool = True
+    credential_rotator_max_records: int = 200000
+    credential_rotator_min_completion_rate_pct: float = 95.0
+
+    # Phase 38: Compliance Evidence Automator
+    evidence_automator_enabled: bool = True
+    evidence_automator_max_records: int = 200000
+    evidence_automator_min_freshness_pct: float = 90.0
+
+    # Phase 38: Chaos Experiment Automator
+    chaos_automator_enabled: bool = True
+    chaos_automator_max_records: int = 200000
+    chaos_automator_min_pass_rate_pct: float = 80.0
+
+    # Phase 38: Multi-Region Failover Coordinator
+    failover_coordinator_enabled: bool = True
+    failover_coordinator_max_records: int = 200000
+    failover_coordinator_max_rto_seconds: float = 300.0
+
+    # Phase 38: Capacity Burst Manager
+    burst_manager_enabled: bool = True
+    burst_manager_max_records: int = 200000
+    burst_manager_max_burst_budget: float = 10000.0
+
+    # Phase 38: Platform Cost Optimizer
+    platform_cost_enabled: bool = True
+    platform_cost_max_records: int = 200000
+    platform_cost_min_savings_threshold: float = 100.0
+
+    # Phase 38: Service Mesh Intelligence
+    service_mesh_intel_enabled: bool = True
+    service_mesh_intel_max_records: int = 200000
+    service_mesh_intel_max_latency_ms: float = 500.0
+
+    # Phase 38: Operational Runbook Generator
+    runbook_generator_enabled: bool = True
+    runbook_generator_max_records: int = 200000
+    runbook_generator_min_accuracy_pct: float = 80.0
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",

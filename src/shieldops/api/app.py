@@ -7981,6 +7981,260 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         except Exception as e:
             logger.warning("compliance_auditor_init_failed", error=str(e))
 
+    # -- Phase 38 ----------------------------------------------------------
+
+    if settings.war_room_orchestrator_enabled:
+        try:
+            from shieldops.api.routes import war_room_orchestrator as wro_mod
+            from shieldops.incidents.war_room_orchestrator import (
+                IncidentWarRoomOrchestrator,
+            )
+
+            wro_engine = IncidentWarRoomOrchestrator(
+                max_records=settings.war_room_orchestrator_max_records,
+                min_resolution_rate_pct=(settings.war_room_orchestrator_min_resolution_rate_pct),
+            )
+            wro_mod.set_engine(wro_engine)
+            app.include_router(
+                wro_mod.wro_route,
+                prefix=settings.api_prefix,
+                tags=["War Room"],
+            )
+            logger.info("war_room_initialized")
+        except Exception as e:
+            logger.warning("war_room_init_failed", error=str(e))
+
+    if settings.root_cause_verifier_enabled:
+        try:
+            from shieldops.api.routes import root_cause_verifier as rcv_mod
+            from shieldops.incidents.root_cause_verifier import (
+                RootCauseVerificationEngine,
+            )
+
+            rcv_engine = RootCauseVerificationEngine(
+                max_records=settings.root_cause_verifier_max_records,
+                min_confidence_pct=settings.root_cause_verifier_min_confidence_pct,
+            )
+            rcv_mod.set_engine(rcv_engine)
+            app.include_router(
+                rcv_mod.rcv_route,
+                prefix=settings.api_prefix,
+                tags=["Root Cause Verifier"],
+            )
+            logger.info("root_cause_verifier_initialized")
+        except Exception as e:
+            logger.warning("root_cause_verifier_init_failed", error=str(e))
+
+    if settings.comm_automator_enabled:
+        try:
+            from shieldops.api.routes import comm_automator as ica_mod
+            from shieldops.incidents.comm_automator import (
+                IncidentCommunicationAutomator,
+            )
+
+            ica_engine = IncidentCommunicationAutomator(
+                max_records=settings.comm_automator_max_records,
+                min_delivery_rate_pct=settings.comm_automator_min_delivery_rate_pct,
+            )
+            ica_mod.set_engine(ica_engine)
+            app.include_router(
+                ica_mod.ica_route,
+                prefix=settings.api_prefix,
+                tags=["Comm Automator"],
+            )
+            logger.info("comm_automator_initialized")
+        except Exception as e:
+            logger.warning("comm_automator_init_failed", error=str(e))
+
+    if settings.posture_simulator_enabled:
+        try:
+            from shieldops.api.routes import posture_simulator as sps_mod
+            from shieldops.security.posture_simulator import (
+                SecurityPostureSimulator,
+            )
+
+            sps_engine = SecurityPostureSimulator(
+                max_records=settings.posture_simulator_max_records,
+                min_blocked_rate_pct=settings.posture_simulator_min_blocked_rate_pct,
+            )
+            sps_mod.set_engine(sps_engine)
+            app.include_router(
+                sps_mod.sps_route,
+                prefix=settings.api_prefix,
+                tags=["Posture Simulator"],
+            )
+            logger.info("posture_simulator_initialized")
+        except Exception as e:
+            logger.warning("posture_simulator_init_failed", error=str(e))
+
+    if settings.credential_rotator_enabled:
+        try:
+            from shieldops.api.routes import credential_rotator as cro_mod
+            from shieldops.security.credential_rotator import (
+                CredentialRotationOrchestrator,
+            )
+
+            cro_engine = CredentialRotationOrchestrator(
+                max_records=settings.credential_rotator_max_records,
+                min_completion_rate_pct=(settings.credential_rotator_min_completion_rate_pct),
+            )
+            cro_mod.set_engine(cro_engine)
+            app.include_router(
+                cro_mod.cro_route,
+                prefix=settings.api_prefix,
+                tags=["Credential Rotator"],
+            )
+            logger.info("credential_rotator_initialized")
+        except Exception as e:
+            logger.warning("credential_rotator_init_failed", error=str(e))
+
+    if settings.evidence_automator_enabled:
+        try:
+            from shieldops.api.routes import evidence_automator as cea_mod
+            from shieldops.compliance.evidence_automator import (
+                ComplianceEvidenceAutomator,
+            )
+
+            cea_engine = ComplianceEvidenceAutomator(
+                max_records=settings.evidence_automator_max_records,
+                min_freshness_pct=settings.evidence_automator_min_freshness_pct,
+            )
+            cea_mod.set_engine(cea_engine)
+            app.include_router(
+                cea_mod.cea_route,
+                prefix=settings.api_prefix,
+                tags=["Evidence Automator"],
+            )
+            logger.info("evidence_automator_initialized")
+        except Exception as e:
+            logger.warning("evidence_automator_init_failed", error=str(e))
+
+    if settings.chaos_automator_enabled:
+        try:
+            from shieldops.api.routes import chaos_automator as cxa_mod
+            from shieldops.observability.chaos_automator import (
+                ChaosExperimentAutomator,
+            )
+
+            cxa_engine = ChaosExperimentAutomator(
+                max_records=settings.chaos_automator_max_records,
+                min_pass_rate_pct=settings.chaos_automator_min_pass_rate_pct,
+            )
+            cxa_mod.set_engine(cxa_engine)
+            app.include_router(
+                cxa_mod.cxa_route,
+                prefix=settings.api_prefix,
+                tags=["Chaos Automator"],
+            )
+            logger.info("chaos_automator_initialized")
+        except Exception as e:
+            logger.warning("chaos_automator_init_failed", error=str(e))
+
+    if settings.failover_coordinator_enabled:
+        try:
+            from shieldops.api.routes import failover_coordinator as mfc_mod
+            from shieldops.operations.failover_coordinator import (
+                MultiRegionFailoverCoordinator,
+            )
+
+            mfc_engine = MultiRegionFailoverCoordinator(
+                max_records=settings.failover_coordinator_max_records,
+                max_rto_seconds=settings.failover_coordinator_max_rto_seconds,
+            )
+            mfc_mod.set_engine(mfc_engine)
+            app.include_router(
+                mfc_mod.mfc_route,
+                prefix=settings.api_prefix,
+                tags=["Failover Coordinator"],
+            )
+            logger.info("failover_coordinator_initialized")
+        except Exception as e:
+            logger.warning("failover_coordinator_init_failed", error=str(e))
+
+    if settings.burst_manager_enabled:
+        try:
+            from shieldops.api.routes import burst_manager as cbm_mod
+            from shieldops.operations.burst_manager import (
+                CapacityBurstManager,
+            )
+
+            cbm_engine = CapacityBurstManager(
+                max_records=settings.burst_manager_max_records,
+                max_burst_budget=settings.burst_manager_max_burst_budget,
+            )
+            cbm_mod.set_engine(cbm_engine)
+            app.include_router(
+                cbm_mod.cbm_route,
+                prefix=settings.api_prefix,
+                tags=["Burst Manager"],
+            )
+            logger.info("burst_manager_initialized")
+        except Exception as e:
+            logger.warning("burst_manager_init_failed", error=str(e))
+
+    if settings.platform_cost_enabled:
+        try:
+            from shieldops.api.routes import platform_cost_optimizer as pco_mod
+            from shieldops.billing.platform_cost_optimizer import (
+                PlatformCostOptimizer,
+            )
+
+            pco_engine = PlatformCostOptimizer(
+                max_records=settings.platform_cost_max_records,
+                min_savings_threshold=settings.platform_cost_min_savings_threshold,
+            )
+            pco_mod.set_engine(pco_engine)
+            app.include_router(
+                pco_mod.pco_route,
+                prefix=settings.api_prefix,
+                tags=["Platform Cost"],
+            )
+            logger.info("platform_cost_initialized")
+        except Exception as e:
+            logger.warning("platform_cost_init_failed", error=str(e))
+
+    if settings.service_mesh_intel_enabled:
+        try:
+            from shieldops.api.routes import service_mesh_intel as smi_mod
+            from shieldops.topology.service_mesh_intel import (
+                ServiceMeshIntelligence,
+            )
+
+            smi_engine = ServiceMeshIntelligence(
+                max_records=settings.service_mesh_intel_max_records,
+                max_latency_ms=settings.service_mesh_intel_max_latency_ms,
+            )
+            smi_mod.set_engine(smi_engine)
+            app.include_router(
+                smi_mod.smi_route,
+                prefix=settings.api_prefix,
+                tags=["Service Mesh"],
+            )
+            logger.info("service_mesh_intel_initialized")
+        except Exception as e:
+            logger.warning("service_mesh_intel_init_failed", error=str(e))
+
+    if settings.runbook_generator_enabled:
+        try:
+            from shieldops.api.routes import runbook_generator as org_mod
+            from shieldops.operations.runbook_generator import (
+                OperationalRunbookGenerator,
+            )
+
+            org_engine = OperationalRunbookGenerator(
+                max_records=settings.runbook_generator_max_records,
+                min_accuracy_pct=settings.runbook_generator_min_accuracy_pct,
+            )
+            org_mod.set_engine(org_engine)
+            app.include_router(
+                org_mod.org_route,
+                prefix=settings.api_prefix,
+                tags=["Runbook Generator"],
+            )
+            logger.info("runbook_generator_initialized")
+        except Exception as e:
+            logger.warning("runbook_generator_init_failed", error=str(e))
+
     yield
 
     logger.info("shieldops_shutting_down")
