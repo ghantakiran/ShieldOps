@@ -74,6 +74,10 @@ Run security audits on ShieldOps codebase and agent configurations.
 48. **Incident Cost Analysis**: Calculate financial impact of security incidents via `IncidentCostCalculator` (`src/shieldops/incidents/incident_cost.py`)
 49. **Resource Contention Detection**: Detect resource contention from security events via `ResourceContentionDetector` (`src/shieldops/analytics/resource_contention.py`)
 50. **Cross-Team Collaboration Scoring**: Assess security collaboration across teams via `CrossTeamCollaborationScorer` (`src/shieldops/analytics/collaboration_scorer.py`)
+51. **Decision Audit Logging**: Review agent decision audit trails via `DecisionAuditLogger` (`src/shieldops/audit/decision_audit.py`)
+52. **Data Retention Policy**: Validate data retention compliance via `DataRetentionPolicyManager` (`src/shieldops/observability/retention_policy.py`)
+53. **Tenant Resource Quotas**: Verify per-tenant resource quota enforcement via `TenantResourceQuotaManager` (`src/shieldops/operations/tenant_quota.py`)
+54. **LLM Cost Tracking**: Audit AI/LLM token usage and costs via `LLMTokenCostTracker` (`src/shieldops/billing/llm_cost_tracker.py`)
 
 ## Severity Levels
 - **CRITICAL**: Hardcoded secrets, SQL injection, unauthenticated endpoints

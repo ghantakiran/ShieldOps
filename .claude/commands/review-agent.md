@@ -128,6 +128,18 @@ Review ShieldOps agent code for correctness, safety, and reliability.
 - [ ] Attack surface monitored via `AttackSurfaceMonitor` (`src/shieldops/security/attack_surface.py`)
 - [ ] Runbooks recommended via `RunbookRecommendationEngine` (`src/shieldops/operations/runbook_recommender.py`)
 - [ ] Platform reliability scored via `PlatformReliabilityScorecard` (`src/shieldops/sla/reliability_scorecard.py`)
+- [ ] LLM token costs tracked via `LLMTokenCostTracker` (`src/shieldops/billing/llm_cost_tracker.py`)
+- [ ] Cloud cost arbitrage analyzed via `CloudCostArbitrageAnalyzer` (`src/shieldops/billing/cloud_arbitrage.py`)
+- [ ] Observability costs allocated via `ObservabilityCostAllocator` (`src/shieldops/observability/observability_cost.py`)
+- [ ] Change lead time analyzed via `ChangeLeadTimeAnalyzer` (`src/shieldops/changes/lead_time_analyzer.py`)
+- [ ] Feature flag impact analyzed via `FeatureFlagImpactAnalyzer` (`src/shieldops/config/flag_impact.py`)
+- [ ] Deployment dependencies tracked via `DeploymentDependencyTracker` (`src/shieldops/changes/deployment_dependency.py`)
+- [ ] Postmortem quality scored via `PostmortemQualityScorer` (`src/shieldops/incidents/postmortem_quality.py`)
+- [ ] DR drills tracked via `DRDrillTracker` (`src/shieldops/operations/dr_drill_tracker.py`)
+- [ ] Escalation paths optimized via `IncidentEscalationPathOptimizer` (`src/shieldops/incidents/escalation_optimizer.py`)
+- [ ] Tenant resource quotas managed via `TenantResourceQuotaManager` (`src/shieldops/operations/tenant_quota.py`)
+- [ ] Agent decisions audited via `DecisionAuditLogger` (`src/shieldops/audit/decision_audit.py`)
+- [ ] Data retention policies managed via `DataRetentionPolicyManager` (`src/shieldops/observability/retention_policy.py`)
 
 ### Testing
 - [ ] Unit tests for all node functions

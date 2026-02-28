@@ -77,6 +77,11 @@ Deploy ShieldOps agents to target environments.
    - Monitor attack surface via `AttackSurfaceMonitor` (`src/shieldops/security/attack_surface.py`)
    - Score platform reliability via `PlatformReliabilityScorecard` (`src/shieldops/sla/reliability_scorecard.py`)
    - Analyze rollback patterns via `DeploymentRollbackAnalyzer` (`src/shieldops/changes/rollback_analyzer.py`)
+   - Track LLM token costs via `LLMTokenCostTracker` (`src/shieldops/billing/llm_cost_tracker.py`)
+   - Track DR drill readiness via `DRDrillTracker` (`src/shieldops/operations/dr_drill_tracker.py`)
+   - Enforce tenant resource quotas via `TenantResourceQuotaManager` (`src/shieldops/operations/tenant_quota.py`)
+   - Log agent decisions via `DecisionAuditLogger` (`src/shieldops/audit/decision_audit.py`)
+   - Track deployment dependencies via `DeploymentDependencyTracker` (`src/shieldops/changes/deployment_dependency.py`)
 4. **Deploy**:
    - Apply Kubernetes manifests from `infrastructure/kubernetes/`
    - For production: trigger approval workflow via Slack/Teams

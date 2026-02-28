@@ -1495,6 +1495,66 @@ class Settings(BaseSettings):
     reliability_scorecard_max_records: int = 200000
     reliability_scorecard_min_grade_score: float = 70.0
 
+    # Phase 35: LLM Token Cost Tracker
+    llm_cost_tracker_enabled: bool = True
+    llm_cost_tracker_max_records: int = 200000
+    llm_cost_tracker_high_cost_threshold: float = 100.0
+
+    # Phase 35: Cloud Cost Arbitrage Analyzer
+    cloud_arbitrage_enabled: bool = True
+    cloud_arbitrage_max_records: int = 200000
+    cloud_arbitrage_min_savings_pct: float = 15.0
+
+    # Phase 35: Observability Cost Allocator
+    observability_cost_enabled: bool = True
+    observability_cost_max_records: int = 200000
+    observability_cost_high_cost_threshold: float = 1000.0
+
+    # Phase 35: Change Lead Time Analyzer
+    lead_time_analyzer_enabled: bool = True
+    lead_time_analyzer_max_records: int = 200000
+    lead_time_analyzer_max_lead_time_hours: float = 72.0
+
+    # Phase 35: Feature Flag Impact Analyzer
+    flag_impact_enabled: bool = True
+    flag_impact_max_records: int = 200000
+    flag_impact_min_reliability_pct: float = 95.0
+
+    # Phase 35: Deployment Dependency Tracker
+    deployment_dependency_enabled: bool = True
+    deployment_dependency_max_records: int = 200000
+    deployment_dependency_max_depth: int = 5
+
+    # Phase 35: Postmortem Quality Scorer
+    postmortem_quality_enabled: bool = True
+    postmortem_quality_max_records: int = 200000
+    postmortem_quality_min_score: float = 70.0
+
+    # Phase 35: DR Drill Tracker
+    dr_drill_tracker_enabled: bool = True
+    dr_drill_tracker_max_records: int = 200000
+    dr_drill_tracker_min_success_rate_pct: float = 80.0
+
+    # Phase 35: Incident Escalation Path Optimizer
+    escalation_optimizer_enabled: bool = True
+    escalation_optimizer_max_records: int = 200000
+    escalation_optimizer_max_escalation_time_min: float = 30.0
+
+    # Phase 35: Tenant Resource Quota Manager
+    tenant_quota_enabled: bool = True
+    tenant_quota_max_records: int = 200000
+    tenant_quota_max_utilization_pct: float = 90.0
+
+    # Phase 35: Decision Audit Logger
+    decision_audit_enabled: bool = True
+    decision_audit_max_records: int = 200000
+    decision_audit_min_confidence_pct: float = 70.0
+
+    # Phase 35: Data Retention Policy Manager
+    retention_policy_enabled: bool = True
+    retention_policy_max_records: int = 200000
+    retention_policy_max_retention_days: int = 365
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",

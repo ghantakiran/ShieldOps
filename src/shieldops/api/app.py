@@ -7215,6 +7215,282 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         except Exception as e:
             logger.warning("reliability_scorecard_init_failed", error=str(e))
 
+    if settings.llm_cost_tracker_enabled:
+        try:
+            from shieldops.api.routes import (
+                llm_cost_tracker as lct_mod,
+            )
+            from shieldops.billing.llm_cost_tracker import (
+                LLMTokenCostTracker,
+            )
+
+            lct_engine = LLMTokenCostTracker(
+                max_records=settings.llm_cost_tracker_max_records,
+                high_cost_threshold=settings.llm_cost_tracker_high_cost_threshold,
+            )
+            lct_mod.set_engine(lct_engine)
+            app.include_router(
+                lct_mod.lct_route,
+                prefix=settings.api_prefix,
+                tags=["LLM Cost Tracker"],
+            )
+            logger.info("llm_cost_tracker_initialized")
+        except Exception as e:
+            logger.warning("llm_cost_tracker_init_failed", error=str(e))
+
+    if settings.cloud_arbitrage_enabled:
+        try:
+            from shieldops.api.routes import (
+                cloud_arbitrage as car_mod,
+            )
+            from shieldops.billing.cloud_arbitrage import (
+                CloudCostArbitrageAnalyzer,
+            )
+
+            car_engine = CloudCostArbitrageAnalyzer(
+                max_records=settings.cloud_arbitrage_max_records,
+                min_savings_pct=settings.cloud_arbitrage_min_savings_pct,
+            )
+            car_mod.set_engine(car_engine)
+            app.include_router(
+                car_mod.car_route,
+                prefix=settings.api_prefix,
+                tags=["Cloud Arbitrage"],
+            )
+            logger.info("cloud_arbitrage_initialized")
+        except Exception as e:
+            logger.warning("cloud_arbitrage_init_failed", error=str(e))
+
+    if settings.observability_cost_enabled:
+        try:
+            from shieldops.api.routes import (
+                observability_cost as oca_mod,
+            )
+            from shieldops.observability.observability_cost import (
+                ObservabilityCostAllocator,
+            )
+
+            oca_engine = ObservabilityCostAllocator(
+                max_records=settings.observability_cost_max_records,
+                high_cost_threshold=settings.observability_cost_high_cost_threshold,
+            )
+            oca_mod.set_engine(oca_engine)
+            app.include_router(
+                oca_mod.oca_route,
+                prefix=settings.api_prefix,
+                tags=["Observability Cost"],
+            )
+            logger.info("observability_cost_initialized")
+        except Exception as e:
+            logger.warning("observability_cost_init_failed", error=str(e))
+
+    if settings.lead_time_analyzer_enabled:
+        try:
+            from shieldops.api.routes import (
+                lead_time_analyzer as lta_mod,
+            )
+            from shieldops.changes.lead_time_analyzer import (
+                ChangeLeadTimeAnalyzer,
+            )
+
+            lta_engine = ChangeLeadTimeAnalyzer(
+                max_records=settings.lead_time_analyzer_max_records,
+                max_lead_time_hours=settings.lead_time_analyzer_max_lead_time_hours,
+            )
+            lta_mod.set_engine(lta_engine)
+            app.include_router(
+                lta_mod.lta_route,
+                prefix=settings.api_prefix,
+                tags=["Lead Time Analyzer"],
+            )
+            logger.info("lead_time_analyzer_initialized")
+        except Exception as e:
+            logger.warning("lead_time_analyzer_init_failed", error=str(e))
+
+    if settings.flag_impact_enabled:
+        try:
+            from shieldops.api.routes import (
+                flag_impact as fia_mod,
+            )
+            from shieldops.config.flag_impact import (
+                FeatureFlagImpactAnalyzer,
+            )
+
+            fia_engine = FeatureFlagImpactAnalyzer(
+                max_records=settings.flag_impact_max_records,
+                min_reliability_pct=settings.flag_impact_min_reliability_pct,
+            )
+            fia_mod.set_engine(fia_engine)
+            app.include_router(
+                fia_mod.fia_route,
+                prefix=settings.api_prefix,
+                tags=["Flag Impact"],
+            )
+            logger.info("flag_impact_initialized")
+        except Exception as e:
+            logger.warning("flag_impact_init_failed", error=str(e))
+
+    if settings.deployment_dependency_enabled:
+        try:
+            from shieldops.api.routes import (
+                deployment_dependency as ddy_mod,
+            )
+            from shieldops.changes.deployment_dependency import (
+                DeploymentDependencyTracker,
+            )
+
+            ddy_engine = DeploymentDependencyTracker(
+                max_records=settings.deployment_dependency_max_records,
+                max_depth=settings.deployment_dependency_max_depth,
+            )
+            ddy_mod.set_engine(ddy_engine)
+            app.include_router(
+                ddy_mod.ddy_route,
+                prefix=settings.api_prefix,
+                tags=["Deployment Dependency"],
+            )
+            logger.info("deployment_dependency_initialized")
+        except Exception as e:
+            logger.warning("deployment_dependency_init_failed", error=str(e))
+
+    if settings.postmortem_quality_enabled:
+        try:
+            from shieldops.api.routes import (
+                postmortem_quality as pmq_mod,
+            )
+            from shieldops.incidents.postmortem_quality import (
+                PostmortemQualityScorer,
+            )
+
+            pmq_engine = PostmortemQualityScorer(
+                max_records=settings.postmortem_quality_max_records,
+                min_score=settings.postmortem_quality_min_score,
+            )
+            pmq_mod.set_engine(pmq_engine)
+            app.include_router(
+                pmq_mod.pmq_route,
+                prefix=settings.api_prefix,
+                tags=["Postmortem Quality"],
+            )
+            logger.info("postmortem_quality_initialized")
+        except Exception as e:
+            logger.warning("postmortem_quality_init_failed", error=str(e))
+
+    if settings.dr_drill_tracker_enabled:
+        try:
+            from shieldops.api.routes import (
+                dr_drill_tracker as drt_mod,
+            )
+            from shieldops.operations.dr_drill_tracker import (
+                DRDrillTracker,
+            )
+
+            drt_engine = DRDrillTracker(
+                max_records=settings.dr_drill_tracker_max_records,
+                min_success_rate_pct=settings.dr_drill_tracker_min_success_rate_pct,
+            )
+            drt_mod.set_engine(drt_engine)
+            app.include_router(
+                drt_mod.drt_route,
+                prefix=settings.api_prefix,
+                tags=["DR Drill Tracker"],
+            )
+            logger.info("dr_drill_tracker_initialized")
+        except Exception as e:
+            logger.warning("dr_drill_tracker_init_failed", error=str(e))
+
+    if settings.escalation_optimizer_enabled:
+        try:
+            from shieldops.api.routes import (
+                escalation_optimizer as epo_mod,
+            )
+            from shieldops.incidents.escalation_optimizer import (
+                IncidentEscalationOptimizer,
+            )
+
+            epo_engine = IncidentEscalationOptimizer(
+                max_records=settings.escalation_optimizer_max_records,
+                max_escalation_time_min=settings.escalation_optimizer_max_escalation_time_min,
+            )
+            epo_mod.set_engine(epo_engine)
+            app.include_router(
+                epo_mod.epo_route,
+                prefix=settings.api_prefix,
+                tags=["Escalation Optimizer"],
+            )
+            logger.info("escalation_optimizer_initialized")
+        except Exception as e:
+            logger.warning("escalation_optimizer_init_failed", error=str(e))
+
+    if settings.tenant_quota_enabled:
+        try:
+            from shieldops.api.routes import (
+                tenant_quota as tqm_mod,
+            )
+            from shieldops.operations.tenant_quota import (
+                TenantResourceQuotaManager,
+            )
+
+            tqm_engine = TenantResourceQuotaManager(
+                max_records=settings.tenant_quota_max_records,
+                max_utilization_pct=settings.tenant_quota_max_utilization_pct,
+            )
+            tqm_mod.set_engine(tqm_engine)
+            app.include_router(
+                tqm_mod.tqm_route,
+                prefix=settings.api_prefix,
+                tags=["Tenant Quota"],
+            )
+            logger.info("tenant_quota_initialized")
+        except Exception as e:
+            logger.warning("tenant_quota_init_failed", error=str(e))
+
+    if settings.decision_audit_enabled:
+        try:
+            from shieldops.api.routes import (
+                decision_audit as dal_mod,
+            )
+            from shieldops.audit.decision_audit import (
+                DecisionAuditLogger,
+            )
+
+            dal_engine = DecisionAuditLogger(
+                max_records=settings.decision_audit_max_records,
+                min_confidence_pct=settings.decision_audit_min_confidence_pct,
+            )
+            dal_mod.set_engine(dal_engine)
+            app.include_router(
+                dal_mod.dal_route,
+                prefix=settings.api_prefix,
+                tags=["Decision Audit"],
+            )
+            logger.info("decision_audit_initialized")
+        except Exception as e:
+            logger.warning("decision_audit_init_failed", error=str(e))
+
+    if settings.retention_policy_enabled:
+        try:
+            from shieldops.api.routes import (
+                retention_policy as rpm_mod,
+            )
+            from shieldops.observability.retention_policy import (
+                DataRetentionPolicyManager,
+            )
+
+            rpm_engine = DataRetentionPolicyManager(
+                max_records=settings.retention_policy_max_records,
+                max_retention_days=settings.retention_policy_max_retention_days,
+            )
+            rpm_mod.set_engine(rpm_engine)
+            app.include_router(
+                rpm_mod.rpm_route,
+                prefix=settings.api_prefix,
+                tags=["Retention Policy"],
+            )
+            logger.info("retention_policy_initialized")
+        except Exception as e:
+            logger.warning("retention_policy_init_failed", error=str(e))
+
     yield
 
     logger.info("shieldops_shutting_down")
