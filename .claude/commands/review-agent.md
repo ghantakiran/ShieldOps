@@ -140,6 +140,22 @@ Review ShieldOps agent code for correctness, safety, and reliability.
 - [ ] Tenant resource quotas managed via `TenantResourceQuotaManager` (`src/shieldops/operations/tenant_quota.py`)
 - [ ] Agent decisions audited via `DecisionAuditLogger` (`src/shieldops/audit/decision_audit.py`)
 - [ ] Data retention policies managed via `DataRetentionPolicyManager` (`src/shieldops/observability/retention_policy.py`)
+- [ ] **(Phase 36)** Agent swarm coordination validated via `AgentSwarmCoordinator` (`src/shieldops/agents/swarm_coordinator.py`)
+- [ ] **(Phase 36)** Agent consensus decisions verified via `AgentConsensusEngine` (`src/shieldops/agents/consensus_engine.py`)
+- [ ] **(Phase 36)** Agent knowledge mesh propagation checked via `AgentKnowledgeMesh` (`src/shieldops/agents/knowledge_mesh.py`)
+- [ ] **(Phase 36)** Risk signals aggregated via `RiskSignalAggregator` (`src/shieldops/security/risk_aggregator.py`)
+- [ ] **(Phase 36)** Agent token optimization verified via `AgentTokenOptimizer` (`src/shieldops/agents/token_optimizer.py`)
+- [ ] **(Phase 36)** Agent routing optimization checked via `AgentRoutingOptimizer` (`src/shieldops/agents/routing_optimizer.py`)
+- [ ] **(Phase 36)** Multi-channel communication verified (Twilio SMS, Voice, Teams)
+- [ ] **(Phase 37)** Threat hunting campaigns validated via `ThreatHuntOrchestrator` (`src/shieldops/security/threat_hunt.py`)
+- [ ] **(Phase 37)** Security response automation checked via `SecurityResponseAutomator` (`src/shieldops/security/response_automator.py`)
+- [ ] **(Phase 37)** Zero trust verification enforced via `ZeroTrustVerifier` (`src/shieldops/security/zero_trust_verifier.py`)
+- [ ] **(Phase 37)** Remediation pipelines validated via `RemediationPipelineOrchestrator` (`src/shieldops/operations/remediation_pipeline.py`)
+- [ ] **(Phase 37)** Cross-agent policy enforcement checked via `CrossAgentPolicyEnforcer` (`src/shieldops/policy/cross_agent_enforcer.py`)
+- [ ] **(Phase 37)** Agent compliance audited via `AgentComplianceAuditor` (`src/shieldops/agents/compliance_auditor.py`)
+- [ ] **(Phase 38)** War room orchestration validated via `IncidentWarRoomOrchestrator` (`src/shieldops/incidents/war_room_orchestrator.py`)
+- [ ] **(Phase 38)** Credential rotation verified via `CredentialRotationOrchestrator` (`src/shieldops/security/credential_rotator.py`)
+- [ ] **(Phase 38)** Multi-region failover tested via `MultiRegionFailoverCoordinator` (`src/shieldops/operations/failover_coordinator.py`)
 
 ### Testing
 - [ ] Unit tests for all node functions
