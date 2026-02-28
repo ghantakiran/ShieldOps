@@ -88,6 +88,13 @@ Run security audits on ShieldOps codebase and agent configurations.
 62. **Security Posture Simulation**: Simulate attack scenarios via `SecurityPostureSimulator` (`src/shieldops/security/posture_simulator.py`)
 63. **Credential Rotation**: Automated credential rotation via `CredentialRotationOrchestrator` (`src/shieldops/security/credential_rotator.py`)
 64. **Compliance Evidence Automation**: Auto-collect compliance evidence via `ComplianceEvidenceAutomator` (`src/shieldops/compliance/evidence_automator.py`)
+65. **Breach Prediction**: Predict imminent security breaches via `BreachPredictor` (`src/shieldops/security/breach_predictor.py`)
+66. **Compliance Posture Scoring**: Score overall compliance posture via `GovernanceDashboard` (`src/shieldops/compliance/governance_dashboard.py`)
+67. **Alert Routing Optimization**: Optimize alert routing to correct responders via `AlertRoutingOptimizer` (`src/shieldops/observability/alert_routing.py`)
+68. **DNS Health Monitoring**: Detect DNS misconfigurations and anomalies via `DNSHealthMonitor` (`src/shieldops/observability/dns_health_monitor.py`)
+69. **Configuration Drift Analysis**: Detect infrastructure and config drift via `DriftAnalyzer` (`src/shieldops/operations/drift_analyzer.py`)
+70. **Attack Surface Assessment**: Map and monitor exposed attack surfaces via `AttackSurfaceMonitor` (`src/shieldops/security/attack_surface.py`)
+71. **Deployment Impact Analysis**: Assess security impact of deployments via `DeploymentImpactAnalyzer` (`src/shieldops/changes/deployment_impact.py`)
 
 ## Severity Levels
 - **CRITICAL**: Hardcoded secrets, SQL injection, unauthenticated endpoints

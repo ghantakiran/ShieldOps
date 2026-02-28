@@ -471,6 +471,18 @@ module = [
     "shieldops.api.routes.platform_cost_optimizer",
     "shieldops.api.routes.service_mesh_intel",
     "shieldops.api.routes.runbook_generator",
+    "shieldops.api.routes.breach_predictor",
+    "shieldops.api.routes.error_budget_allocator",
+    "shieldops.api.routes.dependency_topology",
+    "shieldops.api.routes.infra_capacity_planner",
+    "shieldops.api.routes.dns_health_monitor",
+    "shieldops.api.routes.drift_analyzer",
+    "shieldops.api.routes.timeline_correlator",
+    "shieldops.api.routes.deployment_impact",
+    "shieldops.api.routes.alert_routing_optimizer",
+    "shieldops.api.routes.compliance_posture",
+    "shieldops.api.routes.toil_quantifier",
+    "shieldops.api.routes.governance_dashboard",
 ]
 warn_return_any = false
 disallow_untyped_defs = false

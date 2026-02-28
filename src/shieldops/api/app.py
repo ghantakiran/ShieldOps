@@ -8235,6 +8235,250 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         except Exception as e:
             logger.warning("runbook_generator_init_failed", error=str(e))
 
+    # ── Phase 39: SLA Breach Predictor ──
+    if settings.breach_predictor_enabled:
+        try:
+            from shieldops.api.routes import breach_predictor as sbp_mod
+            from shieldops.sla.breach_predictor import SLABreachPredictor
+
+            sbp_engine = SLABreachPredictor(
+                max_records=settings.breach_predictor_max_records,
+                min_confidence_pct=settings.breach_predictor_min_confidence_pct,
+            )
+            sbp_mod.set_engine(sbp_engine)
+            app.include_router(
+                sbp_mod.sbp_route,
+                prefix=settings.api_prefix,
+                tags=["SLA Breach Predictor"],
+            )
+            logger.info("breach_predictor_initialized")
+        except Exception as e:
+            logger.warning("breach_predictor_init_failed", error=str(e))
+
+    # ── Phase 39: Error Budget Allocator ──
+    if settings.error_budget_allocator_enabled:
+        try:
+            from shieldops.api.routes import error_budget_allocator as eba_mod
+            from shieldops.sla.error_budget_allocator import ErrorBudgetAllocator
+
+            eba_engine = ErrorBudgetAllocator(
+                max_records=settings.error_budget_allocator_max_records,
+                min_healthy_rate_pct=settings.error_budget_allocator_min_healthy_rate_pct,
+            )
+            eba_mod.set_engine(eba_engine)
+            app.include_router(
+                eba_mod.eba_route,
+                prefix=settings.api_prefix,
+                tags=["Error Budget Allocator"],
+            )
+            logger.info("error_budget_allocator_initialized")
+        except Exception as e:
+            logger.warning("error_budget_allocator_init_failed", error=str(e))
+
+    # ── Phase 39: Dependency Topology Analyzer ──
+    if settings.dependency_topology_enabled:
+        try:
+            from shieldops.api.routes import dependency_topology as dta_mod
+            from shieldops.topology.dependency_topology import DependencyTopologyAnalyzer
+
+            dta_engine = DependencyTopologyAnalyzer(
+                max_records=settings.dependency_topology_max_records,
+                max_coupling_depth=settings.dependency_topology_max_coupling_depth,
+            )
+            dta_mod.set_engine(dta_engine)
+            app.include_router(
+                dta_mod.dta_route,
+                prefix=settings.api_prefix,
+                tags=["Dependency Topology Analyzer"],
+            )
+            logger.info("dependency_topology_initialized")
+        except Exception as e:
+            logger.warning("dependency_topology_init_failed", error=str(e))
+
+    # ── Phase 39: Infra Capacity Planner ──
+    if settings.infra_capacity_planner_enabled:
+        try:
+            from shieldops.analytics.infra_capacity_planner import InfraCapacityPlanner
+            from shieldops.api.routes import infra_capacity_planner as icp_mod
+
+            icp_engine = InfraCapacityPlanner(
+                max_records=settings.infra_capacity_planner_max_records,
+                target_utilization_pct=settings.infra_capacity_planner_target_utilization_pct,
+            )
+            icp_mod.set_engine(icp_engine)
+            app.include_router(
+                icp_mod.icp_route,
+                prefix=settings.api_prefix,
+                tags=["Infra Capacity Planner"],
+            )
+            logger.info("infra_capacity_planner_initialized")
+        except Exception as e:
+            logger.warning("infra_capacity_planner_init_failed", error=str(e))
+
+    # ── Phase 39: DNS Health Monitor ──
+    if settings.dns_health_monitor_enabled:
+        try:
+            from shieldops.api.routes import dns_health_monitor as dhm_mod
+            from shieldops.observability.dns_health_monitor import (
+                DNSHealthMonitor as DNSHealthMonitorV2,
+            )
+
+            dhm_engine = DNSHealthMonitorV2(
+                max_records=settings.dns_health_monitor_max_records,
+                max_resolution_ms=settings.dns_health_monitor_max_resolution_ms,
+            )
+            dhm_mod.set_engine(dhm_engine)
+            app.include_router(
+                dhm_mod.dhm_route,
+                prefix=settings.api_prefix,
+                tags=["DNS Health Monitor"],
+            )
+            logger.info("dns_health_monitor_initialized")
+        except Exception as e:
+            logger.warning("dns_health_monitor_init_failed", error=str(e))
+
+    # ── Phase 39: Config Drift Analyzer ──
+    if settings.drift_analyzer_enabled:
+        try:
+            from shieldops.api.routes import drift_analyzer as cda_mod
+            from shieldops.config.drift_analyzer import ConfigDriftAnalyzer
+
+            cda_engine = ConfigDriftAnalyzer(
+                max_records=settings.drift_analyzer_max_records,
+                max_deviation_pct=settings.drift_analyzer_max_deviation_pct,
+            )
+            cda_mod.set_engine(cda_engine)
+            app.include_router(
+                cda_mod.cda_route,
+                prefix=settings.api_prefix,
+                tags=["Config Drift Analyzer"],
+            )
+            logger.info("drift_analyzer_initialized")
+        except Exception as e:
+            logger.warning("drift_analyzer_init_failed", error=str(e))
+
+    # ── Phase 39: Incident Timeline Correlator ──
+    if settings.timeline_correlator_enabled:
+        try:
+            from shieldops.api.routes import timeline_correlator as itc_mod
+            from shieldops.incidents.timeline_correlator import IncidentTimelineCorrelator
+
+            itc_engine = IncidentTimelineCorrelator(
+                max_records=settings.timeline_correlator_max_records,
+                min_confidence_pct=settings.timeline_correlator_min_confidence_pct,
+            )
+            itc_mod.set_engine(itc_engine)
+            app.include_router(
+                itc_mod.itc_route,
+                prefix=settings.api_prefix,
+                tags=["Incident Timeline Correlator"],
+            )
+            logger.info("timeline_correlator_initialized")
+        except Exception as e:
+            logger.warning("timeline_correlator_init_failed", error=str(e))
+
+    # ── Phase 39: Deployment Impact Analyzer ──
+    if settings.deployment_impact_enabled:
+        try:
+            from shieldops.api.routes import deployment_impact as dia_mod
+            from shieldops.changes.deployment_impact import DeploymentImpactAnalyzer
+
+            dia_engine = DeploymentImpactAnalyzer(
+                max_records=settings.deployment_impact_max_records,
+                max_impact_score=settings.deployment_impact_max_impact_score,
+            )
+            dia_mod.set_engine(dia_engine)
+            app.include_router(
+                dia_mod.dia_route,
+                prefix=settings.api_prefix,
+                tags=["Deployment Impact Analyzer"],
+            )
+            logger.info("deployment_impact_initialized")
+        except Exception as e:
+            logger.warning("deployment_impact_init_failed", error=str(e))
+
+    # ── Phase 39: Alert Routing Optimizer ──
+    if settings.alert_routing_optimizer_enabled:
+        try:
+            from shieldops.api.routes import alert_routing_optimizer as aop_mod
+            from shieldops.observability.alert_routing_optimizer import (
+                AlertRoutingOptimizer as AlertRoutingOptimizerV2,
+            )
+
+            aop_engine = AlertRoutingOptimizerV2(
+                max_records=settings.alert_routing_optimizer_max_records,
+                max_response_seconds=settings.alert_routing_optimizer_max_response_seconds,
+            )
+            aop_mod.set_engine(aop_engine)
+            app.include_router(
+                aop_mod.aop_route,
+                prefix=settings.api_prefix,
+                tags=["Alert Routing Optimizer"],
+            )
+            logger.info("alert_routing_optimizer_initialized")
+        except Exception as e:
+            logger.warning("alert_routing_optimizer_init_failed", error=str(e))
+
+    # ── Phase 39: Compliance Posture Scorer ──
+    if settings.compliance_posture_enabled:
+        try:
+            from shieldops.api.routes import compliance_posture as cps_mod
+            from shieldops.compliance.posture_scorer import CompliancePostureScorer
+
+            cps_engine = CompliancePostureScorer(
+                max_records=settings.compliance_posture_max_records,
+                min_score_pct=settings.compliance_posture_min_score_pct,
+            )
+            cps_mod.set_engine(cps_engine)
+            app.include_router(
+                cps_mod.cps_route,
+                prefix=settings.api_prefix,
+                tags=["Compliance Posture Scorer"],
+            )
+            logger.info("compliance_posture_initialized")
+        except Exception as e:
+            logger.warning("compliance_posture_init_failed", error=str(e))
+
+    # ── Phase 39: Team Toil Quantifier ──
+    if settings.toil_quantifier_enabled:
+        try:
+            from shieldops.api.routes import toil_quantifier as ttq_mod
+            from shieldops.operations.toil_quantifier import TeamToilQuantifier
+
+            ttq_engine = TeamToilQuantifier(
+                max_records=settings.toil_quantifier_max_records,
+                max_toil_hours_weekly=settings.toil_quantifier_max_toil_hours_weekly,
+            )
+            ttq_mod.set_engine(ttq_engine)
+            app.include_router(
+                ttq_mod.ttq_route,
+                prefix=settings.api_prefix,
+                tags=["Team Toil Quantifier"],
+            )
+            logger.info("toil_quantifier_initialized")
+        except Exception as e:
+            logger.warning("toil_quantifier_init_failed", error=str(e))
+
+    # ── Phase 39: Platform Governance Dashboard ──
+    if settings.governance_dashboard_enabled:
+        try:
+            from shieldops.api.routes import governance_dashboard as pgd_mod
+            from shieldops.policy.governance_dashboard import PlatformGovernanceDashboard
+
+            pgd_engine = PlatformGovernanceDashboard(
+                max_records=settings.governance_dashboard_max_records,
+                min_governance_score_pct=settings.governance_dashboard_min_governance_score_pct,
+            )
+            pgd_mod.set_engine(pgd_engine)
+            app.include_router(
+                pgd_mod.pgd_route,
+                prefix=settings.api_prefix,
+                tags=["Platform Governance Dashboard"],
+            )
+            logger.info("governance_dashboard_initialized")
+        except Exception as e:
+            logger.warning("governance_dashboard_init_failed", error=str(e))
+
     yield
 
     logger.info("shieldops_shutting_down")

@@ -92,6 +92,14 @@ Deploy ShieldOps agents to target environments.
    - Enforce cross-agent policies via `CrossAgentPolicyEnforcer` (`src/shieldops/policy/cross_agent_enforcer.py`)
    - Coordinate multi-region failover via `MultiRegionFailoverCoordinator` (`src/shieldops/operations/failover_coordinator.py`)
    - Manage capacity bursts via `CapacityBurstManager` (`src/shieldops/operations/burst_manager.py`)
+   - Predict security breaches via `BreachPredictor` (`src/shieldops/security/breach_predictor.py`)
+   - Allocate error budgets via `ErrorBudgetAllocator` (`src/shieldops/sla/error_budget_allocator.py`)
+   - Analyze dependency topology via `DependencyTopologyAnalyzer` (`src/shieldops/topology/dependency_topology.py`)
+   - Plan infra capacity via `InfraCapacityPlanner` (`src/shieldops/operations/infra_capacity_planner.py`)
+   - Monitor DNS health via `DNSHealthMonitor` (`src/shieldops/observability/dns_health_monitor.py`)
+   - Analyze configuration drift via `DriftAnalyzer` (`src/shieldops/operations/drift_analyzer.py`)
+   - Assess deployment impact via `DeploymentImpactAnalyzer` (`src/shieldops/changes/deployment_impact.py`)
+   - Monitor governance posture via `GovernanceDashboard` (`src/shieldops/compliance/governance_dashboard.py`)
 4. **Deploy**:
    - Apply Kubernetes manifests from `infrastructure/kubernetes/`
    - For production: trigger approval workflow via Slack/Teams

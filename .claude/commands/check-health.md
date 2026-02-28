@@ -28,7 +28,7 @@ Run health checks on all ShieldOps platform dependencies.
    - Integration tests: `python3 -m pytest tests/integration/ -v --tb=short`
    - Report: total tests, passed, failed, coverage
 
-5. **Platform feature health** (Phase 11–38 modules):
+5. **Platform feature health** (Phase 11–39 modules):
    - Capacity trends: `src/shieldops/analytics/capacity_trends.py` — CapacityTrendAnalyzer
    - SRE metrics: `src/shieldops/analytics/sre_metrics.py` — SREMetricsAggregator
    - Health reports: `src/shieldops/observability/health_report.py` — ServiceHealthReportGenerator
@@ -230,6 +230,7 @@ Run health checks on all ShieldOps platform dependencies.
    - **Phase 36 (Planned):** Twilio SMS gateway, Twilio voice alerts, Teams notifier, agent swarm coordinator, agent consensus engine, agent knowledge mesh, risk signal aggregator, dynamic risk scorer, predictive alert engine, agent token optimizer, prompt cache manager, agent routing optimizer
    - **Phase 37 (Planned):** Threat hunt orchestrator, security response automator, zero trust verifier, remediation pipeline orchestrator, recovery coordinator, runbook chain executor, SLO auto-scaler, reliability automation engine, incident prevention engine, cross-agent policy enforcer, agent telemetry analyzer, agent compliance auditor
    - **Phase 38 (Planned):** War room orchestrator, root cause verifier, comm automator, security posture simulator, credential rotation orchestrator, compliance evidence automator, chaos experiment automator, multi-region failover coordinator, capacity burst manager, platform cost optimizer, service mesh intelligence, operational runbook generator
+   - **Phase 39 (Planned):** Breach predictor, error budget allocator, dependency topology analyzer, infra capacity planner, DNS health monitor, drift analyzer, deployment impact analyzer, governance dashboard
    - Verify each module initializes in `src/shieldops/api/app.py` lifespan
 
 6. **Check configuration**:
