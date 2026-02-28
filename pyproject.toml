@@ -435,6 +435,18 @@ module = [
     "shieldops.api.routes.tenant_quota",
     "shieldops.api.routes.decision_audit",
     "shieldops.api.routes.retention_policy",
+    "shieldops.api.routes.twilio_sms",
+    "shieldops.api.routes.twilio_voice",
+    "shieldops.api.routes.teams_notifier",
+    "shieldops.api.routes.swarm_coordinator",
+    "shieldops.api.routes.consensus_engine",
+    "shieldops.api.routes.knowledge_mesh",
+    "shieldops.api.routes.risk_aggregator",
+    "shieldops.api.routes.dynamic_risk_scorer",
+    "shieldops.api.routes.predictive_alert",
+    "shieldops.api.routes.token_optimizer",
+    "shieldops.api.routes.prompt_cache",
+    "shieldops.api.routes.routing_optimizer",
 ]
 warn_return_any = false
 disallow_untyped_defs = false
