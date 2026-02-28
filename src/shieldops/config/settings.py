@@ -2035,6 +2035,61 @@ class Settings(BaseSettings):
     impact_predictor_max_records: int = 200000
     impact_predictor_max_impact_score: float = 80.0
 
+    # Phase 44: Incident Response Time Analyzer
+    response_time_enabled: bool = True
+    response_time_max_records: int = 200000
+    response_time_max_response_time_minutes: float = 30.0
+
+    # Phase 44: Service Dependency Risk Scorer
+    service_dep_risk_enabled: bool = True
+    service_dep_risk_max_records: int = 200000
+    service_dep_risk_max_risk_score: float = 80.0
+
+    # Phase 44: Alert Escalation Analyzer
+    alert_escalation_enabled: bool = True
+    alert_escalation_max_records: int = 200000
+    alert_escalation_max_escalation_rate_pct: float = 20.0
+
+    # Phase 44: Capacity Utilization Optimizer
+    capacity_utilizer_enabled: bool = True
+    capacity_utilizer_max_records: int = 200000
+    capacity_utilizer_optimal_utilization_pct: float = 70.0
+
+    # Phase 44: Change Freeze Validator
+    freeze_validator_enabled: bool = True
+    freeze_validator_max_records: int = 200000
+    freeze_validator_max_violation_rate_pct: float = 5.0
+
+    # Phase 44: Platform Availability Tracker
+    availability_tracker_enabled: bool = True
+    availability_tracker_max_records: int = 200000
+    availability_tracker_min_availability_pct: float = 99.9
+
+    # Phase 44: Incident Root Cause Classifier
+    root_cause_classifier_enabled: bool = True
+    root_cause_classifier_max_records: int = 200000
+    root_cause_classifier_min_confidence_pct: float = 70.0
+
+    # Phase 44: Deployment Canary Scorer
+    canary_scorer_enabled: bool = True
+    canary_scorer_max_records: int = 200000
+    canary_scorer_min_canary_score: float = 80.0
+
+    # Phase 44: Config Drift Monitor
+    config_drift_monitor_enabled: bool = True
+    config_drift_monitor_max_records: int = 200000
+    config_drift_monitor_max_drift_count: float = 10.0
+
+    # Phase 44: Security Compliance Mapper
+    compliance_mapper_enabled: bool = True
+    compliance_mapper_max_records: int = 200000
+    compliance_mapper_min_compliance_score: float = 80.0
+
+    # Phase 44: Team On-Call Equity Analyzer
+    oncall_equity_enabled: bool = True
+    oncall_equity_max_records: int = 200000
+    oncall_equity_max_inequity_pct: float = 25.0
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",

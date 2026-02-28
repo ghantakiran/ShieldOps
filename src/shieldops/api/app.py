@@ -9441,6 +9441,248 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         except Exception as e:
             logger.warning("impact_predictor_init_failed", error=str(e))
 
+    # --- Phase 44: Incident Response Time Analyzer ---
+    if settings.response_time_enabled:
+        try:
+            from shieldops.api.routes import response_time as rta_mod
+            from shieldops.incidents.response_time import (
+                IncidentResponseTimeAnalyzer,
+            )
+
+            rta_engine = IncidentResponseTimeAnalyzer(
+                max_records=settings.response_time_max_records,
+                max_response_time_minutes=settings.response_time_max_response_time_minutes,
+            )
+            rta_mod.set_engine(rta_engine)
+            app.include_router(
+                rta_mod.rta_route,
+                prefix=settings.api_prefix,
+                tags=["Response Time"],
+            )
+            logger.info("response_time_initialized")
+        except Exception as e:
+            logger.warning("response_time_init_failed", error=str(e))
+
+    # --- Phase 44: Service Dependency Risk Scorer ---
+    if settings.service_dep_risk_enabled:
+        try:
+            from shieldops.api.routes import service_dep_risk as sdr_mod
+            from shieldops.topology.service_dep_risk import (
+                ServiceDependencyRiskScorer,
+            )
+
+            sdr_engine = ServiceDependencyRiskScorer(
+                max_records=settings.service_dep_risk_max_records,
+                max_risk_score=settings.service_dep_risk_max_risk_score,
+            )
+            sdr_mod.set_engine(sdr_engine)
+            app.include_router(
+                sdr_mod.sdr_route,
+                prefix=settings.api_prefix,
+                tags=["Service Dependency Risk"],
+            )
+            logger.info("service_dep_risk_initialized")
+        except Exception as e:
+            logger.warning("service_dep_risk_init_failed", error=str(e))
+
+    # --- Phase 44: Alert Escalation Analyzer ---
+    if settings.alert_escalation_enabled:
+        try:
+            from shieldops.api.routes import alert_escalation as ean_mod
+            from shieldops.observability.escalation_analyzer import (
+                AlertEscalationAnalyzer,
+            )
+
+            ean_engine = AlertEscalationAnalyzer(
+                max_records=settings.alert_escalation_max_records,
+                max_escalation_rate_pct=settings.alert_escalation_max_escalation_rate_pct,
+            )
+            ean_mod.set_engine(ean_engine)
+            app.include_router(
+                ean_mod.ean_route,
+                prefix=settings.api_prefix,
+                tags=["Alert Escalation"],
+            )
+            logger.info("alert_escalation_initialized")
+        except Exception as e:
+            logger.warning("alert_escalation_init_failed", error=str(e))
+
+    # --- Phase 44: Capacity Utilization Optimizer ---
+    if settings.capacity_utilizer_enabled:
+        try:
+            from shieldops.api.routes import capacity_utilizer as cup_mod
+            from shieldops.billing.capacity_utilizer import (
+                CapacityUtilizationOptimizer,
+            )
+
+            cup_engine = CapacityUtilizationOptimizer(
+                max_records=settings.capacity_utilizer_max_records,
+                optimal_utilization_pct=settings.capacity_utilizer_optimal_utilization_pct,
+            )
+            cup_mod.set_engine(cup_engine)
+            app.include_router(
+                cup_mod.cup_route,
+                prefix=settings.api_prefix,
+                tags=["Capacity Utilization"],
+            )
+            logger.info("capacity_utilizer_initialized")
+        except Exception as e:
+            logger.warning("capacity_utilizer_init_failed", error=str(e))
+
+    # --- Phase 44: Change Freeze Validator ---
+    if settings.freeze_validator_enabled:
+        try:
+            from shieldops.api.routes import freeze_validator as cfv_mod
+            from shieldops.changes.freeze_validator import (
+                ChangeFreezeValidator,
+            )
+
+            cfv_engine = ChangeFreezeValidator(
+                max_records=settings.freeze_validator_max_records,
+                max_violation_rate_pct=settings.freeze_validator_max_violation_rate_pct,
+            )
+            cfv_mod.set_engine(cfv_engine)
+            app.include_router(
+                cfv_mod.cfv_route,
+                prefix=settings.api_prefix,
+                tags=["Change Freeze Validator"],
+            )
+            logger.info("freeze_validator_initialized")
+        except Exception as e:
+            logger.warning("freeze_validator_init_failed", error=str(e))
+
+    # --- Phase 44: Platform Availability Tracker ---
+    if settings.availability_tracker_enabled:
+        try:
+            from shieldops.api.routes import availability_tracker as pat_mod
+            from shieldops.sla.availability_tracker import (
+                PlatformAvailabilityTracker,
+            )
+
+            pat_engine = PlatformAvailabilityTracker(
+                max_records=settings.availability_tracker_max_records,
+                min_availability_pct=settings.availability_tracker_min_availability_pct,
+            )
+            pat_mod.set_engine(pat_engine)
+            app.include_router(
+                pat_mod.pat_route,
+                prefix=settings.api_prefix,
+                tags=["Platform Availability"],
+            )
+            logger.info("availability_tracker_initialized")
+        except Exception as e:
+            logger.warning("availability_tracker_init_failed", error=str(e))
+
+    # --- Phase 44: Incident Root Cause Classifier ---
+    if settings.root_cause_classifier_enabled:
+        try:
+            from shieldops.api.routes import root_cause_classifier as rcc2_mod
+            from shieldops.incidents.root_cause_classifier import (
+                IncidentRootCauseClassifier,
+            )
+
+            rcc2_engine = IncidentRootCauseClassifier(
+                max_records=settings.root_cause_classifier_max_records,
+                min_confidence_pct=settings.root_cause_classifier_min_confidence_pct,
+            )
+            rcc2_mod.set_engine(rcc2_engine)
+            app.include_router(
+                rcc2_mod.rcc_route,
+                prefix=settings.api_prefix,
+                tags=["Root Cause Classifier"],
+            )
+            logger.info("root_cause_classifier_initialized")
+        except Exception as e:
+            logger.warning("root_cause_classifier_init_failed", error=str(e))
+
+    # --- Phase 44: Deployment Canary Scorer ---
+    if settings.canary_scorer_enabled:
+        try:
+            from shieldops.api.routes import canary_scorer as dcs_mod
+            from shieldops.changes.canary_scorer import (
+                DeploymentCanaryScorer,
+            )
+
+            dcs_engine = DeploymentCanaryScorer(
+                max_records=settings.canary_scorer_max_records,
+                min_canary_score=settings.canary_scorer_min_canary_score,
+            )
+            dcs_mod.set_engine(dcs_engine)
+            app.include_router(
+                dcs_mod.dcs_route,
+                prefix=settings.api_prefix,
+                tags=["Canary Scorer"],
+            )
+            logger.info("canary_scorer_initialized")
+        except Exception as e:
+            logger.warning("canary_scorer_init_failed", error=str(e))
+
+    # --- Phase 44: Config Drift Monitor ---
+    if settings.config_drift_monitor_enabled:
+        try:
+            from shieldops.api.routes import config_drift_monitor as cdm2_mod
+            from shieldops.operations.config_drift_monitor import (
+                ConfigDriftMonitor,
+            )
+
+            cdm2_engine = ConfigDriftMonitor(
+                max_records=settings.config_drift_monitor_max_records,
+                max_drift_count=settings.config_drift_monitor_max_drift_count,
+            )
+            cdm2_mod.set_engine(cdm2_engine)
+            app.include_router(
+                cdm2_mod.cdm_route,
+                prefix=settings.api_prefix,
+                tags=["Config Drift Monitor"],
+            )
+            logger.info("config_drift_monitor_initialized")
+        except Exception as e:
+            logger.warning("config_drift_monitor_init_failed", error=str(e))
+
+    # --- Phase 44: Security Compliance Mapper ---
+    if settings.compliance_mapper_enabled:
+        try:
+            from shieldops.api.routes import compliance_mapper as scm2_mod
+            from shieldops.security.compliance_mapper import (
+                SecurityComplianceMapper,
+            )
+
+            scm2_engine = SecurityComplianceMapper(
+                max_records=settings.compliance_mapper_max_records,
+                min_compliance_score=settings.compliance_mapper_min_compliance_score,
+            )
+            scm2_mod.set_engine(scm2_engine)
+            app.include_router(
+                scm2_mod.scm2_route,
+                prefix=settings.api_prefix,
+                tags=["Security Compliance Mapper"],
+            )
+            logger.info("compliance_mapper_initialized")
+        except Exception as e:
+            logger.warning("compliance_mapper_init_failed", error=str(e))
+
+    # --- Phase 44: Team On-Call Equity Analyzer ---
+    if settings.oncall_equity_enabled:
+        try:
+            from shieldops.api.routes import oncall_equity as oce_mod
+            from shieldops.operations.oncall_equity import (
+                TeamOnCallEquityAnalyzer,
+            )
+
+            oce_engine = TeamOnCallEquityAnalyzer(
+                max_records=settings.oncall_equity_max_records,
+                max_inequity_pct=settings.oncall_equity_max_inequity_pct,
+            )
+            oce_mod.set_engine(oce_engine)
+            app.include_router(
+                oce_mod.oce_route,
+                prefix=settings.api_prefix,
+                tags=["On-Call Equity"],
+            )
+            logger.info("oncall_equity_initialized")
+        except Exception as e:
+            logger.warning("oncall_equity_init_failed", error=str(e))
+
     yield
 
     logger.info("shieldops_shutting_down")

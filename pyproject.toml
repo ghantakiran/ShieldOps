@@ -531,6 +531,17 @@ module = [
     "shieldops.api.routes.report_automator",
     "shieldops.api.routes.infra_health_scorer",
     "shieldops.api.routes.impact_predictor",
+    "shieldops.api.routes.response_time",
+    "shieldops.api.routes.service_dep_risk",
+    "shieldops.api.routes.alert_escalation",
+    "shieldops.api.routes.capacity_utilizer",
+    "shieldops.api.routes.freeze_validator",
+    "shieldops.api.routes.availability_tracker",
+    "shieldops.api.routes.root_cause_classifier",
+    "shieldops.api.routes.canary_scorer",
+    "shieldops.api.routes.config_drift_monitor",
+    "shieldops.api.routes.compliance_mapper",
+    "shieldops.api.routes.oncall_equity",
 ]
 warn_return_any = false
 disallow_untyped_defs = false

@@ -28,7 +28,7 @@ Run health checks on all ShieldOps platform dependencies.
    - Integration tests: `python3 -m pytest tests/integration/ -v --tb=short`
    - Report: total tests, passed, failed, coverage
 
-5. **Platform feature health** (Phase 11–43 modules):
+5. **Platform feature health** (Phase 11–44 modules):
    - Capacity trends: `src/shieldops/analytics/capacity_trends.py` — CapacityTrendAnalyzer
    - SRE metrics: `src/shieldops/analytics/sre_metrics.py` — SREMetricsAggregator
    - Health reports: `src/shieldops/observability/health_report.py` — ServiceHealthReportGenerator
@@ -278,6 +278,17 @@ Run health checks on all ShieldOps platform dependencies.
    - Compliance report automator: `src/shieldops/compliance/report_automator.py` — ComplianceReportAutomator
    - Infrastructure health scorer: `src/shieldops/topology/infra_health_scorer.py` — InfrastructureHealthScorer
    - Deployment impact predictor: `src/shieldops/changes/impact_predictor.py` — DeploymentImpactPredictor
+   - **Phase 44:** Response time analyzer: `src/shieldops/incidents/response_time.py` — IncidentResponseTimeAnalyzer
+   - Service dep risk scorer: `src/shieldops/topology/service_dep_risk.py` — ServiceDependencyRiskScorer
+   - Alert escalation analyzer: `src/shieldops/observability/escalation_analyzer.py` — AlertEscalationAnalyzer
+   - Capacity utilization optimizer: `src/shieldops/billing/capacity_utilizer.py` — CapacityUtilizationOptimizer
+   - Change freeze validator: `src/shieldops/changes/freeze_validator.py` — ChangeFreezeValidator
+   - Platform availability tracker: `src/shieldops/sla/availability_tracker.py` — PlatformAvailabilityTracker
+   - Root cause classifier: `src/shieldops/incidents/root_cause_classifier.py` — IncidentRootCauseClassifier
+   - Canary scorer: `src/shieldops/changes/canary_scorer.py` — DeploymentCanaryScorer
+   - Config drift monitor: `src/shieldops/operations/config_drift_monitor.py` — ConfigDriftMonitor
+   - Security compliance mapper: `src/shieldops/security/compliance_mapper.py` — SecurityComplianceMapper
+   - On-call equity analyzer: `src/shieldops/operations/oncall_equity.py` — TeamOnCallEquityAnalyzer
    - Verify each module initializes in `src/shieldops/api/app.py` lifespan
 
 6. **Check configuration**:
