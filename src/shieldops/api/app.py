@@ -11475,6 +11475,254 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         except Exception as e:
             logger.warning("access_review_init_failed", error=str(e))
 
+    # Phase 52: Incident Pattern Detector
+    if settings.incident_pattern_enabled:
+        try:
+            from shieldops.api.routes import incident_pattern as ipt_mod
+            from shieldops.incidents.incident_pattern import IncidentPatternDetector
+
+            _ipt_engine = IncidentPatternDetector(
+                max_records=settings.incident_pattern_max_records,
+                max_critical_pattern_pct=settings.incident_pattern_max_critical_pattern_pct,
+            )
+            ipt_mod.set_engine(_ipt_engine)
+            app.include_router(
+                ipt_mod.ipt_route,
+                prefix=settings.api_prefix,
+                tags=["Incident Pattern"],
+            )
+            logger.info("incident_pattern_initialized")
+        except Exception as e:
+            logger.warning("incident_pattern_init_failed", error=str(e))
+
+    # Phase 52: Escalation Path Analyzer
+    if settings.escalation_path_enabled:
+        try:
+            from shieldops.api.routes import escalation_path as esp_mod
+            from shieldops.incidents.escalation_path import EscalationPathAnalyzer
+
+            _esp_engine = EscalationPathAnalyzer(
+                max_records=settings.escalation_path_max_records,
+                max_resolution_time_minutes=settings.escalation_path_max_resolution_time_minutes,
+            )
+            esp_mod.set_engine(_esp_engine)
+            app.include_router(
+                esp_mod.esp_route,
+                prefix=settings.api_prefix,
+                tags=["Escalation Path"],
+            )
+            logger.info("escalation_path_initialized")
+        except Exception as e:
+            logger.warning("escalation_path_init_failed", error=str(e))
+
+    # Phase 52: Dependency Freshness Monitor
+    if settings.dependency_freshness_monitor_enabled:
+        try:
+            from shieldops.api.routes import dependency_freshness_monitor as dfm_mod
+            from shieldops.topology.dependency_freshness_monitor import (
+                DependencyFreshnessMonitor as DFMEngine,
+            )
+
+            _dfm_engine = DFMEngine(
+                max_records=settings.dependency_freshness_monitor_max_records,
+                max_stale_pct=settings.dependency_freshness_monitor_max_stale_pct,
+            )
+            dfm_mod.set_engine(_dfm_engine)
+            app.include_router(
+                dfm_mod.dfm_route,
+                prefix=settings.api_prefix,
+                tags=["Dependency Freshness"],
+            )
+            logger.info("dependency_freshness_monitor_initialized")
+        except Exception as e:
+            logger.warning("dependency_freshness_monitor_init_failed", error=str(e))
+
+    # Phase 52: Cost Attribution Engine
+    if settings.cost_attribution_engine_enabled:
+        try:
+            from shieldops.api.routes import cost_attribution_engine as caen_mod
+            from shieldops.billing.cost_attribution_engine import (
+                CostAttributionEngine as CAEEngine,
+            )
+
+            _caen_engine = CAEEngine(
+                max_records=settings.cost_attribution_engine_max_records,
+                max_disputed_pct=settings.cost_attribution_engine_max_disputed_pct,
+            )
+            caen_mod.set_engine(_caen_engine)
+            app.include_router(
+                caen_mod.cae_route,
+                prefix=settings.api_prefix,
+                tags=["Cost Attribution"],
+            )
+            logger.info("cost_attribution_engine_initialized")
+        except Exception as e:
+            logger.warning("cost_attribution_engine_init_failed", error=str(e))
+
+    # Phase 52: Deploy Rollback Health Tracker
+    if settings.deploy_rollback_health_enabled:
+        try:
+            from shieldops.api.routes import deploy_rollback_health as drh_mod
+            from shieldops.changes.deploy_rollback_health import DeployRollbackHealthTracker
+
+            _drh_engine = DeployRollbackHealthTracker(
+                max_records=settings.deploy_rollback_health_max_records,
+                max_recovery_time_seconds=settings.deploy_rollback_health_max_recovery_time_seconds,
+            )
+            drh_mod.set_engine(_drh_engine)
+            app.include_router(
+                drh_mod.drh_route,
+                prefix=settings.api_prefix,
+                tags=["Deploy Rollback Health"],
+            )
+            logger.info("deploy_rollback_health_initialized")
+        except Exception as e:
+            logger.warning("deploy_rollback_health_init_failed", error=str(e))
+
+    # Phase 52: SLO Error Budget Tracker
+    if settings.slo_error_budget_tracker_enabled:
+        try:
+            from shieldops.api.routes import slo_error_budget_tracker as ebt_mod
+            from shieldops.sla.slo_error_budget_tracker import SLOErrorBudgetTracker
+
+            _ebt_engine = SLOErrorBudgetTracker(
+                max_records=settings.slo_error_budget_tracker_max_records,
+                min_remaining_budget_pct=settings.slo_error_budget_tracker_min_remaining_budget_pct,
+            )
+            ebt_mod.set_engine(_ebt_engine)
+            app.include_router(
+                ebt_mod.ebt_route,
+                prefix=settings.api_prefix,
+                tags=["SLO Error Budget"],
+            )
+            logger.info("slo_error_budget_tracker_initialized")
+        except Exception as e:
+            logger.warning("slo_error_budget_tracker_init_failed", error=str(e))
+
+    # Phase 52: Operational Readiness Scorer
+    if settings.operational_readiness_enabled:
+        try:
+            from shieldops.api.routes import operational_readiness as opr_mod
+            from shieldops.operations.operational_readiness import (
+                OperationalReadinessScorer as OPRScorer,
+            )
+
+            _opr_engine = OPRScorer(
+                max_records=settings.operational_readiness_max_records,
+                min_readiness_score=settings.operational_readiness_min_readiness_score,
+            )
+            opr_mod.set_engine(_opr_engine)
+            app.include_router(
+                opr_mod.opr_route,
+                prefix=settings.api_prefix,
+                tags=["Operational Readiness"],
+            )
+            logger.info("operational_readiness_initialized")
+        except Exception as e:
+            logger.warning("operational_readiness_init_failed", error=str(e))
+
+    # Phase 52: Threat Intelligence Tracker
+    if settings.threat_intelligence_enabled:
+        try:
+            from shieldops.api.routes import threat_intelligence as tin_mod
+            from shieldops.security.threat_intelligence import ThreatIntelligenceTracker
+
+            _tin_engine = ThreatIntelligenceTracker(
+                max_records=settings.threat_intelligence_max_records,
+                min_threat_confidence_pct=settings.threat_intelligence_min_threat_confidence_pct,
+            )
+            tin_mod.set_engine(_tin_engine)
+            app.include_router(
+                tin_mod.tin_route,
+                prefix=settings.api_prefix,
+                tags=["Threat Intelligence"],
+            )
+            logger.info("threat_intelligence_initialized")
+        except Exception as e:
+            logger.warning("threat_intelligence_init_failed", error=str(e))
+
+    # Phase 52: Knowledge Graph Manager
+    if settings.knowledge_graph_enabled:
+        try:
+            from shieldops.api.routes import knowledge_graph as kgm_mod
+            from shieldops.knowledge.knowledge_graph import KnowledgeGraphManager
+
+            _kgm_engine = KnowledgeGraphManager(
+                max_records=settings.knowledge_graph_max_records,
+                max_orphan_pct=settings.knowledge_graph_max_orphan_pct,
+            )
+            kgm_mod.set_engine(_kgm_engine)
+            app.include_router(
+                kgm_mod.kgm_route,
+                prefix=settings.api_prefix,
+                tags=["Knowledge Graph"],
+            )
+            logger.info("knowledge_graph_initialized")
+        except Exception as e:
+            logger.warning("knowledge_graph_init_failed", error=str(e))
+
+    # Phase 52: Compliance Evidence Chain Tracker
+    if settings.compliance_evidence_chain_enabled:
+        try:
+            from shieldops.api.routes import compliance_evidence_chain as cec_mod
+            from shieldops.compliance.compliance_evidence_chain import (
+                ComplianceEvidenceChainTracker,
+            )
+
+            _cec_engine = ComplianceEvidenceChainTracker(
+                max_records=settings.compliance_evidence_chain_max_records,
+                max_broken_chain_pct=settings.compliance_evidence_chain_max_broken_chain_pct,
+            )
+            cec_mod.set_engine(_cec_engine)
+            app.include_router(
+                cec_mod.cec_route,
+                prefix=settings.api_prefix,
+                tags=["Compliance Evidence Chain"],
+            )
+            logger.info("compliance_evidence_chain_initialized")
+        except Exception as e:
+            logger.warning("compliance_evidence_chain_init_failed", error=str(e))
+
+    # Phase 52: Capacity Headroom Analyzer
+    if settings.capacity_headroom_enabled:
+        try:
+            from shieldops.analytics.capacity_headroom import CapacityHeadroomAnalyzer
+            from shieldops.api.routes import capacity_headroom as chm_mod
+
+            _chm_engine = CapacityHeadroomAnalyzer(
+                max_records=settings.capacity_headroom_max_records,
+                min_headroom_pct=settings.capacity_headroom_min_headroom_pct,
+            )
+            chm_mod.set_engine(_chm_engine)
+            app.include_router(
+                chm_mod.chm_route,
+                prefix=settings.api_prefix,
+                tags=["Capacity Headroom"],
+            )
+            logger.info("capacity_headroom_initialized")
+        except Exception as e:
+            logger.warning("capacity_headroom_init_failed", error=str(e))
+
+    # Phase 52: Change Velocity Tracker
+    if settings.change_velocity_enabled:
+        try:
+            from shieldops.api.routes import change_velocity as cvl_mod
+            from shieldops.changes.change_velocity import ChangeVelocityTracker
+
+            _cvl_engine = ChangeVelocityTracker(
+                max_records=settings.change_velocity_max_records,
+                max_changes_per_day=settings.change_velocity_max_changes_per_day,
+            )
+            cvl_mod.set_engine(_cvl_engine)
+            app.include_router(
+                cvl_mod.cvl_route,
+                prefix=settings.api_prefix,
+                tags=["Change Velocity"],
+            )
+            logger.info("change_velocity_initialized")
+        except Exception as e:
+            logger.warning("change_velocity_init_failed", error=str(e))
+
     yield
 
     logger.info("shieldops_shutting_down")
