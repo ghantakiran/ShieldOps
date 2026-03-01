@@ -554,6 +554,18 @@ module = [
     "shieldops.api.routes.control_tester",
     "shieldops.api.routes.bottleneck_detector",
     "shieldops.api.routes.anomaly_scorer",
+    "shieldops.api.routes.noise_filter",
+    "shieldops.api.routes.dep_validator",
+    "shieldops.api.routes.alert_priority",
+    "shieldops.api.routes.cost_alloc_validator",
+    "shieldops.api.routes.change_correlator",
+    "shieldops.api.routes.slo_dep_mapper",
+    "shieldops.api.routes.metric_aggregator",
+    "shieldops.api.routes.event_correlator",
+    "shieldops.api.routes.search_optimizer",
+    "shieldops.api.routes.evidence_consolidator",
+    "shieldops.api.routes.service_latency",
+    "shieldops.api.routes.compliance_reporter",
 ]
 warn_return_any = false
 disallow_untyped_defs = false

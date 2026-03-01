@@ -9959,6 +9959,270 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         except Exception as e:
             logger.warning("anomaly_scorer_init_failed", error=str(e))
 
+    # -- Phase 46: Incident Noise Filter --
+    if settings.noise_filter_enabled:
+        try:
+            from shieldops.api.routes import noise_filter as inf_mod
+            from shieldops.incidents.noise_filter import (
+                IncidentNoiseFilter,
+            )
+
+            _inf_engine = IncidentNoiseFilter(
+                max_records=settings.noise_filter_max_records,
+                max_false_alarm_rate_pct=settings.noise_filter_max_false_alarm_rate_pct,
+            )
+            inf_mod.set_engine(_inf_engine)
+            app.include_router(
+                inf_mod.inf_route,
+                prefix=settings.api_prefix,
+                tags=["Noise Filter"],
+            )
+            logger.info("noise_filter_initialized")
+        except Exception as e:
+            logger.warning("noise_filter_init_failed", error=str(e))
+
+    # -- Phase 46: Service Dependency Validator --
+    if settings.dep_validator_enabled:
+        try:
+            from shieldops.api.routes import dep_validator as dvl_mod
+            from shieldops.topology.dep_validator import (
+                ServiceDependencyValidator,
+            )
+
+            _dvl_engine = ServiceDependencyValidator(
+                max_records=settings.dep_validator_max_records,
+                max_invalid_pct=settings.dep_validator_max_invalid_pct,
+            )
+            dvl_mod.set_engine(_dvl_engine)
+            app.include_router(
+                dvl_mod.dvl_route,
+                prefix=settings.api_prefix,
+                tags=["Dependency Validator"],
+            )
+            logger.info("dep_validator_initialized")
+        except Exception as e:
+            logger.warning("dep_validator_init_failed", error=str(e))
+
+    # -- Phase 46: Alert Priority Optimizer --
+    if settings.alert_priority_enabled:
+        try:
+            from shieldops.api.routes import alert_priority as apo_mod
+            from shieldops.observability.alert_priority import (
+                AlertPriorityOptimizer,
+            )
+
+            _apo_engine = AlertPriorityOptimizer(
+                max_records=settings.alert_priority_max_records,
+                max_misalignment_pct=settings.alert_priority_max_misalignment_pct,
+            )
+            apo_mod.set_engine(_apo_engine)
+            app.include_router(
+                apo_mod.apo_route,
+                prefix=settings.api_prefix,
+                tags=["Alert Priority"],
+            )
+            logger.info("alert_priority_initialized")
+        except Exception as e:
+            logger.warning("alert_priority_init_failed", error=str(e))
+
+    # -- Phase 46: Cost Allocation Validator --
+    if settings.cost_alloc_validator_enabled:
+        try:
+            from shieldops.api.routes import cost_alloc_validator as cav_mod
+            from shieldops.billing.cost_alloc_validator import (
+                CostAllocationValidator,
+            )
+
+            _cav_engine = CostAllocationValidator(
+                max_records=settings.cost_alloc_validator_max_records,
+                max_variance_pct=settings.cost_alloc_validator_max_variance_pct,
+            )
+            cav_mod.set_engine(_cav_engine)
+            app.include_router(
+                cav_mod.cav_route,
+                prefix=settings.api_prefix,
+                tags=["Cost Allocation Validator"],
+            )
+            logger.info("cost_alloc_validator_initialized")
+        except Exception as e:
+            logger.warning("cost_alloc_validator_init_failed", error=str(e))
+
+    # -- Phase 46: Change Correlation Engine --
+    if settings.change_correlator_enabled:
+        try:
+            from shieldops.api.routes import change_correlator as ccr_mod
+            from shieldops.changes.change_correlator import (
+                ChangeCorrelationEngine,
+            )
+
+            _ccr_engine = ChangeCorrelationEngine(
+                max_records=settings.change_correlator_max_records,
+                min_correlation_strength_pct=settings.change_correlator_min_correlation_strength_pct,
+            )
+            ccr_mod.set_engine(_ccr_engine)
+            app.include_router(
+                ccr_mod.ccr_route,
+                prefix=settings.api_prefix,
+                tags=["Change Correlator"],
+            )
+            logger.info("change_correlator_initialized")
+        except Exception as e:
+            logger.warning("change_correlator_init_failed", error=str(e))
+
+    # -- Phase 46: SLO Dependency Mapper --
+    if settings.slo_dep_mapper_enabled:
+        try:
+            from shieldops.api.routes import slo_dep_mapper as sdm_mod
+            from shieldops.sla.slo_dep_mapper import (
+                SLODependencyMapper,
+            )
+
+            _sdm_engine = SLODependencyMapper(
+                max_records=settings.slo_dep_mapper_max_records,
+                min_slo_target_pct=settings.slo_dep_mapper_min_slo_target_pct,
+            )
+            sdm_mod.set_engine(_sdm_engine)
+            app.include_router(
+                sdm_mod.sdm_route,
+                prefix=settings.api_prefix,
+                tags=["SLO Dependency Mapper"],
+            )
+            logger.info("slo_dep_mapper_initialized")
+        except Exception as e:
+            logger.warning("slo_dep_mapper_init_failed", error=str(e))
+
+    # -- Phase 46: Operational Metric Aggregator --
+    if settings.metric_aggregator_enabled:
+        try:
+            from shieldops.api.routes import metric_aggregator as oma_mod
+            from shieldops.operations.metric_aggregator import (
+                OperationalMetricAggregator,
+            )
+
+            _oma_engine = OperationalMetricAggregator(
+                max_records=settings.metric_aggregator_max_records,
+                min_metric_health_pct=settings.metric_aggregator_min_metric_health_pct,
+            )
+            oma_mod.set_engine(_oma_engine)
+            app.include_router(
+                oma_mod.oma_route,
+                prefix=settings.api_prefix,
+                tags=["Metric Aggregator"],
+            )
+            logger.info("metric_aggregator_initialized")
+        except Exception as e:
+            logger.warning("metric_aggregator_init_failed", error=str(e))
+
+    # -- Phase 46: Security Event Correlator --
+    if settings.security_event_correlator_enabled:
+        try:
+            from shieldops.api.routes import event_correlator as sec_mod
+            from shieldops.security.event_correlator import (
+                SecurityEventCorrelator,
+            )
+
+            _sec_engine = SecurityEventCorrelator(
+                max_records=settings.security_event_correlator_max_records,
+                min_threat_confidence_pct=settings.security_event_correlator_min_threat_confidence_pct,
+            )
+            sec_mod.set_engine(_sec_engine)
+            app.include_router(
+                sec_mod.sec_route,
+                prefix=settings.api_prefix,
+                tags=["Event Correlator"],
+            )
+            logger.info("security_event_correlator_initialized")
+        except Exception as e:
+            logger.warning("security_event_correlator_init_failed", error=str(e))
+
+    # -- Phase 46: Knowledge Search Optimizer --
+    if settings.knowledge_search_enabled:
+        try:
+            from shieldops.api.routes import search_optimizer as kso_mod
+            from shieldops.knowledge.search_optimizer import (
+                KnowledgeSearchOptimizer,
+            )
+
+            _kso_engine = KnowledgeSearchOptimizer(
+                max_records=settings.knowledge_search_max_records,
+                min_relevance_score=settings.knowledge_search_min_relevance_score,
+            )
+            kso_mod.set_engine(_kso_engine)
+            app.include_router(
+                kso_mod.kso_route,
+                prefix=settings.api_prefix,
+                tags=["Search Optimizer"],
+            )
+            logger.info("knowledge_search_initialized")
+        except Exception as e:
+            logger.warning("knowledge_search_init_failed", error=str(e))
+
+    # -- Phase 46: Compliance Evidence Consolidator --
+    if settings.evidence_consolidator_enabled:
+        try:
+            from shieldops.api.routes import evidence_consolidator as ecn_mod
+            from shieldops.compliance.evidence_consolidator import (
+                ComplianceEvidenceConsolidator,
+            )
+
+            _ecn_engine = ComplianceEvidenceConsolidator(
+                max_records=settings.evidence_consolidator_max_records,
+                min_completeness_pct=settings.evidence_consolidator_min_completeness_pct,
+            )
+            ecn_mod.set_engine(_ecn_engine)
+            app.include_router(
+                ecn_mod.ecn_route,
+                prefix=settings.api_prefix,
+                tags=["Evidence Consolidator"],
+            )
+            logger.info("evidence_consolidator_initialized")
+        except Exception as e:
+            logger.warning("evidence_consolidator_init_failed", error=str(e))
+
+    # -- Phase 46: Service Latency Analyzer --
+    if settings.service_latency_enabled:
+        try:
+            from shieldops.analytics.service_latency import (
+                ServiceLatencyAnalyzer,
+            )
+            from shieldops.api.routes import service_latency as slt_mod
+
+            _slt_engine = ServiceLatencyAnalyzer(
+                max_records=settings.service_latency_max_records,
+                max_latency_threshold_ms=settings.service_latency_max_latency_threshold_ms,
+            )
+            slt_mod.set_engine(_slt_engine)
+            app.include_router(
+                slt_mod.slt_route,
+                prefix=settings.api_prefix,
+                tags=["Service Latency"],
+            )
+            logger.info("service_latency_initialized")
+        except Exception as e:
+            logger.warning("service_latency_init_failed", error=str(e))
+
+    # -- Phase 46: Audit Compliance Reporter --
+    if settings.audit_compliance_reporter_enabled:
+        try:
+            from shieldops.api.routes import compliance_reporter as acr_mod
+            from shieldops.audit.compliance_reporter import (
+                AuditComplianceReporter,
+            )
+
+            _acr_engine = AuditComplianceReporter(
+                max_records=settings.audit_compliance_reporter_max_records,
+                min_compliance_score=settings.audit_compliance_reporter_min_compliance_score,
+            )
+            acr_mod.set_engine(_acr_engine)
+            app.include_router(
+                acr_mod.acr_route,
+                prefix=settings.api_prefix,
+                tags=["Compliance Reporter"],
+            )
+            logger.info("audit_compliance_reporter_initialized")
+        except Exception as e:
+            logger.warning("audit_compliance_reporter_init_failed", error=str(e))
+
     yield
 
     logger.info("shieldops_shutting_down")

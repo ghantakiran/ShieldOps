@@ -134,6 +134,10 @@ Deploy ShieldOps agents to target environments.
    - Score canary deployments via `DeploymentCanaryScorer` (`src/shieldops/changes/canary_scorer.py`)
    - Track runbook executions via `RunbookExecutionTracker` (`src/shieldops/operations/runbook_exec_tracker.py`)
    - Detect bottlenecks via `CapacityBottleneckDetector` (`src/shieldops/analytics/bottleneck_detector.py`)
+   - Validate dependencies via `ServiceDependencyValidator` (`src/shieldops/topology/dep_validator.py`)
+   - Validate cost allocations via `CostAllocationValidator` (`src/shieldops/billing/cost_alloc_validator.py`)
+   - Correlate changes via `ChangeCorrelationEngine` (`src/shieldops/changes/change_correlator.py`)
+   - Analyze service latency via `ServiceLatencyAnalyzer` (`src/shieldops/analytics/service_latency.py`)
 4. **Deploy**:
    - Apply Kubernetes manifests from `infrastructure/kubernetes/`
    - For production: trigger approval workflow via Slack/Teams

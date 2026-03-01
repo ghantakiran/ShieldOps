@@ -253,6 +253,17 @@ Design new ShieldOps components, APIs, or agent workflows.
    - Test compliance controls via `ComplianceControlTester` (`src/shieldops/compliance/control_tester.py`)
    - Detect bottlenecks via `CapacityBottleneckDetector` (`src/shieldops/analytics/bottleneck_detector.py`)
    - Score metric anomalies via `MetricAnomalyScorer` (`src/shieldops/analytics/anomaly_scorer.py`)
+   - Filter incident noise via `IncidentNoiseFilter` (`src/shieldops/incidents/noise_filter.py`)
+   - Optimize alert priority via `AlertPriorityOptimizer` (`src/shieldops/observability/alert_priority.py`)
+   - Map SLO dependencies via `SLODependencyMapper` (`src/shieldops/sla/slo_dep_mapper.py`)
+   - Aggregate operational metrics via `OperationalMetricAggregator` (`src/shieldops/operations/metric_aggregator.py`)
+   - Correlate security events via `SecurityEventCorrelator` (`src/shieldops/security/event_correlator.py`)
+   - Optimize knowledge search via `KnowledgeSearchOptimizer` (`src/shieldops/knowledge/search_optimizer.py`)
+   - Consolidate evidence via `ComplianceEvidenceConsolidator` (`src/shieldops/compliance/evidence_consolidator.py`)
+   - Report audit compliance via `AuditComplianceReporter` (`src/shieldops/audit/compliance_reporter.py`)
+   - Analyze service latency via `ServiceLatencyAnalyzer` (`src/shieldops/analytics/service_latency.py`)
+   - Validate dependencies via `ServiceDependencyValidator` (`src/shieldops/topology/dep_validator.py`)
+   - Validate cost allocations via `CostAllocationValidator` (`src/shieldops/billing/cost_alloc_validator.py`)
 
 5. **Documentation**:
    - Write Architecture Decision Record (ADR) in `docs/architecture/`
