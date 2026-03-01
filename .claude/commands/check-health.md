@@ -28,7 +28,7 @@ Run health checks on all ShieldOps platform dependencies.
    - Integration tests: `python3 -m pytest tests/integration/ -v --tb=short`
    - Report: total tests, passed, failed, coverage
 
-5. **Platform feature health** (Phase 11–48 modules):
+5. **Platform feature health** (Phase 11–49 modules):
    - Capacity trends: `src/shieldops/analytics/capacity_trends.py` — CapacityTrendAnalyzer
    - SRE metrics: `src/shieldops/analytics/sre_metrics.py` — SREMetricsAggregator
    - Health reports: `src/shieldops/observability/health_report.py` — ServiceHealthReportGenerator
@@ -337,6 +337,18 @@ Run health checks on all ShieldOps platform dependencies.
    - Regulatory change tracker: `src/shieldops/compliance/regulation_tracker.py` — RegulatoryChangeTracker
    - Workflow efficiency analyzer: `src/shieldops/analytics/workflow_analyzer.py` — WorkflowEfficiencyAnalyzer
    - Audit finding tracker: `src/shieldops/audit/finding_tracker.py` — AuditFindingTracker
+   - **Phase 49:** Incident blast radius analyzer: `src/shieldops/incidents/blast_radius.py` — IncidentBlastRadiusAnalyzer
+   - API gateway health monitor: `src/shieldops/topology/api_gateway_health.py` — APIGatewayHealthMonitor
+   - Log quality analyzer: `src/shieldops/observability/log_quality.py` — LogQualityAnalyzer
+   - Commitment utilization tracker: `src/shieldops/billing/commitment_tracker.py` — CommitmentUtilizationTracker
+   - Feature flag impact analyzer: `src/shieldops/changes/feature_flag_impact.py` — FeatureFlagImpactAnalyzer
+   - Customer impact scorer: `src/shieldops/sla/customer_impact.py` — CustomerImpactScorer
+   - Toil automation tracker: `src/shieldops/operations/toil_automator.py` — ToilAutomationTracker
+   - Insider threat detector: `src/shieldops/security/insider_threat.py` — InsiderThreatDetector
+   - Team expertise mapper: `src/shieldops/knowledge/expertise_mapper.py` — TeamExpertiseMapper
+   - Control effectiveness tracker: `src/shieldops/compliance/control_effectiveness.py` — ControlEffectivenessTracker
+   - Reliability metrics collector: `src/shieldops/analytics/reliability_metrics.py` — ReliabilityMetricsCollector
+   - Audit remediation tracker: `src/shieldops/audit/remediation_tracker.py` — AuditRemediationTracker
    - Verify each module initializes in `src/shieldops/api/app.py` lifespan
 
 6. **Check configuration**:

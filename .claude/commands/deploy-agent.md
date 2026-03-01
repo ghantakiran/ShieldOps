@@ -148,6 +148,11 @@ Deploy ShieldOps agents to target environments.
    - Detect lateral movement via `LateralMovementDetector` (`src/shieldops/security/lateral_movement.py`)
    - Analyze SLA breach impact via `SLABreachImpactAnalyzer` (`src/shieldops/sla/breach_impact.py`)
    - Analyze triage quality via `TriageQualityAnalyzer` (`src/shieldops/incidents/triage_quality.py`)
+   - Track toil automation progress via `ToilAutomationTracker` (`src/shieldops/operations/toil_automator.py`)
+   - Analyze feature flag impact via `FeatureFlagImpactAnalyzer` (`src/shieldops/changes/feature_flag_impact.py`)
+   - Analyze incident blast radius via `IncidentBlastRadiusAnalyzer` (`src/shieldops/incidents/blast_radius.py`)
+   - Score customer impact via `CustomerImpactScorer` (`src/shieldops/sla/customer_impact.py`)
+   - Monitor API gateway health via `APIGatewayHealthMonitor` (`src/shieldops/topology/api_gateway_health.py`)
 4. **Deploy**:
    - Apply Kubernetes manifests from `infrastructure/kubernetes/`
    - For production: trigger approval workflow via Slack/Teams
