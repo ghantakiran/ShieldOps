@@ -164,6 +164,10 @@ Run security audits on ShieldOps codebase and agent configurations.
 138. **Audit Compliance Mapping**: Map audit findings to compliance frameworks and detect unmapped findings via `AuditComplianceMapper` (`src/shieldops/audit/audit_compliance_mapper.py`)
 139. **Change Risk Classification**: Classify change risk levels and analyze risk factors via `ChangeRiskClassifier` (`src/shieldops/changes/change_risk_classifier.py`)
 140. **Incident Response Time Tracking**: Track incident response times and identify slow response patterns via `IncidentResponseTimeTracker` (`src/shieldops/incidents/incident_response_time.py`)
+141. **Vulnerability Response Tracking**: Track vulnerability remediation and measure patch velocity via `VulnerabilityResponseTracker` (`src/shieldops/security/vulnerability_response_tracker.py`)
+142. **Audit Control Assessment**: Assess control effectiveness and detect control gaps via `AuditControlAssessor` (`src/shieldops/audit/audit_control_assessor.py`)
+143. **Alert Noise Profiling**: Profile alert noise patterns and track signal-to-noise ratio via `AlertNoiseProfiler` (`src/shieldops/observability/alert_noise_profiler.py`)
+144. **Incident Pattern Analysis**: Analyze incident patterns and identify recurring failure modes via `IncidentPatternAnalyzer` (`src/shieldops/incidents/incident_pattern_analyzer.py`)
 
 ## Severity Levels
 - **CRITICAL**: Hardcoded secrets, SQL injection, unauthenticated endpoints

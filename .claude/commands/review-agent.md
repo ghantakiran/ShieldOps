@@ -344,6 +344,18 @@ Review ShieldOps agent code for correctness, safety, and reliability.
 - [ ] Audit compliance mapped via `AuditComplianceMapper` (`src/shieldops/audit/audit_compliance_mapper.py`)
 - [ ] Capacity scaling advised via `CapacityScalingAdvisor` (`src/shieldops/analytics/capacity_scaling_advisor.py`)
 - [ ] Change risk classified via `ChangeRiskClassifier` (`src/shieldops/changes/change_risk_classifier.py`)
+- [ ] Incident patterns analyzed via `IncidentPatternAnalyzer` (`src/shieldops/incidents/incident_pattern_analyzer.py`)
+- [ ] Service dependencies scored via `ServiceDependencyScorer` (`src/shieldops/topology/service_dependency_scorer.py`)
+- [ ] Alert noise profiled via `AlertNoiseProfiler` (`src/shieldops/observability/alert_noise_profiler.py`)
+- [ ] Cost optimizations tracked via `CostOptimizationTracker` (`src/shieldops/billing/cost_optimization_tracker.py`)
+- [ ] Deploy verifications tracked via `DeployVerificationTracker` (`src/shieldops/changes/deploy_verification_tracker.py`)
+- [ ] SLO compliance monitored via `SLOComplianceMonitor` (`src/shieldops/sla/slo_compliance_monitor.py`)
+- [ ] Runbook quality scored via `RunbookQualityScorer` (`src/shieldops/operations/runbook_quality_scorer.py`)
+- [ ] Vulnerability responses tracked via `VulnerabilityResponseTracker` (`src/shieldops/security/vulnerability_response_tracker.py`)
+- [ ] Knowledge freshness scored via `KnowledgeFreshnessScorer` (`src/shieldops/knowledge/knowledge_freshness_scorer.py`)
+- [ ] Audit controls assessed via `AuditControlAssessor` (`src/shieldops/audit/audit_control_assessor.py`)
+- [ ] Capacity utilization tracked via `CapacityUtilizationTracker` (`src/shieldops/analytics/capacity_utilization_tracker.py`)
+- [ ] Change impact predicted via `ChangeImpactPredictor` (`src/shieldops/changes/change_impact_predictor.py`)
 
 ### Testing
 - [ ] Unit tests for all node functions
