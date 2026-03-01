@@ -150,6 +150,10 @@ Run security audits on ShieldOps codebase and agent configurations.
 124. **Secret Rotation Planning**: Plan and schedule secret rotations and detect overdue credentials via `SecretRotationPlanner` (`src/shieldops/security/secret_rotation_planner.py`)
 125. **Access Review Automation**: Automate periodic access reviews and detect excessive permissions via `AccessReviewAutomator` (`src/shieldops/audit/access_review.py`)
 126. **Audit Evidence Mapping**: Map audit evidence to compliance controls and detect evidence gaps via `AuditEvidenceMapper` (`src/shieldops/compliance/audit_evidence_mapper.py`)
+127. **Threat Intelligence Tracking**: Track threat intelligence feeds and correlate threats to infrastructure via `ThreatIntelligenceTracker` (`src/shieldops/security/threat_intelligence.py`)
+128. **Compliance Evidence Chain Tracking**: Track compliance evidence chains end-to-end and verify chain integrity via `ComplianceEvidenceChainTracker` (`src/shieldops/compliance/compliance_evidence_chain.py`)
+129. **Incident Pattern Detection**: Detect recurring incident patterns and identify systemic issues via `IncidentPatternDetector` (`src/shieldops/incidents/incident_pattern.py`)
+130. **Cost Attribution**: Attribute costs to teams, services, and features and track cost drivers via `CostAttributionEngine` (`src/shieldops/billing/cost_attribution_engine.py`)
 
 ## Severity Levels
 - **CRITICAL**: Hardcoded secrets, SQL injection, unauthenticated endpoints
