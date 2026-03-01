@@ -614,6 +614,18 @@ module = [
     "shieldops.api.routes.policy_coverage",
     "shieldops.api.routes.alert_response",
     "shieldops.api.routes.change_audit",
+    "shieldops.api.routes.severity_impact",
+    "shieldops.api.routes.api_contract_drift",
+    "shieldops.api.routes.trace_coverage",
+    "shieldops.api.routes.showback_engine",
+    "shieldops.api.routes.deploy_canary_health",
+    "shieldops.api.routes.maintenance_impact",
+    "shieldops.api.routes.reservation_optimizer",
+    "shieldops.api.routes.secret_rotation_planner",
+    "shieldops.api.routes.taxonomy_manager",
+    "shieldops.api.routes.audit_evidence_mapper",
+    "shieldops.api.routes.capacity_simulation",
+    "shieldops.api.routes.access_review",
 ]
 warn_return_any = false
 disallow_untyped_defs = false

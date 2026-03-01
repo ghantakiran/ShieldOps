@@ -11235,6 +11235,246 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         except Exception as e:
             logger.warning("change_audit_init_failed", error=str(e))
 
+    # -- Phase 51: Severity Impact Analyzer --
+    if settings.severity_impact_enabled:
+        try:
+            from shieldops.api.routes import severity_impact as svi_mod
+            from shieldops.incidents.severity_impact import SeverityImpactAnalyzer
+
+            _svi_engine = SeverityImpactAnalyzer(
+                max_records=settings.severity_impact_max_records,
+                max_high_impact_pct=settings.severity_impact_max_high_impact_pct,
+            )
+            svi_mod.set_engine(_svi_engine)
+            app.include_router(
+                svi_mod.svi_route,
+                prefix=settings.api_prefix,
+                tags=["Severity Impact"],
+            )
+            logger.info("severity_impact_initialized")
+        except Exception as e:
+            logger.warning("severity_impact_init_failed", error=str(e))
+
+    # -- Phase 51: API Contract Drift Detector --
+    if settings.api_contract_drift_enabled:
+        try:
+            from shieldops.api.routes import api_contract_drift as acd_mod
+            from shieldops.topology.api_contract_drift import APIContractDriftDetector
+
+            _acd_engine = APIContractDriftDetector(
+                max_records=settings.api_contract_drift_max_records,
+                max_breaking_drift_pct=settings.api_contract_drift_max_breaking_drift_pct,
+            )
+            acd_mod.set_engine(_acd_engine)
+            app.include_router(
+                acd_mod.acd_route,
+                prefix=settings.api_prefix,
+                tags=["API Contract Drift"],
+            )
+            logger.info("api_contract_drift_initialized")
+        except Exception as e:
+            logger.warning("api_contract_drift_init_failed", error=str(e))
+
+    # -- Phase 51: Trace Coverage Analyzer --
+    if settings.trace_coverage_enabled:
+        try:
+            from shieldops.api.routes import trace_coverage as tca_mod
+            from shieldops.observability.trace_coverage import TraceCoverageAnalyzer
+
+            _tca_engine = TraceCoverageAnalyzer(
+                max_records=settings.trace_coverage_max_records,
+                min_coverage_pct=settings.trace_coverage_min_coverage_pct,
+            )
+            tca_mod.set_engine(_tca_engine)
+            app.include_router(
+                tca_mod.tca_route,
+                prefix=settings.api_prefix,
+                tags=["Trace Coverage"],
+            )
+            logger.info("trace_coverage_initialized")
+        except Exception as e:
+            logger.warning("trace_coverage_init_failed", error=str(e))
+
+    # -- Phase 51: Showback Engine --
+    if settings.showback_engine_enabled:
+        try:
+            from shieldops.api.routes import showback_engine as sbe_mod
+            from shieldops.billing.showback_engine import ShowbackEngine
+
+            _sbe_engine = ShowbackEngine(
+                max_records=settings.showback_engine_max_records,
+                max_over_budget_pct=settings.showback_engine_max_over_budget_pct,
+            )
+            sbe_mod.set_engine(_sbe_engine)
+            app.include_router(
+                sbe_mod.sbe_route,
+                prefix=settings.api_prefix,
+                tags=["Showback Engine"],
+            )
+            logger.info("showback_engine_initialized")
+        except Exception as e:
+            logger.warning("showback_engine_init_failed", error=str(e))
+
+    # -- Phase 51: Deploy Canary Health Monitor --
+    if settings.deploy_canary_health_enabled:
+        try:
+            from shieldops.api.routes import deploy_canary_health as dch_mod
+            from shieldops.changes.deploy_canary_health import DeployCanaryHealthMonitor
+
+            _dch_engine = DeployCanaryHealthMonitor(
+                max_records=settings.deploy_canary_health_max_records,
+                max_unhealthy_pct=settings.deploy_canary_health_max_unhealthy_pct,
+            )
+            dch_mod.set_engine(_dch_engine)
+            app.include_router(
+                dch_mod.dch_route,
+                prefix=settings.api_prefix,
+                tags=["Deploy Canary Health"],
+            )
+            logger.info("deploy_canary_health_initialized")
+        except Exception as e:
+            logger.warning("deploy_canary_health_init_failed", error=str(e))
+
+    # -- Phase 51: Maintenance Impact Analyzer --
+    if settings.maintenance_impact_enabled:
+        try:
+            from shieldops.api.routes import maintenance_impact as mia_mod
+            from shieldops.sla.maintenance_impact import MaintenanceImpactAnalyzer
+
+            _mia_engine = MaintenanceImpactAnalyzer(
+                max_records=settings.maintenance_impact_max_records,
+                max_impact_minutes=settings.maintenance_impact_max_impact_minutes,
+            )
+            mia_mod.set_engine(_mia_engine)
+            app.include_router(
+                mia_mod.mia_route,
+                prefix=settings.api_prefix,
+                tags=["Maintenance Impact"],
+            )
+            logger.info("maintenance_impact_initialized")
+        except Exception as e:
+            logger.warning("maintenance_impact_init_failed", error=str(e))
+
+    # -- Phase 51: Reservation Optimizer --
+    if settings.reservation_optimizer_enabled:
+        try:
+            from shieldops.api.routes import reservation_optimizer as rvo_mod
+            from shieldops.operations.reservation_optimizer import ReservationOptimizer
+
+            _rvo_engine = ReservationOptimizer(
+                max_records=settings.reservation_optimizer_max_records,
+                min_utilization_pct=settings.reservation_optimizer_min_utilization_pct,
+            )
+            rvo_mod.set_engine(_rvo_engine)
+            app.include_router(
+                rvo_mod.rvo_route,
+                prefix=settings.api_prefix,
+                tags=["Reservation Optimizer"],
+            )
+            logger.info("reservation_optimizer_initialized")
+        except Exception as e:
+            logger.warning("reservation_optimizer_init_failed", error=str(e))
+
+    # -- Phase 51: Secret Rotation Planner --
+    if settings.secret_rotation_planner_enabled:
+        try:
+            from shieldops.api.routes import secret_rotation_planner as srp_mod
+            from shieldops.security.secret_rotation_planner import SecretRotationPlanner
+
+            _srp_engine = SecretRotationPlanner(
+                max_records=settings.secret_rotation_planner_max_records,
+                max_overdue_pct=settings.secret_rotation_planner_max_overdue_pct,
+            )
+            srp_mod.set_engine(_srp_engine)
+            app.include_router(
+                srp_mod.srp_route,
+                prefix=settings.api_prefix,
+                tags=["Secret Rotation"],
+            )
+            logger.info("secret_rotation_initialized")
+        except Exception as e:
+            logger.warning("secret_rotation_init_failed", error=str(e))
+
+    # -- Phase 51: Taxonomy Manager --
+    if settings.taxonomy_manager_enabled:
+        try:
+            from shieldops.api.routes import taxonomy_manager as txm_mod
+            from shieldops.knowledge.taxonomy_manager import TaxonomyManager
+
+            _txm_engine = TaxonomyManager(
+                max_records=settings.taxonomy_manager_max_records,
+                min_completeness_score=settings.taxonomy_manager_min_completeness_score,
+            )
+            txm_mod.set_engine(_txm_engine)
+            app.include_router(
+                txm_mod.txm_route,
+                prefix=settings.api_prefix,
+                tags=["Taxonomy Manager"],
+            )
+            logger.info("taxonomy_manager_initialized")
+        except Exception as e:
+            logger.warning("taxonomy_manager_init_failed", error=str(e))
+
+    # -- Phase 51: Audit Evidence Mapper --
+    if settings.audit_evidence_mapper_enabled:
+        try:
+            from shieldops.api.routes import audit_evidence_mapper as aem_mod
+            from shieldops.compliance.audit_evidence_mapper import AuditEvidenceMapper
+
+            _aem_engine = AuditEvidenceMapper(
+                max_records=settings.audit_evidence_mapper_max_records,
+                min_mapping_coverage_pct=settings.audit_evidence_mapper_min_mapping_coverage_pct,
+            )
+            aem_mod.set_engine(_aem_engine)
+            app.include_router(
+                aem_mod.aem_route,
+                prefix=settings.api_prefix,
+                tags=["Audit Evidence Mapper"],
+            )
+            logger.info("audit_evidence_mapper_initialized")
+        except Exception as e:
+            logger.warning("audit_evidence_mapper_init_failed", error=str(e))
+
+    # -- Phase 51: Capacity Simulation Engine --
+    if settings.capacity_simulation_enabled:
+        try:
+            from shieldops.analytics.capacity_simulation import CapacitySimulationEngine
+            from shieldops.api.routes import capacity_simulation as cse_mod
+
+            _cse_engine = CapacitySimulationEngine(
+                max_records=settings.capacity_simulation_max_records,
+                max_over_capacity_pct=settings.capacity_simulation_max_over_capacity_pct,
+            )
+            cse_mod.set_engine(_cse_engine)
+            app.include_router(
+                cse_mod.cse_route,
+                prefix=settings.api_prefix,
+                tags=["Capacity Simulation"],
+            )
+            logger.info("capacity_simulation_initialized")
+        except Exception as e:
+            logger.warning("capacity_simulation_init_failed", error=str(e))
+
+    # -- Phase 51: Access Review Tracker --
+    if settings.access_review_enabled:
+        try:
+            from shieldops.api.routes import access_review as arv_mod
+            from shieldops.audit.access_review import AccessReviewTracker
+
+            _arv_engine = AccessReviewTracker(
+                max_records=settings.access_review_max_records,
+                min_review_completion_pct=settings.access_review_min_review_completion_pct,
+            )
+            arv_mod.set_engine(_arv_engine)
+            app.include_router(
+                arv_mod.arv_route,
+                prefix=settings.api_prefix,
+                tags=["Access Review"],
+            )
+            logger.info("access_review_initialized")
+        except Exception as e:
+            logger.warning("access_review_init_failed", error=str(e))
+
     yield
 
     logger.info("shieldops_shutting_down")

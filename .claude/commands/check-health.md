@@ -28,7 +28,7 @@ Run health checks on all ShieldOps platform dependencies.
    - Integration tests: `python3 -m pytest tests/integration/ -v --tb=short`
    - Report: total tests, passed, failed, coverage
 
-5. **Platform feature health** (Phase 11–50 modules):
+5. **Platform feature health** (Phase 11–51 modules):
    - Capacity trends: `src/shieldops/analytics/capacity_trends.py` — CapacityTrendAnalyzer
    - SRE metrics: `src/shieldops/analytics/sre_metrics.py` — SREMetricsAggregator
    - Health reports: `src/shieldops/observability/health_report.py` — ServiceHealthReportGenerator
@@ -361,6 +361,18 @@ Run health checks on all ShieldOps platform dependencies.
    - Policy coverage analyzer: `src/shieldops/compliance/policy_coverage.py` — PolicyCoverageAnalyzer
    - Alert response tracker: `src/shieldops/analytics/alert_response.py` — AlertResponseTracker
    - Change audit logger: `src/shieldops/audit/change_audit.py` — ChangeAuditLogger
+   - **Phase 51:** Severity impact analyzer: `src/shieldops/incidents/severity_impact.py` — SeverityImpactAnalyzer
+   - API contract drift detector: `src/shieldops/topology/api_contract_drift.py` — APIContractDriftDetector
+   - Trace coverage optimizer: `src/shieldops/observability/trace_coverage.py` — TraceCoverageOptimizer
+   - Showback engine: `src/shieldops/billing/showback_engine.py` — ShowbackEngine
+   - Deploy canary health monitor: `src/shieldops/changes/deploy_canary_health.py` — DeployCanaryHealthMonitor
+   - Maintenance impact scorer: `src/shieldops/sla/maintenance_impact.py` — MaintenanceImpactScorer
+   - Reservation optimizer: `src/shieldops/operations/reservation_optimizer.py` — ReservationOptimizer
+   - Secret rotation planner: `src/shieldops/security/secret_rotation_planner.py` — SecretRotationPlanner
+   - Taxonomy manager: `src/shieldops/knowledge/taxonomy_manager.py` — TaxonomyManager
+   - Audit evidence mapper: `src/shieldops/compliance/audit_evidence_mapper.py` — AuditEvidenceMapper
+   - Capacity simulation engine: `src/shieldops/analytics/capacity_simulation.py` — CapacitySimulationEngine
+   - Access review automator: `src/shieldops/audit/access_review.py` — AccessReviewAutomator
    - Verify each module initializes in `src/shieldops/api/app.py` lifespan
 
 6. **Check configuration**:

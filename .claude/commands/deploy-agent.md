@@ -158,6 +158,10 @@ Deploy ShieldOps agents to target environments.
    - Classify data sensitivity via `DataClassificationEngine` (`src/shieldops/security/data_classification.py`)
    - Track service degradation via `DegradationTracker` (`src/shieldops/sla/degradation_tracker.py`)
    - Assess merge risk via `MergeRiskAssessor` (`src/shieldops/changes/merge_risk.py`)
+   - Monitor deploy canary health via `DeployCanaryHealthMonitor` (`src/shieldops/changes/deploy_canary_health.py`)
+   - Optimize reservations via `ReservationOptimizer` (`src/shieldops/operations/reservation_optimizer.py`)
+   - Plan secret rotations via `SecretRotationPlanner` (`src/shieldops/security/secret_rotation_planner.py`)
+   - Score maintenance impact via `MaintenanceImpactScorer` (`src/shieldops/sla/maintenance_impact.py`)
 4. **Deploy**:
    - Apply Kubernetes manifests from `infrastructure/kubernetes/`
    - For production: trigger approval workflow via Slack/Teams

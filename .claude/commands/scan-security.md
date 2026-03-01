@@ -147,6 +147,9 @@ Run security audits on ShieldOps codebase and agent configurations.
 121. **Policy Coverage Analysis**: Analyze policy coverage across infrastructure and detect unprotected resources via `PolicyCoverageAnalyzer` (`src/shieldops/compliance/policy_coverage.py`)
 122. **Change Audit Logging**: Audit all infrastructure changes and detect unauthorized modifications via `ChangeAuditLogger` (`src/shieldops/audit/change_audit.py`)
 123. **Alert Response Tracking**: Track alert response times and outcomes and detect slow response patterns via `AlertResponseTracker` (`src/shieldops/analytics/alert_response.py`)
+124. **Secret Rotation Planning**: Plan and schedule secret rotations and detect overdue credentials via `SecretRotationPlanner` (`src/shieldops/security/secret_rotation_planner.py`)
+125. **Access Review Automation**: Automate periodic access reviews and detect excessive permissions via `AccessReviewAutomator` (`src/shieldops/audit/access_review.py`)
+126. **Audit Evidence Mapping**: Map audit evidence to compliance controls and detect evidence gaps via `AuditEvidenceMapper` (`src/shieldops/compliance/audit_evidence_mapper.py`)
 
 ## Severity Levels
 - **CRITICAL**: Hardcoded secrets, SQL injection, unauthenticated endpoints
