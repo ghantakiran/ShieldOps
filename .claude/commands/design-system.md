@@ -372,6 +372,18 @@ Design new ShieldOps components, APIs, or agent workflows.
    - Assess audit controls via `AuditControlAssessor` (`src/shieldops/audit/audit_control_assessor.py`)
    - Track capacity utilization via `CapacityUtilizationTracker` (`src/shieldops/analytics/capacity_utilization_tracker.py`)
    - Predict change impact via `ChangeImpactPredictor` (`src/shieldops/changes/change_impact_predictor.py`)
+   - Score incident escalation via `IncidentEscalationScorer` (`src/shieldops/incidents/incident_escalation_scorer.py`)
+   - Detect topology drift via `TopologyDriftDetector` (`src/shieldops/topology/topology_drift_detector.py`)
+   - Profile alert correlations via `AlertCorrelationProfiler` (`src/shieldops/observability/alert_correlation_profiler.py`)
+   - Validate cost allocations via `CostAllocationValidator` (`src/shieldops/billing/cost_allocation_validator.py`)
+   - Analyze deploy canary via `DeployCanaryAnalyzer` (`src/shieldops/changes/deploy_canary_analyzer.py`)
+   - Forecast SLO error budgets via `SLOErrorBudgetForecaster` (`src/shieldops/sla/slo_error_budget_forecaster.py`)
+   - Score runbook automation via `RunbookAutomationScorer` (`src/shieldops/operations/runbook_automation_scorer.py`)
+   - Analyze threat surface via `ThreatSurfaceAnalyzer` (`src/shieldops/security/threat_surface_analyzer.py`)
+   - Assess knowledge quality via `KnowledgeQualityAssessor` (`src/shieldops/knowledge/knowledge_quality_assessor.py`)
+   - Track audit remediations via `AuditRemediationTracker` (`src/shieldops/audit/audit_remediation_tracker.py`)
+   - Validate capacity forecasts via `CapacityForecastValidator` (`src/shieldops/analytics/capacity_forecast_validator.py`)
+   - Analyze change windows via `ChangeWindowAnalyzer` (`src/shieldops/changes/change_window_analyzer.py`)
 
 5. **Documentation**:
    - Write Architecture Decision Record (ADR) in `docs/architecture/`
