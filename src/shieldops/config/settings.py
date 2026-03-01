@@ -2510,6 +2510,66 @@ class Settings(BaseSettings):
     access_review_max_records: int = 200000
     access_review_min_review_completion_pct: float = 90.0
 
+    # Phase 52: Incident Pattern Detector
+    incident_pattern_enabled: bool = True
+    incident_pattern_max_records: int = 200000
+    incident_pattern_max_critical_pattern_pct: float = 10.0
+
+    # Phase 52: Escalation Path Analyzer
+    escalation_path_enabled: bool = True
+    escalation_path_max_records: int = 200000
+    escalation_path_max_resolution_time_minutes: float = 120.0
+
+    # Phase 52: Dependency Freshness Monitor
+    dependency_freshness_monitor_enabled: bool = True
+    dependency_freshness_monitor_max_records: int = 200000
+    dependency_freshness_monitor_max_stale_pct: float = 15.0
+
+    # Phase 52: Cost Attribution Engine
+    cost_attribution_engine_enabled: bool = True
+    cost_attribution_engine_max_records: int = 200000
+    cost_attribution_engine_max_disputed_pct: float = 5.0
+
+    # Phase 52: Deploy Rollback Health Tracker
+    deploy_rollback_health_enabled: bool = True
+    deploy_rollback_health_max_records: int = 200000
+    deploy_rollback_health_max_recovery_time_seconds: float = 300.0
+
+    # Phase 52: SLO Error Budget Tracker
+    slo_error_budget_tracker_enabled: bool = True
+    slo_error_budget_tracker_max_records: int = 200000
+    slo_error_budget_tracker_min_remaining_budget_pct: float = 20.0
+
+    # Phase 52: Operational Readiness Scorer
+    operational_readiness_enabled: bool = True
+    operational_readiness_max_records: int = 200000
+    operational_readiness_min_readiness_score: float = 70.0
+
+    # Phase 52: Threat Intelligence Tracker
+    threat_intelligence_enabled: bool = True
+    threat_intelligence_max_records: int = 200000
+    threat_intelligence_min_threat_confidence_pct: float = 60.0
+
+    # Phase 52: Knowledge Graph Manager
+    knowledge_graph_enabled: bool = True
+    knowledge_graph_max_records: int = 200000
+    knowledge_graph_max_orphan_pct: float = 10.0
+
+    # Phase 52: Compliance Evidence Chain Tracker
+    compliance_evidence_chain_enabled: bool = True
+    compliance_evidence_chain_max_records: int = 200000
+    compliance_evidence_chain_max_broken_chain_pct: float = 5.0
+
+    # Phase 52: Capacity Headroom Analyzer
+    capacity_headroom_enabled: bool = True
+    capacity_headroom_max_records: int = 200000
+    capacity_headroom_min_headroom_pct: float = 20.0
+
+    # Phase 52: Change Velocity Tracker
+    change_velocity_enabled: bool = True
+    change_velocity_max_records: int = 200000
+    change_velocity_max_changes_per_day: float = 50.0
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",

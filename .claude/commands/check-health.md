@@ -28,7 +28,7 @@ Run health checks on all ShieldOps platform dependencies.
    - Integration tests: `python3 -m pytest tests/integration/ -v --tb=short`
    - Report: total tests, passed, failed, coverage
 
-5. **Platform feature health** (Phase 11–51 modules):
+5. **Platform feature health** (Phase 11–52 modules):
    - Capacity trends: `src/shieldops/analytics/capacity_trends.py` — CapacityTrendAnalyzer
    - SRE metrics: `src/shieldops/analytics/sre_metrics.py` — SREMetricsAggregator
    - Health reports: `src/shieldops/observability/health_report.py` — ServiceHealthReportGenerator
@@ -373,6 +373,18 @@ Run health checks on all ShieldOps platform dependencies.
    - Audit evidence mapper: `src/shieldops/compliance/audit_evidence_mapper.py` — AuditEvidenceMapper
    - Capacity simulation engine: `src/shieldops/analytics/capacity_simulation.py` — CapacitySimulationEngine
    - Access review automator: `src/shieldops/audit/access_review.py` — AccessReviewAutomator
+   - **Phase 52:** Incident pattern detector: `src/shieldops/incidents/incident_pattern.py` — IncidentPatternDetector
+   - Escalation path analyzer: `src/shieldops/incidents/escalation_path.py` — EscalationPathAnalyzer
+   - Dependency freshness monitor: `src/shieldops/topology/dependency_freshness_monitor.py` — DependencyFreshnessMonitor
+   - Cost attribution engine: `src/shieldops/billing/cost_attribution_engine.py` — CostAttributionEngine
+   - Deploy rollback health tracker: `src/shieldops/changes/deploy_rollback_health.py` — DeployRollbackHealthTracker
+   - SLO error budget tracker: `src/shieldops/sla/slo_error_budget_tracker.py` — SLOErrorBudgetTracker
+   - Operational readiness scorer: `src/shieldops/operations/operational_readiness.py` — OperationalReadinessScorer
+   - Threat intelligence tracker: `src/shieldops/security/threat_intelligence.py` — ThreatIntelligenceTracker
+   - Knowledge graph manager: `src/shieldops/knowledge/knowledge_graph.py` — KnowledgeGraphManager
+   - Compliance evidence chain tracker: `src/shieldops/compliance/compliance_evidence_chain.py` — ComplianceEvidenceChainTracker
+   - Capacity headroom analyzer: `src/shieldops/analytics/capacity_headroom.py` — CapacityHeadroomAnalyzer
+   - Change velocity tracker: `src/shieldops/changes/change_velocity.py` — ChangeVelocityTracker
    - Verify each module initializes in `src/shieldops/api/app.py` lifespan
 
 6. **Check configuration**:

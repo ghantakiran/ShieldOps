@@ -308,6 +308,18 @@ Review ShieldOps agent code for correctness, safety, and reliability.
 - [ ] Audit evidence mapped via `AuditEvidenceMapper` (`src/shieldops/compliance/audit_evidence_mapper.py`)
 - [ ] Capacity simulated via `CapacitySimulationEngine` (`src/shieldops/analytics/capacity_simulation.py`)
 - [ ] Access reviews automated via `AccessReviewAutomator` (`src/shieldops/audit/access_review.py`)
+- [ ] Incident patterns detected via `IncidentPatternDetector` (`src/shieldops/incidents/incident_pattern.py`)
+- [ ] Escalation paths analyzed via `EscalationPathAnalyzer` (`src/shieldops/incidents/escalation_path.py`)
+- [ ] Dependency freshness monitored via `DependencyFreshnessMonitor` (`src/shieldops/topology/dependency_freshness_monitor.py`)
+- [ ] Costs attributed via `CostAttributionEngine` (`src/shieldops/billing/cost_attribution_engine.py`)
+- [ ] Deploy rollback health tracked via `DeployRollbackHealthTracker` (`src/shieldops/changes/deploy_rollback_health.py`)
+- [ ] SLO error budgets tracked via `SLOErrorBudgetTracker` (`src/shieldops/sla/slo_error_budget_tracker.py`)
+- [ ] Operational readiness scored via `OperationalReadinessScorer` (`src/shieldops/operations/operational_readiness.py`)
+- [ ] Threat intelligence tracked via `ThreatIntelligenceTracker` (`src/shieldops/security/threat_intelligence.py`)
+- [ ] Knowledge graph managed via `KnowledgeGraphManager` (`src/shieldops/knowledge/knowledge_graph.py`)
+- [ ] Compliance evidence chains tracked via `ComplianceEvidenceChainTracker` (`src/shieldops/compliance/compliance_evidence_chain.py`)
+- [ ] Capacity headroom analyzed via `CapacityHeadroomAnalyzer` (`src/shieldops/analytics/capacity_headroom.py`)
+- [ ] Change velocity tracked via `ChangeVelocityTracker` (`src/shieldops/changes/change_velocity.py`)
 
 ### Testing
 - [ ] Unit tests for all node functions

@@ -324,6 +324,18 @@ Design new ShieldOps components, APIs, or agent workflows.
    - Map audit evidence via `AuditEvidenceMapper` (`src/shieldops/compliance/audit_evidence_mapper.py`)
    - Simulate capacity scenarios via `CapacitySimulationEngine` (`src/shieldops/analytics/capacity_simulation.py`)
    - Automate access reviews via `AccessReviewAutomator` (`src/shieldops/audit/access_review.py`)
+   - Detect incident patterns via `IncidentPatternDetector` (`src/shieldops/incidents/incident_pattern.py`)
+   - Analyze escalation paths via `EscalationPathAnalyzer` (`src/shieldops/incidents/escalation_path.py`)
+   - Monitor dependency freshness via `DependencyFreshnessMonitor` (`src/shieldops/topology/dependency_freshness_monitor.py`)
+   - Attribute costs via `CostAttributionEngine` (`src/shieldops/billing/cost_attribution_engine.py`)
+   - Track deploy rollback health via `DeployRollbackHealthTracker` (`src/shieldops/changes/deploy_rollback_health.py`)
+   - Track SLO error budgets via `SLOErrorBudgetTracker` (`src/shieldops/sla/slo_error_budget_tracker.py`)
+   - Score operational readiness via `OperationalReadinessScorer` (`src/shieldops/operations/operational_readiness.py`)
+   - Track threat intelligence via `ThreatIntelligenceTracker` (`src/shieldops/security/threat_intelligence.py`)
+   - Manage knowledge graph via `KnowledgeGraphManager` (`src/shieldops/knowledge/knowledge_graph.py`)
+   - Track compliance evidence chains via `ComplianceEvidenceChainTracker` (`src/shieldops/compliance/compliance_evidence_chain.py`)
+   - Analyze capacity headroom via `CapacityHeadroomAnalyzer` (`src/shieldops/analytics/capacity_headroom.py`)
+   - Track change velocity via `ChangeVelocityTracker` (`src/shieldops/changes/change_velocity.py`)
 
 5. **Documentation**:
    - Write Architecture Decision Record (ADR) in `docs/architecture/`

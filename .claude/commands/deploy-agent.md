@@ -162,6 +162,11 @@ Deploy ShieldOps agents to target environments.
    - Optimize reservations via `ReservationOptimizer` (`src/shieldops/operations/reservation_optimizer.py`)
    - Plan secret rotations via `SecretRotationPlanner` (`src/shieldops/security/secret_rotation_planner.py`)
    - Score maintenance impact via `MaintenanceImpactScorer` (`src/shieldops/sla/maintenance_impact.py`)
+   - Score operational readiness via `OperationalReadinessScorer` (`src/shieldops/operations/operational_readiness.py`)
+   - Track threat intelligence via `ThreatIntelligenceTracker` (`src/shieldops/security/threat_intelligence.py`)
+   - Track deploy rollback health via `DeployRollbackHealthTracker` (`src/shieldops/changes/deploy_rollback_health.py`)
+   - Analyze capacity headroom via `CapacityHeadroomAnalyzer` (`src/shieldops/analytics/capacity_headroom.py`)
+   - Track change velocity via `ChangeVelocityTracker` (`src/shieldops/changes/change_velocity.py`)
 4. **Deploy**:
    - Apply Kubernetes manifests from `infrastructure/kubernetes/`
    - For production: trigger approval workflow via Slack/Teams
