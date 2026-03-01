@@ -10737,6 +10737,262 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         except Exception as e:
             logger.warning("finding_tracker_init_failed", error=str(e))
 
+    # -- Phase 49: Incident Blast Radius Analyzer --
+    if settings.blast_radius_enabled:
+        try:
+            from shieldops.api.routes import blast_radius as ibr_mod
+            from shieldops.incidents.blast_radius import (
+                IncidentBlastRadiusAnalyzer,
+            )
+
+            _ibr_engine = IncidentBlastRadiusAnalyzer(
+                max_records=settings.blast_radius_max_records,
+                max_blast_radius_score=settings.blast_radius_max_blast_radius_score,
+            )
+            ibr_mod.set_engine(_ibr_engine)
+            app.include_router(
+                ibr_mod.ibr_route,
+                prefix=settings.api_prefix,
+                tags=["Blast Radius"],
+            )
+            logger.info("blast_radius_initialized")
+        except Exception as e:
+            logger.warning("blast_radius_init_failed", error=str(e))
+
+    # -- Phase 49: API Gateway Health Monitor --
+    if settings.api_gateway_health_enabled:
+        try:
+            from shieldops.api.routes import api_gateway_health as agh_mod
+            from shieldops.topology.api_gateway_health import (
+                APIGatewayHealthMonitor,
+            )
+
+            _agh_engine = APIGatewayHealthMonitor(
+                max_records=settings.api_gateway_health_max_records,
+                max_error_rate_pct=settings.api_gateway_health_max_error_rate_pct,
+            )
+            agh_mod.set_engine(_agh_engine)
+            app.include_router(
+                agh_mod.agh_route,
+                prefix=settings.api_prefix,
+                tags=["API Gateway Health"],
+            )
+            logger.info("api_gateway_health_initialized")
+        except Exception as e:
+            logger.warning("api_gateway_health_init_failed", error=str(e))
+
+    # -- Phase 49: Log Quality Analyzer --
+    if settings.log_quality_enabled:
+        try:
+            from shieldops.api.routes import log_quality as lqa_mod
+            from shieldops.observability.log_quality import LogQualityAnalyzer
+
+            _lqa_engine = LogQualityAnalyzer(
+                max_records=settings.log_quality_max_records,
+                min_log_quality_pct=settings.log_quality_min_log_quality_pct,
+            )
+            lqa_mod.set_engine(_lqa_engine)
+            app.include_router(
+                lqa_mod.lqa_route,
+                prefix=settings.api_prefix,
+                tags=["Log Quality"],
+            )
+            logger.info("log_quality_initialized")
+        except Exception as e:
+            logger.warning("log_quality_init_failed", error=str(e))
+
+    # -- Phase 49: Commitment Utilization Tracker --
+    if settings.commitment_tracker_enabled:
+        try:
+            from shieldops.api.routes import commitment_tracker as cut_mod
+            from shieldops.billing.commitment_tracker import (
+                CommitmentUtilizationTracker,
+            )
+
+            _cut_engine = CommitmentUtilizationTracker(
+                max_records=settings.commitment_tracker_max_records,
+                min_utilization_pct=settings.commitment_tracker_min_utilization_pct,
+            )
+            cut_mod.set_engine(_cut_engine)
+            app.include_router(
+                cut_mod.cut_route,
+                prefix=settings.api_prefix,
+                tags=["Commitment Tracker"],
+            )
+            logger.info("commitment_tracker_initialized")
+        except Exception as e:
+            logger.warning("commitment_tracker_init_failed", error=str(e))
+
+    # -- Phase 49: Feature Flag Impact Analyzer --
+    if settings.feature_flag_impact_enabled:
+        try:
+            from shieldops.api.routes import feature_flag_impact as ffi_mod
+            from shieldops.changes.feature_flag_impact import (
+                FeatureFlagImpactTracker,
+            )
+
+            _ffi_engine = FeatureFlagImpactTracker(
+                max_records=settings.feature_flag_impact_max_records,
+                max_negative_impact_pct=settings.feature_flag_impact_max_negative_impact_pct,
+            )
+            ffi_mod.set_engine(_ffi_engine)
+            app.include_router(
+                ffi_mod.ffi_route,
+                prefix=settings.api_prefix,
+                tags=["Feature Flag Impact"],
+            )
+            logger.info("feature_flag_impact_initialized")
+        except Exception as e:
+            logger.warning("feature_flag_impact_init_failed", error=str(e))
+
+    # -- Phase 49: Customer Impact Scorer --
+    if settings.customer_impact_enabled:
+        try:
+            from shieldops.api.routes import customer_impact as cis_mod
+            from shieldops.sla.customer_impact import CustomerImpactScorer
+
+            _cis_engine = CustomerImpactScorer(
+                max_records=settings.customer_impact_max_records,
+                max_impact_score=settings.customer_impact_max_impact_score,
+            )
+            cis_mod.set_engine(_cis_engine)
+            app.include_router(
+                cis_mod.cis_route,
+                prefix=settings.api_prefix,
+                tags=["Customer Impact"],
+            )
+            logger.info("customer_impact_initialized")
+        except Exception as e:
+            logger.warning("customer_impact_init_failed", error=str(e))
+
+    # -- Phase 49: Toil Automation Tracker --
+    if settings.toil_automator_enabled:
+        try:
+            from shieldops.api.routes import toil_automator as tat_mod
+            from shieldops.operations.toil_automator import (
+                ToilAutomationTracker,
+            )
+
+            _tat_engine = ToilAutomationTracker(
+                max_records=settings.toil_automator_max_records,
+                min_automation_pct=settings.toil_automator_min_automation_pct,
+            )
+            tat_mod.set_engine(_tat_engine)
+            app.include_router(
+                tat_mod.tat_route,
+                prefix=settings.api_prefix,
+                tags=["Toil Automator"],
+            )
+            logger.info("toil_automator_initialized")
+        except Exception as e:
+            logger.warning("toil_automator_init_failed", error=str(e))
+
+    # -- Phase 49: Insider Threat Detector --
+    if settings.insider_threat_enabled:
+        try:
+            from shieldops.api.routes import insider_threat as itd_mod
+            from shieldops.security.insider_threat import InsiderThreatDetector
+
+            _itd_engine = InsiderThreatDetector(
+                max_records=settings.insider_threat_max_records,
+                min_threat_confidence_pct=settings.insider_threat_min_threat_confidence_pct,
+            )
+            itd_mod.set_engine(_itd_engine)
+            app.include_router(
+                itd_mod.itd_route,
+                prefix=settings.api_prefix,
+                tags=["Insider Threat"],
+            )
+            logger.info("insider_threat_initialized")
+        except Exception as e:
+            logger.warning("insider_threat_init_failed", error=str(e))
+
+    # -- Phase 49: Team Expertise Mapper --
+    if settings.expertise_mapper_enabled:
+        try:
+            from shieldops.api.routes import expertise_mapper as tem_mod
+            from shieldops.knowledge.expertise_mapper import TeamExpertiseMapper
+
+            _tem_engine = TeamExpertiseMapper(
+                max_records=settings.expertise_mapper_max_records,
+                min_expertise_coverage_pct=settings.expertise_mapper_min_expertise_coverage_pct,
+            )
+            tem_mod.set_engine(_tem_engine)
+            app.include_router(
+                tem_mod.tem_route,
+                prefix=settings.api_prefix,
+                tags=["Expertise Mapper"],
+            )
+            logger.info("expertise_mapper_initialized")
+        except Exception as e:
+            logger.warning("expertise_mapper_init_failed", error=str(e))
+
+    # -- Phase 49: Control Effectiveness Tracker --
+    if settings.control_effectiveness_enabled:
+        try:
+            from shieldops.api.routes import control_effectiveness as cet_mod
+            from shieldops.compliance.control_effectiveness import (
+                ControlEffectivenessTracker,
+            )
+
+            _cet_engine = ControlEffectivenessTracker(
+                max_records=settings.control_effectiveness_max_records,
+                min_effectiveness_pct=settings.control_effectiveness_min_effectiveness_pct,
+            )
+            cet_mod.set_engine(_cet_engine)
+            app.include_router(
+                cet_mod.cet_route,
+                prefix=settings.api_prefix,
+                tags=["Control Effectiveness"],
+            )
+            logger.info("control_effectiveness_initialized")
+        except Exception as e:
+            logger.warning("control_effectiveness_init_failed", error=str(e))
+
+    # -- Phase 49: Reliability Metrics Collector --
+    if settings.reliability_metrics_enabled:
+        try:
+            from shieldops.analytics.reliability_metrics import (
+                ReliabilityMetricsCollector,
+            )
+            from shieldops.api.routes import reliability_metrics as rmc_mod
+
+            _rmc_engine = ReliabilityMetricsCollector(
+                max_records=settings.reliability_metrics_max_records,
+                min_reliability_score=settings.reliability_metrics_min_reliability_score,
+            )
+            rmc_mod.set_engine(_rmc_engine)
+            app.include_router(
+                rmc_mod.rmc_route,
+                prefix=settings.api_prefix,
+                tags=["Reliability Metrics"],
+            )
+            logger.info("reliability_metrics_initialized")
+        except Exception as e:
+            logger.warning("reliability_metrics_init_failed", error=str(e))
+
+    # -- Phase 49: Audit Remediation Tracker --
+    if settings.remediation_tracker_enabled:
+        try:
+            from shieldops.api.routes import remediation_tracker as art_mod
+            from shieldops.audit.remediation_tracker import (
+                AuditRemediationTracker,
+            )
+
+            _art_engine = AuditRemediationTracker(
+                max_records=settings.remediation_tracker_max_records,
+                max_overdue_pct=settings.remediation_tracker_max_overdue_pct,
+            )
+            art_mod.set_engine(_art_engine)
+            app.include_router(
+                art_mod.art_route,
+                prefix=settings.api_prefix,
+                tags=["Remediation Tracker"],
+            )
+            logger.info("remediation_tracker_initialized")
+        except Exception as e:
+            logger.warning("remediation_tracker_init_failed", error=str(e))
+
     yield
 
     logger.info("shieldops_shutting_down")

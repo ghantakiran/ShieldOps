@@ -288,6 +288,18 @@ Design new ShieldOps components, APIs, or agent workflows.
    - Track regulatory changes via `RegulatoryChangeTracker` (`src/shieldops/compliance/regulation_tracker.py`)
    - Analyze workflow efficiency via `WorkflowEfficiencyAnalyzer` (`src/shieldops/analytics/workflow_analyzer.py`)
    - Track audit findings via `AuditFindingTracker` (`src/shieldops/audit/finding_tracker.py`)
+   - Analyze incident blast radius via `IncidentBlastRadiusAnalyzer` (`src/shieldops/incidents/blast_radius.py`)
+   - Monitor API gateway health via `APIGatewayHealthMonitor` (`src/shieldops/topology/api_gateway_health.py`)
+   - Analyze log quality via `LogQualityAnalyzer` (`src/shieldops/observability/log_quality.py`)
+   - Track commitment utilization via `CommitmentUtilizationTracker` (`src/shieldops/billing/commitment_tracker.py`)
+   - Analyze feature flag impact via `FeatureFlagImpactAnalyzer` (`src/shieldops/changes/feature_flag_impact.py`)
+   - Score customer impact via `CustomerImpactScorer` (`src/shieldops/sla/customer_impact.py`)
+   - Track toil automation via `ToilAutomationTracker` (`src/shieldops/operations/toil_automator.py`)
+   - Detect insider threats via `InsiderThreatDetector` (`src/shieldops/security/insider_threat.py`)
+   - Map team expertise via `TeamExpertiseMapper` (`src/shieldops/knowledge/expertise_mapper.py`)
+   - Track control effectiveness via `ControlEffectivenessTracker` (`src/shieldops/compliance/control_effectiveness.py`)
+   - Collect reliability metrics via `ReliabilityMetricsCollector` (`src/shieldops/analytics/reliability_metrics.py`)
+   - Track audit remediations via `AuditRemediationTracker` (`src/shieldops/audit/remediation_tracker.py`)
 
 5. **Documentation**:
    - Write Architecture Decision Record (ADR) in `docs/architecture/`

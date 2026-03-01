@@ -272,6 +272,18 @@ Review ShieldOps agent code for correctness, safety, and reliability.
 - [ ] Regulatory changes tracked via `RegulatoryChangeTracker` (`src/shieldops/compliance/regulation_tracker.py`)
 - [ ] Workflow efficiency analyzed via `WorkflowEfficiencyAnalyzer` (`src/shieldops/analytics/workflow_analyzer.py`)
 - [ ] Audit findings tracked via `AuditFindingTracker` (`src/shieldops/audit/finding_tracker.py`)
+- [ ] Incident blast radius analyzed via `IncidentBlastRadiusAnalyzer` (`src/shieldops/incidents/blast_radius.py`)
+- [ ] API gateway health monitored via `APIGatewayHealthMonitor` (`src/shieldops/topology/api_gateway_health.py`)
+- [ ] Log quality analyzed via `LogQualityAnalyzer` (`src/shieldops/observability/log_quality.py`)
+- [ ] Commitment utilization tracked via `CommitmentUtilizationTracker` (`src/shieldops/billing/commitment_tracker.py`)
+- [ ] Feature flag impact analyzed via `FeatureFlagImpactAnalyzer` (`src/shieldops/changes/feature_flag_impact.py`)
+- [ ] Customer impact scored via `CustomerImpactScorer` (`src/shieldops/sla/customer_impact.py`)
+- [ ] Toil automation tracked via `ToilAutomationTracker` (`src/shieldops/operations/toil_automator.py`)
+- [ ] Insider threats detected via `InsiderThreatDetector` (`src/shieldops/security/insider_threat.py`)
+- [ ] Team expertise mapped via `TeamExpertiseMapper` (`src/shieldops/knowledge/expertise_mapper.py`)
+- [ ] Control effectiveness tracked via `ControlEffectivenessTracker` (`src/shieldops/compliance/control_effectiveness.py`)
+- [ ] Reliability metrics collected via `ReliabilityMetricsCollector` (`src/shieldops/analytics/reliability_metrics.py`)
+- [ ] Audit remediations tracked via `AuditRemediationTracker` (`src/shieldops/audit/remediation_tracker.py`)
 
 ### Testing
 - [ ] Unit tests for all node functions

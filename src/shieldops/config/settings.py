@@ -2330,6 +2330,66 @@ class Settings(BaseSettings):
     finding_tracker_max_records: int = 200000
     finding_tracker_max_open_finding_pct: float = 15.0
 
+    # Phase 49: Incident Blast Radius Analyzer
+    blast_radius_enabled: bool = True
+    blast_radius_max_records: int = 200000
+    blast_radius_max_blast_radius_score: float = 75.0
+
+    # Phase 49: API Gateway Health Monitor
+    api_gateway_health_enabled: bool = True
+    api_gateway_health_max_records: int = 200000
+    api_gateway_health_max_error_rate_pct: float = 5.0
+
+    # Phase 49: Log Quality Analyzer
+    log_quality_enabled: bool = True
+    log_quality_max_records: int = 200000
+    log_quality_min_log_quality_pct: float = 70.0
+
+    # Phase 49: Commitment Utilization Tracker
+    commitment_tracker_enabled: bool = True
+    commitment_tracker_max_records: int = 200000
+    commitment_tracker_min_utilization_pct: float = 80.0
+
+    # Phase 49: Feature Flag Impact Analyzer
+    feature_flag_impact_enabled: bool = True
+    feature_flag_impact_max_records: int = 200000
+    feature_flag_impact_max_negative_impact_pct: float = 10.0
+
+    # Phase 49: Customer Impact Scorer
+    customer_impact_enabled: bool = True
+    customer_impact_max_records: int = 200000
+    customer_impact_max_impact_score: float = 70.0
+
+    # Phase 49: Toil Automation Tracker
+    toil_automator_enabled: bool = True
+    toil_automator_max_records: int = 200000
+    toil_automator_min_automation_pct: float = 60.0
+
+    # Phase 49: Insider Threat Detector
+    insider_threat_enabled: bool = True
+    insider_threat_max_records: int = 200000
+    insider_threat_min_threat_confidence_pct: float = 75.0
+
+    # Phase 49: Team Expertise Mapper
+    expertise_mapper_enabled: bool = True
+    expertise_mapper_max_records: int = 200000
+    expertise_mapper_min_expertise_coverage_pct: float = 70.0
+
+    # Phase 49: Control Effectiveness Tracker
+    control_effectiveness_enabled: bool = True
+    control_effectiveness_max_records: int = 200000
+    control_effectiveness_min_effectiveness_pct: float = 80.0
+
+    # Phase 49: Reliability Metrics Collector
+    reliability_metrics_enabled: bool = True
+    reliability_metrics_max_records: int = 200000
+    reliability_metrics_min_reliability_score: float = 90.0
+
+    # Phase 49: Audit Remediation Tracker
+    remediation_tracker_enabled: bool = True
+    remediation_tracker_max_records: int = 200000
+    remediation_tracker_max_overdue_pct: float = 10.0
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",

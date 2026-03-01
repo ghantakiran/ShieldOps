@@ -138,6 +138,11 @@ Run security audits on ShieldOps codebase and agent configurations.
 112. **Audit Finding Tracking**: Track audit findings and monitor remediation progress via `AuditFindingTracker` (`src/shieldops/audit/finding_tracker.py`)
 113. **Invoice Validation**: Validate cloud invoices against usage and detect billing anomalies via `InvoiceValidationEngine` (`src/shieldops/billing/invoice_validator.py`)
 114. **Metric Quality Scoring**: Score metric quality and detect stale/noisy metrics via `MetricQualityScorer` (`src/shieldops/observability/metric_quality.py`)
+115. **Insider Threat Detection**: Detect insider threat patterns and anomalous access behavior via `InsiderThreatDetector` (`src/shieldops/security/insider_threat.py`)
+116. **Control Effectiveness Tracking**: Track compliance control effectiveness and detect control failures via `ControlEffectivenessTracker` (`src/shieldops/compliance/control_effectiveness.py`)
+117. **Audit Remediation Tracking**: Track audit remediation progress and detect overdue remediations via `AuditRemediationTracker` (`src/shieldops/audit/remediation_tracker.py`)
+118. **Log Quality Analysis**: Analyze log quality across services and detect missing fields via `LogQualityAnalyzer` (`src/shieldops/observability/log_quality.py`)
+119. **Reliability Metrics Collection**: Collect and aggregate reliability metrics and track MTTR/MTBF via `ReliabilityMetricsCollector` (`src/shieldops/analytics/reliability_metrics.py`)
 
 ## Severity Levels
 - **CRITICAL**: Hardcoded secrets, SQL injection, unauthenticated endpoints
