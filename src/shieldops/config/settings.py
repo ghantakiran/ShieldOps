@@ -2750,6 +2750,66 @@ class Settings(BaseSettings):
     change_impact_predictor_max_records: int = 200000
     change_impact_predictor_max_high_impact_pct: float = 15.0
 
+    # Phase 56: Incident Escalation Scorer
+    incident_escalation_scorer_enabled: bool = True
+    incident_escalation_scorer_max_records: int = 200000
+    incident_escalation_scorer_min_quality_score: float = 70.0
+
+    # Phase 56: Topology Drift Detector
+    topology_drift_detector_enabled: bool = True
+    topology_drift_detector_max_records: int = 200000
+    topology_drift_detector_max_critical_drift_pct: float = 10.0
+
+    # Phase 56: Alert Correlation Profiler
+    alert_correlation_profiler_enabled: bool = True
+    alert_correlation_profiler_max_records: int = 200000
+    alert_correlation_profiler_min_correlation_score: float = 50.0
+
+    # Phase 56: Cost Allocation Validator
+    cost_allocation_validator_enabled: bool = True
+    cost_allocation_validator_max_records: int = 200000
+    cost_allocation_validator_min_accuracy_pct: float = 90.0
+
+    # Phase 56: Deploy Canary Analyzer
+    deploy_canary_analyzer_enabled: bool = True
+    deploy_canary_analyzer_max_records: int = 200000
+    deploy_canary_analyzer_min_success_rate: float = 80.0
+
+    # Phase 56: SLO Error Budget Forecaster
+    slo_error_budget_forecaster_enabled: bool = True
+    slo_error_budget_forecaster_max_records: int = 200000
+    slo_error_budget_forecaster_min_remaining_pct: float = 20.0
+
+    # Phase 56: Runbook Automation Scorer
+    runbook_automation_scorer_enabled: bool = True
+    runbook_automation_scorer_max_records: int = 200000
+    runbook_automation_scorer_min_automation_score: float = 60.0
+
+    # Phase 56: Threat Surface Analyzer
+    threat_surface_analyzer_enabled: bool = True
+    threat_surface_analyzer_max_records: int = 200000
+    threat_surface_analyzer_max_exposure_score: float = 30.0
+
+    # Phase 56: Knowledge Quality Assessor
+    knowledge_quality_assessor_enabled: bool = True
+    knowledge_quality_assessor_max_records: int = 200000
+    knowledge_quality_assessor_min_quality_score: float = 65.0
+
+    # Phase 56: Audit Remediation Tracker
+    audit_remediation_tracker_enabled: bool = True
+    audit_remediation_tracker_max_records: int = 200000
+    audit_remediation_tracker_max_remediation_days: float = 45.0
+
+    # Phase 56: Capacity Forecast Validator
+    capacity_forecast_validator_enabled: bool = True
+    capacity_forecast_validator_max_records: int = 200000
+    capacity_forecast_validator_min_accuracy_pct: float = 75.0
+
+    # Phase 56: Change Window Analyzer
+    change_window_analyzer_enabled: bool = True
+    change_window_analyzer_max_records: int = 200000
+    change_window_analyzer_min_compliance_pct: float = 85.0
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",
