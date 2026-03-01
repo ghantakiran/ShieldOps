@@ -2150,6 +2150,66 @@ class Settings(BaseSettings):
     anomaly_scorer_max_records: int = 200000
     anomaly_scorer_min_anomaly_score: float = 70.0
 
+    # Phase 46: Incident Noise Filter
+    noise_filter_enabled: bool = True
+    noise_filter_max_records: int = 200000
+    noise_filter_max_false_alarm_rate_pct: float = 20.0
+
+    # Phase 46: Service Dependency Validator
+    dep_validator_enabled: bool = True
+    dep_validator_max_records: int = 200000
+    dep_validator_max_invalid_pct: float = 10.0
+
+    # Phase 46: Alert Priority Optimizer
+    alert_priority_enabled: bool = True
+    alert_priority_max_records: int = 200000
+    alert_priority_max_misalignment_pct: float = 15.0
+
+    # Phase 46: Cost Allocation Validator
+    cost_alloc_validator_enabled: bool = True
+    cost_alloc_validator_max_records: int = 200000
+    cost_alloc_validator_max_variance_pct: float = 15.0
+
+    # Phase 46: Change Correlation Engine
+    change_correlator_enabled: bool = True
+    change_correlator_max_records: int = 200000
+    change_correlator_min_correlation_strength_pct: float = 60.0
+
+    # Phase 46: SLO Dependency Mapper
+    slo_dep_mapper_enabled: bool = True
+    slo_dep_mapper_max_records: int = 200000
+    slo_dep_mapper_min_slo_target_pct: float = 99.0
+
+    # Phase 46: Operational Metric Aggregator
+    metric_aggregator_enabled: bool = True
+    metric_aggregator_max_records: int = 200000
+    metric_aggregator_min_metric_health_pct: float = 80.0
+
+    # Phase 46: Security Event Correlator
+    security_event_correlator_enabled: bool = True
+    security_event_correlator_max_records: int = 200000
+    security_event_correlator_min_threat_confidence_pct: float = 70.0
+
+    # Phase 46: Knowledge Search Optimizer
+    knowledge_search_enabled: bool = True
+    knowledge_search_max_records: int = 200000
+    knowledge_search_min_relevance_score: float = 60.0
+
+    # Phase 46: Compliance Evidence Consolidator
+    evidence_consolidator_enabled: bool = True
+    evidence_consolidator_max_records: int = 200000
+    evidence_consolidator_min_completeness_pct: float = 90.0
+
+    # Phase 46: Service Latency Analyzer
+    service_latency_enabled: bool = True
+    service_latency_max_records: int = 200000
+    service_latency_max_latency_threshold_ms: float = 500.0
+
+    # Phase 46: Audit Compliance Reporter
+    audit_compliance_reporter_enabled: bool = True
+    audit_compliance_reporter_max_records: int = 200000
+    audit_compliance_reporter_min_compliance_score: float = 85.0
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",

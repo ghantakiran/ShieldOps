@@ -119,6 +119,15 @@ Run security audits on ShieldOps codebase and agent configurations.
 93. **Compliance Control Testing**: Test compliance controls for effectiveness via `ComplianceControlTester` (`src/shieldops/compliance/control_tester.py`)
 94. **Alert Suppression Management**: Track alert suppression effectiveness via `AlertSuppressionManager` (`src/shieldops/observability/alert_suppression.py`)
 95. **Metric Anomaly Scoring**: Score and classify metric anomalies via `MetricAnomalyScorer` (`src/shieldops/analytics/anomaly_scorer.py`)
+96. **Incident Noise Filtering**: Filter incident noise and identify false alarms via `IncidentNoiseFilter` (`src/shieldops/incidents/noise_filter.py`)
+97. **Dependency Validation**: Validate service dependencies against traffic via `ServiceDependencyValidator` (`src/shieldops/topology/dep_validator.py`)
+98. **Alert Priority Optimization**: Optimize alert priority levels via `AlertPriorityOptimizer` (`src/shieldops/observability/alert_priority.py`)
+99. **Cost Allocation Validation**: Validate cost allocations via `CostAllocationValidator` (`src/shieldops/billing/cost_alloc_validator.py`)
+100. **Change Correlation**: Correlate changes with incidents via `ChangeCorrelationEngine` (`src/shieldops/changes/change_correlator.py`)
+101. **SLO Dependency Mapping**: Map SLO dependencies via `SLODependencyMapper` (`src/shieldops/sla/slo_dep_mapper.py`)
+102. **Security Event Correlation**: Correlate security events via `SecurityEventCorrelator` (`src/shieldops/security/event_correlator.py`)
+103. **Evidence Consolidation**: Consolidate compliance evidence via `ComplianceEvidenceConsolidator` (`src/shieldops/compliance/evidence_consolidator.py`)
+104. **Audit Compliance Reporting**: Generate audit compliance reports via `AuditComplianceReporter` (`src/shieldops/audit/compliance_reporter.py`)
 
 ## Severity Levels
 - **CRITICAL**: Hardcoded secrets, SQL injection, unauthenticated endpoints

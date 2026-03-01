@@ -236,6 +236,18 @@ Review ShieldOps agent code for correctness, safety, and reliability.
 - [ ] Compliance controls tested via `ComplianceControlTester` (`src/shieldops/compliance/control_tester.py`)
 - [ ] Bottlenecks detected via `CapacityBottleneckDetector` (`src/shieldops/analytics/bottleneck_detector.py`)
 - [ ] Metric anomalies scored via `MetricAnomalyScorer` (`src/shieldops/analytics/anomaly_scorer.py`)
+- [ ] Incident noise filtered via `IncidentNoiseFilter` (`src/shieldops/incidents/noise_filter.py`)
+- [ ] Dependencies validated via `ServiceDependencyValidator` (`src/shieldops/topology/dep_validator.py`)
+- [ ] Alert priority optimized via `AlertPriorityOptimizer` (`src/shieldops/observability/alert_priority.py`)
+- [ ] Cost allocations validated via `CostAllocationValidator` (`src/shieldops/billing/cost_alloc_validator.py`)
+- [ ] Changes correlated via `ChangeCorrelationEngine` (`src/shieldops/changes/change_correlator.py`)
+- [ ] SLO deps mapped via `SLODependencyMapper` (`src/shieldops/sla/slo_dep_mapper.py`)
+- [ ] Metrics aggregated via `OperationalMetricAggregator` (`src/shieldops/operations/metric_aggregator.py`)
+- [ ] Security events correlated via `SecurityEventCorrelator` (`src/shieldops/security/event_correlator.py`)
+- [ ] Knowledge search optimized via `KnowledgeSearchOptimizer` (`src/shieldops/knowledge/search_optimizer.py`)
+- [ ] Evidence consolidated via `ComplianceEvidenceConsolidator` (`src/shieldops/compliance/evidence_consolidator.py`)
+- [ ] Service latency analyzed via `ServiceLatencyAnalyzer` (`src/shieldops/analytics/service_latency.py`)
+- [ ] Audit compliance reported via `AuditComplianceReporter` (`src/shieldops/audit/compliance_reporter.py`)
 
 ### Testing
 - [ ] Unit tests for all node functions

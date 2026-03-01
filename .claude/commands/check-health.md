@@ -301,6 +301,18 @@ Run health checks on all ShieldOps platform dependencies.
    - Compliance control tester: `src/shieldops/compliance/control_tester.py` — ComplianceControlTester
    - Capacity bottleneck detector: `src/shieldops/analytics/bottleneck_detector.py` — CapacityBottleneckDetector
    - Metric anomaly scorer: `src/shieldops/analytics/anomaly_scorer.py` — MetricAnomalyScorer
+   - **Phase 46:** Incident noise filter: `src/shieldops/incidents/noise_filter.py` — IncidentNoiseFilter
+   - Service dependency validator: `src/shieldops/topology/dep_validator.py` — ServiceDependencyValidator
+   - Alert priority optimizer: `src/shieldops/observability/alert_priority.py` — AlertPriorityOptimizer
+   - Cost allocation validator: `src/shieldops/billing/cost_alloc_validator.py` — CostAllocationValidator
+   - Change correlation engine: `src/shieldops/changes/change_correlator.py` — ChangeCorrelationEngine
+   - SLO dependency mapper: `src/shieldops/sla/slo_dep_mapper.py` — SLODependencyMapper
+   - Operational metric aggregator: `src/shieldops/operations/metric_aggregator.py` — OperationalMetricAggregator
+   - Security event correlator: `src/shieldops/security/event_correlator.py` — SecurityEventCorrelator
+   - Knowledge search optimizer: `src/shieldops/knowledge/search_optimizer.py` — KnowledgeSearchOptimizer
+   - Compliance evidence consolidator: `src/shieldops/compliance/evidence_consolidator.py` — ComplianceEvidenceConsolidator
+   - Service latency analyzer: `src/shieldops/analytics/service_latency.py` — ServiceLatencyAnalyzer
+   - Audit compliance reporter: `src/shieldops/audit/compliance_reporter.py` — AuditComplianceReporter
    - Verify each module initializes in `src/shieldops/api/app.py` lifespan
 
 6. **Check configuration**:
