@@ -300,6 +300,18 @@ Design new ShieldOps components, APIs, or agent workflows.
    - Track control effectiveness via `ControlEffectivenessTracker` (`src/shieldops/compliance/control_effectiveness.py`)
    - Collect reliability metrics via `ReliabilityMetricsCollector` (`src/shieldops/analytics/reliability_metrics.py`)
    - Track audit remediations via `AuditRemediationTracker` (`src/shieldops/audit/remediation_tracker.py`)
+   - Manage response playbooks via `ResponsePlaybookManager` (`src/shieldops/incidents/response_playbook.py`)
+   - Analyze service communications via `ServiceCommunicationAnalyzer` (`src/shieldops/topology/service_communication.py`)
+   - Score dashboard effectiveness via `DashboardEffectivenessScorer` (`src/shieldops/observability/dashboard_effectiveness.py`)
+   - Optimize procurement via `ProcurementOptimizer` (`src/shieldops/billing/procurement_optimizer.py`)
+   - Assess merge risk via `MergeRiskAssessor` (`src/shieldops/changes/merge_risk.py`)
+   - Track degradation via `DegradationTracker` (`src/shieldops/sla/degradation_tracker.py`)
+   - Analyze handover quality via `HandoverQualityAnalyzer` (`src/shieldops/operations/handover_quality.py`)
+   - Classify data sensitivity via `DataClassificationEngine` (`src/shieldops/security/data_classification.py`)
+   - Manage feedback loops via `FeedbackLoopManager` (`src/shieldops/knowledge/feedback_loop.py`)
+   - Analyze policy coverage via `PolicyCoverageAnalyzer` (`src/shieldops/compliance/policy_coverage.py`)
+   - Track alert responses via `AlertResponseTracker` (`src/shieldops/analytics/alert_response.py`)
+   - Audit changes via `ChangeAuditLogger` (`src/shieldops/audit/change_audit.py`)
 
 5. **Documentation**:
    - Write Architecture Decision Record (ADR) in `docs/architecture/`

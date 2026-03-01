@@ -284,6 +284,18 @@ Review ShieldOps agent code for correctness, safety, and reliability.
 - [ ] Control effectiveness tracked via `ControlEffectivenessTracker` (`src/shieldops/compliance/control_effectiveness.py`)
 - [ ] Reliability metrics collected via `ReliabilityMetricsCollector` (`src/shieldops/analytics/reliability_metrics.py`)
 - [ ] Audit remediations tracked via `AuditRemediationTracker` (`src/shieldops/audit/remediation_tracker.py`)
+- [ ] Response playbooks managed via `ResponsePlaybookManager` (`src/shieldops/incidents/response_playbook.py`)
+- [ ] Service communications analyzed via `ServiceCommunicationAnalyzer` (`src/shieldops/topology/service_communication.py`)
+- [ ] Dashboard effectiveness scored via `DashboardEffectivenessScorer` (`src/shieldops/observability/dashboard_effectiveness.py`)
+- [ ] Procurement optimized via `ProcurementOptimizer` (`src/shieldops/billing/procurement_optimizer.py`)
+- [ ] Merge risk assessed via `MergeRiskAssessor` (`src/shieldops/changes/merge_risk.py`)
+- [ ] Degradation tracked via `DegradationTracker` (`src/shieldops/sla/degradation_tracker.py`)
+- [ ] Handover quality analyzed via `HandoverQualityAnalyzer` (`src/shieldops/operations/handover_quality.py`)
+- [ ] Data classified via `DataClassificationEngine` (`src/shieldops/security/data_classification.py`)
+- [ ] Feedback loops managed via `FeedbackLoopManager` (`src/shieldops/knowledge/feedback_loop.py`)
+- [ ] Policy coverage analyzed via `PolicyCoverageAnalyzer` (`src/shieldops/compliance/policy_coverage.py`)
+- [ ] Alert responses tracked via `AlertResponseTracker` (`src/shieldops/analytics/alert_response.py`)
+- [ ] Changes audited via `ChangeAuditLogger` (`src/shieldops/audit/change_audit.py`)
 
 ### Testing
 - [ ] Unit tests for all node functions
