@@ -213,6 +213,17 @@ Review ShieldOps agent code for correctness, safety, and reliability.
 - [ ] Compliance reports automated via `ComplianceReportAutomator` (`src/shieldops/compliance/report_automator.py`)
 - [ ] Infrastructure health scored via `InfrastructureHealthScorer` (`src/shieldops/topology/infra_health_scorer.py`)
 - [ ] Deployment impact predicted via `DeploymentImpactPredictor` (`src/shieldops/changes/impact_predictor.py`)
+- [ ] Response times analyzed via `IncidentResponseTimeAnalyzer` (`src/shieldops/incidents/response_time.py`)
+- [ ] Service dependency risk scored via `ServiceDependencyRiskScorer` (`src/shieldops/topology/service_dep_risk.py`)
+- [ ] Alert escalations analyzed via `AlertEscalationAnalyzer` (`src/shieldops/observability/escalation_analyzer.py`)
+- [ ] Capacity utilization optimized via `CapacityUtilizationOptimizer` (`src/shieldops/billing/capacity_utilizer.py`)
+- [ ] Change freezes validated via `ChangeFreezeValidator` (`src/shieldops/changes/freeze_validator.py`)
+- [ ] Platform availability tracked via `PlatformAvailabilityTracker` (`src/shieldops/sla/availability_tracker.py`)
+- [ ] Root causes classified via `IncidentRootCauseClassifier` (`src/shieldops/incidents/root_cause_classifier.py`)
+- [ ] Canary deployments scored via `DeploymentCanaryScorer` (`src/shieldops/changes/canary_scorer.py`)
+- [ ] Config drift monitored via `ConfigDriftMonitor` (`src/shieldops/operations/config_drift_monitor.py`)
+- [ ] Security compliance mapped via `SecurityComplianceMapper` (`src/shieldops/security/compliance_mapper.py`)
+- [ ] On-call equity analyzed via `TeamOnCallEquityAnalyzer` (`src/shieldops/operations/oncall_equity.py`)
 
 ### Testing
 - [ ] Unit tests for all node functions

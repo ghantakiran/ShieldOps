@@ -111,6 +111,10 @@ Run security audits on ShieldOps codebase and agent configurations.
 85. **Security Posture Benchmarking**: Benchmark security posture against industry standards via `SecurityPostureBenchmarker` (`src/shieldops/security/posture_benchmark.py`)
 86. **Alert Noise Classification**: Classify alerts as actionable vs noise to reduce alert fatigue via `AlertNoiseClassifier` (`src/shieldops/observability/noise_classifier.py`)
 87. **Compliance Report Automation**: Automate compliance report generation and evidence aggregation via `ComplianceReportAutomator` (`src/shieldops/compliance/report_automator.py`)
+88. **Alert Escalation Analysis**: Analyze alert escalation patterns, timing, and outcomes via `AlertEscalationAnalyzer` (`src/shieldops/observability/escalation_analyzer.py`)
+89. **Security Compliance Mapping**: Map security controls to compliance frameworks and detect gaps via `SecurityComplianceMapper` (`src/shieldops/security/compliance_mapper.py`)
+90. **Config Drift Monitoring**: Monitor configuration drift and detect unauthorized changes via `ConfigDriftMonitor` (`src/shieldops/operations/config_drift_monitor.py`)
+91. **Service Dependency Risk**: Score dependency risk across services via `ServiceDependencyRiskScorer` (`src/shieldops/topology/service_dep_risk.py`)
 
 ## Severity Levels
 - **CRITICAL**: Hardcoded secrets, SQL injection, unauthenticated endpoints

@@ -230,6 +230,17 @@ Design new ShieldOps components, APIs, or agent workflows.
    - Automate compliance reports via `ComplianceReportAutomator` (`src/shieldops/compliance/report_automator.py`)
    - Score infrastructure health via `InfrastructureHealthScorer` (`src/shieldops/topology/infra_health_scorer.py`)
    - Predict deployment impact via `DeploymentImpactPredictor` (`src/shieldops/changes/impact_predictor.py`)
+   - Analyze response times via `IncidentResponseTimeAnalyzer` (`src/shieldops/incidents/response_time.py`)
+   - Score service dependency risk via `ServiceDependencyRiskScorer` (`src/shieldops/topology/service_dep_risk.py`)
+   - Analyze alert escalations via `AlertEscalationAnalyzer` (`src/shieldops/observability/escalation_analyzer.py`)
+   - Optimize capacity utilization via `CapacityUtilizationOptimizer` (`src/shieldops/billing/capacity_utilizer.py`)
+   - Validate change freezes via `ChangeFreezeValidator` (`src/shieldops/changes/freeze_validator.py`)
+   - Track platform availability via `PlatformAvailabilityTracker` (`src/shieldops/sla/availability_tracker.py`)
+   - Classify root causes via `IncidentRootCauseClassifier` (`src/shieldops/incidents/root_cause_classifier.py`)
+   - Score canary deployments via `DeploymentCanaryScorer` (`src/shieldops/changes/canary_scorer.py`)
+   - Monitor config drift via `ConfigDriftMonitor` (`src/shieldops/operations/config_drift_monitor.py`)
+   - Map security compliance via `SecurityComplianceMapper` (`src/shieldops/security/compliance_mapper.py`)
+   - Analyze on-call equity via `TeamOnCallEquityAnalyzer` (`src/shieldops/operations/oncall_equity.py`)
 
 5. **Documentation**:
    - Write Architecture Decision Record (ADR) in `docs/architecture/`

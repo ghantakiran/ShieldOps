@@ -125,6 +125,11 @@ Deploy ShieldOps agents to target environments.
    - Predict change risk via `ChangeRiskPredictor` (`src/shieldops/changes/risk_predictor.py`)
    - Predict deployment impact via `DeploymentImpactPredictor` (`src/shieldops/changes/impact_predictor.py`)
    - Benchmark security posture via `SecurityPostureBenchmarker` (`src/shieldops/security/posture_benchmark.py`)
+   - Analyze response times via `IncidentResponseTimeAnalyzer` (`src/shieldops/incidents/response_time.py`)
+   - Score canary deployments via `DeploymentCanaryScorer` (`src/shieldops/changes/canary_scorer.py`)
+   - Validate change freezes via `ChangeFreezeValidator` (`src/shieldops/changes/freeze_validator.py`)
+   - Monitor config drift via `ConfigDriftMonitor` (`src/shieldops/operations/config_drift_monitor.py`)
+   - Track availability via `PlatformAvailabilityTracker` (`src/shieldops/sla/availability_tracker.py`)
 4. **Deploy**:
    - Apply Kubernetes manifests from `infrastructure/kubernetes/`
    - For production: trigger approval workflow via Slack/Teams
