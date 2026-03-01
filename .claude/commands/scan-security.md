@@ -128,6 +128,11 @@ Run security audits on ShieldOps codebase and agent configurations.
 102. **Security Event Correlation**: Correlate security events via `SecurityEventCorrelator` (`src/shieldops/security/event_correlator.py`)
 103. **Evidence Consolidation**: Consolidate compliance evidence via `ComplianceEvidenceConsolidator` (`src/shieldops/compliance/evidence_consolidator.py`)
 104. **Audit Compliance Reporting**: Generate audit compliance reports via `AuditComplianceReporter` (`src/shieldops/audit/compliance_reporter.py`)
+105. **Vulnerability Prioritization**: Prioritize vulnerabilities by exploitability and impact via `VulnerabilityPrioritizer` (`src/shieldops/security/vuln_prioritizer.py`)
+106. **Compliance Risk Scoring**: Score compliance risk across frameworks and detect high-risk areas via `ComplianceRiskScorer` (`src/shieldops/compliance/risk_scorer.py`)
+107. **Audit Evidence Tracking**: Track audit evidence collection and monitor freshness via `AuditEvidenceTracker` (`src/shieldops/audit/evidence_tracker.py`)
+108. **Performance Benchmarking**: Track performance benchmarks and detect regressions via `PerformanceBenchmarkTracker` (`src/shieldops/analytics/perf_benchmark.py`)
+109. **Alert Correlation Optimization**: Optimize alert correlation rules and reduce false correlations via `AlertCorrelationOptimizer` (`src/shieldops/observability/alert_correlation_opt.py`)
 
 ## Severity Levels
 - **CRITICAL**: Hardcoded secrets, SQL injection, unauthenticated endpoints

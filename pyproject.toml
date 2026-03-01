@@ -566,6 +566,18 @@ module = [
     "shieldops.api.routes.evidence_consolidator",
     "shieldops.api.routes.service_latency",
     "shieldops.api.routes.compliance_reporter",
+    "shieldops.api.routes.response_optimizer",
+    "shieldops.api.routes.dep_change_tracker",
+    "shieldops.api.routes.alert_correlation_opt",
+    "shieldops.api.routes.forecast_validator",
+    "shieldops.api.routes.rollback_tracker",
+    "shieldops.api.routes.slo_health",
+    "shieldops.api.routes.runbook_compliance",
+    "shieldops.api.routes.vuln_prioritizer",
+    "shieldops.api.routes.usage_analyzer",
+    "shieldops.api.routes.risk_scorer",
+    "shieldops.api.routes.perf_benchmark",
+    "shieldops.api.routes.evidence_tracker",
 ]
 warn_return_any = false
 disallow_untyped_defs = false

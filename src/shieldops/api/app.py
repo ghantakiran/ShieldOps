@@ -10223,6 +10223,264 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         except Exception as e:
             logger.warning("audit_compliance_reporter_init_failed", error=str(e))
 
+    # -- Phase 47: Incident Response Optimizer --
+    if settings.response_optimizer_enabled:
+        try:
+            from shieldops.api.routes import response_optimizer as iro_mod
+            from shieldops.incidents.response_optimizer import (
+                IncidentResponseOptimizer,
+            )
+
+            _iro_engine = IncidentResponseOptimizer(
+                max_records=settings.response_optimizer_max_records,
+                max_response_time_minutes=settings.response_optimizer_max_response_time_minutes,
+            )
+            iro_mod.set_engine(_iro_engine)
+            app.include_router(
+                iro_mod.iro_route,
+                prefix=settings.api_prefix,
+                tags=["Response Optimizer"],
+            )
+            logger.info("response_optimizer_initialized")
+        except Exception as e:
+            logger.warning("response_optimizer_init_failed", error=str(e))
+
+    # -- Phase 47: Dependency Change Tracker --
+    if settings.dep_change_tracker_enabled:
+        try:
+            from shieldops.api.routes import dep_change_tracker as dct_mod
+            from shieldops.topology.dep_change_tracker import (
+                DependencyChangeTracker,
+            )
+
+            _dct_engine = DependencyChangeTracker(
+                max_records=settings.dep_change_tracker_max_records,
+                max_breaking_change_pct=settings.dep_change_tracker_max_breaking_change_pct,
+            )
+            dct_mod.set_engine(_dct_engine)
+            app.include_router(
+                dct_mod.dct_route,
+                prefix=settings.api_prefix,
+                tags=["Dependency Change Tracker"],
+            )
+            logger.info("dep_change_tracker_initialized")
+        except Exception as e:
+            logger.warning("dep_change_tracker_init_failed", error=str(e))
+
+    # -- Phase 47: Alert Correlation Optimizer --
+    if settings.alert_correlation_opt_enabled:
+        try:
+            from shieldops.api.routes import alert_correlation_opt as aco_mod
+            from shieldops.observability.alert_correlation_opt import (
+                AlertCorrelationOptimizer,
+            )
+
+            _aco_engine = AlertCorrelationOptimizer(
+                max_records=settings.alert_correlation_opt_max_records,
+                min_correlation_strength=settings.alert_correlation_opt_min_correlation_strength,
+            )
+            aco_mod.set_engine(_aco_engine)
+            app.include_router(
+                aco_mod.aco_route,
+                prefix=settings.api_prefix,
+                tags=["Alert Correlation Optimizer"],
+            )
+            logger.info("alert_correlation_opt_initialized")
+        except Exception as e:
+            logger.warning("alert_correlation_opt_init_failed", error=str(e))
+
+    # -- Phase 47: Cost Forecast Validator --
+    if settings.forecast_validator_enabled:
+        try:
+            from shieldops.api.routes import forecast_validator as fvl_mod
+            from shieldops.billing.forecast_validator import (
+                CostForecastValidator,
+            )
+
+            _fvl_engine = CostForecastValidator(
+                max_records=settings.forecast_validator_max_records,
+                max_forecast_error_pct=settings.forecast_validator_max_forecast_error_pct,
+            )
+            fvl_mod.set_engine(_fvl_engine)
+            app.include_router(
+                fvl_mod.fvl_route,
+                prefix=settings.api_prefix,
+                tags=["Forecast Validator"],
+            )
+            logger.info("forecast_validator_initialized")
+        except Exception as e:
+            logger.warning("forecast_validator_init_failed", error=str(e))
+
+    # -- Phase 47: Deployment Rollback Tracker --
+    if settings.rollback_tracker_enabled:
+        try:
+            from shieldops.api.routes import rollback_tracker as rbt_mod
+            from shieldops.changes.rollback_tracker import (
+                DeploymentRollbackTracker,
+            )
+
+            _rbt_engine = DeploymentRollbackTracker(
+                max_records=settings.rollback_tracker_max_records,
+                max_rollback_rate_pct=settings.rollback_tracker_max_rollback_rate_pct,
+            )
+            rbt_mod.set_engine(_rbt_engine)
+            app.include_router(
+                rbt_mod.rbt_route,
+                prefix=settings.api_prefix,
+                tags=["Rollback Tracker"],
+            )
+            logger.info("rollback_tracker_initialized")
+        except Exception as e:
+            logger.warning("rollback_tracker_init_failed", error=str(e))
+
+    # -- Phase 47: SLO Health Dashboard --
+    if settings.slo_health_enabled:
+        try:
+            from shieldops.api.routes import slo_health as shd_mod
+            from shieldops.sla.slo_health import SLOHealthDashboard
+
+            _shd_engine = SLOHealthDashboard(
+                max_records=settings.slo_health_max_records,
+                min_health_score=settings.slo_health_min_health_score,
+            )
+            shd_mod.set_engine(_shd_engine)
+            app.include_router(
+                shd_mod.shd_route,
+                prefix=settings.api_prefix,
+                tags=["SLO Health"],
+            )
+            logger.info("slo_health_initialized")
+        except Exception as e:
+            logger.warning("slo_health_init_failed", error=str(e))
+
+    # -- Phase 47: Runbook Compliance Checker --
+    if settings.runbook_compliance_enabled:
+        try:
+            from shieldops.api.routes import runbook_compliance as rcp_mod
+            from shieldops.operations.runbook_compliance import (
+                RunbookComplianceChecker,
+            )
+
+            _rcp_engine = RunbookComplianceChecker(
+                max_records=settings.runbook_compliance_max_records,
+                min_compliance_pct=settings.runbook_compliance_min_compliance_pct,
+            )
+            rcp_mod.set_engine(_rcp_engine)
+            app.include_router(
+                rcp_mod.rcp_route,
+                prefix=settings.api_prefix,
+                tags=["Runbook Compliance"],
+            )
+            logger.info("runbook_compliance_initialized")
+        except Exception as e:
+            logger.warning("runbook_compliance_init_failed", error=str(e))
+
+    # -- Phase 47: Vulnerability Prioritizer --
+    if settings.vuln_prioritizer_enabled:
+        try:
+            from shieldops.api.routes import vuln_prioritizer as vpr_mod
+            from shieldops.security.vuln_prioritizer import (
+                VulnerabilityPrioritizer,
+            )
+
+            _vpr_engine = VulnerabilityPrioritizer(
+                max_records=settings.vuln_prioritizer_max_records,
+                critical_cvss_threshold=settings.vuln_prioritizer_critical_cvss_threshold,
+            )
+            vpr_mod.set_engine(_vpr_engine)
+            app.include_router(
+                vpr_mod.vpr_route,
+                prefix=settings.api_prefix,
+                tags=["Vulnerability Prioritizer"],
+            )
+            logger.info("vuln_prioritizer_initialized")
+        except Exception as e:
+            logger.warning("vuln_prioritizer_init_failed", error=str(e))
+
+    # -- Phase 47: Knowledge Usage Analyzer --
+    if settings.usage_analyzer_enabled:
+        try:
+            from shieldops.api.routes import usage_analyzer as kua_mod
+            from shieldops.knowledge.usage_analyzer import (
+                KnowledgeUsageAnalyzer,
+            )
+
+            _kua_engine = KnowledgeUsageAnalyzer(
+                max_records=settings.usage_analyzer_max_records,
+                min_usage_score=settings.usage_analyzer_min_usage_score,
+            )
+            kua_mod.set_engine(_kua_engine)
+            app.include_router(
+                kua_mod.kua_route,
+                prefix=settings.api_prefix,
+                tags=["Usage Analyzer"],
+            )
+            logger.info("usage_analyzer_initialized")
+        except Exception as e:
+            logger.warning("usage_analyzer_init_failed", error=str(e))
+
+    # -- Phase 47: Compliance Risk Scorer --
+    if settings.compliance_risk_scorer_enabled:
+        try:
+            from shieldops.api.routes import risk_scorer as crs_mod
+            from shieldops.compliance.risk_scorer import ComplianceRiskScorer
+
+            _crs_engine = ComplianceRiskScorer(
+                max_records=settings.compliance_risk_scorer_max_records,
+                max_risk_score=settings.compliance_risk_scorer_max_risk_score,
+            )
+            crs_mod.set_engine(_crs_engine)
+            app.include_router(
+                crs_mod.crs_route,
+                prefix=settings.api_prefix,
+                tags=["Compliance Risk Scorer"],
+            )
+            logger.info("compliance_risk_scorer_initialized")
+        except Exception as e:
+            logger.warning("compliance_risk_scorer_init_failed", error=str(e))
+
+    # -- Phase 47: Performance Benchmark Tracker --
+    if settings.perf_benchmark_enabled:
+        try:
+            from shieldops.analytics.perf_benchmark import (
+                PerformanceBenchmarkTracker,
+            )
+            from shieldops.api.routes import perf_benchmark as pbt_mod
+
+            _pbt_engine = PerformanceBenchmarkTracker(
+                max_records=settings.perf_benchmark_max_records,
+                max_regression_pct=settings.perf_benchmark_max_regression_pct,
+            )
+            pbt_mod.set_engine(_pbt_engine)
+            app.include_router(
+                pbt_mod.pbt_route,
+                prefix=settings.api_prefix,
+                tags=["Performance Benchmark"],
+            )
+            logger.info("perf_benchmark_initialized")
+        except Exception as e:
+            logger.warning("perf_benchmark_init_failed", error=str(e))
+
+    # -- Phase 47: Audit Evidence Tracker --
+    if settings.evidence_tracker_enabled:
+        try:
+            from shieldops.api.routes import evidence_tracker as aet_mod
+            from shieldops.audit.evidence_tracker import AuditEvidenceTracker
+
+            _aet_engine = AuditEvidenceTracker(
+                max_records=settings.evidence_tracker_max_records,
+                min_completeness_pct=settings.evidence_tracker_min_completeness_pct,
+            )
+            aet_mod.set_engine(_aet_engine)
+            app.include_router(
+                aet_mod.aet_route,
+                prefix=settings.api_prefix,
+                tags=["Evidence Tracker"],
+            )
+            logger.info("evidence_tracker_initialized")
+        except Exception as e:
+            logger.warning("evidence_tracker_init_failed", error=str(e))
+
     yield
 
     logger.info("shieldops_shutting_down")

@@ -28,7 +28,7 @@ Run health checks on all ShieldOps platform dependencies.
    - Integration tests: `python3 -m pytest tests/integration/ -v --tb=short`
    - Report: total tests, passed, failed, coverage
 
-5. **Platform feature health** (Phase 11–45 modules):
+5. **Platform feature health** (Phase 11–47 modules):
    - Capacity trends: `src/shieldops/analytics/capacity_trends.py` — CapacityTrendAnalyzer
    - SRE metrics: `src/shieldops/analytics/sre_metrics.py` — SREMetricsAggregator
    - Health reports: `src/shieldops/observability/health_report.py` — ServiceHealthReportGenerator
@@ -313,6 +313,18 @@ Run health checks on all ShieldOps platform dependencies.
    - Compliance evidence consolidator: `src/shieldops/compliance/evidence_consolidator.py` — ComplianceEvidenceConsolidator
    - Service latency analyzer: `src/shieldops/analytics/service_latency.py` — ServiceLatencyAnalyzer
    - Audit compliance reporter: `src/shieldops/audit/compliance_reporter.py` — AuditComplianceReporter
+   - **Phase 47:** Incident response optimizer: `src/shieldops/incidents/response_optimizer.py` — IncidentResponseOptimizer
+   - Dependency change tracker: `src/shieldops/topology/dep_change_tracker.py` — DependencyChangeTracker
+   - Alert correlation optimizer: `src/shieldops/observability/alert_correlation_opt.py` — AlertCorrelationOptimizer
+   - Cost forecast validator: `src/shieldops/billing/forecast_validator.py` — CostForecastValidator
+   - Deployment rollback tracker: `src/shieldops/changes/rollback_tracker.py` — DeploymentRollbackTracker
+   - SLO health dashboard: `src/shieldops/sla/slo_health.py` — SLOHealthDashboard
+   - Runbook compliance checker: `src/shieldops/operations/runbook_compliance.py` — RunbookComplianceChecker
+   - Vulnerability prioritizer: `src/shieldops/security/vuln_prioritizer.py` — VulnerabilityPrioritizer
+   - Knowledge usage analyzer: `src/shieldops/knowledge/usage_analyzer.py` — KnowledgeUsageAnalyzer
+   - Compliance risk scorer: `src/shieldops/compliance/risk_scorer.py` — ComplianceRiskScorer
+   - Performance benchmark tracker: `src/shieldops/analytics/perf_benchmark.py` — PerformanceBenchmarkTracker
+   - Audit evidence tracker: `src/shieldops/audit/evidence_tracker.py` — AuditEvidenceTracker
    - Verify each module initializes in `src/shieldops/api/app.py` lifespan
 
 6. **Check configuration**:

@@ -248,6 +248,18 @@ Review ShieldOps agent code for correctness, safety, and reliability.
 - [ ] Evidence consolidated via `ComplianceEvidenceConsolidator` (`src/shieldops/compliance/evidence_consolidator.py`)
 - [ ] Service latency analyzed via `ServiceLatencyAnalyzer` (`src/shieldops/analytics/service_latency.py`)
 - [ ] Audit compliance reported via `AuditComplianceReporter` (`src/shieldops/audit/compliance_reporter.py`)
+- [ ] Incident response optimized via `IncidentResponseOptimizer` (`src/shieldops/incidents/response_optimizer.py`)
+- [ ] Dependency changes tracked via `DependencyChangeTracker` (`src/shieldops/topology/dep_change_tracker.py`)
+- [ ] Alert correlations optimized via `AlertCorrelationOptimizer` (`src/shieldops/observability/alert_correlation_opt.py`)
+- [ ] Cost forecasts validated via `CostForecastValidator` (`src/shieldops/billing/forecast_validator.py`)
+- [ ] Deployment rollbacks tracked via `DeploymentRollbackTracker` (`src/shieldops/changes/rollback_tracker.py`)
+- [ ] SLO health monitored via `SLOHealthDashboard` (`src/shieldops/sla/slo_health.py`)
+- [ ] Runbook compliance checked via `RunbookComplianceChecker` (`src/shieldops/operations/runbook_compliance.py`)
+- [ ] Vulnerabilities prioritized via `VulnerabilityPrioritizer` (`src/shieldops/security/vuln_prioritizer.py`)
+- [ ] Knowledge usage analyzed via `KnowledgeUsageAnalyzer` (`src/shieldops/knowledge/usage_analyzer.py`)
+- [ ] Compliance risk scored via `ComplianceRiskScorer` (`src/shieldops/compliance/risk_scorer.py`)
+- [ ] Performance benchmarks tracked via `PerformanceBenchmarkTracker` (`src/shieldops/analytics/perf_benchmark.py`)
+- [ ] Audit evidence tracked via `AuditEvidenceTracker` (`src/shieldops/audit/evidence_tracker.py`)
 
 ### Testing
 - [ ] Unit tests for all node functions
