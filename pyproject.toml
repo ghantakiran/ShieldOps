@@ -542,6 +542,18 @@ module = [
     "shieldops.api.routes.config_drift_monitor",
     "shieldops.api.routes.compliance_mapper",
     "shieldops.api.routes.oncall_equity",
+    "shieldops.api.routes.incident_cluster",
+    "shieldops.api.routes.dep_latency",
+    "shieldops.api.routes.suppression_manager",
+    "shieldops.api.routes.cost_trend",
+    "shieldops.api.routes.batch_analyzer",
+    "shieldops.api.routes.slo_alignment",
+    "shieldops.api.routes.runbook_exec_tracker",
+    "shieldops.api.routes.threat_correlator",
+    "shieldops.api.routes.freshness_monitor",
+    "shieldops.api.routes.control_tester",
+    "shieldops.api.routes.bottleneck_detector",
+    "shieldops.api.routes.anomaly_scorer",
 ]
 warn_return_any = false
 disallow_untyped_defs = false

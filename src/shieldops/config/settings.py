@@ -2090,6 +2090,66 @@ class Settings(BaseSettings):
     oncall_equity_max_records: int = 200000
     oncall_equity_max_inequity_pct: float = 25.0
 
+    # Phase 45: Incident Clustering Engine
+    incident_cluster_enabled: bool = True
+    incident_cluster_max_records: int = 200000
+    incident_cluster_min_cluster_confidence: float = 70.0
+
+    # Phase 45: Dependency Latency Tracker
+    dep_latency_enabled: bool = True
+    dep_latency_max_records: int = 200000
+    dep_latency_max_latency_ms: float = 500.0
+
+    # Phase 45: Alert Suppression Manager
+    suppression_mgr_enabled: bool = True
+    suppression_mgr_max_records: int = 200000
+    suppression_mgr_max_suppression_rate_pct: float = 30.0
+
+    # Phase 45: Cost Trend Forecaster
+    cost_trend_enabled: bool = True
+    cost_trend_max_records: int = 200000
+    cost_trend_max_growth_rate_pct: float = 20.0
+
+    # Phase 45: Change Batch Analyzer
+    batch_analyzer_enabled: bool = True
+    batch_analyzer_max_records: int = 200000
+    batch_analyzer_max_batch_risk_score: float = 75.0
+
+    # Phase 45: SLO Alignment Validator
+    slo_alignment_enabled: bool = True
+    slo_alignment_max_records: int = 200000
+    slo_alignment_min_alignment_score: float = 80.0
+
+    # Phase 45: Runbook Execution Tracker
+    runbook_exec_tracker_enabled: bool = True
+    runbook_exec_tracker_max_records: int = 200000
+    runbook_exec_tracker_min_success_rate_pct: float = 80.0
+
+    # Phase 45: Threat Intelligence Correlator
+    threat_correlator_enabled: bool = True
+    threat_correlator_max_records: int = 200000
+    threat_correlator_min_relevance_score: float = 60.0
+
+    # Phase 45: Knowledge Freshness Monitor
+    freshness_monitor_enabled: bool = True
+    freshness_monitor_max_records: int = 200000
+    freshness_monitor_max_stale_days: float = 90.0
+
+    # Phase 45: Compliance Control Tester
+    control_tester_enabled: bool = True
+    control_tester_max_records: int = 200000
+    control_tester_min_pass_rate_pct: float = 90.0
+
+    # Phase 45: Capacity Bottleneck Detector
+    bottleneck_detector_enabled: bool = True
+    bottleneck_detector_max_records: int = 200000
+    bottleneck_detector_critical_utilization_pct: float = 90.0
+
+    # Phase 45: Metric Anomaly Scorer
+    anomaly_scorer_enabled: bool = True
+    anomaly_scorer_max_records: int = 200000
+    anomaly_scorer_min_anomaly_score: float = 70.0
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",
