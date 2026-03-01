@@ -167,6 +167,18 @@ Deploy ShieldOps agents to target environments.
    - Track deploy rollback health via `DeployRollbackHealthTracker` (`src/shieldops/changes/deploy_rollback_health.py`)
    - Analyze capacity headroom via `CapacityHeadroomAnalyzer` (`src/shieldops/analytics/capacity_headroom.py`)
    - Track change velocity via `ChangeVelocityTracker` (`src/shieldops/changes/change_velocity.py`)
+   - Track deploy gate pass/fail via `DeployGateTracker` (`src/shieldops/changes/deploy_gate_tracker.py`)
+   - Map runbook dependencies via `RunbookDependencyMapper` (`src/shieldops/operations/runbook_dependency.py`)
+   - Track change approval flows via `ChangeApprovalFlowTracker` (`src/shieldops/changes/change_approval_flow.py`)
+   - Monitor dependency circuit breakers via `DependencyCircuitBreakerMonitor` (`src/shieldops/topology/dependency_circuit_breaker.py`)
+   - Analyze SLO windows via `SLOWindowAnalyzer` (`src/shieldops/sla/slo_window_analyzer.py`)
+   - Plan capacity reservations via `CapacityReservationPlanner` (`src/shieldops/billing/capacity_reservation_planner.py`)
+   - Track cost forecast accuracy via `CostForecastAccuracyTracker` (`src/shieldops/billing/cost_forecast_accuracy.py`)
+   - Track incident debriefs via `IncidentDebriefTracker` (`src/shieldops/incidents/incident_debrief.py`)
+   - Plan metric cardinality via `MetricCardinalityPlanner` (`src/shieldops/observability/metric_cardinality_planner.py`)
+   - Analyze security posture gaps via `SecurityPostureGapAnalyzer` (`src/shieldops/security/security_posture_gap.py`)
+   - Track knowledge retention via `KnowledgeRetentionTracker` (`src/shieldops/knowledge/knowledge_retention.py`)
+   - Track audit findings via `AuditFindingTracker` (`src/shieldops/audit/audit_finding_tracker.py`)
 4. **Deploy**:
    - Apply Kubernetes manifests from `infrastructure/kubernetes/`
    - For production: trigger approval workflow via Slack/Teams

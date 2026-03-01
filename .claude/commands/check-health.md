@@ -28,7 +28,7 @@ Run health checks on all ShieldOps platform dependencies.
    - Integration tests: `python3 -m pytest tests/integration/ -v --tb=short`
    - Report: total tests, passed, failed, coverage
 
-5. **Platform feature health** (Phase 11–52 modules):
+5. **Platform feature health** (Phase 11–53 modules):
    - Capacity trends: `src/shieldops/analytics/capacity_trends.py` — CapacityTrendAnalyzer
    - SRE metrics: `src/shieldops/analytics/sre_metrics.py` — SREMetricsAggregator
    - Health reports: `src/shieldops/observability/health_report.py` — ServiceHealthReportGenerator
@@ -385,6 +385,18 @@ Run health checks on all ShieldOps platform dependencies.
    - Compliance evidence chain tracker: `src/shieldops/compliance/compliance_evidence_chain.py` — ComplianceEvidenceChainTracker
    - Capacity headroom analyzer: `src/shieldops/analytics/capacity_headroom.py` — CapacityHeadroomAnalyzer
    - Change velocity tracker: `src/shieldops/changes/change_velocity.py` — ChangeVelocityTracker
+   - **Phase 53:** Incident debrief tracker: `src/shieldops/incidents/incident_debrief.py` — IncidentDebriefTracker
+   - Dependency circuit breaker monitor: `src/shieldops/topology/dependency_circuit_breaker.py` — DependencyCircuitBreakerMonitor
+   - Metric cardinality planner: `src/shieldops/observability/metric_cardinality_planner.py` — MetricCardinalityPlanner
+   - Cost forecast accuracy tracker: `src/shieldops/billing/cost_forecast_accuracy.py` — CostForecastAccuracyTracker
+   - Deploy gate tracker: `src/shieldops/changes/deploy_gate_tracker.py` — DeployGateTracker
+   - SLO window analyzer: `src/shieldops/sla/slo_window_analyzer.py` — SLOWindowAnalyzer
+   - Runbook dependency mapper: `src/shieldops/operations/runbook_dependency.py` — RunbookDependencyMapper
+   - Security posture gap analyzer: `src/shieldops/security/security_posture_gap.py` — SecurityPostureGapAnalyzer
+   - Knowledge retention tracker: `src/shieldops/knowledge/knowledge_retention.py` — KnowledgeRetentionTracker
+   - Audit finding tracker: `src/shieldops/audit/audit_finding_tracker.py` — AuditFindingTracker
+   - Capacity reservation planner: `src/shieldops/billing/capacity_reservation_planner.py` — CapacityReservationPlanner
+   - Change approval flow tracker: `src/shieldops/changes/change_approval_flow.py` — ChangeApprovalFlowTracker
    - Verify each module initializes in `src/shieldops/api/app.py` lifespan
 
 6. **Check configuration**:

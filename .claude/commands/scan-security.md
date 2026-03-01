@@ -154,6 +154,12 @@ Run security audits on ShieldOps codebase and agent configurations.
 128. **Compliance Evidence Chain Tracking**: Track compliance evidence chains end-to-end and verify chain integrity via `ComplianceEvidenceChainTracker` (`src/shieldops/compliance/compliance_evidence_chain.py`)
 129. **Incident Pattern Detection**: Detect recurring incident patterns and identify systemic issues via `IncidentPatternDetector` (`src/shieldops/incidents/incident_pattern.py`)
 130. **Cost Attribution**: Attribute costs to teams, services, and features and track cost drivers via `CostAttributionEngine` (`src/shieldops/billing/cost_attribution_engine.py`)
+131. **Security Posture Gap Analysis**: Analyze security posture gaps across infrastructure and prioritize remediation via `SecurityPostureGapAnalyzer` (`src/shieldops/security/security_posture_gap.py`)
+132. **Audit Finding Tracking**: Track audit finding lifecycle, remediation timelines, and recurring findings via `AuditFindingTracker` (`src/shieldops/audit/audit_finding_tracker.py`)
+133. **Dependency Circuit Breaker Monitoring**: Monitor dependency circuit breaker states and detect unhealthy patterns via `DependencyCircuitBreakerMonitor` (`src/shieldops/topology/dependency_circuit_breaker.py`)
+134. **Metric Cardinality Planning**: Plan metric cardinality budgets and detect cardinality explosions via `MetricCardinalityPlanner` (`src/shieldops/observability/metric_cardinality_planner.py`)
+135. **Knowledge Retention Tracking**: Track knowledge retention across teams and detect knowledge loss risks via `KnowledgeRetentionTracker` (`src/shieldops/knowledge/knowledge_retention.py`)
+136. **Cost Forecast Accuracy**: Track cost forecast accuracy and detect forecast drift via `CostForecastAccuracyTracker` (`src/shieldops/billing/cost_forecast_accuracy.py`)
 
 ## Severity Levels
 - **CRITICAL**: Hardcoded secrets, SQL injection, unauthenticated endpoints

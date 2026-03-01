@@ -320,6 +320,18 @@ Review ShieldOps agent code for correctness, safety, and reliability.
 - [ ] Compliance evidence chains tracked via `ComplianceEvidenceChainTracker` (`src/shieldops/compliance/compliance_evidence_chain.py`)
 - [ ] Capacity headroom analyzed via `CapacityHeadroomAnalyzer` (`src/shieldops/analytics/capacity_headroom.py`)
 - [ ] Change velocity tracked via `ChangeVelocityTracker` (`src/shieldops/changes/change_velocity.py`)
+- [ ] Incident debriefs tracked via `IncidentDebriefTracker` (`src/shieldops/incidents/incident_debrief.py`)
+- [ ] Dependency circuit breakers monitored via `DependencyCircuitBreakerMonitor` (`src/shieldops/topology/dependency_circuit_breaker.py`)
+- [ ] Metric cardinality planned via `MetricCardinalityPlanner` (`src/shieldops/observability/metric_cardinality_planner.py`)
+- [ ] Cost forecast accuracy tracked via `CostForecastAccuracyTracker` (`src/shieldops/billing/cost_forecast_accuracy.py`)
+- [ ] Deploy gates tracked via `DeployGateTracker` (`src/shieldops/changes/deploy_gate_tracker.py`)
+- [ ] SLO windows analyzed via `SLOWindowAnalyzer` (`src/shieldops/sla/slo_window_analyzer.py`)
+- [ ] Runbook dependencies mapped via `RunbookDependencyMapper` (`src/shieldops/operations/runbook_dependency.py`)
+- [ ] Security posture gaps analyzed via `SecurityPostureGapAnalyzer` (`src/shieldops/security/security_posture_gap.py`)
+- [ ] Knowledge retention tracked via `KnowledgeRetentionTracker` (`src/shieldops/knowledge/knowledge_retention.py`)
+- [ ] Audit findings tracked via `AuditFindingTracker` (`src/shieldops/audit/audit_finding_tracker.py`)
+- [ ] Capacity reservations planned via `CapacityReservationPlanner` (`src/shieldops/billing/capacity_reservation_planner.py`)
+- [ ] Change approval flows tracked via `ChangeApprovalFlowTracker` (`src/shieldops/changes/change_approval_flow.py`)
 
 ### Testing
 - [ ] Unit tests for all node functions
