@@ -11723,6 +11723,254 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         except Exception as e:
             logger.warning("change_velocity_init_failed", error=str(e))
 
+    # Phase 53: Incident Debrief Tracker
+    if settings.incident_debrief_enabled:
+        try:
+            from shieldops.api.routes import incident_debrief as idb_mod
+            from shieldops.incidents.incident_debrief import IncidentDebriefTracker
+
+            _idb_engine = IncidentDebriefTracker(
+                max_records=settings.incident_debrief_max_records,
+                min_debrief_quality_pct=settings.incident_debrief_min_debrief_quality_pct,
+            )
+            idb_mod.set_engine(_idb_engine)
+            app.include_router(
+                idb_mod.idb_route,
+                prefix=settings.api_prefix,
+                tags=["Incident Debrief"],
+            )
+            logger.info("incident_debrief_initialized")
+        except Exception as e:
+            logger.warning("incident_debrief_init_failed", error=str(e))
+
+    # Phase 53: Dependency Circuit Breaker Monitor
+    if settings.dependency_circuit_breaker_enabled:
+        try:
+            from shieldops.api.routes import dependency_circuit_breaker as dcb_mod
+            from shieldops.topology.dependency_circuit_breaker import (
+                DependencyCircuitBreakerMonitor,
+            )
+
+            _dcb_engine = DependencyCircuitBreakerMonitor(
+                max_records=settings.dependency_circuit_breaker_max_records,
+                max_open_circuit_pct=settings.dependency_circuit_breaker_max_open_circuit_pct,
+            )
+            dcb_mod.set_engine(_dcb_engine)
+            app.include_router(
+                dcb_mod.dcb_route,
+                prefix=settings.api_prefix,
+                tags=["Dependency Circuit Breaker"],
+            )
+            logger.info("dependency_circuit_breaker_initialized")
+        except Exception as e:
+            logger.warning("dependency_circuit_breaker_init_failed", error=str(e))
+
+    # Phase 53: Metric Cardinality Planner
+    if settings.metric_cardinality_planner_enabled:
+        try:
+            from shieldops.api.routes import metric_cardinality_planner as mcp_mod
+            from shieldops.observability.metric_cardinality_planner import (
+                MetricCardinalityPlanner,
+            )
+
+            _mcp_engine = MetricCardinalityPlanner(
+                max_records=settings.metric_cardinality_planner_max_records,
+                max_high_cardinality_pct=settings.metric_cardinality_planner_max_high_cardinality_pct,
+            )
+            mcp_mod.set_engine(_mcp_engine)
+            app.include_router(
+                mcp_mod.mcp_route,
+                prefix=settings.api_prefix,
+                tags=["Metric Cardinality"],
+            )
+            logger.info("metric_cardinality_planner_initialized")
+        except Exception as e:
+            logger.warning("metric_cardinality_planner_init_failed", error=str(e))
+
+    # Phase 53: Cost Forecast Accuracy Tracker
+    if settings.cost_forecast_accuracy_enabled:
+        try:
+            from shieldops.api.routes import cost_forecast_accuracy as cfa_mod
+            from shieldops.billing.cost_forecast_accuracy import CostForecastAccuracyTracker
+
+            _cfa_engine = CostForecastAccuracyTracker(
+                max_records=settings.cost_forecast_accuracy_max_records,
+                min_accuracy_pct=settings.cost_forecast_accuracy_min_accuracy_pct,
+            )
+            cfa_mod.set_engine(_cfa_engine)
+            app.include_router(
+                cfa_mod.cfa_route,
+                prefix=settings.api_prefix,
+                tags=["Cost Forecast Accuracy"],
+            )
+            logger.info("cost_forecast_accuracy_initialized")
+        except Exception as e:
+            logger.warning("cost_forecast_accuracy_init_failed", error=str(e))
+
+    # Phase 53: Deploy Gate Tracker
+    if settings.deploy_gate_tracker_enabled:
+        try:
+            from shieldops.api.routes import deploy_gate_tracker as dgt_mod
+            from shieldops.changes.deploy_gate_tracker import DeployGateTracker
+
+            _dgt_engine = DeployGateTracker(
+                max_records=settings.deploy_gate_tracker_max_records,
+                max_gate_failure_pct=settings.deploy_gate_tracker_max_gate_failure_pct,
+            )
+            dgt_mod.set_engine(_dgt_engine)
+            app.include_router(
+                dgt_mod.dgt_route,
+                prefix=settings.api_prefix,
+                tags=["Deploy Gate"],
+            )
+            logger.info("deploy_gate_tracker_initialized")
+        except Exception as e:
+            logger.warning("deploy_gate_tracker_init_failed", error=str(e))
+
+    # Phase 53: SLO Window Analyzer
+    if settings.slo_window_analyzer_enabled:
+        try:
+            from shieldops.api.routes import slo_window_analyzer as swa_mod
+            from shieldops.sla.slo_window_analyzer import SLOWindowAnalyzer
+
+            _swa_engine = SLOWindowAnalyzer(
+                max_records=settings.slo_window_analyzer_max_records,
+                min_compliance_pct=settings.slo_window_analyzer_min_compliance_pct,
+            )
+            swa_mod.set_engine(_swa_engine)
+            app.include_router(
+                swa_mod.swa_route,
+                prefix=settings.api_prefix,
+                tags=["SLO Window"],
+            )
+            logger.info("slo_window_analyzer_initialized")
+        except Exception as e:
+            logger.warning("slo_window_analyzer_init_failed", error=str(e))
+
+    # Phase 53: Runbook Dependency Mapper
+    if settings.runbook_dependency_enabled:
+        try:
+            from shieldops.api.routes import runbook_dependency as rbd_mod
+            from shieldops.operations.runbook_dependency import RunbookDependencyMapper
+
+            _rbd_engine = RunbookDependencyMapper(
+                max_records=settings.runbook_dependency_max_records,
+                max_broken_dependency_pct=settings.runbook_dependency_max_broken_dependency_pct,
+            )
+            rbd_mod.set_engine(_rbd_engine)
+            app.include_router(
+                rbd_mod.rbd_route,
+                prefix=settings.api_prefix,
+                tags=["Runbook Dependency"],
+            )
+            logger.info("runbook_dependency_initialized")
+        except Exception as e:
+            logger.warning("runbook_dependency_init_failed", error=str(e))
+
+    # Phase 53: Security Posture Gap Analyzer
+    if settings.security_posture_gap_enabled:
+        try:
+            from shieldops.api.routes import security_posture_gap as spg_mod
+            from shieldops.security.security_posture_gap import SecurityPostureGapAnalyzer
+
+            _spg_engine = SecurityPostureGapAnalyzer(
+                max_records=settings.security_posture_gap_max_records,
+                max_critical_gap_pct=settings.security_posture_gap_max_critical_gap_pct,
+            )
+            spg_mod.set_engine(_spg_engine)
+            app.include_router(
+                spg_mod.spg_route,
+                prefix=settings.api_prefix,
+                tags=["Security Posture Gap"],
+            )
+            logger.info("security_posture_gap_initialized")
+        except Exception as e:
+            logger.warning("security_posture_gap_init_failed", error=str(e))
+
+    # Phase 53: Knowledge Retention Tracker
+    if settings.knowledge_retention_enabled:
+        try:
+            from shieldops.api.routes import knowledge_retention as krt_mod
+            from shieldops.knowledge.knowledge_retention import KnowledgeRetentionTracker
+
+            _krt_engine = KnowledgeRetentionTracker(
+                max_records=settings.knowledge_retention_max_records,
+                min_retention_score=settings.knowledge_retention_min_retention_score,
+            )
+            krt_mod.set_engine(_krt_engine)
+            app.include_router(
+                krt_mod.krt_route,
+                prefix=settings.api_prefix,
+                tags=["Knowledge Retention"],
+            )
+            logger.info("knowledge_retention_initialized")
+        except Exception as e:
+            logger.warning("knowledge_retention_init_failed", error=str(e))
+
+    # Phase 53: Audit Finding Tracker
+    if settings.audit_finding_tracker_enabled:
+        try:
+            from shieldops.api.routes import audit_finding_tracker as afk_mod
+            from shieldops.audit.audit_finding_tracker import (
+                AuditFindingTracker as AFKTracker,
+            )
+
+            _afk_engine = AFKTracker(
+                max_records=settings.audit_finding_tracker_max_records,
+                max_open_finding_pct=settings.audit_finding_tracker_max_open_finding_pct,
+            )
+            afk_mod.set_engine(_afk_engine)
+            app.include_router(
+                afk_mod.afk_route,
+                prefix=settings.api_prefix,
+                tags=["Audit Finding"],
+            )
+            logger.info("audit_finding_tracker_initialized")
+        except Exception as e:
+            logger.warning("audit_finding_tracker_init_failed", error=str(e))
+
+    # Phase 53: Capacity Reservation Planner
+    if settings.capacity_reservation_planner_enabled:
+        try:
+            from shieldops.api.routes import capacity_reservation_planner as crv_mod
+            from shieldops.billing.capacity_reservation_planner import (
+                CapacityReservationPlanner,
+            )
+
+            _crv_engine = CapacityReservationPlanner(
+                max_records=settings.capacity_reservation_planner_max_records,
+                min_utilization_pct=settings.capacity_reservation_planner_min_utilization_pct,
+            )
+            crv_mod.set_engine(_crv_engine)
+            app.include_router(
+                crv_mod.crv_route,
+                prefix=settings.api_prefix,
+                tags=["Capacity Reservation"],
+            )
+            logger.info("capacity_reservation_planner_initialized")
+        except Exception as e:
+            logger.warning("capacity_reservation_planner_init_failed", error=str(e))
+
+    # Phase 53: Change Approval Flow Tracker
+    if settings.change_approval_flow_enabled:
+        try:
+            from shieldops.api.routes import change_approval_flow as caf_mod
+            from shieldops.changes.change_approval_flow import ChangeApprovalFlowTracker
+
+            _caf_engine = ChangeApprovalFlowTracker(
+                max_records=settings.change_approval_flow_max_records,
+                max_approval_time_hours=settings.change_approval_flow_max_approval_time_hours,
+            )
+            caf_mod.set_engine(_caf_engine)
+            app.include_router(
+                caf_mod.caf_route,
+                prefix=settings.api_prefix,
+                tags=["Change Approval Flow"],
+            )
+            logger.info("change_approval_flow_initialized")
+        except Exception as e:
+            logger.warning("change_approval_flow_init_failed", error=str(e))
+
     yield
 
     logger.info("shieldops_shutting_down")

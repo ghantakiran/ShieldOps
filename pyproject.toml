@@ -638,6 +638,18 @@ module = [
     "shieldops.api.routes.compliance_evidence_chain",
     "shieldops.api.routes.capacity_headroom",
     "shieldops.api.routes.change_velocity",
+    "shieldops.api.routes.incident_debrief",
+    "shieldops.api.routes.dependency_circuit_breaker",
+    "shieldops.api.routes.metric_cardinality_planner",
+    "shieldops.api.routes.cost_forecast_accuracy",
+    "shieldops.api.routes.deploy_gate_tracker",
+    "shieldops.api.routes.slo_window_analyzer",
+    "shieldops.api.routes.runbook_dependency",
+    "shieldops.api.routes.security_posture_gap",
+    "shieldops.api.routes.knowledge_retention",
+    "shieldops.api.routes.audit_finding_tracker",
+    "shieldops.api.routes.capacity_reservation_planner",
+    "shieldops.api.routes.change_approval_flow",
 ]
 warn_return_any = false
 disallow_untyped_defs = false

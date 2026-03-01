@@ -2570,6 +2570,66 @@ class Settings(BaseSettings):
     change_velocity_max_records: int = 200000
     change_velocity_max_changes_per_day: float = 50.0
 
+    # Phase 53: Incident Debrief Tracker
+    incident_debrief_enabled: bool = True
+    incident_debrief_max_records: int = 200000
+    incident_debrief_min_debrief_quality_pct: float = 70.0
+
+    # Phase 53: Dependency Circuit Breaker Monitor
+    dependency_circuit_breaker_enabled: bool = True
+    dependency_circuit_breaker_max_records: int = 200000
+    dependency_circuit_breaker_max_open_circuit_pct: float = 5.0
+
+    # Phase 53: Metric Cardinality Planner
+    metric_cardinality_planner_enabled: bool = True
+    metric_cardinality_planner_max_records: int = 200000
+    metric_cardinality_planner_max_high_cardinality_pct: float = 10.0
+
+    # Phase 53: Cost Forecast Accuracy Tracker
+    cost_forecast_accuracy_enabled: bool = True
+    cost_forecast_accuracy_max_records: int = 200000
+    cost_forecast_accuracy_min_accuracy_pct: float = 80.0
+
+    # Phase 53: Deploy Gate Tracker
+    deploy_gate_tracker_enabled: bool = True
+    deploy_gate_tracker_max_records: int = 200000
+    deploy_gate_tracker_max_gate_failure_pct: float = 15.0
+
+    # Phase 53: SLO Window Analyzer
+    slo_window_analyzer_enabled: bool = True
+    slo_window_analyzer_max_records: int = 200000
+    slo_window_analyzer_min_compliance_pct: float = 95.0
+
+    # Phase 53: Runbook Dependency Mapper
+    runbook_dependency_enabled: bool = True
+    runbook_dependency_max_records: int = 200000
+    runbook_dependency_max_broken_dependency_pct: float = 5.0
+
+    # Phase 53: Security Posture Gap Analyzer
+    security_posture_gap_enabled: bool = True
+    security_posture_gap_max_records: int = 200000
+    security_posture_gap_max_critical_gap_pct: float = 5.0
+
+    # Phase 53: Knowledge Retention Tracker
+    knowledge_retention_enabled: bool = True
+    knowledge_retention_max_records: int = 200000
+    knowledge_retention_min_retention_score: float = 60.0
+
+    # Phase 53: Audit Finding Tracker
+    audit_finding_tracker_enabled: bool = True
+    audit_finding_tracker_max_records: int = 200000
+    audit_finding_tracker_max_open_finding_pct: float = 10.0
+
+    # Phase 53: Capacity Reservation Planner
+    capacity_reservation_planner_enabled: bool = True
+    capacity_reservation_planner_max_records: int = 200000
+    capacity_reservation_planner_min_utilization_pct: float = 70.0
+
+    # Phase 53: Change Approval Flow Tracker
+    change_approval_flow_enabled: bool = True
+    change_approval_flow_max_records: int = 200000
+    change_approval_flow_max_approval_time_hours: float = 24.0
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",
