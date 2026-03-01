@@ -348,6 +348,18 @@ Design new ShieldOps components, APIs, or agent workflows.
    - Track audit findings via `AuditFindingTracker` (`src/shieldops/audit/audit_finding_tracker.py`)
    - Plan capacity reservations via `CapacityReservationPlanner` (`src/shieldops/billing/capacity_reservation_planner.py`)
    - Track change approval flows via `ChangeApprovalFlowTracker` (`src/shieldops/changes/change_approval_flow.py`)
+   - Track incident response times via `IncidentResponseTimeTracker` (`src/shieldops/incidents/incident_response_time.py`)
+   - Track topology changes via `TopologyChangeTracker` (`src/shieldops/topology/topology_change_tracker.py`)
+   - Plan observability budgets via `ObservabilityBudgetPlanner` (`src/shieldops/observability/observability_budget_planner.py`)
+   - Analyze cost variances via `CostVarianceAnalyzer` (`src/shieldops/billing/cost_variance_analyzer.py`)
+   - Track deploy dependencies via `DeployDependencyTracker` (`src/shieldops/changes/deploy_dependency_tracker.py`)
+   - Analyze SLO breaches via `SLOBreachAnalyzer` (`src/shieldops/sla/slo_breach_analyzer.py`)
+   - Score runbook effectiveness via `RunbookEffectivenessScorer` (`src/shieldops/operations/runbook_effectiveness_scorer.py`)
+   - Track threat responses via `ThreatResponseTracker` (`src/shieldops/security/threat_response_tracker.py`)
+   - Detect knowledge gaps via `KnowledgeGapDetector` (`src/shieldops/knowledge/knowledge_gap_detector.py`)
+   - Map audit compliance via `AuditComplianceMapper` (`src/shieldops/audit/audit_compliance_mapper.py`)
+   - Advise capacity scaling via `CapacityScalingAdvisor` (`src/shieldops/analytics/capacity_scaling_advisor.py`)
+   - Classify change risk via `ChangeRiskClassifier` (`src/shieldops/changes/change_risk_classifier.py`)
 
 5. **Documentation**:
    - Write Architecture Decision Record (ADR) in `docs/architecture/`
