@@ -133,6 +133,11 @@ Run security audits on ShieldOps codebase and agent configurations.
 107. **Audit Evidence Tracking**: Track audit evidence collection and monitor freshness via `AuditEvidenceTracker` (`src/shieldops/audit/evidence_tracker.py`)
 108. **Performance Benchmarking**: Track performance benchmarks and detect regressions via `PerformanceBenchmarkTracker` (`src/shieldops/analytics/perf_benchmark.py`)
 109. **Alert Correlation Optimization**: Optimize alert correlation rules and reduce false correlations via `AlertCorrelationOptimizer` (`src/shieldops/observability/alert_correlation_opt.py`)
+110. **Lateral Movement Detection**: Detect lateral movement patterns and compromised credentials via `LateralMovementDetector` (`src/shieldops/security/lateral_movement.py`)
+111. **Regulatory Change Tracking**: Track regulatory changes and assess compliance impact via `RegulatoryChangeTracker` (`src/shieldops/compliance/regulation_tracker.py`)
+112. **Audit Finding Tracking**: Track audit findings and monitor remediation progress via `AuditFindingTracker` (`src/shieldops/audit/finding_tracker.py`)
+113. **Invoice Validation**: Validate cloud invoices against usage and detect billing anomalies via `InvoiceValidationEngine` (`src/shieldops/billing/invoice_validator.py`)
+114. **Metric Quality Scoring**: Score metric quality and detect stale/noisy metrics via `MetricQualityScorer` (`src/shieldops/observability/metric_quality.py`)
 
 ## Severity Levels
 - **CRITICAL**: Hardcoded secrets, SQL injection, unauthenticated endpoints

@@ -578,6 +578,18 @@ module = [
     "shieldops.api.routes.risk_scorer",
     "shieldops.api.routes.perf_benchmark",
     "shieldops.api.routes.evidence_tracker",
+    "shieldops.api.routes.triage_quality",
+    "shieldops.api.routes.health_trend",
+    "shieldops.api.routes.metric_quality",
+    "shieldops.api.routes.invoice_validator",
+    "shieldops.api.routes.deploy_stability",
+    "shieldops.api.routes.breach_impact",
+    "shieldops.api.routes.shift_optimizer",
+    "shieldops.api.routes.lateral_movement",
+    "shieldops.api.routes.knowledge_coverage",
+    "shieldops.api.routes.regulation_tracker",
+    "shieldops.api.routes.workflow_analyzer",
+    "shieldops.api.routes.finding_tracker",
 ]
 warn_return_any = false
 disallow_untyped_defs = false

@@ -143,6 +143,11 @@ Deploy ShieldOps agents to target environments.
    - Prioritize vulnerabilities via `VulnerabilityPrioritizer` (`src/shieldops/security/vuln_prioritizer.py`)
    - Monitor SLO health via `SLOHealthDashboard` (`src/shieldops/sla/slo_health.py`)
    - Track deployment rollbacks via `DeploymentRollbackTracker` (`src/shieldops/changes/rollback_tracker.py`)
+   - Track deployment stability via `DeploymentStabilityTracker` (`src/shieldops/changes/deploy_stability.py`)
+   - Optimize shift schedules via `ShiftScheduleOptimizer` (`src/shieldops/operations/shift_optimizer.py`)
+   - Detect lateral movement via `LateralMovementDetector` (`src/shieldops/security/lateral_movement.py`)
+   - Analyze SLA breach impact via `SLABreachImpactAnalyzer` (`src/shieldops/sla/breach_impact.py`)
+   - Analyze triage quality via `TriageQualityAnalyzer` (`src/shieldops/incidents/triage_quality.py`)
 4. **Deploy**:
    - Apply Kubernetes manifests from `infrastructure/kubernetes/`
    - For production: trigger approval workflow via Slack/Teams

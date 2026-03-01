@@ -260,6 +260,18 @@ Review ShieldOps agent code for correctness, safety, and reliability.
 - [ ] Compliance risk scored via `ComplianceRiskScorer` (`src/shieldops/compliance/risk_scorer.py`)
 - [ ] Performance benchmarks tracked via `PerformanceBenchmarkTracker` (`src/shieldops/analytics/perf_benchmark.py`)
 - [ ] Audit evidence tracked via `AuditEvidenceTracker` (`src/shieldops/audit/evidence_tracker.py`)
+- [ ] Triage quality analyzed via `TriageQualityAnalyzer` (`src/shieldops/incidents/triage_quality.py`)
+- [ ] Service health trends analyzed via `ServiceHealthTrendAnalyzer` (`src/shieldops/topology/health_trend.py`)
+- [ ] Metric quality scored via `MetricQualityScorer` (`src/shieldops/observability/metric_quality.py`)
+- [ ] Invoices validated via `InvoiceValidationEngine` (`src/shieldops/billing/invoice_validator.py`)
+- [ ] Deployment stability tracked via `DeploymentStabilityTracker` (`src/shieldops/changes/deploy_stability.py`)
+- [ ] SLA breach impact analyzed via `SLABreachImpactAnalyzer` (`src/shieldops/sla/breach_impact.py`)
+- [ ] Shift schedules optimized via `ShiftScheduleOptimizer` (`src/shieldops/operations/shift_optimizer.py`)
+- [ ] Lateral movement detected via `LateralMovementDetector` (`src/shieldops/security/lateral_movement.py`)
+- [ ] Knowledge coverage analyzed via `KnowledgeCoverageAnalyzer` (`src/shieldops/knowledge/knowledge_coverage.py`)
+- [ ] Regulatory changes tracked via `RegulatoryChangeTracker` (`src/shieldops/compliance/regulation_tracker.py`)
+- [ ] Workflow efficiency analyzed via `WorkflowEfficiencyAnalyzer` (`src/shieldops/analytics/workflow_analyzer.py`)
+- [ ] Audit findings tracked via `AuditFindingTracker` (`src/shieldops/audit/finding_tracker.py`)
 
 ### Testing
 - [ ] Unit tests for all node functions

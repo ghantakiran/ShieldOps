@@ -10481,6 +10481,262 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         except Exception as e:
             logger.warning("evidence_tracker_init_failed", error=str(e))
 
+    # -- Phase 48: Triage Quality Analyzer --
+    if settings.triage_quality_enabled:
+        try:
+            from shieldops.api.routes import triage_quality as tqa_mod
+            from shieldops.incidents.triage_quality import TriageQualityAnalyzer
+
+            _tqa_engine = TriageQualityAnalyzer(
+                max_records=settings.triage_quality_max_records,
+                min_triage_quality_pct=settings.triage_quality_min_triage_quality_pct,
+            )
+            tqa_mod.set_engine(_tqa_engine)
+            app.include_router(
+                tqa_mod.tqa_route,
+                prefix=settings.api_prefix,
+                tags=["Triage Quality"],
+            )
+            logger.info("triage_quality_initialized")
+        except Exception as e:
+            logger.warning("triage_quality_init_failed", error=str(e))
+
+    # -- Phase 48: Service Health Trend Analyzer --
+    if settings.health_trend_enabled:
+        try:
+            from shieldops.api.routes import health_trend as sht_mod
+            from shieldops.topology.health_trend import (
+                ServiceHealthTrendAnalyzer,
+            )
+
+            _sht_engine = ServiceHealthTrendAnalyzer(
+                max_records=settings.health_trend_max_records,
+                min_health_trend_score=settings.health_trend_min_health_trend_score,
+            )
+            sht_mod.set_engine(_sht_engine)
+            app.include_router(
+                sht_mod.sht_route,
+                prefix=settings.api_prefix,
+                tags=["Health Trend"],
+            )
+            logger.info("health_trend_initialized")
+        except Exception as e:
+            logger.warning("health_trend_init_failed", error=str(e))
+
+    # -- Phase 48: Metric Quality Scorer --
+    if settings.metric_quality_enabled:
+        try:
+            from shieldops.api.routes import metric_quality as mqs_mod
+            from shieldops.observability.metric_quality import MetricQualityScorer
+
+            _mqs_engine = MetricQualityScorer(
+                max_records=settings.metric_quality_max_records,
+                min_metric_quality_pct=settings.metric_quality_min_metric_quality_pct,
+            )
+            mqs_mod.set_engine(_mqs_engine)
+            app.include_router(
+                mqs_mod.mqs_route,
+                prefix=settings.api_prefix,
+                tags=["Metric Quality"],
+            )
+            logger.info("metric_quality_initialized")
+        except Exception as e:
+            logger.warning("metric_quality_init_failed", error=str(e))
+
+    # -- Phase 48: Invoice Validation Engine --
+    if settings.invoice_validator_enabled:
+        try:
+            from shieldops.api.routes import invoice_validator as ivl_mod
+            from shieldops.billing.invoice_validator import (
+                InvoiceValidationEngine,
+            )
+
+            _ivl_engine = InvoiceValidationEngine(
+                max_records=settings.invoice_validator_max_records,
+                max_discrepancy_pct=settings.invoice_validator_max_discrepancy_pct,
+            )
+            ivl_mod.set_engine(_ivl_engine)
+            app.include_router(
+                ivl_mod.ivl_route,
+                prefix=settings.api_prefix,
+                tags=["Invoice Validator"],
+            )
+            logger.info("invoice_validator_initialized")
+        except Exception as e:
+            logger.warning("invoice_validator_init_failed", error=str(e))
+
+    # -- Phase 48: Deployment Stability Tracker --
+    if settings.deploy_stability_enabled:
+        try:
+            from shieldops.api.routes import deploy_stability as dst_mod
+            from shieldops.changes.deploy_stability import (
+                DeploymentStabilityTracker,
+            )
+
+            _dst_engine = DeploymentStabilityTracker(
+                max_records=settings.deploy_stability_max_records,
+                min_stability_score=settings.deploy_stability_min_stability_score,
+            )
+            dst_mod.set_engine(_dst_engine)
+            app.include_router(
+                dst_mod.dst_route,
+                prefix=settings.api_prefix,
+                tags=["Deploy Stability"],
+            )
+            logger.info("deploy_stability_initialized")
+        except Exception as e:
+            logger.warning("deploy_stability_init_failed", error=str(e))
+
+    # -- Phase 48: SLA Breach Impact Analyzer --
+    if settings.breach_impact_enabled:
+        try:
+            from shieldops.api.routes import breach_impact as sbi_mod
+            from shieldops.sla.breach_impact import SLABreachImpactAnalyzer
+
+            _sbi_engine = SLABreachImpactAnalyzer(
+                max_records=settings.breach_impact_max_records,
+                max_breach_impact_score=settings.breach_impact_max_breach_impact_score,
+            )
+            sbi_mod.set_engine(_sbi_engine)
+            app.include_router(
+                sbi_mod.sbi_route,
+                prefix=settings.api_prefix,
+                tags=["Breach Impact"],
+            )
+            logger.info("breach_impact_initialized")
+        except Exception as e:
+            logger.warning("breach_impact_init_failed", error=str(e))
+
+    # -- Phase 48: Shift Schedule Optimizer --
+    if settings.shift_optimizer_enabled:
+        try:
+            from shieldops.api.routes import shift_optimizer as sso_mod
+            from shieldops.operations.shift_optimizer import (
+                ShiftScheduleOptimizer,
+            )
+
+            _sso_engine = ShiftScheduleOptimizer(
+                max_records=settings.shift_optimizer_max_records,
+                max_coverage_gap_pct=settings.shift_optimizer_max_coverage_gap_pct,
+            )
+            sso_mod.set_engine(_sso_engine)
+            app.include_router(
+                sso_mod.sso_route,
+                prefix=settings.api_prefix,
+                tags=["Shift Optimizer"],
+            )
+            logger.info("shift_optimizer_initialized")
+        except Exception as e:
+            logger.warning("shift_optimizer_init_failed", error=str(e))
+
+    # -- Phase 48: Lateral Movement Detector --
+    if settings.lateral_movement_enabled:
+        try:
+            from shieldops.api.routes import lateral_movement as lmd_mod
+            from shieldops.security.lateral_movement import (
+                LateralMovementDetector,
+            )
+
+            _lmd_engine = LateralMovementDetector(
+                max_records=settings.lateral_movement_max_records,
+                min_detection_confidence_pct=settings.lateral_movement_min_detection_confidence_pct,
+            )
+            lmd_mod.set_engine(_lmd_engine)
+            app.include_router(
+                lmd_mod.lmd_route,
+                prefix=settings.api_prefix,
+                tags=["Lateral Movement"],
+            )
+            logger.info("lateral_movement_initialized")
+        except Exception as e:
+            logger.warning("lateral_movement_init_failed", error=str(e))
+
+    # -- Phase 48: Knowledge Coverage Analyzer --
+    if settings.knowledge_coverage_enabled:
+        try:
+            from shieldops.api.routes import knowledge_coverage as kca_mod
+            from shieldops.knowledge.knowledge_coverage import (
+                KnowledgeCoverageAnalyzer,
+            )
+
+            _kca_engine = KnowledgeCoverageAnalyzer(
+                max_records=settings.knowledge_coverage_max_records,
+                min_coverage_pct=settings.knowledge_coverage_min_coverage_pct,
+            )
+            kca_mod.set_engine(_kca_engine)
+            app.include_router(
+                kca_mod.kca_route,
+                prefix=settings.api_prefix,
+                tags=["Knowledge Coverage"],
+            )
+            logger.info("knowledge_coverage_initialized")
+        except Exception as e:
+            logger.warning("knowledge_coverage_init_failed", error=str(e))
+
+    # -- Phase 48: Regulatory Change Tracker --
+    if settings.regulation_tracker_enabled:
+        try:
+            from shieldops.api.routes import regulation_tracker as rct_mod
+            from shieldops.compliance.regulation_tracker import (
+                RegulatoryChangeTracker,
+            )
+
+            _rct_engine = RegulatoryChangeTracker(
+                max_records=settings.regulation_tracker_max_records,
+                max_impact_score=settings.regulation_tracker_max_impact_score,
+            )
+            rct_mod.set_engine(_rct_engine)
+            app.include_router(
+                rct_mod.rct_route,
+                prefix=settings.api_prefix,
+                tags=["Regulation Tracker"],
+            )
+            logger.info("regulation_tracker_initialized")
+        except Exception as e:
+            logger.warning("regulation_tracker_init_failed", error=str(e))
+
+    # -- Phase 48: Workflow Efficiency Analyzer --
+    if settings.workflow_analyzer_enabled:
+        try:
+            from shieldops.analytics.workflow_analyzer import (
+                WorkflowEfficiencyAnalyzer,
+            )
+            from shieldops.api.routes import workflow_analyzer as wea_mod
+
+            _wea_engine = WorkflowEfficiencyAnalyzer(
+                max_records=settings.workflow_analyzer_max_records,
+                min_efficiency_score=settings.workflow_analyzer_min_efficiency_score,
+            )
+            wea_mod.set_engine(_wea_engine)
+            app.include_router(
+                wea_mod.wea_route,
+                prefix=settings.api_prefix,
+                tags=["Workflow Analyzer"],
+            )
+            logger.info("workflow_analyzer_initialized")
+        except Exception as e:
+            logger.warning("workflow_analyzer_init_failed", error=str(e))
+
+    # -- Phase 48: Audit Finding Tracker --
+    if settings.finding_tracker_enabled:
+        try:
+            from shieldops.api.routes import finding_tracker as aft_mod
+            from shieldops.audit.finding_tracker import AuditFindingTracker
+
+            _aft_engine = AuditFindingTracker(
+                max_records=settings.finding_tracker_max_records,
+                max_open_finding_pct=settings.finding_tracker_max_open_finding_pct,
+            )
+            aft_mod.set_engine(_aft_engine)
+            app.include_router(
+                aft_mod.aft_route,
+                prefix=settings.api_prefix,
+                tags=["Finding Tracker"],
+            )
+            logger.info("finding_tracker_initialized")
+        except Exception as e:
+            logger.warning("finding_tracker_init_failed", error=str(e))
+
     yield
 
     logger.info("shieldops_shutting_down")

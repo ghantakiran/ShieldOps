@@ -28,7 +28,7 @@ Run health checks on all ShieldOps platform dependencies.
    - Integration tests: `python3 -m pytest tests/integration/ -v --tb=short`
    - Report: total tests, passed, failed, coverage
 
-5. **Platform feature health** (Phase 11–47 modules):
+5. **Platform feature health** (Phase 11–48 modules):
    - Capacity trends: `src/shieldops/analytics/capacity_trends.py` — CapacityTrendAnalyzer
    - SRE metrics: `src/shieldops/analytics/sre_metrics.py` — SREMetricsAggregator
    - Health reports: `src/shieldops/observability/health_report.py` — ServiceHealthReportGenerator
@@ -325,6 +325,18 @@ Run health checks on all ShieldOps platform dependencies.
    - Compliance risk scorer: `src/shieldops/compliance/risk_scorer.py` — ComplianceRiskScorer
    - Performance benchmark tracker: `src/shieldops/analytics/perf_benchmark.py` — PerformanceBenchmarkTracker
    - Audit evidence tracker: `src/shieldops/audit/evidence_tracker.py` — AuditEvidenceTracker
+   - **Phase 48:** Triage quality analyzer: `src/shieldops/incidents/triage_quality.py` — TriageQualityAnalyzer
+   - Service health trend analyzer: `src/shieldops/topology/health_trend.py` — ServiceHealthTrendAnalyzer
+   - Metric quality scorer: `src/shieldops/observability/metric_quality.py` — MetricQualityScorer
+   - Invoice validation engine: `src/shieldops/billing/invoice_validator.py` — InvoiceValidationEngine
+   - Deployment stability tracker: `src/shieldops/changes/deploy_stability.py` — DeploymentStabilityTracker
+   - SLA breach impact analyzer: `src/shieldops/sla/breach_impact.py` — SLABreachImpactAnalyzer
+   - Shift schedule optimizer: `src/shieldops/operations/shift_optimizer.py` — ShiftScheduleOptimizer
+   - Lateral movement detector: `src/shieldops/security/lateral_movement.py` — LateralMovementDetector
+   - Knowledge coverage analyzer: `src/shieldops/knowledge/knowledge_coverage.py` — KnowledgeCoverageAnalyzer
+   - Regulatory change tracker: `src/shieldops/compliance/regulation_tracker.py` — RegulatoryChangeTracker
+   - Workflow efficiency analyzer: `src/shieldops/analytics/workflow_analyzer.py` — WorkflowEfficiencyAnalyzer
+   - Audit finding tracker: `src/shieldops/audit/finding_tracker.py` — AuditFindingTracker
    - Verify each module initializes in `src/shieldops/api/app.py` lifespan
 
 6. **Check configuration**:
