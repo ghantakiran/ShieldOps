@@ -12207,6 +12207,248 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         except Exception as e:
             logger.warning("change_risk_classifier_init_failed", error=str(e))
 
+    # --- Phase 55: Predictive Analytics & Compliance Automation ---
+
+    if settings.incident_pattern_analyzer_enabled:
+        try:
+            from shieldops.api.routes import incident_pattern_analyzer as ipz_mod
+            from shieldops.incidents.incident_pattern_analyzer import (
+                IncidentPatternAnalyzer,
+            )
+
+            _ipz_engine = IncidentPatternAnalyzer(
+                max_records=settings.incident_pattern_analyzer_max_records,
+                max_recurring_pct=settings.incident_pattern_analyzer_max_recurring_pct,
+            )
+            ipz_mod.set_engine(_ipz_engine)
+            app.include_router(
+                ipz_mod.ipz_route,
+                prefix=settings.api_prefix,
+                tags=["Incident Pattern Analyzer"],
+            )
+            logger.info("incident_pattern_analyzer_initialized")
+        except Exception as e:
+            logger.warning("incident_pattern_analyzer_init_failed", error=str(e))
+
+    if settings.service_dependency_scorer_enabled:
+        try:
+            from shieldops.api.routes import service_dependency_scorer as sdx_mod
+            from shieldops.topology.service_dependency_scorer import (
+                ServiceDependencyScorer,
+            )
+
+            _sdx_engine = ServiceDependencyScorer(
+                max_records=settings.service_dependency_scorer_max_records,
+                min_health_score=settings.service_dependency_scorer_min_health_score,
+            )
+            sdx_mod.set_engine(_sdx_engine)
+            app.include_router(
+                sdx_mod.sdx_route,
+                prefix=settings.api_prefix,
+                tags=["Service Dependency Scorer"],
+            )
+            logger.info("service_dependency_scorer_initialized")
+        except Exception as e:
+            logger.warning("service_dependency_scorer_init_failed", error=str(e))
+
+    if settings.alert_noise_profiler_enabled:
+        try:
+            from shieldops.api.routes import alert_noise_profiler as anf_mod
+            from shieldops.observability.alert_noise_profiler import AlertNoiseProfiler
+
+            _anf_engine = AlertNoiseProfiler(
+                max_records=settings.alert_noise_profiler_max_records,
+                max_noise_ratio=settings.alert_noise_profiler_max_noise_ratio,
+            )
+            anf_mod.set_engine(_anf_engine)
+            app.include_router(
+                anf_mod.anf_route,
+                prefix=settings.api_prefix,
+                tags=["Alert Noise Profiler"],
+            )
+            logger.info("alert_noise_profiler_initialized")
+        except Exception as e:
+            logger.warning("alert_noise_profiler_init_failed", error=str(e))
+
+    if settings.cost_optimization_tracker_enabled:
+        try:
+            from shieldops.api.routes import cost_optimization_tracker as cox_mod
+            from shieldops.billing.cost_optimization_tracker import CostOptimizationTracker
+
+            _cox_engine = CostOptimizationTracker(
+                max_records=settings.cost_optimization_tracker_max_records,
+                min_savings_pct=settings.cost_optimization_tracker_min_savings_pct,
+            )
+            cox_mod.set_engine(_cox_engine)
+            app.include_router(
+                cox_mod.cox_route,
+                prefix=settings.api_prefix,
+                tags=["Cost Optimization Tracker"],
+            )
+            logger.info("cost_optimization_tracker_initialized")
+        except Exception as e:
+            logger.warning("cost_optimization_tracker_init_failed", error=str(e))
+
+    if settings.deploy_verification_tracker_enabled:
+        try:
+            from shieldops.api.routes import deploy_verification_tracker as dhx_mod
+            from shieldops.changes.deploy_verification_tracker import (
+                DeployVerificationTracker,
+            )
+
+            _dhx_engine = DeployVerificationTracker(
+                max_records=settings.deploy_verification_tracker_max_records,
+                min_coverage_pct=settings.deploy_verification_tracker_min_coverage_pct,
+            )
+            dhx_mod.set_engine(_dhx_engine)
+            app.include_router(
+                dhx_mod.dhx_route,
+                prefix=settings.api_prefix,
+                tags=["Deploy Verification Tracker"],
+            )
+            logger.info("deploy_verification_tracker_initialized")
+        except Exception as e:
+            logger.warning("deploy_verification_tracker_init_failed", error=str(e))
+
+    if settings.slo_compliance_monitor_enabled:
+        try:
+            from shieldops.api.routes import slo_compliance_monitor as slc_mod
+            from shieldops.sla.slo_compliance_monitor import SLOComplianceMonitor
+
+            _slc_engine = SLOComplianceMonitor(
+                max_records=settings.slo_compliance_monitor_max_records,
+                min_compliance_pct=settings.slo_compliance_monitor_min_compliance_pct,
+            )
+            slc_mod.set_engine(_slc_engine)
+            app.include_router(
+                slc_mod.slc_route,
+                prefix=settings.api_prefix,
+                tags=["SLO Compliance Monitor"],
+            )
+            logger.info("slo_compliance_monitor_initialized")
+        except Exception as e:
+            logger.warning("slo_compliance_monitor_init_failed", error=str(e))
+
+    if settings.runbook_quality_scorer_enabled:
+        try:
+            from shieldops.api.routes import runbook_quality_scorer as rqx_mod
+            from shieldops.operations.runbook_quality_scorer import RunbookQualityScorer
+
+            _rqx_engine = RunbookQualityScorer(
+                max_records=settings.runbook_quality_scorer_max_records,
+                min_quality_score=settings.runbook_quality_scorer_min_quality_score,
+            )
+            rqx_mod.set_engine(_rqx_engine)
+            app.include_router(
+                rqx_mod.rqx_route,
+                prefix=settings.api_prefix,
+                tags=["Runbook Quality Scorer"],
+            )
+            logger.info("runbook_quality_scorer_initialized")
+        except Exception as e:
+            logger.warning("runbook_quality_scorer_init_failed", error=str(e))
+
+    if settings.vulnerability_response_tracker_enabled:
+        try:
+            from shieldops.api.routes import vulnerability_response_tracker as vrx_mod
+            from shieldops.security.vulnerability_response_tracker import (
+                VulnerabilityResponseTracker,
+            )
+
+            _vrx_engine = VulnerabilityResponseTracker(
+                max_records=settings.vulnerability_response_tracker_max_records,
+                max_remediation_days=settings.vulnerability_response_tracker_max_remediation_days,
+            )
+            vrx_mod.set_engine(_vrx_engine)
+            app.include_router(
+                vrx_mod.vrx_route,
+                prefix=settings.api_prefix,
+                tags=["Vulnerability Response Tracker"],
+            )
+            logger.info("vulnerability_response_tracker_initialized")
+        except Exception as e:
+            logger.warning("vulnerability_response_tracker_init_failed", error=str(e))
+
+    if settings.knowledge_freshness_scorer_enabled:
+        try:
+            from shieldops.api.routes import knowledge_freshness_scorer as kfx_mod
+            from shieldops.knowledge.knowledge_freshness_scorer import (
+                KnowledgeFreshnessScorer,
+            )
+
+            _kfx_engine = KnowledgeFreshnessScorer(
+                max_records=settings.knowledge_freshness_scorer_max_records,
+                min_freshness_score=settings.knowledge_freshness_scorer_min_freshness_score,
+            )
+            kfx_mod.set_engine(_kfx_engine)
+            app.include_router(
+                kfx_mod.kfx_route,
+                prefix=settings.api_prefix,
+                tags=["Knowledge Freshness Scorer"],
+            )
+            logger.info("knowledge_freshness_scorer_initialized")
+        except Exception as e:
+            logger.warning("knowledge_freshness_scorer_init_failed", error=str(e))
+
+    if settings.audit_control_assessor_enabled:
+        try:
+            from shieldops.api.routes import audit_control_assessor as acx_mod
+            from shieldops.audit.audit_control_assessor import AuditControlAssessor
+
+            _acx_engine = AuditControlAssessor(
+                max_records=settings.audit_control_assessor_max_records,
+                min_effectiveness_score=settings.audit_control_assessor_min_effectiveness_score,
+            )
+            acx_mod.set_engine(_acx_engine)
+            app.include_router(
+                acx_mod.acx_route,
+                prefix=settings.api_prefix,
+                tags=["Audit Control Assessor"],
+            )
+            logger.info("audit_control_assessor_initialized")
+        except Exception as e:
+            logger.warning("audit_control_assessor_init_failed", error=str(e))
+
+    if settings.capacity_utilization_tracker_enabled:
+        try:
+            from shieldops.analytics.capacity_utilization_tracker import (
+                CapacityUtilizationTracker,
+            )
+            from shieldops.api.routes import capacity_utilization_tracker as cux_mod
+
+            _cux_engine = CapacityUtilizationTracker(
+                max_records=settings.capacity_utilization_tracker_max_records,
+                min_utilization_pct=settings.capacity_utilization_tracker_min_utilization_pct,
+            )
+            cux_mod.set_engine(_cux_engine)
+            app.include_router(
+                cux_mod.cux_route,
+                prefix=settings.api_prefix,
+                tags=["Capacity Utilization Tracker"],
+            )
+            logger.info("capacity_utilization_tracker_initialized")
+        except Exception as e:
+            logger.warning("capacity_utilization_tracker_init_failed", error=str(e))
+
+    if settings.change_impact_predictor_enabled:
+        try:
+            from shieldops.api.routes import change_impact_predictor as cpx_mod
+            from shieldops.changes.change_impact_predictor import ChangeImpactPredictor
+
+            _cpx_engine = ChangeImpactPredictor(
+                max_records=settings.change_impact_predictor_max_records,
+                max_high_impact_pct=settings.change_impact_predictor_max_high_impact_pct,
+            )
+            cpx_mod.set_engine(_cpx_engine)
+            app.include_router(
+                cpx_mod.cpx_route,
+                prefix=settings.api_prefix,
+                tags=["Change Impact Predictor"],
+            )
+            logger.info("change_impact_predictor_initialized")
+        except Exception as e:
+            logger.warning("change_impact_predictor_init_failed", error=str(e))
+
     yield
 
     logger.info("shieldops_shutting_down")
