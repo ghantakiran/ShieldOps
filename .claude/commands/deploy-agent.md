@@ -138,6 +138,11 @@ Deploy ShieldOps agents to target environments.
    - Validate cost allocations via `CostAllocationValidator` (`src/shieldops/billing/cost_alloc_validator.py`)
    - Correlate changes via `ChangeCorrelationEngine` (`src/shieldops/changes/change_correlator.py`)
    - Analyze service latency via `ServiceLatencyAnalyzer` (`src/shieldops/analytics/service_latency.py`)
+   - Optimize incident response via `IncidentResponseOptimizer` (`src/shieldops/incidents/response_optimizer.py`)
+   - Check runbook compliance via `RunbookComplianceChecker` (`src/shieldops/operations/runbook_compliance.py`)
+   - Prioritize vulnerabilities via `VulnerabilityPrioritizer` (`src/shieldops/security/vuln_prioritizer.py`)
+   - Monitor SLO health via `SLOHealthDashboard` (`src/shieldops/sla/slo_health.py`)
+   - Track deployment rollbacks via `DeploymentRollbackTracker` (`src/shieldops/changes/rollback_tracker.py`)
 4. **Deploy**:
    - Apply Kubernetes manifests from `infrastructure/kubernetes/`
    - For production: trigger approval workflow via Slack/Teams

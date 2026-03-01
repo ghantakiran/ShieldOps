@@ -264,6 +264,18 @@ Design new ShieldOps components, APIs, or agent workflows.
    - Analyze service latency via `ServiceLatencyAnalyzer` (`src/shieldops/analytics/service_latency.py`)
    - Validate dependencies via `ServiceDependencyValidator` (`src/shieldops/topology/dep_validator.py`)
    - Validate cost allocations via `CostAllocationValidator` (`src/shieldops/billing/cost_alloc_validator.py`)
+   - Optimize incident response via `IncidentResponseOptimizer` (`src/shieldops/incidents/response_optimizer.py`)
+   - Track dependency changes via `DependencyChangeTracker` (`src/shieldops/topology/dep_change_tracker.py`)
+   - Optimize alert correlations via `AlertCorrelationOptimizer` (`src/shieldops/observability/alert_correlation_opt.py`)
+   - Validate cost forecasts via `CostForecastValidator` (`src/shieldops/billing/forecast_validator.py`)
+   - Track deployment rollbacks via `DeploymentRollbackTracker` (`src/shieldops/changes/rollback_tracker.py`)
+   - Monitor SLO health via `SLOHealthDashboard` (`src/shieldops/sla/slo_health.py`)
+   - Check runbook compliance via `RunbookComplianceChecker` (`src/shieldops/operations/runbook_compliance.py`)
+   - Prioritize vulnerabilities via `VulnerabilityPrioritizer` (`src/shieldops/security/vuln_prioritizer.py`)
+   - Analyze knowledge usage via `KnowledgeUsageAnalyzer` (`src/shieldops/knowledge/usage_analyzer.py`)
+   - Score compliance risk via `ComplianceRiskScorer` (`src/shieldops/compliance/risk_scorer.py`)
+   - Track performance benchmarks via `PerformanceBenchmarkTracker` (`src/shieldops/analytics/perf_benchmark.py`)
+   - Track audit evidence via `AuditEvidenceTracker` (`src/shieldops/audit/evidence_tracker.py`)
 
 5. **Documentation**:
    - Write Architecture Decision Record (ADR) in `docs/architecture/`

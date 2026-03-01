@@ -2210,6 +2210,66 @@ class Settings(BaseSettings):
     audit_compliance_reporter_max_records: int = 200000
     audit_compliance_reporter_min_compliance_score: float = 85.0
 
+    # Phase 47: Incident Response Optimizer
+    response_optimizer_enabled: bool = True
+    response_optimizer_max_records: int = 200000
+    response_optimizer_max_response_time_minutes: float = 30.0
+
+    # Phase 47: Dependency Change Tracker
+    dep_change_tracker_enabled: bool = True
+    dep_change_tracker_max_records: int = 200000
+    dep_change_tracker_max_breaking_change_pct: float = 5.0
+
+    # Phase 47: Alert Correlation Optimizer
+    alert_correlation_opt_enabled: bool = True
+    alert_correlation_opt_max_records: int = 200000
+    alert_correlation_opt_min_correlation_strength: float = 70.0
+
+    # Phase 47: Cost Forecast Validator
+    forecast_validator_enabled: bool = True
+    forecast_validator_max_records: int = 200000
+    forecast_validator_max_forecast_error_pct: float = 10.0
+
+    # Phase 47: Deployment Rollback Tracker
+    rollback_tracker_enabled: bool = True
+    rollback_tracker_max_records: int = 200000
+    rollback_tracker_max_rollback_rate_pct: float = 10.0
+
+    # Phase 47: SLO Health Dashboard
+    slo_health_enabled: bool = True
+    slo_health_max_records: int = 200000
+    slo_health_min_health_score: float = 80.0
+
+    # Phase 47: Runbook Compliance Checker
+    runbook_compliance_enabled: bool = True
+    runbook_compliance_max_records: int = 200000
+    runbook_compliance_min_compliance_pct: float = 90.0
+
+    # Phase 47: Vulnerability Prioritizer
+    vuln_prioritizer_enabled: bool = True
+    vuln_prioritizer_max_records: int = 200000
+    vuln_prioritizer_critical_cvss_threshold: float = 9.0
+
+    # Phase 47: Knowledge Usage Analyzer
+    usage_analyzer_enabled: bool = True
+    usage_analyzer_max_records: int = 200000
+    usage_analyzer_min_usage_score: float = 50.0
+
+    # Phase 47: Compliance Risk Scorer
+    compliance_risk_scorer_enabled: bool = True
+    compliance_risk_scorer_max_records: int = 200000
+    compliance_risk_scorer_max_risk_score: float = 75.0
+
+    # Phase 47: Performance Benchmark Tracker
+    perf_benchmark_enabled: bool = True
+    perf_benchmark_max_records: int = 200000
+    perf_benchmark_max_regression_pct: float = 10.0
+
+    # Phase 47: Audit Evidence Tracker
+    evidence_tracker_enabled: bool = True
+    evidence_tracker_max_records: int = 200000
+    evidence_tracker_min_completeness_pct: float = 90.0
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",
