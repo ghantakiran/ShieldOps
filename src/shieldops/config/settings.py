@@ -2690,6 +2690,66 @@ class Settings(BaseSettings):
     change_risk_classifier_max_records: int = 200000
     change_risk_classifier_max_high_risk_pct: float = 15.0
 
+    # Phase 55: Incident Pattern Analyzer
+    incident_pattern_analyzer_enabled: bool = True
+    incident_pattern_analyzer_max_records: int = 200000
+    incident_pattern_analyzer_max_recurring_pct: float = 20.0
+
+    # Phase 55: Service Dependency Scorer
+    service_dependency_scorer_enabled: bool = True
+    service_dependency_scorer_max_records: int = 200000
+    service_dependency_scorer_min_health_score: float = 60.0
+
+    # Phase 55: Alert Noise Profiler
+    alert_noise_profiler_enabled: bool = True
+    alert_noise_profiler_max_records: int = 200000
+    alert_noise_profiler_max_noise_ratio: float = 30.0
+
+    # Phase 55: Cost Optimization Tracker
+    cost_optimization_tracker_enabled: bool = True
+    cost_optimization_tracker_max_records: int = 200000
+    cost_optimization_tracker_min_savings_pct: float = 10.0
+
+    # Phase 55: Deploy Verification Tracker
+    deploy_verification_tracker_enabled: bool = True
+    deploy_verification_tracker_max_records: int = 200000
+    deploy_verification_tracker_min_coverage_pct: float = 80.0
+
+    # Phase 55: SLO Compliance Monitor
+    slo_compliance_monitor_enabled: bool = True
+    slo_compliance_monitor_max_records: int = 200000
+    slo_compliance_monitor_min_compliance_pct: float = 95.0
+
+    # Phase 55: Runbook Quality Scorer
+    runbook_quality_scorer_enabled: bool = True
+    runbook_quality_scorer_max_records: int = 200000
+    runbook_quality_scorer_min_quality_score: float = 70.0
+
+    # Phase 55: Vulnerability Response Tracker
+    vulnerability_response_tracker_enabled: bool = True
+    vulnerability_response_tracker_max_records: int = 200000
+    vulnerability_response_tracker_max_remediation_days: float = 30.0
+
+    # Phase 55: Knowledge Freshness Scorer
+    knowledge_freshness_scorer_enabled: bool = True
+    knowledge_freshness_scorer_max_records: int = 200000
+    knowledge_freshness_scorer_min_freshness_score: float = 60.0
+
+    # Phase 55: Audit Control Assessor
+    audit_control_assessor_enabled: bool = True
+    audit_control_assessor_max_records: int = 200000
+    audit_control_assessor_min_effectiveness_score: float = 75.0
+
+    # Phase 55: Capacity Utilization Tracker
+    capacity_utilization_tracker_enabled: bool = True
+    capacity_utilization_tracker_max_records: int = 200000
+    capacity_utilization_tracker_min_utilization_pct: float = 40.0
+
+    # Phase 55: Change Impact Predictor
+    change_impact_predictor_enabled: bool = True
+    change_impact_predictor_max_records: int = 200000
+    change_impact_predictor_max_high_impact_pct: float = 15.0
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",

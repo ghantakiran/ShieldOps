@@ -360,6 +360,18 @@ Design new ShieldOps components, APIs, or agent workflows.
    - Map audit compliance via `AuditComplianceMapper` (`src/shieldops/audit/audit_compliance_mapper.py`)
    - Advise capacity scaling via `CapacityScalingAdvisor` (`src/shieldops/analytics/capacity_scaling_advisor.py`)
    - Classify change risk via `ChangeRiskClassifier` (`src/shieldops/changes/change_risk_classifier.py`)
+   - Analyze incident patterns via `IncidentPatternAnalyzer` (`src/shieldops/incidents/incident_pattern_analyzer.py`)
+   - Score service dependencies via `ServiceDependencyScorer` (`src/shieldops/topology/service_dependency_scorer.py`)
+   - Profile alert noise via `AlertNoiseProfiler` (`src/shieldops/observability/alert_noise_profiler.py`)
+   - Track cost optimizations via `CostOptimizationTracker` (`src/shieldops/billing/cost_optimization_tracker.py`)
+   - Track deploy verifications via `DeployVerificationTracker` (`src/shieldops/changes/deploy_verification_tracker.py`)
+   - Monitor SLO compliance via `SLOComplianceMonitor` (`src/shieldops/sla/slo_compliance_monitor.py`)
+   - Score runbook quality via `RunbookQualityScorer` (`src/shieldops/operations/runbook_quality_scorer.py`)
+   - Track vulnerability responses via `VulnerabilityResponseTracker` (`src/shieldops/security/vulnerability_response_tracker.py`)
+   - Score knowledge freshness via `KnowledgeFreshnessScorer` (`src/shieldops/knowledge/knowledge_freshness_scorer.py`)
+   - Assess audit controls via `AuditControlAssessor` (`src/shieldops/audit/audit_control_assessor.py`)
+   - Track capacity utilization via `CapacityUtilizationTracker` (`src/shieldops/analytics/capacity_utilization_tracker.py`)
+   - Predict change impact via `ChangeImpactPredictor` (`src/shieldops/changes/change_impact_predictor.py`)
 
 5. **Documentation**:
    - Write Architecture Decision Record (ADR) in `docs/architecture/`
