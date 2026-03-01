@@ -179,6 +179,11 @@ Deploy ShieldOps agents to target environments.
    - Analyze security posture gaps via `SecurityPostureGapAnalyzer` (`src/shieldops/security/security_posture_gap.py`)
    - Track knowledge retention via `KnowledgeRetentionTracker` (`src/shieldops/knowledge/knowledge_retention.py`)
    - Track audit findings via `AuditFindingTracker` (`src/shieldops/audit/audit_finding_tracker.py`)
+   - Score runbook effectiveness via `RunbookEffectivenessScorer` (`src/shieldops/operations/runbook_effectiveness_scorer.py`)
+   - Track threat responses via `ThreatResponseTracker` (`src/shieldops/security/threat_response_tracker.py`)
+   - Advise capacity scaling via `CapacityScalingAdvisor` (`src/shieldops/analytics/capacity_scaling_advisor.py`)
+   - Track deploy dependencies via `DeployDependencyTracker` (`src/shieldops/changes/deploy_dependency_tracker.py`)
+   - Analyze SLO breaches via `SLOBreachAnalyzer` (`src/shieldops/sla/slo_breach_analyzer.py`)
 4. **Deploy**:
    - Apply Kubernetes manifests from `infrastructure/kubernetes/`
    - For production: trigger approval workflow via Slack/Teams

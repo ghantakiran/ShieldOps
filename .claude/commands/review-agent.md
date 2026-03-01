@@ -332,6 +332,18 @@ Review ShieldOps agent code for correctness, safety, and reliability.
 - [ ] Audit findings tracked via `AuditFindingTracker` (`src/shieldops/audit/audit_finding_tracker.py`)
 - [ ] Capacity reservations planned via `CapacityReservationPlanner` (`src/shieldops/billing/capacity_reservation_planner.py`)
 - [ ] Change approval flows tracked via `ChangeApprovalFlowTracker` (`src/shieldops/changes/change_approval_flow.py`)
+- [ ] Incident response times tracked via `IncidentResponseTimeTracker` (`src/shieldops/incidents/incident_response_time.py`)
+- [ ] Topology changes tracked via `TopologyChangeTracker` (`src/shieldops/topology/topology_change_tracker.py`)
+- [ ] Observability budgets planned via `ObservabilityBudgetPlanner` (`src/shieldops/observability/observability_budget_planner.py`)
+- [ ] Cost variances analyzed via `CostVarianceAnalyzer` (`src/shieldops/billing/cost_variance_analyzer.py`)
+- [ ] Deploy dependencies tracked via `DeployDependencyTracker` (`src/shieldops/changes/deploy_dependency_tracker.py`)
+- [ ] SLO breaches analyzed via `SLOBreachAnalyzer` (`src/shieldops/sla/slo_breach_analyzer.py`)
+- [ ] Runbook effectiveness scored via `RunbookEffectivenessScorer` (`src/shieldops/operations/runbook_effectiveness_scorer.py`)
+- [ ] Threat responses tracked via `ThreatResponseTracker` (`src/shieldops/security/threat_response_tracker.py`)
+- [ ] Knowledge gaps detected via `KnowledgeGapDetector` (`src/shieldops/knowledge/knowledge_gap_detector.py`)
+- [ ] Audit compliance mapped via `AuditComplianceMapper` (`src/shieldops/audit/audit_compliance_mapper.py`)
+- [ ] Capacity scaling advised via `CapacityScalingAdvisor` (`src/shieldops/analytics/capacity_scaling_advisor.py`)
+- [ ] Change risk classified via `ChangeRiskClassifier` (`src/shieldops/changes/change_risk_classifier.py`)
 
 ### Testing
 - [ ] Unit tests for all node functions

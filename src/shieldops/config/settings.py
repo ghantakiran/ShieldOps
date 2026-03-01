@@ -2630,6 +2630,66 @@ class Settings(BaseSettings):
     change_approval_flow_max_records: int = 200000
     change_approval_flow_max_approval_time_hours: float = 24.0
 
+    # Phase 54: Incident Response Time Tracker
+    incident_response_time_enabled: bool = True
+    incident_response_time_max_records: int = 200000
+    incident_response_time_max_response_time_minutes: float = 30.0
+
+    # Phase 54: Topology Change Tracker
+    topology_change_tracker_enabled: bool = True
+    topology_change_tracker_max_records: int = 200000
+    topology_change_tracker_max_high_impact_pct: float = 15.0
+
+    # Phase 54: Observability Budget Planner
+    observability_budget_planner_enabled: bool = True
+    observability_budget_planner_max_records: int = 200000
+    observability_budget_planner_max_over_budget_pct: float = 10.0
+
+    # Phase 54: Cost Variance Analyzer
+    cost_variance_analyzer_enabled: bool = True
+    cost_variance_analyzer_max_records: int = 200000
+    cost_variance_analyzer_max_variance_pct: float = 20.0
+
+    # Phase 54: Deploy Dependency Tracker
+    deploy_dependency_tracker_enabled: bool = True
+    deploy_dependency_tracker_max_records: int = 200000
+    deploy_dependency_tracker_max_wait_time_minutes: float = 60.0
+
+    # Phase 54: SLO Breach Analyzer
+    slo_breach_analyzer_enabled: bool = True
+    slo_breach_analyzer_max_records: int = 200000
+    slo_breach_analyzer_max_breach_duration_minutes: float = 60.0
+
+    # Phase 54: Runbook Effectiveness Scorer
+    runbook_effectiveness_scorer_enabled: bool = True
+    runbook_effectiveness_scorer_max_records: int = 200000
+    runbook_effectiveness_scorer_min_effectiveness_score: float = 70.0
+
+    # Phase 54: Threat Response Tracker
+    threat_response_tracker_enabled: bool = True
+    threat_response_tracker_max_records: int = 200000
+    threat_response_tracker_max_response_time_hours: float = 4.0
+
+    # Phase 54: Knowledge Gap Detector
+    knowledge_gap_detector_enabled: bool = True
+    knowledge_gap_detector_max_records: int = 200000
+    knowledge_gap_detector_min_coverage_pct: float = 80.0
+
+    # Phase 54: Audit Compliance Mapper
+    audit_compliance_mapper_enabled: bool = True
+    audit_compliance_mapper_max_records: int = 200000
+    audit_compliance_mapper_min_coverage_score: float = 85.0
+
+    # Phase 54: Capacity Scaling Advisor
+    capacity_scaling_advisor_enabled: bool = True
+    capacity_scaling_advisor_max_records: int = 200000
+    capacity_scaling_advisor_min_efficiency_score: float = 70.0
+
+    # Phase 54: Change Risk Classifier
+    change_risk_classifier_enabled: bool = True
+    change_risk_classifier_max_records: int = 200000
+    change_risk_classifier_max_high_risk_pct: float = 15.0
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",

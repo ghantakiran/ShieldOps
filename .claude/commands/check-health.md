@@ -28,7 +28,7 @@ Run health checks on all ShieldOps platform dependencies.
    - Integration tests: `python3 -m pytest tests/integration/ -v --tb=short`
    - Report: total tests, passed, failed, coverage
 
-5. **Platform feature health** (Phase 11–53 modules):
+5. **Platform feature health** (Phase 11–54 modules):
    - Capacity trends: `src/shieldops/analytics/capacity_trends.py` — CapacityTrendAnalyzer
    - SRE metrics: `src/shieldops/analytics/sre_metrics.py` — SREMetricsAggregator
    - Health reports: `src/shieldops/observability/health_report.py` — ServiceHealthReportGenerator
@@ -397,6 +397,18 @@ Run health checks on all ShieldOps platform dependencies.
    - Audit finding tracker: `src/shieldops/audit/audit_finding_tracker.py` — AuditFindingTracker
    - Capacity reservation planner: `src/shieldops/billing/capacity_reservation_planner.py` — CapacityReservationPlanner
    - Change approval flow tracker: `src/shieldops/changes/change_approval_flow.py` — ChangeApprovalFlowTracker
+   - **Phase 54:** Incident response time tracker: `src/shieldops/incidents/incident_response_time.py` — IncidentResponseTimeTracker
+   - Topology change tracker: `src/shieldops/topology/topology_change_tracker.py` — TopologyChangeTracker
+   - Observability budget planner: `src/shieldops/observability/observability_budget_planner.py` — ObservabilityBudgetPlanner
+   - Cost variance analyzer: `src/shieldops/billing/cost_variance_analyzer.py` — CostVarianceAnalyzer
+   - Deploy dependency tracker: `src/shieldops/changes/deploy_dependency_tracker.py` — DeployDependencyTracker
+   - SLO breach analyzer: `src/shieldops/sla/slo_breach_analyzer.py` — SLOBreachAnalyzer
+   - Runbook effectiveness scorer: `src/shieldops/operations/runbook_effectiveness_scorer.py` — RunbookEffectivenessScorer
+   - Threat response tracker: `src/shieldops/security/threat_response_tracker.py` — ThreatResponseTracker
+   - Knowledge gap detector: `src/shieldops/knowledge/knowledge_gap_detector.py` — KnowledgeGapDetector
+   - Audit compliance mapper: `src/shieldops/audit/audit_compliance_mapper.py` — AuditComplianceMapper
+   - Capacity scaling advisor: `src/shieldops/analytics/capacity_scaling_advisor.py` — CapacityScalingAdvisor
+   - Change risk classifier: `src/shieldops/changes/change_risk_classifier.py` — ChangeRiskClassifier
    - Verify each module initializes in `src/shieldops/api/app.py` lifespan
 
 6. **Check configuration**:

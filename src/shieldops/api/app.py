@@ -11971,6 +11971,242 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         except Exception as e:
             logger.warning("change_approval_flow_init_failed", error=str(e))
 
+    # --- Phase 54: Intelligent Analytics & Operational Governance ---
+
+    if settings.incident_response_time_enabled:
+        try:
+            from shieldops.api.routes import incident_response_time as irs_mod
+            from shieldops.incidents.incident_response_time import (
+                IncidentResponseTimeTracker,
+            )
+
+            _irs_engine = IncidentResponseTimeTracker(
+                max_records=settings.incident_response_time_max_records,
+                max_response_time_minutes=settings.incident_response_time_max_response_time_minutes,
+            )
+            irs_mod.set_engine(_irs_engine)
+            app.include_router(
+                irs_mod.irs_route,
+                prefix=settings.api_prefix,
+                tags=["Incident Response Time"],
+            )
+            logger.info("incident_response_time_initialized")
+        except Exception as e:
+            logger.warning("incident_response_time_init_failed", error=str(e))
+
+    if settings.topology_change_tracker_enabled:
+        try:
+            from shieldops.api.routes import topology_change_tracker as tct_mod
+            from shieldops.topology.topology_change_tracker import TopologyChangeTracker
+
+            _tct_engine = TopologyChangeTracker(
+                max_records=settings.topology_change_tracker_max_records,
+                max_high_impact_pct=settings.topology_change_tracker_max_high_impact_pct,
+            )
+            tct_mod.set_engine(_tct_engine)
+            app.include_router(
+                tct_mod.tct_route,
+                prefix=settings.api_prefix,
+                tags=["Topology Change Tracker"],
+            )
+            logger.info("topology_change_tracker_initialized")
+        except Exception as e:
+            logger.warning("topology_change_tracker_init_failed", error=str(e))
+
+    if settings.observability_budget_planner_enabled:
+        try:
+            from shieldops.api.routes import observability_budget_planner as obp_mod
+            from shieldops.observability.observability_budget_planner import (
+                ObservabilityBudgetPlanner,
+            )
+
+            _obp_engine = ObservabilityBudgetPlanner(
+                max_records=settings.observability_budget_planner_max_records,
+                max_over_budget_pct=settings.observability_budget_planner_max_over_budget_pct,
+            )
+            obp_mod.set_engine(_obp_engine)
+            app.include_router(
+                obp_mod.obp_route,
+                prefix=settings.api_prefix,
+                tags=["Observability Budget Planner"],
+            )
+            logger.info("observability_budget_planner_initialized")
+        except Exception as e:
+            logger.warning("observability_budget_planner_init_failed", error=str(e))
+
+    if settings.cost_variance_analyzer_enabled:
+        try:
+            from shieldops.api.routes import cost_variance_analyzer as cva_mod
+            from shieldops.billing.cost_variance_analyzer import CostVarianceAnalyzer
+
+            _cva_engine = CostVarianceAnalyzer(
+                max_records=settings.cost_variance_analyzer_max_records,
+                max_variance_pct=settings.cost_variance_analyzer_max_variance_pct,
+            )
+            cva_mod.set_engine(_cva_engine)
+            app.include_router(
+                cva_mod.cva_route,
+                prefix=settings.api_prefix,
+                tags=["Cost Variance Analyzer"],
+            )
+            logger.info("cost_variance_analyzer_initialized")
+        except Exception as e:
+            logger.warning("cost_variance_analyzer_init_failed", error=str(e))
+
+    if settings.deploy_dependency_tracker_enabled:
+        try:
+            from shieldops.api.routes import deploy_dependency_tracker as ddt_mod
+            from shieldops.changes.deploy_dependency_tracker import DeployDependencyTracker
+
+            _ddt_engine = DeployDependencyTracker(
+                max_records=settings.deploy_dependency_tracker_max_records,
+                max_wait_time_minutes=settings.deploy_dependency_tracker_max_wait_time_minutes,
+            )
+            ddt_mod.set_engine(_ddt_engine)
+            app.include_router(
+                ddt_mod.ddt_route,
+                prefix=settings.api_prefix,
+                tags=["Deploy Dependency Tracker"],
+            )
+            logger.info("deploy_dependency_tracker_initialized")
+        except Exception as e:
+            logger.warning("deploy_dependency_tracker_init_failed", error=str(e))
+
+    if settings.slo_breach_analyzer_enabled:
+        try:
+            from shieldops.api.routes import slo_breach_analyzer as sba_mod
+            from shieldops.sla.slo_breach_analyzer import SLOBreachAnalyzer
+
+            _sba_engine = SLOBreachAnalyzer(
+                max_records=settings.slo_breach_analyzer_max_records,
+                max_breach_duration_minutes=settings.slo_breach_analyzer_max_breach_duration_minutes,
+            )
+            sba_mod.set_engine(_sba_engine)
+            app.include_router(
+                sba_mod.sba_route,
+                prefix=settings.api_prefix,
+                tags=["SLO Breach Analyzer"],
+            )
+            logger.info("slo_breach_analyzer_initialized")
+        except Exception as e:
+            logger.warning("slo_breach_analyzer_init_failed", error=str(e))
+
+    if settings.runbook_effectiveness_scorer_enabled:
+        try:
+            from shieldops.api.routes import runbook_effectiveness_scorer as res_mod
+            from shieldops.operations.runbook_effectiveness_scorer import (
+                RunbookEffectivenessScorer,
+            )
+
+            _res_engine = RunbookEffectivenessScorer(
+                max_records=settings.runbook_effectiveness_scorer_max_records,
+                min_effectiveness_score=settings.runbook_effectiveness_scorer_min_effectiveness_score,
+            )
+            res_mod.set_engine(_res_engine)
+            app.include_router(
+                res_mod.res_route,
+                prefix=settings.api_prefix,
+                tags=["Runbook Effectiveness Scorer"],
+            )
+            logger.info("runbook_effectiveness_scorer_initialized")
+        except Exception as e:
+            logger.warning("runbook_effectiveness_scorer_init_failed", error=str(e))
+
+    if settings.threat_response_tracker_enabled:
+        try:
+            from shieldops.api.routes import threat_response_tracker as trt_mod
+            from shieldops.security.threat_response_tracker import ThreatResponseTracker
+
+            _trt_engine = ThreatResponseTracker(
+                max_records=settings.threat_response_tracker_max_records,
+                max_response_time_hours=settings.threat_response_tracker_max_response_time_hours,
+            )
+            trt_mod.set_engine(_trt_engine)
+            app.include_router(
+                trt_mod.trt_route,
+                prefix=settings.api_prefix,
+                tags=["Threat Response Tracker"],
+            )
+            logger.info("threat_response_tracker_initialized")
+        except Exception as e:
+            logger.warning("threat_response_tracker_init_failed", error=str(e))
+
+    if settings.knowledge_gap_detector_enabled:
+        try:
+            from shieldops.api.routes import knowledge_gap_detector as kgd_mod
+            from shieldops.knowledge.knowledge_gap_detector import KnowledgeGapDetector
+
+            _kgd_engine = KnowledgeGapDetector(
+                max_records=settings.knowledge_gap_detector_max_records,
+                min_coverage_pct=settings.knowledge_gap_detector_min_coverage_pct,
+            )
+            kgd_mod.set_engine(_kgd_engine)
+            app.include_router(
+                kgd_mod.kgd_route,
+                prefix=settings.api_prefix,
+                tags=["Knowledge Gap Detector"],
+            )
+            logger.info("knowledge_gap_detector_initialized")
+        except Exception as e:
+            logger.warning("knowledge_gap_detector_init_failed", error=str(e))
+
+    if settings.audit_compliance_mapper_enabled:
+        try:
+            from shieldops.api.routes import audit_compliance_mapper as acm_mod
+            from shieldops.audit.audit_compliance_mapper import AuditComplianceMapper
+
+            _acm_engine = AuditComplianceMapper(
+                max_records=settings.audit_compliance_mapper_max_records,
+                min_coverage_score=settings.audit_compliance_mapper_min_coverage_score,
+            )
+            acm_mod.set_engine(_acm_engine)
+            app.include_router(
+                acm_mod.acm_route,
+                prefix=settings.api_prefix,
+                tags=["Audit Compliance Mapper"],
+            )
+            logger.info("audit_compliance_mapper_initialized")
+        except Exception as e:
+            logger.warning("audit_compliance_mapper_init_failed", error=str(e))
+
+    if settings.capacity_scaling_advisor_enabled:
+        try:
+            from shieldops.analytics.capacity_scaling_advisor import CapacityScalingAdvisor
+            from shieldops.api.routes import capacity_scaling_advisor as csa_mod
+
+            _csa_engine = CapacityScalingAdvisor(
+                max_records=settings.capacity_scaling_advisor_max_records,
+                min_efficiency_score=settings.capacity_scaling_advisor_min_efficiency_score,
+            )
+            csa_mod.set_engine(_csa_engine)
+            app.include_router(
+                csa_mod.csa_route,
+                prefix=settings.api_prefix,
+                tags=["Capacity Scaling Advisor"],
+            )
+            logger.info("capacity_scaling_advisor_initialized")
+        except Exception as e:
+            logger.warning("capacity_scaling_advisor_init_failed", error=str(e))
+
+    if settings.change_risk_classifier_enabled:
+        try:
+            from shieldops.api.routes import change_risk_classifier as crc_mod
+            from shieldops.changes.change_risk_classifier import ChangeRiskClassifier
+
+            _crc_engine = ChangeRiskClassifier(
+                max_records=settings.change_risk_classifier_max_records,
+                max_high_risk_pct=settings.change_risk_classifier_max_high_risk_pct,
+            )
+            crc_mod.set_engine(_crc_engine)
+            app.include_router(
+                crc_mod.crc_route,
+                prefix=settings.api_prefix,
+                tags=["Change Risk Classifier"],
+            )
+            logger.info("change_risk_classifier_initialized")
+        except Exception as e:
+            logger.warning("change_risk_classifier_init_failed", error=str(e))
+
     yield
 
     logger.info("shieldops_shutting_down")

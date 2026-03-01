@@ -160,6 +160,10 @@ Run security audits on ShieldOps codebase and agent configurations.
 134. **Metric Cardinality Planning**: Plan metric cardinality budgets and detect cardinality explosions via `MetricCardinalityPlanner` (`src/shieldops/observability/metric_cardinality_planner.py`)
 135. **Knowledge Retention Tracking**: Track knowledge retention across teams and detect knowledge loss risks via `KnowledgeRetentionTracker` (`src/shieldops/knowledge/knowledge_retention.py`)
 136. **Cost Forecast Accuracy**: Track cost forecast accuracy and detect forecast drift via `CostForecastAccuracyTracker` (`src/shieldops/billing/cost_forecast_accuracy.py`)
+137. **Threat Response Tracking**: Track threat response activities and measure response effectiveness via `ThreatResponseTracker` (`src/shieldops/security/threat_response_tracker.py`)
+138. **Audit Compliance Mapping**: Map audit findings to compliance frameworks and detect unmapped findings via `AuditComplianceMapper` (`src/shieldops/audit/audit_compliance_mapper.py`)
+139. **Change Risk Classification**: Classify change risk levels and analyze risk factors via `ChangeRiskClassifier` (`src/shieldops/changes/change_risk_classifier.py`)
+140. **Incident Response Time Tracking**: Track incident response times and identify slow response patterns via `IncidentResponseTimeTracker` (`src/shieldops/incidents/incident_response_time.py`)
 
 ## Severity Levels
 - **CRITICAL**: Hardcoded secrets, SQL injection, unauthenticated endpoints

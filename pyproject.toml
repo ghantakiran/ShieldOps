@@ -650,6 +650,18 @@ module = [
     "shieldops.api.routes.audit_finding_tracker",
     "shieldops.api.routes.capacity_reservation_planner",
     "shieldops.api.routes.change_approval_flow",
+    "shieldops.api.routes.incident_response_time",
+    "shieldops.api.routes.topology_change_tracker",
+    "shieldops.api.routes.observability_budget_planner",
+    "shieldops.api.routes.cost_variance_analyzer",
+    "shieldops.api.routes.deploy_dependency_tracker",
+    "shieldops.api.routes.slo_breach_analyzer",
+    "shieldops.api.routes.runbook_effectiveness_scorer",
+    "shieldops.api.routes.threat_response_tracker",
+    "shieldops.api.routes.knowledge_gap_detector",
+    "shieldops.api.routes.audit_compliance_mapper",
+    "shieldops.api.routes.capacity_scaling_advisor",
+    "shieldops.api.routes.change_risk_classifier",
 ]
 warn_return_any = false
 disallow_untyped_defs = false
