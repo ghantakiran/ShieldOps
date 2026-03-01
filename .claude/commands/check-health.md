@@ -28,7 +28,7 @@ Run health checks on all ShieldOps platform dependencies.
    - Integration tests: `python3 -m pytest tests/integration/ -v --tb=short`
    - Report: total tests, passed, failed, coverage
 
-5. **Platform feature health** (Phase 11–55 modules):
+5. **Platform feature health** (Phase 11–56 modules):
    - Capacity trends: `src/shieldops/analytics/capacity_trends.py` — CapacityTrendAnalyzer
    - SRE metrics: `src/shieldops/analytics/sre_metrics.py` — SREMetricsAggregator
    - Health reports: `src/shieldops/observability/health_report.py` — ServiceHealthReportGenerator
@@ -421,6 +421,18 @@ Run health checks on all ShieldOps platform dependencies.
    - Audit control assessor: `src/shieldops/audit/audit_control_assessor.py` — AuditControlAssessor
    - Capacity utilization tracker: `src/shieldops/analytics/capacity_utilization_tracker.py` — CapacityUtilizationTracker
    - Change impact predictor: `src/shieldops/changes/change_impact_predictor.py` — ChangeImpactPredictor
+   - **Phase 56:** Incident escalation scorer: `src/shieldops/incidents/incident_escalation_scorer.py` — IncidentEscalationScorer
+   - Topology drift detector: `src/shieldops/topology/topology_drift_detector.py` — TopologyDriftDetector
+   - Alert correlation profiler: `src/shieldops/observability/alert_correlation_profiler.py` — AlertCorrelationProfiler
+   - Cost allocation validator: `src/shieldops/billing/cost_allocation_validator.py` — CostAllocationValidator
+   - Deploy canary analyzer: `src/shieldops/changes/deploy_canary_analyzer.py` — DeployCanaryAnalyzer
+   - SLO error budget forecaster: `src/shieldops/sla/slo_error_budget_forecaster.py` — SLOErrorBudgetForecaster
+   - Runbook automation scorer: `src/shieldops/operations/runbook_automation_scorer.py` — RunbookAutomationScorer
+   - Threat surface analyzer: `src/shieldops/security/threat_surface_analyzer.py` — ThreatSurfaceAnalyzer
+   - Knowledge quality assessor: `src/shieldops/knowledge/knowledge_quality_assessor.py` — KnowledgeQualityAssessor
+   - Audit remediation tracker: `src/shieldops/audit/audit_remediation_tracker.py` — AuditRemediationTracker
+   - Capacity forecast validator: `src/shieldops/analytics/capacity_forecast_validator.py` — CapacityForecastValidator
+   - Change window analyzer: `src/shieldops/changes/change_window_analyzer.py` — ChangeWindowAnalyzer
    - Verify each module initializes in `src/shieldops/api/app.py` lifespan
 
 6. **Check configuration**:

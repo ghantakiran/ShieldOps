@@ -356,6 +356,18 @@ Review ShieldOps agent code for correctness, safety, and reliability.
 - [ ] Audit controls assessed via `AuditControlAssessor` (`src/shieldops/audit/audit_control_assessor.py`)
 - [ ] Capacity utilization tracked via `CapacityUtilizationTracker` (`src/shieldops/analytics/capacity_utilization_tracker.py`)
 - [ ] Change impact predicted via `ChangeImpactPredictor` (`src/shieldops/changes/change_impact_predictor.py`)
+- [ ] Incident escalation scored via `IncidentEscalationScorer` (`src/shieldops/incidents/incident_escalation_scorer.py`)
+- [ ] Topology drift detected via `TopologyDriftDetector` (`src/shieldops/topology/topology_drift_detector.py`)
+- [ ] Alert correlations profiled via `AlertCorrelationProfiler` (`src/shieldops/observability/alert_correlation_profiler.py`)
+- [ ] Cost allocations validated via `CostAllocationValidator` (`src/shieldops/billing/cost_allocation_validator.py`)
+- [ ] Deploy canary analyzed via `DeployCanaryAnalyzer` (`src/shieldops/changes/deploy_canary_analyzer.py`)
+- [ ] SLO error budgets forecasted via `SLOErrorBudgetForecaster` (`src/shieldops/sla/slo_error_budget_forecaster.py`)
+- [ ] Runbook automation scored via `RunbookAutomationScorer` (`src/shieldops/operations/runbook_automation_scorer.py`)
+- [ ] Threat surface analyzed via `ThreatSurfaceAnalyzer` (`src/shieldops/security/threat_surface_analyzer.py`)
+- [ ] Knowledge quality assessed via `KnowledgeQualityAssessor` (`src/shieldops/knowledge/knowledge_quality_assessor.py`)
+- [ ] Audit remediations tracked via `AuditRemediationTracker` (`src/shieldops/audit/audit_remediation_tracker.py`)
+- [ ] Capacity forecasts validated via `CapacityForecastValidator` (`src/shieldops/analytics/capacity_forecast_validator.py`)
+- [ ] Change windows analyzed via `ChangeWindowAnalyzer` (`src/shieldops/changes/change_window_analyzer.py`)
 
 ### Testing
 - [ ] Unit tests for all node functions

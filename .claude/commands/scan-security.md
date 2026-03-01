@@ -168,6 +168,10 @@ Run security audits on ShieldOps codebase and agent configurations.
 142. **Audit Control Assessment**: Assess control effectiveness and detect control gaps via `AuditControlAssessor` (`src/shieldops/audit/audit_control_assessor.py`)
 143. **Alert Noise Profiling**: Profile alert noise patterns and track signal-to-noise ratio via `AlertNoiseProfiler` (`src/shieldops/observability/alert_noise_profiler.py`)
 144. **Incident Pattern Analysis**: Analyze incident patterns and identify recurring failure modes via `IncidentPatternAnalyzer` (`src/shieldops/incidents/incident_pattern_analyzer.py`)
+145. **Threat Surface Analysis**: Analyze threat surface exposure and risk patterns via `ThreatSurfaceAnalyzer` (`src/shieldops/security/threat_surface_analyzer.py`)
+146. **Cost Allocation Validation**: Validate cost allocation accuracy and compliance via `CostAllocationValidator` (`src/shieldops/billing/cost_allocation_validator.py`)
+147. **Audit Remediation Tracking**: Track audit finding remediation progress and timelines via `AuditRemediationTracker` (`src/shieldops/audit/audit_remediation_tracker.py`)
+148. **Alert Correlation Profiling**: Profile and score alert correlation patterns via `AlertCorrelationProfiler` (`src/shieldops/observability/alert_correlation_profiler.py`)
 
 ## Severity Levels
 - **CRITICAL**: Hardcoded secrets, SQL injection, unauthenticated endpoints

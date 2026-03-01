@@ -12449,6 +12449,252 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         except Exception as e:
             logger.warning("change_impact_predictor_init_failed", error=str(e))
 
+    # --- Phase 56: Advanced Scoring & Operational Analytics ---
+
+    if settings.incident_escalation_scorer_enabled:
+        try:
+            from shieldops.api.routes import incident_escalation_scorer as iex_mod
+            from shieldops.incidents.incident_escalation_scorer import (
+                IncidentEscalationScorer,
+            )
+
+            _iex_engine = IncidentEscalationScorer(
+                max_records=settings.incident_escalation_scorer_max_records,
+                min_quality_score=settings.incident_escalation_scorer_min_quality_score,
+            )
+            iex_mod.set_engine(_iex_engine)
+            app.include_router(
+                iex_mod.iex_route,
+                prefix=settings.api_prefix,
+                tags=["Incident Escalation Scorer"],
+            )
+            logger.info("incident_escalation_scorer_initialized")
+        except Exception as e:
+            logger.warning("incident_escalation_scorer_init_failed", error=str(e))
+
+    if settings.topology_drift_detector_enabled:
+        try:
+            from shieldops.api.routes import topology_drift_detector as tdx_mod
+            from shieldops.topology.topology_drift_detector import TopologyDriftDetector
+
+            _tdx_engine = TopologyDriftDetector(
+                max_records=settings.topology_drift_detector_max_records,
+                max_critical_drift_pct=settings.topology_drift_detector_max_critical_drift_pct,
+            )
+            tdx_mod.set_engine(_tdx_engine)
+            app.include_router(
+                tdx_mod.tdx_route,
+                prefix=settings.api_prefix,
+                tags=["Topology Drift Detector"],
+            )
+            logger.info("topology_drift_detector_initialized")
+        except Exception as e:
+            logger.warning("topology_drift_detector_init_failed", error=str(e))
+
+    if settings.alert_correlation_profiler_enabled:
+        try:
+            from shieldops.api.routes import alert_correlation_profiler as acq_mod
+            from shieldops.observability.alert_correlation_profiler import (
+                AlertCorrelationProfiler,
+            )
+
+            _acq_engine = AlertCorrelationProfiler(
+                max_records=settings.alert_correlation_profiler_max_records,
+                min_correlation_score=settings.alert_correlation_profiler_min_correlation_score,
+            )
+            acq_mod.set_engine(_acq_engine)
+            app.include_router(
+                acq_mod.acq_route,
+                prefix=settings.api_prefix,
+                tags=["Alert Correlation Profiler"],
+            )
+            logger.info("alert_correlation_profiler_initialized")
+        except Exception as e:
+            logger.warning("alert_correlation_profiler_init_failed", error=str(e))
+
+    if settings.cost_allocation_validator_enabled:
+        try:
+            from shieldops.api.routes import cost_allocation_validator as clv_mod
+            from shieldops.billing.cost_allocation_validator import (
+                CostAllocationValidator as CLVEngine,
+            )
+
+            _clv_engine = CLVEngine(
+                max_records=settings.cost_allocation_validator_max_records,
+                min_accuracy_pct=settings.cost_allocation_validator_min_accuracy_pct,
+            )
+            clv_mod.set_engine(_clv_engine)
+            app.include_router(
+                clv_mod.clv_route,
+                prefix=settings.api_prefix,
+                tags=["Cost Allocation Validator"],
+            )
+            logger.info("cost_allocation_validator_initialized")
+        except Exception as e:
+            logger.warning("cost_allocation_validator_init_failed", error=str(e))
+
+    if settings.deploy_canary_analyzer_enabled:
+        try:
+            from shieldops.api.routes import deploy_canary_analyzer as dcx_mod
+            from shieldops.changes.deploy_canary_analyzer import DeployCanaryAnalyzer
+
+            _dcx_engine = DeployCanaryAnalyzer(
+                max_records=settings.deploy_canary_analyzer_max_records,
+                min_success_rate=settings.deploy_canary_analyzer_min_success_rate,
+            )
+            dcx_mod.set_engine(_dcx_engine)
+            app.include_router(
+                dcx_mod.dcx_route,
+                prefix=settings.api_prefix,
+                tags=["Deploy Canary Analyzer"],
+            )
+            logger.info("deploy_canary_analyzer_initialized")
+        except Exception as e:
+            logger.warning("deploy_canary_analyzer_init_failed", error=str(e))
+
+    if settings.slo_error_budget_forecaster_enabled:
+        try:
+            from shieldops.api.routes import slo_error_budget_forecaster as ebx_mod
+            from shieldops.sla.slo_error_budget_forecaster import (
+                SLOErrorBudgetForecaster,
+            )
+
+            _ebx_engine = SLOErrorBudgetForecaster(
+                max_records=settings.slo_error_budget_forecaster_max_records,
+                min_remaining_pct=settings.slo_error_budget_forecaster_min_remaining_pct,
+            )
+            ebx_mod.set_engine(_ebx_engine)
+            app.include_router(
+                ebx_mod.ebx_route,
+                prefix=settings.api_prefix,
+                tags=["SLO Error Budget Forecaster"],
+            )
+            logger.info("slo_error_budget_forecaster_initialized")
+        except Exception as e:
+            logger.warning("slo_error_budget_forecaster_init_failed", error=str(e))
+
+    if settings.runbook_automation_scorer_enabled:
+        try:
+            from shieldops.api.routes import runbook_automation_scorer as rax_mod
+            from shieldops.operations.runbook_automation_scorer import (
+                RunbookAutomationScorer,
+            )
+
+            _rax_engine = RunbookAutomationScorer(
+                max_records=settings.runbook_automation_scorer_max_records,
+                min_automation_score=settings.runbook_automation_scorer_min_automation_score,
+            )
+            rax_mod.set_engine(_rax_engine)
+            app.include_router(
+                rax_mod.rax_route,
+                prefix=settings.api_prefix,
+                tags=["Runbook Automation Scorer"],
+            )
+            logger.info("runbook_automation_scorer_initialized")
+        except Exception as e:
+            logger.warning("runbook_automation_scorer_init_failed", error=str(e))
+
+    if settings.threat_surface_analyzer_enabled:
+        try:
+            from shieldops.api.routes import threat_surface_analyzer as tsx_mod
+            from shieldops.security.threat_surface_analyzer import ThreatSurfaceAnalyzer
+
+            _tsx_engine = ThreatSurfaceAnalyzer(
+                max_records=settings.threat_surface_analyzer_max_records,
+                max_exposure_score=settings.threat_surface_analyzer_max_exposure_score,
+            )
+            tsx_mod.set_engine(_tsx_engine)
+            app.include_router(
+                tsx_mod.tsx_route,
+                prefix=settings.api_prefix,
+                tags=["Threat Surface Analyzer"],
+            )
+            logger.info("threat_surface_analyzer_initialized")
+        except Exception as e:
+            logger.warning("threat_surface_analyzer_init_failed", error=str(e))
+
+    if settings.knowledge_quality_assessor_enabled:
+        try:
+            from shieldops.api.routes import knowledge_quality_assessor as kqx_mod
+            from shieldops.knowledge.knowledge_quality_assessor import (
+                KnowledgeQualityAssessor,
+            )
+
+            _kqx_engine = KnowledgeQualityAssessor(
+                max_records=settings.knowledge_quality_assessor_max_records,
+                min_quality_score=settings.knowledge_quality_assessor_min_quality_score,
+            )
+            kqx_mod.set_engine(_kqx_engine)
+            app.include_router(
+                kqx_mod.kqx_route,
+                prefix=settings.api_prefix,
+                tags=["Knowledge Quality Assessor"],
+            )
+            logger.info("knowledge_quality_assessor_initialized")
+        except Exception as e:
+            logger.warning("knowledge_quality_assessor_init_failed", error=str(e))
+
+    if settings.audit_remediation_tracker_enabled:
+        try:
+            from shieldops.api.routes import audit_remediation_tracker as arx_mod
+            from shieldops.audit.audit_remediation_tracker import (
+                AuditRemediationTracker as ARXTracker,
+            )
+
+            _arx_engine = ARXTracker(
+                max_records=settings.audit_remediation_tracker_max_records,
+                max_remediation_days=settings.audit_remediation_tracker_max_remediation_days,
+            )
+            arx_mod.set_engine(_arx_engine)
+            app.include_router(
+                arx_mod.arx_route,
+                prefix=settings.api_prefix,
+                tags=["Audit Remediation Tracker"],
+            )
+            logger.info("audit_remediation_tracker_initialized")
+        except Exception as e:
+            logger.warning("audit_remediation_tracker_init_failed", error=str(e))
+
+    if settings.capacity_forecast_validator_enabled:
+        try:
+            from shieldops.analytics.capacity_forecast_validator import (
+                CapacityForecastValidator,
+            )
+            from shieldops.api.routes import capacity_forecast_validator as cfx_mod
+
+            _cfx_engine = CapacityForecastValidator(
+                max_records=settings.capacity_forecast_validator_max_records,
+                min_accuracy_pct=settings.capacity_forecast_validator_min_accuracy_pct,
+            )
+            cfx_mod.set_engine(_cfx_engine)
+            app.include_router(
+                cfx_mod.cfx_route,
+                prefix=settings.api_prefix,
+                tags=["Capacity Forecast Validator"],
+            )
+            logger.info("capacity_forecast_validator_initialized")
+        except Exception as e:
+            logger.warning("capacity_forecast_validator_init_failed", error=str(e))
+
+    if settings.change_window_analyzer_enabled:
+        try:
+            from shieldops.api.routes import change_window_analyzer as cwx_mod
+            from shieldops.changes.change_window_analyzer import ChangeWindowAnalyzer
+
+            _cwx_engine = ChangeWindowAnalyzer(
+                max_records=settings.change_window_analyzer_max_records,
+                min_compliance_pct=settings.change_window_analyzer_min_compliance_pct,
+            )
+            cwx_mod.set_engine(_cwx_engine)
+            app.include_router(
+                cwx_mod.cwx_route,
+                prefix=settings.api_prefix,
+                tags=["Change Window Analyzer"],
+            )
+            logger.info("change_window_analyzer_initialized")
+        except Exception as e:
+            logger.warning("change_window_analyzer_init_failed", error=str(e))
+
     yield
 
     logger.info("shieldops_shutting_down")

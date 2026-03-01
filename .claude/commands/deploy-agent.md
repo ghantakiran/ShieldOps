@@ -189,6 +189,11 @@ Deploy ShieldOps agents to target environments.
    - Track deploy verification via `DeployVerificationTracker` (`src/shieldops/changes/deploy_verification_tracker.py`)
    - Monitor SLO compliance via `SLOComplianceMonitor` (`src/shieldops/sla/slo_compliance_monitor.py`)
    - Predict change impact via `ChangeImpactPredictor` (`src/shieldops/changes/change_impact_predictor.py`)
+   - Score runbook automation via `RunbookAutomationScorer` (`src/shieldops/operations/runbook_automation_scorer.py`)
+   - Analyze deploy canary via `DeployCanaryAnalyzer` (`src/shieldops/changes/deploy_canary_analyzer.py`)
+   - Analyze threat surface via `ThreatSurfaceAnalyzer` (`src/shieldops/security/threat_surface_analyzer.py`)
+   - Analyze change windows via `ChangeWindowAnalyzer` (`src/shieldops/changes/change_window_analyzer.py`)
+   - Validate capacity forecasts via `CapacityForecastValidator` (`src/shieldops/analytics/capacity_forecast_validator.py`)
 4. **Deploy**:
    - Apply Kubernetes manifests from `infrastructure/kubernetes/`
    - For production: trigger approval workflow via Slack/Teams
