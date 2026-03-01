@@ -276,6 +276,18 @@ Design new ShieldOps components, APIs, or agent workflows.
    - Score compliance risk via `ComplianceRiskScorer` (`src/shieldops/compliance/risk_scorer.py`)
    - Track performance benchmarks via `PerformanceBenchmarkTracker` (`src/shieldops/analytics/perf_benchmark.py`)
    - Track audit evidence via `AuditEvidenceTracker` (`src/shieldops/audit/evidence_tracker.py`)
+   - Analyze triage quality via `TriageQualityAnalyzer` (`src/shieldops/incidents/triage_quality.py`)
+   - Analyze service health trends via `ServiceHealthTrendAnalyzer` (`src/shieldops/topology/health_trend.py`)
+   - Score metric quality via `MetricQualityScorer` (`src/shieldops/observability/metric_quality.py`)
+   - Validate invoices via `InvoiceValidationEngine` (`src/shieldops/billing/invoice_validator.py`)
+   - Track deployment stability via `DeploymentStabilityTracker` (`src/shieldops/changes/deploy_stability.py`)
+   - Analyze SLA breach impact via `SLABreachImpactAnalyzer` (`src/shieldops/sla/breach_impact.py`)
+   - Optimize shift schedules via `ShiftScheduleOptimizer` (`src/shieldops/operations/shift_optimizer.py`)
+   - Detect lateral movement via `LateralMovementDetector` (`src/shieldops/security/lateral_movement.py`)
+   - Analyze knowledge coverage via `KnowledgeCoverageAnalyzer` (`src/shieldops/knowledge/knowledge_coverage.py`)
+   - Track regulatory changes via `RegulatoryChangeTracker` (`src/shieldops/compliance/regulation_tracker.py`)
+   - Analyze workflow efficiency via `WorkflowEfficiencyAnalyzer` (`src/shieldops/analytics/workflow_analyzer.py`)
+   - Track audit findings via `AuditFindingTracker` (`src/shieldops/audit/finding_tracker.py`)
 
 5. **Documentation**:
    - Write Architecture Decision Record (ADR) in `docs/architecture/`

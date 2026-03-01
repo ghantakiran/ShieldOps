@@ -2270,6 +2270,66 @@ class Settings(BaseSettings):
     evidence_tracker_max_records: int = 200000
     evidence_tracker_min_completeness_pct: float = 90.0
 
+    # Phase 48: Triage Quality Analyzer
+    triage_quality_enabled: bool = True
+    triage_quality_max_records: int = 200000
+    triage_quality_min_triage_quality_pct: float = 80.0
+
+    # Phase 48: Service Health Trend Analyzer
+    health_trend_enabled: bool = True
+    health_trend_max_records: int = 200000
+    health_trend_min_health_trend_score: float = 70.0
+
+    # Phase 48: Metric Quality Scorer
+    metric_quality_enabled: bool = True
+    metric_quality_max_records: int = 200000
+    metric_quality_min_metric_quality_pct: float = 75.0
+
+    # Phase 48: Invoice Validation Engine
+    invoice_validator_enabled: bool = True
+    invoice_validator_max_records: int = 200000
+    invoice_validator_max_discrepancy_pct: float = 5.0
+
+    # Phase 48: Deployment Stability Tracker
+    deploy_stability_enabled: bool = True
+    deploy_stability_max_records: int = 200000
+    deploy_stability_min_stability_score: float = 80.0
+
+    # Phase 48: SLA Breach Impact Analyzer
+    breach_impact_enabled: bool = True
+    breach_impact_max_records: int = 200000
+    breach_impact_max_breach_impact_score: float = 75.0
+
+    # Phase 48: Shift Schedule Optimizer
+    shift_optimizer_enabled: bool = True
+    shift_optimizer_max_records: int = 200000
+    shift_optimizer_max_coverage_gap_pct: float = 10.0
+
+    # Phase 48: Lateral Movement Detector
+    lateral_movement_enabled: bool = True
+    lateral_movement_max_records: int = 200000
+    lateral_movement_min_detection_confidence_pct: float = 70.0
+
+    # Phase 48: Knowledge Coverage Analyzer
+    knowledge_coverage_enabled: bool = True
+    knowledge_coverage_max_records: int = 200000
+    knowledge_coverage_min_coverage_pct: float = 80.0
+
+    # Phase 48: Regulatory Change Tracker
+    regulation_tracker_enabled: bool = True
+    regulation_tracker_max_records: int = 200000
+    regulation_tracker_max_impact_score: float = 75.0
+
+    # Phase 48: Workflow Efficiency Analyzer
+    workflow_analyzer_enabled: bool = True
+    workflow_analyzer_max_records: int = 200000
+    workflow_analyzer_min_efficiency_score: float = 70.0
+
+    # Phase 48: Audit Finding Tracker
+    finding_tracker_enabled: bool = True
+    finding_tracker_max_records: int = 200000
+    finding_tracker_max_open_finding_pct: float = 15.0
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",
