@@ -115,6 +115,10 @@ Run security audits on ShieldOps codebase and agent configurations.
 89. **Security Compliance Mapping**: Map security controls to compliance frameworks and detect gaps via `SecurityComplianceMapper` (`src/shieldops/security/compliance_mapper.py`)
 90. **Config Drift Monitoring**: Monitor configuration drift and detect unauthorized changes via `ConfigDriftMonitor` (`src/shieldops/operations/config_drift_monitor.py`)
 91. **Service Dependency Risk**: Score dependency risk across services via `ServiceDependencyRiskScorer` (`src/shieldops/topology/service_dep_risk.py`)
+92. **Threat Intelligence Correlation**: Correlate threat intelligence feeds and detect relevant threats via `ThreatIntelligenceCorrelator` (`src/shieldops/security/threat_correlator.py`)
+93. **Compliance Control Testing**: Test compliance controls for effectiveness via `ComplianceControlTester` (`src/shieldops/compliance/control_tester.py`)
+94. **Alert Suppression Management**: Track alert suppression effectiveness via `AlertSuppressionManager` (`src/shieldops/observability/alert_suppression.py`)
+95. **Metric Anomaly Scoring**: Score and classify metric anomalies via `MetricAnomalyScorer` (`src/shieldops/analytics/anomaly_scorer.py`)
 
 ## Severity Levels
 - **CRITICAL**: Hardcoded secrets, SQL injection, unauthenticated endpoints

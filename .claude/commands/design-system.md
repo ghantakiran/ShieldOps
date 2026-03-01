@@ -241,6 +241,18 @@ Design new ShieldOps components, APIs, or agent workflows.
    - Monitor config drift via `ConfigDriftMonitor` (`src/shieldops/operations/config_drift_monitor.py`)
    - Map security compliance via `SecurityComplianceMapper` (`src/shieldops/security/compliance_mapper.py`)
    - Analyze on-call equity via `TeamOnCallEquityAnalyzer` (`src/shieldops/operations/oncall_equity.py`)
+   - Cluster incidents via `IncidentClusterEngine` (`src/shieldops/incidents/incident_cluster.py`)
+   - Track dependency latency via `DependencyLatencyTracker` (`src/shieldops/topology/dep_latency.py`)
+   - Manage alert suppression via `AlertSuppressionManager` (`src/shieldops/observability/alert_suppression.py`)
+   - Forecast cost trends via `CostTrendForecaster` (`src/shieldops/billing/cost_trend.py`)
+   - Analyze change batches via `ChangeBatchAnalyzer` (`src/shieldops/changes/batch_analyzer.py`)
+   - Validate SLO alignment via `SLOAlignmentValidator` (`src/shieldops/sla/slo_alignment.py`)
+   - Track runbook executions via `RunbookExecutionTracker` (`src/shieldops/operations/runbook_exec_tracker.py`)
+   - Correlate threat intelligence via `ThreatIntelligenceCorrelator` (`src/shieldops/security/threat_correlator.py`)
+   - Monitor knowledge freshness via `KnowledgeFreshnessMonitor` (`src/shieldops/knowledge/freshness_monitor.py`)
+   - Test compliance controls via `ComplianceControlTester` (`src/shieldops/compliance/control_tester.py`)
+   - Detect bottlenecks via `CapacityBottleneckDetector` (`src/shieldops/analytics/bottleneck_detector.py`)
+   - Score metric anomalies via `MetricAnomalyScorer` (`src/shieldops/analytics/anomaly_scorer.py`)
 
 5. **Documentation**:
    - Write Architecture Decision Record (ADR) in `docs/architecture/`

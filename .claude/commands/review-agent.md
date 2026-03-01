@@ -224,6 +224,18 @@ Review ShieldOps agent code for correctness, safety, and reliability.
 - [ ] Config drift monitored via `ConfigDriftMonitor` (`src/shieldops/operations/config_drift_monitor.py`)
 - [ ] Security compliance mapped via `SecurityComplianceMapper` (`src/shieldops/security/compliance_mapper.py`)
 - [ ] On-call equity analyzed via `TeamOnCallEquityAnalyzer` (`src/shieldops/operations/oncall_equity.py`)
+- [ ] Incidents clustered via `IncidentClusterEngine` (`src/shieldops/incidents/incident_cluster.py`)
+- [ ] Dependency latency tracked via `DependencyLatencyTracker` (`src/shieldops/topology/dep_latency.py`)
+- [ ] Alert suppression managed via `AlertSuppressionManager` (`src/shieldops/observability/alert_suppression.py`)
+- [ ] Cost trends forecasted via `CostTrendForecaster` (`src/shieldops/billing/cost_trend.py`)
+- [ ] Change batches analyzed via `ChangeBatchAnalyzer` (`src/shieldops/changes/batch_analyzer.py`)
+- [ ] SLO alignment validated via `SLOAlignmentValidator` (`src/shieldops/sla/slo_alignment.py`)
+- [ ] Runbook executions tracked via `RunbookExecutionTracker` (`src/shieldops/operations/runbook_exec_tracker.py`)
+- [ ] Threats correlated via `ThreatIntelligenceCorrelator` (`src/shieldops/security/threat_correlator.py`)
+- [ ] Knowledge freshness monitored via `KnowledgeFreshnessMonitor` (`src/shieldops/knowledge/freshness_monitor.py`)
+- [ ] Compliance controls tested via `ComplianceControlTester` (`src/shieldops/compliance/control_tester.py`)
+- [ ] Bottlenecks detected via `CapacityBottleneckDetector` (`src/shieldops/analytics/bottleneck_detector.py`)
+- [ ] Metric anomalies scored via `MetricAnomalyScorer` (`src/shieldops/analytics/anomaly_scorer.py`)
 
 ### Testing
 - [ ] Unit tests for all node functions

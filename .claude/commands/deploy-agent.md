@@ -130,6 +130,10 @@ Deploy ShieldOps agents to target environments.
    - Validate change freezes via `ChangeFreezeValidator` (`src/shieldops/changes/freeze_validator.py`)
    - Monitor config drift via `ConfigDriftMonitor` (`src/shieldops/operations/config_drift_monitor.py`)
    - Track availability via `PlatformAvailabilityTracker` (`src/shieldops/sla/availability_tracker.py`)
+   - Analyze change batches via `ChangeBatchAnalyzer` (`src/shieldops/changes/batch_analyzer.py`)
+   - Score canary deployments via `DeploymentCanaryScorer` (`src/shieldops/changes/canary_scorer.py`)
+   - Track runbook executions via `RunbookExecutionTracker` (`src/shieldops/operations/runbook_exec_tracker.py`)
+   - Detect bottlenecks via `CapacityBottleneckDetector` (`src/shieldops/analytics/bottleneck_detector.py`)
 4. **Deploy**:
    - Apply Kubernetes manifests from `infrastructure/kubernetes/`
    - For production: trigger approval workflow via Slack/Teams

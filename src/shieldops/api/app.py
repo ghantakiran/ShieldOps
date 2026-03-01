@@ -9683,6 +9683,282 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         except Exception as e:
             logger.warning("oncall_equity_init_failed", error=str(e))
 
+    # --- Phase 45: Incident Clustering Engine ---
+    if settings.incident_cluster_enabled:
+        try:
+            from shieldops.api.routes import incident_cluster as icr_mod
+            from shieldops.incidents.incident_cluster import (
+                IncidentClusterEngine,
+            )
+
+            icr_engine = IncidentClusterEngine(
+                max_records=settings.incident_cluster_max_records,
+                min_cluster_confidence=settings.incident_cluster_min_cluster_confidence,
+            )
+            icr_mod.set_engine(icr_engine)
+            app.include_router(
+                icr_mod.icr_route,
+                prefix=settings.api_prefix,
+                tags=["Incident Cluster"],
+            )
+            logger.info("incident_cluster_initialized")
+        except Exception as e:
+            logger.warning("incident_cluster_init_failed", error=str(e))
+
+    # --- Phase 45: Dependency Latency Tracker ---
+    if settings.dep_latency_enabled:
+        try:
+            from shieldops.api.routes import dep_latency as dlt_mod
+            from shieldops.topology.dep_latency import (
+                DependencyLatencyTracker,
+            )
+
+            dlt_engine = DependencyLatencyTracker(
+                max_records=settings.dep_latency_max_records,
+                max_latency_ms=settings.dep_latency_max_latency_ms,
+            )
+            dlt_mod.set_engine(dlt_engine)
+            app.include_router(
+                dlt_mod.dlt_route,
+                prefix=settings.api_prefix,
+                tags=["Dependency Latency"],
+            )
+            logger.info("dep_latency_initialized")
+        except Exception as e:
+            logger.warning("dep_latency_init_failed", error=str(e))
+
+    # --- Phase 45: Alert Suppression Manager ---
+    if settings.suppression_mgr_enabled:
+        try:
+            from shieldops.api.routes import (
+                suppression_manager as asn_mod,
+            )
+            from shieldops.observability.suppression_manager import (
+                AlertSuppressionManager,
+            )
+
+            asn_engine = AlertSuppressionManager(
+                max_records=settings.suppression_mgr_max_records,
+                max_suppression_rate_pct=settings.suppression_mgr_max_suppression_rate_pct,
+            )
+            asn_mod.set_engine(asn_engine)
+            app.include_router(
+                asn_mod.asn_route,
+                prefix=settings.api_prefix,
+                tags=["Suppression Manager"],
+            )
+            logger.info("suppression_mgr_initialized")
+        except Exception as e:
+            logger.warning("suppression_mgr_init_failed", error=str(e))
+
+    # --- Phase 45: Cost Trend Forecaster ---
+    if settings.cost_trend_enabled:
+        try:
+            from shieldops.api.routes import cost_trend as ctf_mod
+            from shieldops.billing.cost_trend import (
+                CostTrendForecaster,
+            )
+
+            ctf_engine = CostTrendForecaster(
+                max_records=settings.cost_trend_max_records,
+                max_growth_rate_pct=settings.cost_trend_max_growth_rate_pct,
+            )
+            ctf_mod.set_engine(ctf_engine)
+            app.include_router(
+                ctf_mod.ctf_route,
+                prefix=settings.api_prefix,
+                tags=["Cost Trend"],
+            )
+            logger.info("cost_trend_initialized")
+        except Exception as e:
+            logger.warning("cost_trend_init_failed", error=str(e))
+
+    # --- Phase 45: Change Batch Analyzer ---
+    if settings.batch_analyzer_enabled:
+        try:
+            from shieldops.api.routes import batch_analyzer as cba_mod
+            from shieldops.changes.batch_analyzer import (
+                ChangeBatchAnalyzer,
+            )
+
+            cba_engine = ChangeBatchAnalyzer(
+                max_records=settings.batch_analyzer_max_records,
+                max_batch_risk_score=settings.batch_analyzer_max_batch_risk_score,
+            )
+            cba_mod.set_engine(cba_engine)
+            app.include_router(
+                cba_mod.cba_route,
+                prefix=settings.api_prefix,
+                tags=["Change Batch Analyzer"],
+            )
+            logger.info("batch_analyzer_initialized")
+        except Exception as e:
+            logger.warning("batch_analyzer_init_failed", error=str(e))
+
+    # --- Phase 45: SLO Alignment Validator ---
+    if settings.slo_alignment_enabled:
+        try:
+            from shieldops.api.routes import slo_alignment as sal_mod
+            from shieldops.sla.slo_alignment import (
+                SLOAlignmentValidator,
+            )
+
+            sal_engine = SLOAlignmentValidator(
+                max_records=settings.slo_alignment_max_records,
+                min_alignment_score=settings.slo_alignment_min_alignment_score,
+            )
+            sal_mod.set_engine(sal_engine)
+            app.include_router(
+                sal_mod.sal_route,
+                prefix=settings.api_prefix,
+                tags=["SLO Alignment"],
+            )
+            logger.info("slo_alignment_initialized")
+        except Exception as e:
+            logger.warning("slo_alignment_init_failed", error=str(e))
+
+    # --- Phase 45: Runbook Execution Tracker ---
+    if settings.runbook_exec_tracker_enabled:
+        try:
+            from shieldops.api.routes import (
+                runbook_exec_tracker as ret_mod,
+            )
+            from shieldops.operations.runbook_exec_tracker import (
+                RunbookExecutionTracker as OpsRunbookExecTracker,
+            )
+
+            ret_engine = OpsRunbookExecTracker(
+                max_records=settings.runbook_exec_tracker_max_records,
+                min_success_rate_pct=settings.runbook_exec_tracker_min_success_rate_pct,
+            )
+            ret_mod.set_engine(ret_engine)
+            app.include_router(
+                ret_mod.ret_route,
+                prefix=settings.api_prefix,
+                tags=["Runbook Execution Tracker"],
+            )
+            logger.info("runbook_exec_tracker_initialized")
+        except Exception as e:
+            logger.warning("runbook_exec_tracker_init_failed", error=str(e))
+
+    # --- Phase 45: Threat Intelligence Correlator ---
+    if settings.threat_correlator_enabled:
+        try:
+            from shieldops.api.routes import (
+                threat_correlator as tic_mod,
+            )
+            from shieldops.security.threat_correlator import (
+                ThreatIntelligenceCorrelator,
+            )
+
+            tic_engine = ThreatIntelligenceCorrelator(
+                max_records=settings.threat_correlator_max_records,
+                min_relevance_score=settings.threat_correlator_min_relevance_score,
+            )
+            tic_mod.set_engine(tic_engine)
+            app.include_router(
+                tic_mod.tic_route,
+                prefix=settings.api_prefix,
+                tags=["Threat Correlator"],
+            )
+            logger.info("threat_correlator_initialized")
+        except Exception as e:
+            logger.warning("threat_correlator_init_failed", error=str(e))
+
+    # --- Phase 45: Knowledge Freshness Monitor ---
+    if settings.freshness_monitor_enabled:
+        try:
+            from shieldops.api.routes import (
+                freshness_monitor as kfm_mod,
+            )
+            from shieldops.knowledge.freshness_monitor import (
+                KnowledgeFreshnessMonitor,
+            )
+
+            kfm_engine = KnowledgeFreshnessMonitor(
+                max_records=settings.freshness_monitor_max_records,
+                max_stale_days=settings.freshness_monitor_max_stale_days,
+            )
+            kfm_mod.set_engine(kfm_engine)
+            app.include_router(
+                kfm_mod.kfm_route,
+                prefix=settings.api_prefix,
+                tags=["Knowledge Freshness"],
+            )
+            logger.info("freshness_monitor_initialized")
+        except Exception as e:
+            logger.warning("freshness_monitor_init_failed", error=str(e))
+
+    # --- Phase 45: Compliance Control Tester ---
+    if settings.control_tester_enabled:
+        try:
+            from shieldops.api.routes import (
+                control_tester as cct_mod,
+            )
+            from shieldops.compliance.control_tester import (
+                ComplianceControlTester,
+            )
+
+            cct_engine = ComplianceControlTester(
+                max_records=settings.control_tester_max_records,
+                min_pass_rate_pct=settings.control_tester_min_pass_rate_pct,
+            )
+            cct_mod.set_engine(cct_engine)
+            app.include_router(
+                cct_mod.cct_route,
+                prefix=settings.api_prefix,
+                tags=["Control Tester"],
+            )
+            logger.info("control_tester_initialized")
+        except Exception as e:
+            logger.warning("control_tester_init_failed", error=str(e))
+
+    # --- Phase 45: Capacity Bottleneck Detector ---
+    if settings.bottleneck_detector_enabled:
+        try:
+            from shieldops.analytics.bottleneck_detector import (
+                CapacityBottleneckDetector,
+            )
+            from shieldops.api.routes import (
+                bottleneck_detector as cbd_mod,
+            )
+
+            cbd_engine = CapacityBottleneckDetector(
+                max_records=settings.bottleneck_detector_max_records,
+                critical_utilization_pct=settings.bottleneck_detector_critical_utilization_pct,
+            )
+            cbd_mod.set_engine(cbd_engine)
+            app.include_router(
+                cbd_mod.cbd_route,
+                prefix=settings.api_prefix,
+                tags=["Bottleneck Detector"],
+            )
+            logger.info("bottleneck_detector_initialized")
+        except Exception as e:
+            logger.warning("bottleneck_detector_init_failed", error=str(e))
+
+    # --- Phase 45: Metric Anomaly Scorer ---
+    if settings.anomaly_scorer_enabled:
+        try:
+            from shieldops.analytics.anomaly_scorer import (
+                MetricAnomalyScorer,
+            )
+            from shieldops.api.routes import anomaly_scorer as mas_mod
+
+            mas_engine = MetricAnomalyScorer(
+                max_records=settings.anomaly_scorer_max_records,
+                min_anomaly_score=settings.anomaly_scorer_min_anomaly_score,
+            )
+            mas_mod.set_engine(mas_engine)
+            app.include_router(
+                mas_mod.mas_route,
+                prefix=settings.api_prefix,
+                tags=["Anomaly Scorer"],
+            )
+            logger.info("anomaly_scorer_initialized")
+        except Exception as e:
+            logger.warning("anomaly_scorer_init_failed", error=str(e))
+
     yield
 
     logger.info("shieldops_shutting_down")
