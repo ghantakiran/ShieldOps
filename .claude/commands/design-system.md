@@ -312,6 +312,18 @@ Design new ShieldOps components, APIs, or agent workflows.
    - Analyze policy coverage via `PolicyCoverageAnalyzer` (`src/shieldops/compliance/policy_coverage.py`)
    - Track alert responses via `AlertResponseTracker` (`src/shieldops/analytics/alert_response.py`)
    - Audit changes via `ChangeAuditLogger` (`src/shieldops/audit/change_audit.py`)
+   - Analyze severity impact via `SeverityImpactAnalyzer` (`src/shieldops/incidents/severity_impact.py`)
+   - Detect API contract drift via `APIContractDriftDetector` (`src/shieldops/topology/api_contract_drift.py`)
+   - Optimize trace coverage via `TraceCoverageOptimizer` (`src/shieldops/observability/trace_coverage.py`)
+   - Generate showback reports via `ShowbackEngine` (`src/shieldops/billing/showback_engine.py`)
+   - Monitor deploy canary health via `DeployCanaryHealthMonitor` (`src/shieldops/changes/deploy_canary_health.py`)
+   - Score maintenance impact via `MaintenanceImpactScorer` (`src/shieldops/sla/maintenance_impact.py`)
+   - Optimize reservations via `ReservationOptimizer` (`src/shieldops/operations/reservation_optimizer.py`)
+   - Plan secret rotations via `SecretRotationPlanner` (`src/shieldops/security/secret_rotation_planner.py`)
+   - Manage taxonomy via `TaxonomyManager` (`src/shieldops/knowledge/taxonomy_manager.py`)
+   - Map audit evidence via `AuditEvidenceMapper` (`src/shieldops/compliance/audit_evidence_mapper.py`)
+   - Simulate capacity scenarios via `CapacitySimulationEngine` (`src/shieldops/analytics/capacity_simulation.py`)
+   - Automate access reviews via `AccessReviewAutomator` (`src/shieldops/audit/access_review.py`)
 
 5. **Documentation**:
    - Write Architecture Decision Record (ADR) in `docs/architecture/`

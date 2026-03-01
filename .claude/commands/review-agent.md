@@ -296,6 +296,18 @@ Review ShieldOps agent code for correctness, safety, and reliability.
 - [ ] Policy coverage analyzed via `PolicyCoverageAnalyzer` (`src/shieldops/compliance/policy_coverage.py`)
 - [ ] Alert responses tracked via `AlertResponseTracker` (`src/shieldops/analytics/alert_response.py`)
 - [ ] Changes audited via `ChangeAuditLogger` (`src/shieldops/audit/change_audit.py`)
+- [ ] Severity impact analyzed via `SeverityImpactAnalyzer` (`src/shieldops/incidents/severity_impact.py`)
+- [ ] API contract drift detected via `APIContractDriftDetector` (`src/shieldops/topology/api_contract_drift.py`)
+- [ ] Trace coverage optimized via `TraceCoverageOptimizer` (`src/shieldops/observability/trace_coverage.py`)
+- [ ] Showback reports generated via `ShowbackEngine` (`src/shieldops/billing/showback_engine.py`)
+- [ ] Deploy canary health monitored via `DeployCanaryHealthMonitor` (`src/shieldops/changes/deploy_canary_health.py`)
+- [ ] Maintenance impact scored via `MaintenanceImpactScorer` (`src/shieldops/sla/maintenance_impact.py`)
+- [ ] Reservations optimized via `ReservationOptimizer` (`src/shieldops/operations/reservation_optimizer.py`)
+- [ ] Secret rotation planned via `SecretRotationPlanner` (`src/shieldops/security/secret_rotation_planner.py`)
+- [ ] Taxonomy managed via `TaxonomyManager` (`src/shieldops/knowledge/taxonomy_manager.py`)
+- [ ] Audit evidence mapped via `AuditEvidenceMapper` (`src/shieldops/compliance/audit_evidence_mapper.py`)
+- [ ] Capacity simulated via `CapacitySimulationEngine` (`src/shieldops/analytics/capacity_simulation.py`)
+- [ ] Access reviews automated via `AccessReviewAutomator` (`src/shieldops/audit/access_review.py`)
 
 ### Testing
 - [ ] Unit tests for all node functions
