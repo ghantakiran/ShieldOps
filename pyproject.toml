@@ -602,6 +602,18 @@ module = [
     "shieldops.api.routes.control_effectiveness",
     "shieldops.api.routes.reliability_metrics",
     "shieldops.api.routes.remediation_tracker",
+    "shieldops.api.routes.response_playbook",
+    "shieldops.api.routes.service_communication",
+    "shieldops.api.routes.dashboard_effectiveness",
+    "shieldops.api.routes.procurement_optimizer",
+    "shieldops.api.routes.merge_risk",
+    "shieldops.api.routes.degradation_tracker",
+    "shieldops.api.routes.handover_quality",
+    "shieldops.api.routes.data_classification",
+    "shieldops.api.routes.feedback_loop",
+    "shieldops.api.routes.policy_coverage",
+    "shieldops.api.routes.alert_response",
+    "shieldops.api.routes.change_audit",
 ]
 warn_return_any = false
 disallow_untyped_defs = false

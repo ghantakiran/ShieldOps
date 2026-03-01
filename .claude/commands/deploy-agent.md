@@ -153,6 +153,11 @@ Deploy ShieldOps agents to target environments.
    - Analyze incident blast radius via `IncidentBlastRadiusAnalyzer` (`src/shieldops/incidents/blast_radius.py`)
    - Score customer impact via `CustomerImpactScorer` (`src/shieldops/sla/customer_impact.py`)
    - Monitor API gateway health via `APIGatewayHealthMonitor` (`src/shieldops/topology/api_gateway_health.py`)
+   - Manage response playbooks via `ResponsePlaybookManager` (`src/shieldops/incidents/response_playbook.py`)
+   - Analyze handover quality via `HandoverQualityAnalyzer` (`src/shieldops/operations/handover_quality.py`)
+   - Classify data sensitivity via `DataClassificationEngine` (`src/shieldops/security/data_classification.py`)
+   - Track service degradation via `DegradationTracker` (`src/shieldops/sla/degradation_tracker.py`)
+   - Assess merge risk via `MergeRiskAssessor` (`src/shieldops/changes/merge_risk.py`)
 4. **Deploy**:
    - Apply Kubernetes manifests from `infrastructure/kubernetes/`
    - For production: trigger approval workflow via Slack/Teams

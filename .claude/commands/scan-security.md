@@ -143,6 +143,10 @@ Run security audits on ShieldOps codebase and agent configurations.
 117. **Audit Remediation Tracking**: Track audit remediation progress and detect overdue remediations via `AuditRemediationTracker` (`src/shieldops/audit/remediation_tracker.py`)
 118. **Log Quality Analysis**: Analyze log quality across services and detect missing fields via `LogQualityAnalyzer` (`src/shieldops/observability/log_quality.py`)
 119. **Reliability Metrics Collection**: Collect and aggregate reliability metrics and track MTTR/MTBF via `ReliabilityMetricsCollector` (`src/shieldops/analytics/reliability_metrics.py`)
+120. **Data Classification**: Classify data sensitivity levels and enforce classification policies via `DataClassificationEngine` (`src/shieldops/security/data_classification.py`)
+121. **Policy Coverage Analysis**: Analyze policy coverage across infrastructure and detect unprotected resources via `PolicyCoverageAnalyzer` (`src/shieldops/compliance/policy_coverage.py`)
+122. **Change Audit Logging**: Audit all infrastructure changes and detect unauthorized modifications via `ChangeAuditLogger` (`src/shieldops/audit/change_audit.py`)
+123. **Alert Response Tracking**: Track alert response times and outcomes and detect slow response patterns via `AlertResponseTracker` (`src/shieldops/analytics/alert_response.py`)
 
 ## Severity Levels
 - **CRITICAL**: Hardcoded secrets, SQL injection, unauthenticated endpoints

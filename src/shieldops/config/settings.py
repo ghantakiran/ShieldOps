@@ -2390,6 +2390,66 @@ class Settings(BaseSettings):
     remediation_tracker_max_records: int = 200000
     remediation_tracker_max_overdue_pct: float = 10.0
 
+    # Phase 50: Incident Response Playbook Manager
+    response_playbook_enabled: bool = True
+    response_playbook_max_records: int = 200000
+    response_playbook_min_playbook_coverage_pct: float = 75.0
+
+    # Phase 50: Service Communication Analyzer
+    service_communication_enabled: bool = True
+    service_communication_max_records: int = 200000
+    service_communication_max_anomaly_rate_pct: float = 5.0
+
+    # Phase 50: Dashboard Effectiveness Scorer
+    dashboard_effectiveness_enabled: bool = True
+    dashboard_effectiveness_max_records: int = 200000
+    dashboard_effectiveness_min_effectiveness_score: float = 70.0
+
+    # Phase 50: Procurement Optimizer
+    procurement_optimizer_enabled: bool = True
+    procurement_optimizer_max_records: int = 200000
+    procurement_optimizer_max_waste_pct: float = 10.0
+
+    # Phase 50: Merge Risk Assessor
+    merge_risk_enabled: bool = True
+    merge_risk_max_records: int = 200000
+    merge_risk_max_risk_score: float = 70.0
+
+    # Phase 50: Service Degradation Tracker
+    degradation_tracker_enabled: bool = True
+    degradation_tracker_max_records: int = 200000
+    degradation_tracker_max_degradation_minutes: float = 30.0
+
+    # Phase 50: Handover Quality Tracker
+    handover_quality_enabled: bool = True
+    handover_quality_max_records: int = 200000
+    handover_quality_min_handover_quality_pct: float = 80.0
+
+    # Phase 50: Data Classification Engine
+    data_classification_enabled: bool = True
+    data_classification_max_records: int = 200000
+    data_classification_min_classification_coverage_pct: float = 90.0
+
+    # Phase 50: Knowledge Feedback Analyzer
+    feedback_loop_enabled: bool = True
+    feedback_loop_max_records: int = 200000
+    feedback_loop_min_satisfaction_score: float = 70.0
+
+    # Phase 50: Policy Coverage Analyzer
+    policy_coverage_enabled: bool = True
+    policy_coverage_max_records: int = 200000
+    policy_coverage_min_policy_coverage_pct: float = 85.0
+
+    # Phase 50: Alert Response Analyzer
+    alert_response_enabled: bool = True
+    alert_response_max_records: int = 200000
+    alert_response_max_response_time_minutes: float = 15.0
+
+    # Phase 50: Change Audit Analyzer
+    change_audit_enabled: bool = True
+    change_audit_max_records: int = 200000
+    change_audit_min_audit_compliance_pct: float = 90.0
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",

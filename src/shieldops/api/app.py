@@ -10993,6 +10993,248 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         except Exception as e:
             logger.warning("remediation_tracker_init_failed", error=str(e))
 
+    # -- Phase 50: Incident Response Playbook Manager --
+    if settings.response_playbook_enabled:
+        try:
+            from shieldops.api.routes import response_playbook as irp_mod
+            from shieldops.incidents.response_playbook import IncidentResponsePlaybookManager
+
+            _irp_engine = IncidentResponsePlaybookManager(
+                max_records=settings.response_playbook_max_records,
+                min_playbook_coverage_pct=settings.response_playbook_min_playbook_coverage_pct,
+            )
+            irp_mod.set_engine(_irp_engine)
+            app.include_router(
+                irp_mod.irp_route,
+                prefix=settings.api_prefix,
+                tags=["Response Playbook"],
+            )
+            logger.info("response_playbook_initialized")
+        except Exception as e:
+            logger.warning("response_playbook_init_failed", error=str(e))
+
+    # -- Phase 50: Service Communication Analyzer --
+    if settings.service_communication_enabled:
+        try:
+            from shieldops.api.routes import service_communication as sca_mod
+            from shieldops.topology.service_communication import ServiceCommunicationAnalyzer
+
+            _sca_engine = ServiceCommunicationAnalyzer(
+                max_records=settings.service_communication_max_records,
+                max_anomaly_rate_pct=settings.service_communication_max_anomaly_rate_pct,
+            )
+            sca_mod.set_engine(_sca_engine)
+            app.include_router(
+                sca_mod.sca_route,
+                prefix=settings.api_prefix,
+                tags=["Service Communication"],
+            )
+            logger.info("service_communication_initialized")
+        except Exception as e:
+            logger.warning("service_communication_init_failed", error=str(e))
+
+    # -- Phase 50: Dashboard Effectiveness Scorer --
+    if settings.dashboard_effectiveness_enabled:
+        try:
+            from shieldops.api.routes import dashboard_effectiveness as des_mod
+            from shieldops.observability.dashboard_effectiveness import (
+                DashboardEffectivenessScorer,
+            )
+
+            _des_engine = DashboardEffectivenessScorer(
+                max_records=settings.dashboard_effectiveness_max_records,
+                min_effectiveness_score=settings.dashboard_effectiveness_min_effectiveness_score,
+            )
+            des_mod.set_engine(_des_engine)
+            app.include_router(
+                des_mod.des_route,
+                prefix=settings.api_prefix,
+                tags=["Dashboard Effectiveness"],
+            )
+            logger.info("dashboard_effectiveness_initialized")
+        except Exception as e:
+            logger.warning("dashboard_effectiveness_init_failed", error=str(e))
+
+    # -- Phase 50: Procurement Optimizer --
+    if settings.procurement_optimizer_enabled:
+        try:
+            from shieldops.api.routes import procurement_optimizer as pro_mod
+            from shieldops.billing.procurement_optimizer import ProcurementOptimizer
+
+            _pro_engine = ProcurementOptimizer(
+                max_records=settings.procurement_optimizer_max_records,
+                max_waste_pct=settings.procurement_optimizer_max_waste_pct,
+            )
+            pro_mod.set_engine(_pro_engine)
+            app.include_router(
+                pro_mod.pro_route,
+                prefix=settings.api_prefix,
+                tags=["Procurement Optimizer"],
+            )
+            logger.info("procurement_optimizer_initialized")
+        except Exception as e:
+            logger.warning("procurement_optimizer_init_failed", error=str(e))
+
+    # -- Phase 50: Merge Risk Assessor --
+    if settings.merge_risk_enabled:
+        try:
+            from shieldops.api.routes import merge_risk as mra_mod
+            from shieldops.changes.merge_risk import MergeRiskAssessor
+
+            _mra_engine = MergeRiskAssessor(
+                max_records=settings.merge_risk_max_records,
+                max_risk_score=settings.merge_risk_max_risk_score,
+            )
+            mra_mod.set_engine(_mra_engine)
+            app.include_router(
+                mra_mod.mra_route,
+                prefix=settings.api_prefix,
+                tags=["Merge Risk"],
+            )
+            logger.info("merge_risk_initialized")
+        except Exception as e:
+            logger.warning("merge_risk_init_failed", error=str(e))
+
+    # -- Phase 50: Service Degradation Tracker --
+    if settings.degradation_tracker_enabled:
+        try:
+            from shieldops.api.routes import degradation_tracker as sdg_mod
+            from shieldops.sla.degradation_tracker import ServiceDegradationTracker
+
+            _sdg_engine = ServiceDegradationTracker(
+                max_records=settings.degradation_tracker_max_records,
+                max_degradation_minutes=settings.degradation_tracker_max_degradation_minutes,
+            )
+            sdg_mod.set_engine(_sdg_engine)
+            app.include_router(
+                sdg_mod.sdg_route,
+                prefix=settings.api_prefix,
+                tags=["Degradation Tracker"],
+            )
+            logger.info("degradation_tracker_initialized")
+        except Exception as e:
+            logger.warning("degradation_tracker_init_failed", error=str(e))
+
+    # -- Phase 50: Handover Quality Tracker --
+    if settings.handover_quality_enabled:
+        try:
+            from shieldops.api.routes import handover_quality as hqt_mod
+            from shieldops.operations.handover_quality import HandoverQualityTracker
+
+            _hqt_engine = HandoverQualityTracker(
+                max_records=settings.handover_quality_max_records,
+                min_handover_quality_pct=settings.handover_quality_min_handover_quality_pct,
+            )
+            hqt_mod.set_engine(_hqt_engine)
+            app.include_router(
+                hqt_mod.hqt_route,
+                prefix=settings.api_prefix,
+                tags=["Handover Quality"],
+            )
+            logger.info("handover_quality_initialized")
+        except Exception as e:
+            logger.warning("handover_quality_init_failed", error=str(e))
+
+    # -- Phase 50: Data Classification Engine --
+    if settings.data_classification_enabled:
+        try:
+            from shieldops.api.routes import data_classification as dce_mod
+            from shieldops.security.data_classification import DataClassificationEngine
+
+            _dce_engine = DataClassificationEngine(
+                max_records=settings.data_classification_max_records,
+                min_classification_coverage_pct=settings.data_classification_min_classification_coverage_pct,
+            )
+            dce_mod.set_engine(_dce_engine)
+            app.include_router(
+                dce_mod.dce_route,
+                prefix=settings.api_prefix,
+                tags=["Data Classification"],
+            )
+            logger.info("data_classification_initialized")
+        except Exception as e:
+            logger.warning("data_classification_init_failed", error=str(e))
+
+    # -- Phase 50: Knowledge Feedback Analyzer --
+    if settings.feedback_loop_enabled:
+        try:
+            from shieldops.api.routes import feedback_loop as kfa_mod
+            from shieldops.knowledge.feedback_loop import KnowledgeFeedbackAnalyzer
+
+            _kfa_engine = KnowledgeFeedbackAnalyzer(
+                max_records=settings.feedback_loop_max_records,
+                min_satisfaction_score=settings.feedback_loop_min_satisfaction_score,
+            )
+            kfa_mod.set_engine(_kfa_engine)
+            app.include_router(
+                kfa_mod.kfa_route,
+                prefix=settings.api_prefix,
+                tags=["Feedback Loop"],
+            )
+            logger.info("feedback_loop_initialized")
+        except Exception as e:
+            logger.warning("feedback_loop_init_failed", error=str(e))
+
+    # -- Phase 50: Policy Coverage Analyzer --
+    if settings.policy_coverage_enabled:
+        try:
+            from shieldops.api.routes import policy_coverage as pca_mod
+            from shieldops.compliance.policy_coverage import PolicyCoverageAnalyzer
+
+            _pca_engine = PolicyCoverageAnalyzer(
+                max_records=settings.policy_coverage_max_records,
+                min_policy_coverage_pct=settings.policy_coverage_min_policy_coverage_pct,
+            )
+            pca_mod.set_engine(_pca_engine)
+            app.include_router(
+                pca_mod.pca_route,
+                prefix=settings.api_prefix,
+                tags=["Policy Coverage"],
+            )
+            logger.info("policy_coverage_initialized")
+        except Exception as e:
+            logger.warning("policy_coverage_init_failed", error=str(e))
+
+    # -- Phase 50: Alert Response Analyzer --
+    if settings.alert_response_enabled:
+        try:
+            from shieldops.analytics.alert_response import AlertResponseAnalyzer
+            from shieldops.api.routes import alert_response as ara_mod
+
+            _ara_engine = AlertResponseAnalyzer(
+                max_records=settings.alert_response_max_records,
+                max_response_time_minutes=settings.alert_response_max_response_time_minutes,
+            )
+            ara_mod.set_engine(_ara_engine)
+            app.include_router(
+                ara_mod.ara_route,
+                prefix=settings.api_prefix,
+                tags=["Alert Response"],
+            )
+            logger.info("alert_response_initialized")
+        except Exception as e:
+            logger.warning("alert_response_init_failed", error=str(e))
+
+    # -- Phase 50: Change Audit Analyzer --
+    if settings.change_audit_enabled:
+        try:
+            from shieldops.api.routes import change_audit as cau_mod
+            from shieldops.audit.change_audit import ChangeAuditAnalyzer
+
+            _cau_engine = ChangeAuditAnalyzer(
+                max_records=settings.change_audit_max_records,
+                min_audit_compliance_pct=settings.change_audit_min_audit_compliance_pct,
+            )
+            cau_mod.set_engine(_cau_engine)
+            app.include_router(
+                cau_mod.cau_route,
+                prefix=settings.api_prefix,
+                tags=["Change Audit"],
+            )
+            logger.info("change_audit_initialized")
+        except Exception as e:
+            logger.warning("change_audit_init_failed", error=str(e))
+
     yield
 
     logger.info("shieldops_shutting_down")
