@@ -2450,6 +2450,66 @@ class Settings(BaseSettings):
     change_audit_max_records: int = 200000
     change_audit_min_audit_compliance_pct: float = 90.0
 
+    # Phase 51: Severity Impact Analyzer
+    severity_impact_enabled: bool = True
+    severity_impact_max_records: int = 200000
+    severity_impact_max_high_impact_pct: float = 15.0
+
+    # Phase 51: API Contract Drift Detector
+    api_contract_drift_enabled: bool = True
+    api_contract_drift_max_records: int = 200000
+    api_contract_drift_max_breaking_drift_pct: float = 5.0
+
+    # Phase 51: Trace Coverage Analyzer
+    trace_coverage_enabled: bool = True
+    trace_coverage_max_records: int = 200000
+    trace_coverage_min_coverage_pct: float = 80.0
+
+    # Phase 51: Showback Engine
+    showback_engine_enabled: bool = True
+    showback_engine_max_records: int = 200000
+    showback_engine_max_over_budget_pct: float = 10.0
+
+    # Phase 51: Deploy Canary Health Monitor
+    deploy_canary_health_enabled: bool = True
+    deploy_canary_health_max_records: int = 200000
+    deploy_canary_health_max_unhealthy_pct: float = 10.0
+
+    # Phase 51: Maintenance Impact Analyzer
+    maintenance_impact_enabled: bool = True
+    maintenance_impact_max_records: int = 200000
+    maintenance_impact_max_impact_minutes: float = 60.0
+
+    # Phase 51: Reservation Optimizer
+    reservation_optimizer_enabled: bool = True
+    reservation_optimizer_max_records: int = 200000
+    reservation_optimizer_min_utilization_pct: float = 70.0
+
+    # Phase 51: Secret Rotation Planner
+    secret_rotation_planner_enabled: bool = True
+    secret_rotation_planner_max_records: int = 200000
+    secret_rotation_planner_max_overdue_pct: float = 5.0
+
+    # Phase 51: Taxonomy Manager
+    taxonomy_manager_enabled: bool = True
+    taxonomy_manager_max_records: int = 200000
+    taxonomy_manager_min_completeness_score: float = 70.0
+
+    # Phase 51: Audit Evidence Mapper
+    audit_evidence_mapper_enabled: bool = True
+    audit_evidence_mapper_max_records: int = 200000
+    audit_evidence_mapper_min_mapping_coverage_pct: float = 90.0
+
+    # Phase 51: Capacity Simulation Engine
+    capacity_simulation_enabled: bool = True
+    capacity_simulation_max_records: int = 200000
+    capacity_simulation_max_over_capacity_pct: float = 10.0
+
+    # Phase 51: Access Review Tracker
+    access_review_enabled: bool = True
+    access_review_max_records: int = 200000
+    access_review_min_review_completion_pct: float = 90.0
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",
