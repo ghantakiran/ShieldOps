@@ -457,6 +457,69 @@ Run health checks on all ShieldOps platform dependencies.
    - Audit scope optimizer: `src/shieldops/audit/audit_scope_optimizer.py` — AuditScopeOptimizer
    - Data quality scorer: `src/shieldops/analytics/data_quality_scorer.py` — DataQualityScorer
    - Regulatory impact tracker: `src/shieldops/compliance/regulatory_impact_tracker.py` — RegulatoryImpactTracker
+   - **Phase 59 (SOC Foundation):**
+   - MITRE ATT&CK mapper: `src/shieldops/security/mitre_attack_mapper.py` — MitreAttackMapper
+   - Threat intel aggregator: `src/shieldops/security/threat_intel_aggregator.py` — ThreatIntelAggregator
+   - SOAR playbook engine: `src/shieldops/security/soar_playbook_engine.py` — SOARPlaybookEngine
+   - Attack chain reconstructor: `src/shieldops/security/attack_chain_reconstructor.py` — AttackChainReconstructor
+   - SOC metrics dashboard: `src/shieldops/security/soc_metrics_dashboard.py` — SOCMetricsDashboard
+   - Adversary simulation engine: `src/shieldops/security/adversary_simulation_engine.py` — AdversarySimulationEngine
+   - Risk quantification engine: `src/shieldops/security/risk_quantification_engine.py` — RiskQuantificationEngine
+   - Alert enrichment engine: `src/shieldops/security/alert_enrichment_engine.py` — AlertEnrichmentEngine
+   - Detection rule effectiveness: `src/shieldops/security/detection_rule_effectiveness.py` — DetectionRuleEffectiveness
+   - IOC sweep engine: `src/shieldops/security/ioc_sweep_engine.py` — IOCSweepEngine
+   - Security alert dedup engine: `src/shieldops/security/security_alert_dedup_engine.py` — SecurityAlertDedupEngine
+   - Alert triage scorer: `src/shieldops/analytics/alert_triage_scorer.py` — AlertTriageScorer
+   - **Phase 60 (SOC Analyst Agent):**
+   - SOC Analyst agent: `src/shieldops/agents/soc_analyst/` — LangGraph agent (graph, nodes, tools, runner)
+   - SOC Analyst API: `src/shieldops/api/routes/soc_analyst.py` — POST /api/v1/soc/analyze, GET /api/v1/soc/results
+   - Hunt hypothesis generator: `src/shieldops/security/hunt_hypothesis_generator.py` — HuntHypothesisGenerator
+   - Hunt effectiveness tracker: `src/shieldops/security/hunt_effectiveness_tracker.py` — HuntEffectivenessTracker
+   - Threat campaign tracker: `src/shieldops/security/threat_campaign_tracker.py` — ThreatCampaignTracker
+   - Anomalous access detector: `src/shieldops/security/anomalous_access_detector.py` — AnomalousAccessDetector
+   - Network flow analyzer: `src/shieldops/security/network_flow_analyzer.py` — NetworkFlowAnalyzer
+   - Analyst workload balancer: `src/shieldops/operations/analyst_workload_balancer.py` — AnalystWorkloadBalancer
+   - **Phase 61 (Threat Hunter Agent):**
+   - Threat Hunter agent: `src/shieldops/agents/threat_hunter/` — LangGraph agent (graph, nodes, tools, runner)
+   - Evidence integrity verifier: `src/shieldops/security/evidence_integrity_verifier.py` — EvidenceIntegrityVerifier
+   - Honeypot interaction analyzer: `src/shieldops/security/honeypot_interaction_analyzer.py` — HoneypotInteractionAnalyzer
+   - Attacker profile builder: `src/shieldops/security/attacker_profile_builder.py` — AttackerProfileBuilder
+   - Zero-day detection engine: `src/shieldops/security/zero_day_detection_engine.py` — ZeroDayDetectionEngine
+   - Supply chain attack detector: `src/shieldops/security/supply_chain_attack_detector.py` — SupplyChainAttackDetector
+   - APT detection engine: `src/shieldops/security/apt_detection_engine.py` — APTDetectionEngine
+   - **Phase 62 (Forensics & Deception Agents):**
+   - Forensics agent: `src/shieldops/agents/forensics/` — LangGraph agent (graph, nodes, tools, runner)
+   - Deception agent: `src/shieldops/agents/deception/` — LangGraph agent (graph, nodes, tools, runner)
+   - Forensic timeline builder: `src/shieldops/incidents/forensic_timeline_builder.py` — ForensicTimelineBuilder
+   - Incident forensics tracker: `src/shieldops/incidents/incident_forensics_tracker.py` — IncidentForensicsTracker
+   - Alert escalation intelligence: `src/shieldops/incidents/alert_escalation_intelligence.py` — AlertEscalationIntelligence
+   - Incident containment tracker: `src/shieldops/incidents/incident_containment_tracker.py` — IncidentContainmentTracker
+   - **Phase 63 (Advanced Defense):**
+   - Ransomware defense engine: `src/shieldops/security/ransomware_defense_engine.py` — RansomwareDefenseEngine
+   - DLP scorer: `src/shieldops/security/dlp_scorer.py` — DLPScorer
+   - Insider threat AI scorer: `src/shieldops/security/insider_threat_ai_scorer.py` — InsiderThreatAIScorer
+   - Cloud security posture scorer: `src/shieldops/security/cloud_security_posture_scorer.py` — CloudSecurityPostureScorer
+   - Container runtime security: `src/shieldops/security/container_runtime_security.py` — ContainerRuntimeSecurity
+   - Identity threat detection: `src/shieldops/security/identity_threat_detection.py` — IdentityThreatDetection
+   - Threat intel correlation: `src/shieldops/security/threat_intel_correlation.py` — ThreatIntelCorrelation
+   - Security automation coverage: `src/shieldops/security/security_automation_coverage.py` — SecurityAutomationCoverage
+   - Purple team exercise tracker: `src/shieldops/security/purple_team_exercise_tracker.py` — PurpleTeamExerciseTracker
+   - Security maturity model: `src/shieldops/security/security_maturity_model.py` — SecurityMaturityModel
+   - Behavioral baseline engine: `src/shieldops/analytics/behavioral_baseline_engine.py` — BehavioralBaselineEngine
+   - Risk prediction engine: `src/shieldops/analytics/risk_prediction_engine.py` — RiskPredictionEngine
+   - **Phase 64 (Risk & Compliance):**
+   - Compliance evidence automator v2: `src/shieldops/compliance/compliance_evidence_automator_v2.py` — ComplianceEvidenceAutomatorV2
+   - FAIR risk modeler: `src/shieldops/compliance/fair_risk_modeler.py` — FAIRRiskModeler
+   - Continuous compliance monitor: `src/shieldops/compliance/continuous_compliance_monitor.py` — ContinuousComplianceMonitor
+   - Regulatory change impact: `src/shieldops/compliance/regulatory_change_impact.py` — RegulatoryChangeImpact
+   - Control effectiveness scorer: `src/shieldops/compliance/control_effectiveness_scorer.py` — ControlEffectivenessScorer
+   - Vendor risk intelligence: `src/shieldops/compliance/vendor_risk_intelligence.py` — VendorRiskIntelligence
+   - Compliance gap prioritizer: `src/shieldops/compliance/compliance_gap_prioritizer.py` — ComplianceGapPrioritizer
+   - Risk treatment tracker: `src/shieldops/compliance/risk_treatment_tracker.py` — RiskTreatmentTracker
+   - Compliance automation scorer: `src/shieldops/compliance/compliance_automation_scorer.py` — ComplianceAutomationScorer
+   - Data privacy impact assessor: `src/shieldops/compliance/data_privacy_impact_assessor.py` — DataPrivacyImpactAssessor
+   - Audit readiness scorer: `src/shieldops/audit/audit_readiness_scorer.py` — AuditReadinessScorer
+   - Deception tech manager: `src/shieldops/operations/deception_tech_manager.py` — DeceptionTechManager
    - Verify each module initializes in `src/shieldops/api/app.py` lifespan
 
 6. **Check configuration**:

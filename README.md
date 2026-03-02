@@ -52,6 +52,7 @@ ShieldOps is built on a four-layer stack:
 │  Layer 3: Agent Orchestration (LangGraph)           │
 │  Investigation · Remediation · Security · Learning  │
 │  Cost · Prediction · Supervisor · Custom agents      │
+│  SOC Analyst · Threat Hunter · Forensics · Deception │
 ├─────────────────────────────────────────────────────┤
 │  Layer 2: Observability Ingestion                   │
 │  OpenTelemetry · Splunk · Datadog · Prometheus      │
@@ -74,6 +75,10 @@ ShieldOps is built on a four-layer stack:
 | **Cost** | Cloud cost optimization | Analyze spend, identify waste, recommend savings |
 | **Prediction** | Proactive incident prevention | Detect trends, forecast anomalies, generate predictions |
 | **Supervisor** | Orchestration | Delegates to specialists, manages escalation, chains workflows |
+| **SOC Analyst** | Autonomous SOC Tier 1/2/3 | Triage alerts, correlate events, generate attack narratives, recommend containment |
+| **Threat Hunter** | Proactive threat hunting | Hypothesis-driven hunts, MITRE ATT&CK campaigns, IOC sweeps, behavioral analysis |
+| **Forensics** | Digital forensics | Evidence preservation, integrity verification, memory/disk/network analysis, timeline reconstruction |
+| **Deception** | Honeypot/honeytoken management | Deploy deception assets, monitor interactions, profile attackers |
 
 ### Safety Model (Defense in Depth)
 
@@ -167,6 +172,10 @@ ShieldOps/
 │   │   ├── supervisor/                # Multi-agent orchestrator
 │   │   ├── custom/                    # Custom agent builder
 │   │   ├── knowledge/                 # RAG over incidents & runbooks
+│   │   ├── soc_analyst/                # SOC Analyst agent (Tier 1/2/3 triage)
+│   │   ├── threat_hunter/              # Threat Hunter agent (proactive hunting)
+│   │   ├── forensics/                  # Digital Forensics agent
+│   │   ├── deception/                  # Deception/Honeypot agent
 │   │   ├── calibration/               # Agent confidence calibration
 │   │   └── registry.py                # Agent fleet registry
 │   ├── connectors/                    # Multi-cloud abstraction layer
@@ -224,7 +233,7 @@ ShieldOps/
 ├── dashboard-ui/                      # React + TypeScript dashboard
 │
 ├── tests/
-│   ├── unit/                          # Unit tests (~29,459 tests)
+│   ├── unit/                          # Unit tests (~31,956 tests)
 │   └── integration/                   # Integration tests
 │
 ├── docs/
@@ -253,6 +262,7 @@ ShieldOps/
 | **Billing** | `GET /api/v1/billing/usage`, `POST /api/v1/billing/subscribe` |
 | **Webhooks** | `POST /api/v1/webhooks/subscriptions`, `GET /api/v1/webhooks/subscriptions` |
 | **Plugins** | `GET /api/v1/plugins`, `POST /api/v1/plugins/install` |
+| **SOC Analyst** | `POST /api/v1/soc/analyze`, `GET /api/v1/soc/results/{id}` |
 | **Analytics** | `GET /api/v1/analytics/mttr`, `GET /api/v1/analytics/resolution-rate` |
 | **Tenant Isolation** | `POST /api/v1/tenant-isolation`, `GET /api/v1/tenant-isolation/{id}` |
 | **Alert Noise** | `POST /api/v1/alert-noise/alerts`, `POST /api/v1/alert-noise/analyze` |
@@ -380,6 +390,12 @@ Default policies ship with the platform and can be customized per environment:
 | Phase 56 | Advanced Scoring & Operational Analytics | Completed |
 | Phase 57 | Intelligent Monitoring & Cross-Domain Optimization | Completed |
 | Phase 58 | Advanced Platform Intelligence & Resilience Engineering | Completed |
+| Phase 59 | SOC Foundation — MITRE ATT&CK, SOAR, Threat Intel, Alert Enrichment | Completed |
+| Phase 60 | SOC Analyst Agent — Autonomous Tier 1/2/3 SOC Analyst | Completed |
+| Phase 61 | Threat Hunter Agent — Proactive Hypothesis-Driven Hunting | Completed |
+| Phase 62 | Forensics & Deception Agents — Digital Forensics, Honeypots | Completed |
+| Phase 63 | Advanced Defense — Ransomware, DLP, APT, Zero-Day Detection | Completed |
+| Phase 64 | Risk & Compliance — FAIR, Privacy Impact, Vendor Risk, GRC | Completed |
 
 ## Documentation
 

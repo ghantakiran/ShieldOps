@@ -2930,6 +2930,278 @@ class Settings(BaseSettings):
     regulatory_impact_tracker_max_records: int = 200000
     regulatory_impact_tracker_impact_severity_threshold: float = 60.0
 
+    # Phase 59: MITRE ATT&CK Mapper
+    mitre_attack_mapper_enabled: bool = True
+    mitre_attack_mapper_max_records: int = 200000
+    mitre_attack_mapper_coverage_gap_threshold: float = 50.0
+
+    # Phase 59: Threat Intel Aggregator
+    threat_intel_aggregator_enabled: bool = True
+    threat_intel_aggregator_max_records: int = 200000
+    threat_intel_aggregator_ioc_confidence_threshold: float = 70.0
+
+    # Phase 59: SOAR Playbook Engine
+    soar_playbook_engine_enabled: bool = True
+    soar_playbook_engine_max_records: int = 200000
+    soar_playbook_engine_effectiveness_threshold: float = 70.0
+
+    # Phase 59: Attack Chain Reconstructor
+    attack_chain_reconstructor_enabled: bool = True
+    attack_chain_reconstructor_max_records: int = 200000
+    attack_chain_reconstructor_completeness_threshold: float = 60.0
+
+    # Phase 59: SOC Metrics Dashboard
+    soc_metrics_dashboard_enabled: bool = True
+    soc_metrics_dashboard_max_records: int = 200000
+    soc_metrics_dashboard_metric_target_threshold: float = 75.0
+
+    # Phase 59: Adversary Simulation Engine
+    adversary_simulation_engine_enabled: bool = True
+    adversary_simulation_engine_max_records: int = 200000
+    adversary_simulation_engine_detection_threshold: float = 70.0
+
+    # Phase 59: Risk Quantification Engine
+    risk_quantification_engine_enabled: bool = True
+    risk_quantification_engine_max_records: int = 200000
+    risk_quantification_engine_risk_tolerance_threshold: float = 70.0
+
+    # Phase 59: Alert Triage Scorer
+    alert_triage_scorer_enabled: bool = True
+    alert_triage_scorer_max_records: int = 200000
+    alert_triage_scorer_triage_score_threshold: float = 60.0
+
+    # Phase 59: Compliance Evidence Automator V2
+    compliance_evidence_automator_v2_enabled: bool = True
+    compliance_evidence_automator_v2_max_records: int = 200000
+    compliance_evidence_automator_v2_completeness_threshold: float = 80.0
+
+    # Phase 59: Incident Containment Tracker
+    incident_containment_tracker_enabled: bool = True
+    incident_containment_tracker_max_records: int = 200000
+    incident_containment_tracker_effectiveness_threshold: float = 70.0
+
+    # Phase 59: Incident Forensics Tracker
+    incident_forensics_tracker_enabled: bool = True
+    incident_forensics_tracker_max_records: int = 200000
+    incident_forensics_tracker_integrity_threshold: float = 90.0
+
+    # Phase 59: Deception Tech Manager
+    deception_tech_manager_enabled: bool = True
+    deception_tech_manager_max_records: int = 200000
+    deception_tech_manager_detection_threshold: float = 65.0
+
+    # Phase 60: SOC Analyst Agent
+    soc_analyst_agent_enabled: bool = True
+
+    # Phase 60: Alert Enrichment Engine
+    alert_enrichment_engine_enabled: bool = True
+    alert_enrichment_engine_max_records: int = 200000
+    alert_enrichment_engine_enrichment_quality_threshold: float = 70.0
+
+    # Phase 60: Detection Rule Effectiveness
+    detection_rule_effectiveness_enabled: bool = True
+    detection_rule_effectiveness_max_records: int = 200000
+    detection_rule_effectiveness_rule_effectiveness_threshold: float = 65.0
+
+    # Phase 60: Analyst Workload Balancer
+    analyst_workload_balancer_enabled: bool = True
+    analyst_workload_balancer_max_records: int = 200000
+    analyst_workload_balancer_utilization_threshold: float = 85.0
+
+    # Phase 60: Alert Escalation Intelligence
+    alert_escalation_intelligence_enabled: bool = True
+    alert_escalation_intelligence_max_records: int = 200000
+    alert_escalation_intelligence_escalation_effectiveness_threshold: float = 70.0
+
+    # Phase 60: IOC Sweep Engine
+    ioc_sweep_engine_enabled: bool = True
+    ioc_sweep_engine_max_records: int = 200000
+    ioc_sweep_engine_match_score_threshold: float = 50.0
+
+    # Phase 60: Security Alert Dedup Engine
+    security_alert_dedup_engine_enabled: bool = True
+    security_alert_dedup_engine_max_records: int = 200000
+    security_alert_dedup_engine_dedup_effectiveness_threshold: float = 75.0
+
+    # Phase 61: Threat Hunter Agent
+    threat_hunter_agent_enabled: bool = True
+
+    # Phase 61: Hunt Hypothesis Generator
+    hunt_hypothesis_generator_enabled: bool = True
+    hunt_hypothesis_generator_max_records: int = 200000
+    hunt_hypothesis_generator_hypothesis_quality_threshold: float = 60.0
+
+    # Phase 61: Behavioral Baseline Engine
+    behavioral_baseline_engine_enabled: bool = True
+    behavioral_baseline_engine_max_records: int = 200000
+    behavioral_baseline_engine_deviation_threshold: float = 70.0
+
+    # Phase 61: Hunt Effectiveness Tracker
+    hunt_effectiveness_tracker_enabled: bool = True
+    hunt_effectiveness_tracker_max_records: int = 200000
+    hunt_effectiveness_tracker_hunt_effectiveness_threshold: float = 60.0
+
+    # Phase 61: Threat Campaign Tracker
+    threat_campaign_tracker_enabled: bool = True
+    threat_campaign_tracker_max_records: int = 200000
+    threat_campaign_tracker_threat_score_threshold: float = 70.0
+
+    # Phase 61: Anomalous Access Detector
+    anomalous_access_detector_enabled: bool = True
+    anomalous_access_detector_max_records: int = 200000
+    anomalous_access_detector_anomaly_score_threshold: float = 65.0
+
+    # Phase 61: Network Flow Analyzer
+    network_flow_analyzer_enabled: bool = True
+    network_flow_analyzer_max_records: int = 200000
+    network_flow_analyzer_suspicion_score_threshold: float = 60.0
+
+    # Phase 62: Forensics Agent
+    forensics_agent_enabled: bool = True
+
+    # Phase 62: Deception Agent
+    deception_agent_enabled: bool = True
+
+    # Phase 62: Evidence Integrity Verifier
+    evidence_integrity_verifier_enabled: bool = True
+    evidence_integrity_verifier_max_records: int = 200000
+    evidence_integrity_verifier_integrity_confidence_threshold: float = 95.0
+
+    # Phase 62: Forensic Timeline Builder
+    forensic_timeline_builder_enabled: bool = True
+    forensic_timeline_builder_max_records: int = 200000
+    forensic_timeline_builder_accuracy_threshold: float = 80.0
+
+    # Phase 62: Honeypot Interaction Analyzer
+    honeypot_interaction_analyzer_enabled: bool = True
+    honeypot_interaction_analyzer_max_records: int = 200000
+    honeypot_interaction_analyzer_threat_score_threshold: float = 60.0
+
+    # Phase 62: Attacker Profile Builder
+    attacker_profile_builder_enabled: bool = True
+    attacker_profile_builder_max_records: int = 200000
+    attacker_profile_builder_profile_confidence_threshold: float = 65.0
+
+    # Phase 63: Zero Day Detection Engine
+    zero_day_detection_engine_enabled: bool = True
+    zero_day_detection_engine_max_records: int = 200000
+    zero_day_detection_engine_detection_confidence_threshold: float = 60.0
+
+    # Phase 63: Supply Chain Attack Detector
+    supply_chain_attack_detector_enabled: bool = True
+    supply_chain_attack_detector_max_records: int = 200000
+    supply_chain_attack_detector_supply_chain_risk_threshold: float = 55.0
+
+    # Phase 63: APT Detection Engine
+    apt_detection_engine_enabled: bool = True
+    apt_detection_engine_max_records: int = 200000
+    apt_detection_engine_apt_threat_threshold: float = 65.0
+
+    # Phase 63: Ransomware Defense Engine
+    ransomware_defense_engine_enabled: bool = True
+    ransomware_defense_engine_max_records: int = 200000
+    ransomware_defense_engine_readiness_threshold: float = 70.0
+
+    # Phase 63: DLP Scorer
+    dlp_scorer_enabled: bool = True
+    dlp_scorer_max_records: int = 200000
+    dlp_scorer_protection_threshold: float = 75.0
+
+    # Phase 63: Insider Threat AI Scorer
+    insider_threat_ai_scorer_enabled: bool = True
+    insider_threat_ai_scorer_max_records: int = 200000
+    insider_threat_ai_scorer_insider_threat_threshold: float = 60.0
+
+    # Phase 63: Cloud Security Posture Scorer
+    cloud_security_posture_scorer_enabled: bool = True
+    cloud_security_posture_scorer_max_records: int = 200000
+    cloud_security_posture_scorer_posture_threshold: float = 80.0
+
+    # Phase 63: Container Runtime Security
+    container_runtime_security_enabled: bool = True
+    container_runtime_security_max_records: int = 200000
+    container_runtime_security_runtime_security_threshold: float = 75.0
+
+    # Phase 63: Identity Threat Detection
+    identity_threat_detection_enabled: bool = True
+    identity_threat_detection_max_records: int = 200000
+    identity_threat_detection_identity_threat_threshold: float = 60.0
+
+    # Phase 63: Threat Intel Correlation
+    threat_intel_correlation_enabled: bool = True
+    threat_intel_correlation_max_records: int = 200000
+    threat_intel_correlation_correlation_confidence_threshold: float = 65.0
+
+    # Phase 63: Security Automation Coverage
+    security_automation_coverage_enabled: bool = True
+    security_automation_coverage_max_records: int = 200000
+    security_automation_coverage_automation_coverage_threshold: float = 70.0
+
+    # Phase 63: Purple Team Exercise Tracker
+    purple_team_exercise_tracker_enabled: bool = True
+    purple_team_exercise_tracker_max_records: int = 200000
+    purple_team_exercise_tracker_exercise_effectiveness_threshold: float = 65.0
+
+    # Phase 64: FAIR Risk Modeler
+    fair_risk_modeler_enabled: bool = True
+    fair_risk_modeler_max_records: int = 200000
+    fair_risk_modeler_risk_estimate_threshold: float = 70.0
+
+    # Phase 64: Continuous Compliance Monitor
+    continuous_compliance_monitor_enabled: bool = True
+    continuous_compliance_monitor_max_records: int = 200000
+    continuous_compliance_monitor_compliance_drift_threshold: float = 85.0
+
+    # Phase 64: Regulatory Change Impact
+    regulatory_change_impact_enabled: bool = True
+    regulatory_change_impact_max_records: int = 200000
+    regulatory_change_impact_regulatory_impact_threshold: float = 60.0
+
+    # Phase 64: Risk Prediction Engine
+    risk_prediction_engine_enabled: bool = True
+    risk_prediction_engine_max_records: int = 200000
+    risk_prediction_engine_forecast_confidence_threshold: float = 65.0
+
+    # Phase 64: Control Effectiveness Scorer
+    control_effectiveness_scorer_enabled: bool = True
+    control_effectiveness_scorer_max_records: int = 200000
+    control_effectiveness_scorer_control_effectiveness_threshold: float = 75.0
+
+    # Phase 64: Vendor Risk Intelligence
+    vendor_risk_intelligence_enabled: bool = True
+    vendor_risk_intelligence_max_records: int = 200000
+    vendor_risk_intelligence_vendor_risk_threshold: float = 65.0
+
+    # Phase 64: Compliance Gap Prioritizer
+    compliance_gap_prioritizer_enabled: bool = True
+    compliance_gap_prioritizer_max_records: int = 200000
+    compliance_gap_prioritizer_gap_priority_threshold: float = 60.0
+
+    # Phase 64: Audit Readiness Scorer
+    audit_readiness_scorer_enabled: bool = True
+    audit_readiness_scorer_max_records: int = 200000
+    audit_readiness_scorer_readiness_threshold: float = 75.0
+
+    # Phase 64: Risk Treatment Tracker
+    risk_treatment_tracker_enabled: bool = True
+    risk_treatment_tracker_max_records: int = 200000
+    risk_treatment_tracker_residual_risk_threshold: float = 50.0
+
+    # Phase 64: Compliance Automation Scorer
+    compliance_automation_scorer_enabled: bool = True
+    compliance_automation_scorer_max_records: int = 200000
+    compliance_automation_scorer_automation_threshold: float = 70.0
+
+    # Phase 64: Data Privacy Impact Assessor
+    data_privacy_impact_assessor_enabled: bool = True
+    data_privacy_impact_assessor_max_records: int = 200000
+    data_privacy_impact_assessor_privacy_impact_threshold: float = 60.0
+
+    # Phase 64: Security Maturity Model
+    security_maturity_model_enabled: bool = True
+    security_maturity_model_max_records: int = 200000
+    security_maturity_model_maturity_threshold: float = 70.0
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",
