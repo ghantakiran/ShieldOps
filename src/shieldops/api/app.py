@@ -9,7 +9,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, PlainTextResponse
 
+from shieldops.agents.attack_surface.runner import AttackSurfaceRunner
 from shieldops.agents.cost.runner import CostRunner
+from shieldops.agents.incident_response.runner import IncidentResponseRunner
 from shieldops.agents.investigation.runner import InvestigationRunner
 from shieldops.agents.learning.runner import LearningRunner
 from shieldops.agents.remediation.runner import RemediationRunner
@@ -19,8 +21,10 @@ from shieldops.agents.supervisor.runner import SupervisorRunner
 from shieldops.api.routes import (
     agents,
     analytics,
+    attack_surface_agent,
     batch,
     cost,
+    incident_response,
     investigations,
     learning,
     remediations,
@@ -133,6 +137,8 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
                 "threat_hunter",
                 "forensics",
                 "deception",
+                "incident_response",
+                "attack_surface",
             ):
                 try:
                     await agent_registry.register(
@@ -630,6 +636,30 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     except Exception as e:
         logger.warning("deception_runner_init_failed", error=str(e))
 
+    # Incident Response runner
+    ir_runner = None
+    try:
+        ir_runner = IncidentResponseRunner(
+            policy_engine=policy_engine,
+            repository=repository,
+        )
+        incident_response.set_runner(ir_runner)
+        logger.info("incident_response_runner_initialized")
+    except Exception as e:
+        logger.warning("incident_response_runner_init_failed", error=str(e))
+
+    # Attack Surface runner
+    as_runner = None
+    try:
+        as_runner = AttackSurfaceRunner(
+            policy_engine=policy_engine,
+            repository=repository,
+        )
+        attack_surface_agent.set_runner(as_runner)
+        logger.info("attack_surface_runner_initialized")
+    except Exception as e:
+        logger.warning("attack_surface_runner_init_failed", error=str(e))
+
     # Supervisor — orchestrates all specialist agents
     sup_runner = SupervisorRunner(
         agent_runners={
@@ -642,6 +672,8 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
             "threat_hunter": threat_hunter_runner,
             "forensics": forensics_runner,
             "deception": deception_runner,
+            "incident_response": ir_runner,
+            "attack_surface": as_runner,
         },
         playbook_loader=playbook_loader,
         notification_channels=notification_channels,
@@ -13421,6 +13453,12 @@ def create_app() -> FastAPI:
     app.include_router(learning.router, prefix=settings.api_prefix, tags=["Learning"])
     app.include_router(supervisor.router, prefix=settings.api_prefix, tags=["Supervisor"])
     app.include_router(soc_analyst.router, prefix=settings.api_prefix, tags=["SOC Analyst"])
+    app.include_router(
+        incident_response.router, prefix=settings.api_prefix, tags=["Incident Response"]
+    )
+    app.include_router(
+        attack_surface_agent.router, prefix=settings.api_prefix, tags=["Attack Surface"]
+    )
     app.include_router(batch.router, prefix=settings.api_prefix, tags=["Batch"])
     app.include_router(search.router, prefix=settings.api_prefix, tags=["Search"])
     app.include_router(usage.router, prefix=settings.api_prefix, tags=["API Usage"])

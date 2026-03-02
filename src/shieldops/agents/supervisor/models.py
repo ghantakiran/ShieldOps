@@ -19,6 +19,8 @@ class TaskType(StrEnum):
     THREAT_HUNT = "threat_hunt"
     FORENSICS = "forensics"
     DECEPTION = "deception"
+    INCIDENT_RESPONSE = "incident_response"
+    ATTACK_SURFACE = "attack_surface"
 
 
 class TaskStatus(StrEnum):

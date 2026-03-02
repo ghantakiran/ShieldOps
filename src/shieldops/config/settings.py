@@ -3202,6 +3202,16 @@ class Settings(BaseSettings):
     security_maturity_model_max_records: int = 200000
     security_maturity_model_maturity_threshold: float = 70.0
 
+    # Phase 65: Incident Response Agent
+    incident_response_agent_enabled: bool = True
+    incident_response_containment_timeout_seconds: int = 300
+    incident_response_max_concurrent_responses: int = 10
+
+    # Phase 67: Attack Surface Agent
+    attack_surface_agent_enabled: bool = True
+    attack_surface_scan_timeout_seconds: int = 600
+    attack_surface_max_concurrent_scans: int = 5
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",

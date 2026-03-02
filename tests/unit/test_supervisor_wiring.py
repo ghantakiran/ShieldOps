@@ -41,6 +41,8 @@ class TestSupervisorWiring:
             mock_cost = stack.enter_context(patch("shieldops.api.app.CostRunner"))
             mock_learn = stack.enter_context(patch("shieldops.api.app.LearningRunner"))
             mock_soc = stack.enter_context(patch("shieldops.api.app.SOCAnalystRunner"))
+            mock_ir = stack.enter_context(patch("shieldops.api.app.IncidentResponseRunner"))
+            mock_as = stack.enter_context(patch("shieldops.api.app.AttackSurfaceRunner"))
             mock_sup_cls = stack.enter_context(patch("shieldops.api.app.SupervisorRunner"))
 
             from shieldops.api.app import create_app
@@ -62,6 +64,8 @@ class TestSupervisorWiring:
                 assert "cost" in runners
                 assert "learning" in runners
                 assert "soc_analyst" in runners
+                assert "incident_response" in runners
+                assert "attack_surface" in runners
 
                 # Each value is the return_value of the corresponding mock class
                 assert runners["investigation"] is mock_inv.return_value
@@ -70,6 +74,8 @@ class TestSupervisorWiring:
                 assert runners["cost"] is mock_cost.return_value
                 assert runners["learning"] is mock_learn.return_value
                 assert runners["soc_analyst"] is mock_soc.return_value
+                assert runners["incident_response"] is mock_ir.return_value
+                assert runners["attack_surface"] is mock_as.return_value
 
                 # Runner injected into route module
                 assert supervisor._runner is mock_sup_cls.return_value
