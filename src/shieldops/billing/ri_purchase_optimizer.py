@@ -1,4 +1,4 @@
-"""Spot Instance Manager — manage and optimize spot instance usage."""
+"""RI Purchase Optimizer — optimize reserved instance and savings plan purchases."""
 
 from __future__ import annotations
 
@@ -16,49 +16,49 @@ logger = structlog.get_logger()
 # --- Enums ---
 
 
-class SpotStrategy(StrEnum):
-    LOWEST_PRICE = "lowest_price"
-    CAPACITY_OPTIMIZED = "capacity_optimized"
-    DIVERSIFIED = "diversified"
-    PRICE_CAPACITY = "price_capacity"
+class ReservationType(StrEnum):
+    STANDARD = "standard"
+    CONVERTIBLE = "convertible"
+    SAVINGS_PLAN = "savings_plan"
+    SPOT = "spot"
+    ON_DEMAND = "on_demand"
+
+
+class CommitmentTerm(StrEnum):
+    ONE_YEAR = "one_year"
+    THREE_YEAR = "three_year"
+    MONTHLY = "monthly"
+    WEEKLY = "weekly"
+    NONE = "none"
+
+
+class PaymentOption(StrEnum):
+    ALL_UPFRONT = "all_upfront"
+    PARTIAL_UPFRONT = "partial_upfront"
+    NO_UPFRONT = "no_upfront"
+    MONTHLY = "monthly"
     CUSTOM = "custom"
-
-
-class InstanceFamily(StrEnum):
-    GENERAL = "general"
-    COMPUTE = "compute"
-    MEMORY = "memory"
-    STORAGE = "storage"
-    ACCELERATED = "accelerated"
-
-
-class InterruptionBehavior(StrEnum):
-    TERMINATE = "terminate"
-    STOP = "stop"
-    HIBERNATE = "hibernate"
-    REBALANCE = "rebalance"
-    MIGRATE = "migrate"
 
 
 # --- Models ---
 
 
-class SpotInstanceRecord(BaseModel):
+class RIPurchaseRecord(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    spot_strategy: SpotStrategy = SpotStrategy.CAPACITY_OPTIMIZED
-    instance_family: InstanceFamily = InstanceFamily.GENERAL
-    interruption_behavior: InterruptionBehavior = InterruptionBehavior.TERMINATE
-    spot_price: float = 0.0
-    on_demand_price: float = 0.0
+    reservation_type: ReservationType = ReservationType.STANDARD
+    commitment_term: CommitmentTerm = CommitmentTerm.ONE_YEAR
+    payment_option: PaymentOption = PaymentOption.NO_UPFRONT
+    on_demand_cost: float = 0.0
+    reserved_cost: float = 0.0
     savings_pct: float = 0.0
     service: str = ""
     team: str = ""
     created_at: float = Field(default_factory=time.time)
 
 
-class SpotAnalysis(BaseModel):
+class PurchaseAnalysis(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    spot_strategy: SpotStrategy = SpotStrategy.CAPACITY_OPTIMIZED
+    reservation_type: ReservationType = ReservationType.STANDARD
     analysis_score: float = 0.0
     threshold: float = 0.0
     breached: bool = False
@@ -66,15 +66,15 @@ class SpotAnalysis(BaseModel):
     created_at: float = Field(default_factory=time.time)
 
 
-class SpotInstanceReport(BaseModel):
+class RIPurchaseReport(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     total_records: int = 0
     total_analyses: int = 0
     high_savings_count: int = 0
     avg_savings_pct: float = 0.0
-    by_spot_strategy: dict[str, int] = Field(default_factory=dict)
-    by_instance_family: dict[str, int] = Field(default_factory=dict)
-    by_interruption_behavior: dict[str, int] = Field(default_factory=dict)
+    by_reservation_type: dict[str, int] = Field(default_factory=dict)
+    by_commitment_term: dict[str, int] = Field(default_factory=dict)
+    by_payment_option: dict[str, int] = Field(default_factory=dict)
     top_opportunities: list[str] = Field(default_factory=list)
     recommendations: list[str] = Field(default_factory=list)
     generated_at: float = Field(default_factory=time.time)
@@ -84,43 +84,43 @@ class SpotInstanceReport(BaseModel):
 # --- Engine ---
 
 
-class SpotInstanceManager:
-    """Manage and optimize spot instance usage for maximum cost savings."""
+class RIPurchaseOptimizer:
+    """Optimize reserved instance and savings plan purchases for cloud cost reduction."""
 
     def __init__(
         self,
         max_records: int = 200000,
-        savings_threshold: float = 40.0,
+        savings_threshold: float = 30.0,
     ) -> None:
         self._max_records = max_records
         self._savings_threshold = savings_threshold
-        self._records: list[SpotInstanceRecord] = []
-        self._analyses: list[SpotAnalysis] = []
+        self._records: list[RIPurchaseRecord] = []
+        self._analyses: list[PurchaseAnalysis] = []
         logger.info(
-            "spot_instance_manager.initialized",
+            "ri_purchase_optimizer.initialized",
             max_records=max_records,
             savings_threshold=savings_threshold,
         )
 
     # -- record / get / list ------------------------------------------------
 
-    def record_spot_instance(
+    def record_purchase(
         self,
-        spot_strategy: SpotStrategy = SpotStrategy.CAPACITY_OPTIMIZED,
-        instance_family: InstanceFamily = InstanceFamily.GENERAL,
-        interruption_behavior: InterruptionBehavior = InterruptionBehavior.TERMINATE,
-        spot_price: float = 0.0,
-        on_demand_price: float = 0.0,
+        reservation_type: ReservationType = ReservationType.STANDARD,
+        commitment_term: CommitmentTerm = CommitmentTerm.ONE_YEAR,
+        payment_option: PaymentOption = PaymentOption.NO_UPFRONT,
+        on_demand_cost: float = 0.0,
+        reserved_cost: float = 0.0,
         savings_pct: float = 0.0,
         service: str = "",
         team: str = "",
-    ) -> SpotInstanceRecord:
-        record = SpotInstanceRecord(
-            spot_strategy=spot_strategy,
-            instance_family=instance_family,
-            interruption_behavior=interruption_behavior,
-            spot_price=spot_price,
-            on_demand_price=on_demand_price,
+    ) -> RIPurchaseRecord:
+        record = RIPurchaseRecord(
+            reservation_type=reservation_type,
+            commitment_term=commitment_term,
+            payment_option=payment_option,
+            on_demand_cost=on_demand_cost,
+            reserved_cost=reserved_cost,
             savings_pct=savings_pct,
             service=service,
             team=team,
@@ -129,45 +129,45 @@ class SpotInstanceManager:
         if len(self._records) > self._max_records:
             self._records = self._records[-self._max_records :]
         logger.info(
-            "spot_instance_manager.spot_recorded",
+            "ri_purchase_optimizer.purchase_recorded",
             record_id=record.id,
-            spot_strategy=spot_strategy.value,
+            reservation_type=reservation_type.value,
             savings_pct=savings_pct,
         )
         return record
 
-    def get_spot_instance(self, record_id: str) -> SpotInstanceRecord | None:
+    def get_purchase(self, record_id: str) -> RIPurchaseRecord | None:
         for r in self._records:
             if r.id == record_id:
                 return r
         return None
 
-    def list_spot_instances(
+    def list_purchases(
         self,
-        spot_strategy: SpotStrategy | None = None,
-        instance_family: InstanceFamily | None = None,
+        reservation_type: ReservationType | None = None,
+        commitment_term: CommitmentTerm | None = None,
         team: str | None = None,
         limit: int = 50,
-    ) -> list[SpotInstanceRecord]:
+    ) -> list[RIPurchaseRecord]:
         results = list(self._records)
-        if spot_strategy is not None:
-            results = [r for r in results if r.spot_strategy == spot_strategy]
-        if instance_family is not None:
-            results = [r for r in results if r.instance_family == instance_family]
+        if reservation_type is not None:
+            results = [r for r in results if r.reservation_type == reservation_type]
+        if commitment_term is not None:
+            results = [r for r in results if r.commitment_term == commitment_term]
         if team is not None:
             results = [r for r in results if r.team == team]
         return results[-limit:]
 
     def add_analysis(
         self,
-        spot_strategy: SpotStrategy = SpotStrategy.CAPACITY_OPTIMIZED,
+        reservation_type: ReservationType = ReservationType.STANDARD,
         analysis_score: float = 0.0,
         threshold: float = 0.0,
         breached: bool = False,
         description: str = "",
-    ) -> SpotAnalysis:
-        analysis = SpotAnalysis(
-            spot_strategy=spot_strategy,
+    ) -> PurchaseAnalysis:
+        analysis = PurchaseAnalysis(
+            reservation_type=reservation_type,
             analysis_score=analysis_score,
             threshold=threshold,
             breached=breached,
@@ -177,29 +177,29 @@ class SpotInstanceManager:
         if len(self._analyses) > self._max_records:
             self._analyses = self._analyses[-self._max_records :]
         logger.info(
-            "spot_instance_manager.analysis_added",
-            spot_strategy=spot_strategy.value,
+            "ri_purchase_optimizer.analysis_added",
+            reservation_type=reservation_type.value,
             analysis_score=analysis_score,
         )
         return analysis
 
     # -- domain operations --------------------------------------------------
 
-    def analyze_strategy_distribution(self) -> dict[str, Any]:
-        """Group by spot_strategy; return count and avg savings_pct."""
-        strat_data: dict[str, list[float]] = {}
+    def analyze_type_distribution(self) -> dict[str, Any]:
+        """Group by reservation_type; return count and avg savings_pct."""
+        type_data: dict[str, list[float]] = {}
         for r in self._records:
-            key = r.spot_strategy.value
-            strat_data.setdefault(key, []).append(r.savings_pct)
+            key = r.reservation_type.value
+            type_data.setdefault(key, []).append(r.savings_pct)
         result: dict[str, Any] = {}
-        for strat, savings in strat_data.items():
-            result[strat] = {
+        for rtype, savings in type_data.items():
+            result[rtype] = {
                 "count": len(savings),
                 "avg_savings_pct": round(sum(savings) / len(savings), 2),
             }
         return result
 
-    def identify_high_savings_spots(self) -> list[dict[str, Any]]:
+    def identify_high_savings_opportunities(self) -> list[dict[str, Any]]:
         """Return records where savings_pct >= savings_threshold."""
         results: list[dict[str, Any]] = []
         for r in self._records:
@@ -207,9 +207,9 @@ class SpotInstanceManager:
                 results.append(
                     {
                         "record_id": r.id,
-                        "spot_strategy": r.spot_strategy.value,
+                        "reservation_type": r.reservation_type.value,
                         "savings_pct": r.savings_pct,
-                        "spot_price": r.spot_price,
+                        "on_demand_cost": r.on_demand_cost,
                         "service": r.service,
                         "team": r.team,
                     }
@@ -257,40 +257,36 @@ class SpotInstanceManager:
 
     # -- report / stats -----------------------------------------------------
 
-    def generate_report(self) -> SpotInstanceReport:
-        by_strategy: dict[str, int] = {}
-        by_family: dict[str, int] = {}
-        by_behavior: dict[str, int] = {}
+    def generate_report(self) -> RIPurchaseReport:
+        by_type: dict[str, int] = {}
+        by_term: dict[str, int] = {}
+        by_payment: dict[str, int] = {}
         for r in self._records:
-            by_strategy[r.spot_strategy.value] = by_strategy.get(r.spot_strategy.value, 0) + 1
-            by_family[r.instance_family.value] = by_family.get(r.instance_family.value, 0) + 1
-            by_behavior[r.interruption_behavior.value] = (
-                by_behavior.get(r.interruption_behavior.value, 0) + 1
-            )
+            by_type[r.reservation_type.value] = by_type.get(r.reservation_type.value, 0) + 1
+            by_term[r.commitment_term.value] = by_term.get(r.commitment_term.value, 0) + 1
+            by_payment[r.payment_option.value] = by_payment.get(r.payment_option.value, 0) + 1
         high_savings_count = sum(
             1 for r in self._records if r.savings_pct >= self._savings_threshold
         )
         savings = [r.savings_pct for r in self._records]
         avg_savings_pct = round(sum(savings) / len(savings), 2) if savings else 0.0
-        opps = self.identify_high_savings_spots()
+        opps = self.identify_high_savings_opportunities()
         top_opportunities = [o["record_id"] for o in opps[:5]]
         recs: list[str] = []
         if high_savings_count > 0:
-            recs.append(f"{high_savings_count} spot instance(s) achieving high savings")
+            recs.append(f"{high_savings_count} high-savings RI opportunity(ies) identified")
         if avg_savings_pct < self._savings_threshold and self._records:
-            recs.append(
-                f"Avg spot savings {avg_savings_pct}% below target ({self._savings_threshold}%)"
-            )
+            recs.append(f"Avg savings {avg_savings_pct}% below target ({self._savings_threshold}%)")
         if not recs:
-            recs.append("Spot instance management is healthy")
-        return SpotInstanceReport(
+            recs.append("RI purchase optimization is healthy")
+        return RIPurchaseReport(
             total_records=len(self._records),
             total_analyses=len(self._analyses),
             high_savings_count=high_savings_count,
             avg_savings_pct=avg_savings_pct,
-            by_spot_strategy=by_strategy,
-            by_instance_family=by_family,
-            by_interruption_behavior=by_behavior,
+            by_reservation_type=by_type,
+            by_commitment_term=by_term,
+            by_payment_option=by_payment,
             top_opportunities=top_opportunities,
             recommendations=recs,
         )
@@ -298,19 +294,19 @@ class SpotInstanceManager:
     def clear_data(self) -> dict[str, str]:
         self._records.clear()
         self._analyses.clear()
-        logger.info("spot_instance_manager.cleared")
+        logger.info("ri_purchase_optimizer.cleared")
         return {"status": "cleared"}
 
     def get_stats(self) -> dict[str, Any]:
-        strat_dist: dict[str, int] = {}
+        type_dist: dict[str, int] = {}
         for r in self._records:
-            key = r.spot_strategy.value
-            strat_dist[key] = strat_dist.get(key, 0) + 1
+            key = r.reservation_type.value
+            type_dist[key] = type_dist.get(key, 0) + 1
         return {
             "total_records": len(self._records),
             "total_analyses": len(self._analyses),
             "savings_threshold": self._savings_threshold,
-            "spot_strategy_distribution": strat_dist,
+            "reservation_type_distribution": type_dist,
             "unique_teams": len({r.team for r in self._records}),
             "unique_services": len({r.service for r in self._records}),
         }

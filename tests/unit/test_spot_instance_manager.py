@@ -1,15 +1,15 @@
-"""Tests for shieldops.billing.spot_instance_manager — SpotInstanceManager."""
+"""Tests for shieldops.billing.spot_instance_manager."""
 
 from __future__ import annotations
 
 from shieldops.billing.spot_instance_manager import (
-    FallbackStrategy,
-    InstanceStatus,
-    InterruptionEvent,
-    SpotInstance,
+    InstanceFamily,
+    InterruptionBehavior,
+    SpotAnalysis,
     SpotInstanceManager,
-    SpotMarket,
-    SpotReport,
+    SpotInstanceRecord,
+    SpotInstanceReport,
+    SpotStrategy,
 )
 
 
@@ -17,554 +17,297 @@ def _engine(**kw) -> SpotInstanceManager:
     return SpotInstanceManager(**kw)
 
 
-# ---------------------------------------------------------------------------
-# Enum tests
-# ---------------------------------------------------------------------------
-
-
 class TestEnums:
-    # InstanceStatus (5)
-    def test_status_running(self):
-        assert InstanceStatus.RUNNING == "running"
+    def test_spotstrategy_lowest_price(self):
+        assert SpotStrategy.LOWEST_PRICE == "lowest_price"
 
-    def test_status_interrupted(self):
-        assert InstanceStatus.INTERRUPTED == "interrupted"
+    def test_spotstrategy_capacity_optimized(self):
+        assert SpotStrategy.CAPACITY_OPTIMIZED == "capacity_optimized"
 
-    def test_status_migrating(self):
-        assert InstanceStatus.MIGRATING == "migrating"
+    def test_spotstrategy_diversified(self):
+        assert SpotStrategy.DIVERSIFIED == "diversified"
 
-    def test_status_terminated(self):
-        assert InstanceStatus.TERMINATED == "terminated"
+    def test_spotstrategy_price_capacity(self):
+        assert SpotStrategy.PRICE_CAPACITY == "price_capacity"
 
-    def test_status_pending(self):
-        assert InstanceStatus.PENDING == "pending"
+    def test_spotstrategy_custom(self):
+        assert SpotStrategy.CUSTOM == "custom"
 
-    # FallbackStrategy (5)
-    def test_fallback_on_demand(self):
-        assert FallbackStrategy.ON_DEMAND == "on_demand"
+    def test_instancefamily_general(self):
+        assert InstanceFamily.GENERAL == "general"
 
-    def test_fallback_different_az(self):
-        assert FallbackStrategy.DIFFERENT_AZ == "different_az"
+    def test_instancefamily_compute(self):
+        assert InstanceFamily.COMPUTE == "compute"
 
-    def test_fallback_different_type(self):
-        assert FallbackStrategy.DIFFERENT_TYPE == "different_type"
+    def test_instancefamily_memory(self):
+        assert InstanceFamily.MEMORY == "memory"
 
-    def test_fallback_scale_down(self):
-        assert FallbackStrategy.SCALE_DOWN == "scale_down"
+    def test_instancefamily_storage(self):
+        assert InstanceFamily.STORAGE == "storage"
 
-    def test_fallback_queue_work(self):
-        assert FallbackStrategy.QUEUE_WORK == "queue_work"
+    def test_instancefamily_accelerated(self):
+        assert InstanceFamily.ACCELERATED == "accelerated"
 
-    # SpotMarket (5)
-    def test_market_aws_spot(self):
-        assert SpotMarket.AWS_SPOT == "aws_spot"
+    def test_interruptionbehavior_terminate(self):
+        assert InterruptionBehavior.TERMINATE == "terminate"
 
-    def test_market_gcp_preemptible(self):
-        assert SpotMarket.GCP_PREEMPTIBLE == "gcp_preemptible"
+    def test_interruptionbehavior_stop(self):
+        assert InterruptionBehavior.STOP == "stop"
 
-    def test_market_azure_spot(self):
-        assert SpotMarket.AZURE_SPOT == "azure_spot"
+    def test_interruptionbehavior_hibernate(self):
+        assert InterruptionBehavior.HIBERNATE == "hibernate"
 
-    def test_market_aws_spot_fleet(self):
-        assert SpotMarket.AWS_SPOT_FLEET == "aws_spot_fleet"
+    def test_interruptionbehavior_rebalance(self):
+        assert InterruptionBehavior.REBALANCE == "rebalance"
 
-    def test_market_gcp_spot(self):
-        assert SpotMarket.GCP_SPOT == "gcp_spot"
-
-
-# ---------------------------------------------------------------------------
-# Model defaults
-# ---------------------------------------------------------------------------
+    def test_interruptionbehavior_migrate(self):
+        assert InterruptionBehavior.MIGRATE == "migrate"
 
 
 class TestModels:
-    def test_spot_instance_defaults(self):
-        s = SpotInstance()
-        assert s.id
-        assert s.instance_id == ""
-        assert s.instance_type == ""
-        assert s.market == SpotMarket.AWS_SPOT
-        assert s.status == InstanceStatus.PENDING
-        assert s.hourly_rate == 0.0
-        assert s.on_demand_rate == 0.0
-        assert s.savings_pct == 0.0
-        assert s.fallback_strategy == FallbackStrategy.ON_DEMAND
-        assert s.launched_at > 0
-        assert s.created_at > 0
+    def test_spot_instance_record_defaults(self):
+        r = SpotInstanceRecord()
+        assert r.id
+        assert r.spot_strategy == SpotStrategy.CAPACITY_OPTIMIZED
+        assert r.instance_family == InstanceFamily.GENERAL
+        assert r.interruption_behavior == InterruptionBehavior.TERMINATE
+        assert r.spot_price == 0.0
+        assert r.on_demand_price == 0.0
+        assert r.savings_pct == 0.0
+        assert r.service == ""
+        assert r.team == ""
+        assert r.created_at > 0
 
-    def test_interruption_event_defaults(self):
-        e = InterruptionEvent()
-        assert e.id
-        assert e.spot_id == ""
-        assert e.reason == ""
-        assert e.warning_seconds == 0
-        assert e.fallback_used == FallbackStrategy.ON_DEMAND
-        assert e.recovery_success is False
-        assert e.occurred_at > 0
-        assert e.created_at > 0
+    def test_spot_analysis_defaults(self):
+        a = SpotAnalysis()
+        assert a.id
+        assert a.spot_strategy == SpotStrategy.CAPACITY_OPTIMIZED
+        assert a.analysis_score == 0.0
+        assert a.breached is False
+        assert a.created_at > 0
 
-    def test_spot_report_defaults(self):
-        r = SpotReport()
-        assert r.total_instances == 0
-        assert r.total_interruptions == 0
-        assert r.interruption_rate_pct == 0.0
-        assert r.total_savings == 0.0
+    def test_spot_instance_report_defaults(self):
+        r = SpotInstanceReport()
+        assert r.id
+        assert r.total_records == 0
+        assert r.high_savings_count == 0
         assert r.avg_savings_pct == 0.0
-        assert r.by_market == {}
-        assert r.by_status == {}
-        assert r.by_strategy == {}
+        assert r.by_spot_strategy == {}
+        assert r.by_instance_family == {}
+        assert r.by_interruption_behavior == {}
+        assert r.top_opportunities == []
         assert r.recommendations == []
         assert r.generated_at > 0
 
 
-# ---------------------------------------------------------------------------
-# register_instance
-# ---------------------------------------------------------------------------
-
-
-class TestRegisterInstance:
-    def test_basic_register(self):
+class TestRecordSpotInstance:
+    def test_basic(self):
         eng = _engine()
-        inst = eng.register_instance(
-            instance_id="i-abc123",
-            instance_type="m5.large",
-            market=SpotMarket.AWS_SPOT,
-            hourly_rate=0.05,
-            on_demand_rate=0.10,
+        r = eng.record_spot_instance(
+            spot_strategy=SpotStrategy.DIVERSIFIED,
+            instance_family=InstanceFamily.COMPUTE,
+            interruption_behavior=InterruptionBehavior.HIBERNATE,
+            spot_price=0.05,
+            on_demand_price=0.20,
+            savings_pct=75.0,
+            service="batch-processor",
+            team="data",
         )
-        assert inst.instance_id == "i-abc123"
-        assert inst.instance_type == "m5.large"
-        assert inst.market == SpotMarket.AWS_SPOT
-        assert inst.status == InstanceStatus.RUNNING
-        assert inst.savings_pct == 50.0
-
-    def test_savings_calculation(self):
-        eng = _engine()
-        inst = eng.register_instance(
-            instance_id="i-001",
-            instance_type="c5.xlarge",
-            market=SpotMarket.GCP_PREEMPTIBLE,
-            hourly_rate=0.03,
-            on_demand_rate=0.10,
-        )
-        assert inst.savings_pct == 70.0
+        assert r.spot_strategy == SpotStrategy.DIVERSIFIED
+        assert r.savings_pct == 75.0
+        assert r.team == "data"
 
     def test_eviction_at_max(self):
-        eng = _engine(max_instances=3)
-        for i in range(5):
-            eng.register_instance(
-                instance_id=f"i-{i}",
-                instance_type="t3.micro",
-                market=SpotMarket.AWS_SPOT,
-                hourly_rate=0.01,
-                on_demand_rate=0.02,
-            )
-        assert len(eng._items) == 3
+        eng = _engine(max_records=3)
+        for _i in range(5):
+            eng.record_spot_instance(spot_strategy=SpotStrategy.LOWEST_PRICE)
+        assert len(eng._records) == 3
 
 
-# ---------------------------------------------------------------------------
-# get_instance
-# ---------------------------------------------------------------------------
-
-
-class TestGetInstance:
+class TestGetSpotInstance:
     def test_found(self):
         eng = _engine()
-        inst = eng.register_instance(
-            "i-001",
-            "m5.large",
-            SpotMarket.AWS_SPOT,
-            0.05,
-            0.10,
-        )
-        result = eng.get_instance(inst.id)
+        r = eng.record_spot_instance(savings_pct=60.0)
+        result = eng.get_spot_instance(r.id)
         assert result is not None
-        assert result.instance_id == "i-001"
+        assert result.savings_pct == 60.0
 
     def test_not_found(self):
         eng = _engine()
-        assert eng.get_instance("nonexistent") is None
+        assert eng.get_spot_instance("nonexistent") is None
 
 
-# ---------------------------------------------------------------------------
-# list_instances
-# ---------------------------------------------------------------------------
-
-
-class TestListInstances:
+class TestListSpotInstances:
     def test_list_all(self):
         eng = _engine()
-        eng.register_instance(
-            "i-1",
-            "m5.large",
-            SpotMarket.AWS_SPOT,
-            0.05,
-            0.10,
-        )
-        eng.register_instance(
-            "i-2",
-            "n1-standard",
-            SpotMarket.GCP_PREEMPTIBLE,
-            0.03,
-            0.08,
-        )
-        assert len(eng.list_instances()) == 2
+        eng.record_spot_instance(spot_strategy=SpotStrategy.LOWEST_PRICE)
+        eng.record_spot_instance(spot_strategy=SpotStrategy.DIVERSIFIED)
+        assert len(eng.list_spot_instances()) == 2
 
-    def test_filter_by_market(self):
+    def test_filter_by_strategy(self):
         eng = _engine()
-        eng.register_instance(
-            "i-1",
-            "m5.large",
-            SpotMarket.AWS_SPOT,
-            0.05,
-            0.10,
-        )
-        eng.register_instance(
-            "i-2",
-            "n1-std",
-            SpotMarket.GCP_PREEMPTIBLE,
-            0.03,
-            0.08,
-        )
-        results = eng.list_instances(
-            market=SpotMarket.AWS_SPOT,
-        )
+        eng.record_spot_instance(spot_strategy=SpotStrategy.LOWEST_PRICE)
+        eng.record_spot_instance(spot_strategy=SpotStrategy.DIVERSIFIED)
+        results = eng.list_spot_instances(spot_strategy=SpotStrategy.LOWEST_PRICE)
         assert len(results) == 1
 
-    def test_filter_by_status(self):
+    def test_filter_by_family(self):
         eng = _engine()
-        inst = eng.register_instance(
-            "i-1",
-            "m5.large",
-            SpotMarket.AWS_SPOT,
-            0.05,
-            0.10,
-        )
-        eng.register_instance(
-            "i-2",
-            "m5.large",
-            SpotMarket.AWS_SPOT,
-            0.05,
-            0.10,
-        )
-        eng.record_interruption(
-            inst.id,
-            "capacity",
-            120,
-        )
-        results = eng.list_instances(
-            status=InstanceStatus.INTERRUPTED,
-        )
+        eng.record_spot_instance(instance_family=InstanceFamily.COMPUTE)
+        eng.record_spot_instance(instance_family=InstanceFamily.MEMORY)
+        results = eng.list_spot_instances(instance_family=InstanceFamily.COMPUTE)
         assert len(results) == 1
 
-
-# ---------------------------------------------------------------------------
-# record_interruption
-# ---------------------------------------------------------------------------
-
-
-class TestRecordInterruption:
-    def test_basic_interruption(self):
+    def test_filter_by_team(self):
         eng = _engine()
-        inst = eng.register_instance(
-            "i-1",
-            "m5.large",
-            SpotMarket.AWS_SPOT,
-            0.05,
-            0.10,
-        )
-        event = eng.record_interruption(
-            inst.id,
-            "capacity",
-            120,
-        )
-        assert event is not None
-        assert event.spot_id == inst.id
-        assert event.reason == "capacity"
-        assert event.warning_seconds == 120
-        assert inst.status == InstanceStatus.INTERRUPTED
+        eng.record_spot_instance(team="data")
+        eng.record_spot_instance(team="platform")
+        results = eng.list_spot_instances(team="data")
+        assert len(results) == 1
 
-    def test_not_found(self):
+    def test_limit(self):
         eng = _engine()
-        assert (
-            eng.record_interruption(
-                "bad",
-                "capacity",
-                120,
-            )
-            is None
-        )
+        for _i in range(10):
+            eng.record_spot_instance(spot_strategy=SpotStrategy.LOWEST_PRICE)
+        assert len(eng.list_spot_instances(limit=5)) == 5
 
-    def test_multiple_interruptions(self):
+
+class TestAddAnalysis:
+    def test_basic(self):
         eng = _engine()
-        inst = eng.register_instance(
-            "i-1",
-            "m5.large",
-            SpotMarket.AWS_SPOT,
-            0.05,
-            0.10,
+        a = eng.add_analysis(
+            spot_strategy=SpotStrategy.CAPACITY_OPTIMIZED,
+            analysis_score=85.0,
+            threshold=70.0,
+            breached=True,
+            description="spot interruption risk high",
         )
-        eng.record_interruption(
-            inst.id,
-            "capacity",
-            120,
-        )
-        eng.record_interruption(
-            inst.id,
-            "price",
-            60,
-        )
-        assert len(eng._interruptions) == 2
+        assert a.spot_strategy == SpotStrategy.CAPACITY_OPTIMIZED
+        assert a.breached is True
+
+    def test_eviction_at_max(self):
+        eng = _engine(max_records=2)
+        for _i in range(5):
+            eng.add_analysis(spot_strategy=SpotStrategy.LOWEST_PRICE)
+        assert len(eng._analyses) == 2
 
 
-# ---------------------------------------------------------------------------
-# execute_fallback
-# ---------------------------------------------------------------------------
-
-
-class TestExecuteFallback:
-    def test_successful_fallback(self):
+class TestAnalyzeStrategyDistribution:
+    def test_with_data(self):
         eng = _engine()
-        inst = eng.register_instance(
-            "i-1",
-            "m5.large",
-            SpotMarket.AWS_SPOT,
-            0.05,
-            0.10,
-        )
-        eng.record_interruption(
-            inst.id,
-            "capacity",
-            120,
-        )
-        result = eng.execute_fallback(
-            inst.id,
-            FallbackStrategy.DIFFERENT_AZ,
-        )
-        assert result is not None
-        assert result.status == InstanceStatus.MIGRATING
-        assert result.fallback_strategy == (FallbackStrategy.DIFFERENT_AZ)
-
-    def test_not_found(self):
-        eng = _engine()
-        assert (
-            eng.execute_fallback(
-                "bad",
-                FallbackStrategy.ON_DEMAND,
-            )
-            is None
-        )
-
-
-# ---------------------------------------------------------------------------
-# calculate_savings
-# ---------------------------------------------------------------------------
-
-
-class TestCalculateSavings:
-    def test_total_savings(self):
-        eng = _engine()
-        eng.register_instance(
-            "i-1",
-            "m5.large",
-            SpotMarket.AWS_SPOT,
-            0.05,
-            0.10,
-        )
-        eng.register_instance(
-            "i-2",
-            "c5.xlarge",
-            SpotMarket.GCP_PREEMPTIBLE,
-            0.03,
-            0.08,
-        )
-        savings = eng.calculate_savings()
-        assert savings["total_hourly_savings"] == 0.10
-        assert savings["instance_count"] == 2
-        assert len(savings["by_market"]) == 2
+        eng.record_spot_instance(spot_strategy=SpotStrategy.LOWEST_PRICE, savings_pct=70.0)
+        eng.record_spot_instance(spot_strategy=SpotStrategy.LOWEST_PRICE, savings_pct=50.0)
+        result = eng.analyze_strategy_distribution()
+        assert "lowest_price" in result
+        assert result["lowest_price"]["count"] == 2
+        assert result["lowest_price"]["avg_savings_pct"] == 60.0
 
     def test_empty(self):
         eng = _engine()
-        savings = eng.calculate_savings()
-        assert savings["total_hourly_savings"] == 0.0
+        assert eng.analyze_strategy_distribution() == {}
 
 
-# ---------------------------------------------------------------------------
-# predict_interruption_risk
-# ---------------------------------------------------------------------------
+class TestIdentifyHighSavingsSpots:
+    def test_detects_above_threshold(self):
+        eng = _engine(savings_threshold=50.0)
+        eng.record_spot_instance(savings_pct=75.0)
+        eng.record_spot_instance(savings_pct=20.0)
+        results = eng.identify_high_savings_spots()
+        assert len(results) == 1
 
-
-class TestPredictInterruptionRisk:
-    def test_low_risk(self):
-        eng = _engine()
-        eng.register_instance(
-            "i-1",
-            "m5.large",
-            SpotMarket.AWS_SPOT,
-            0.05,
-            0.10,
-        )
-        risk = eng.predict_interruption_risk("m5.large")
-        assert risk["risk_level"] == "low"
-        assert risk["total_instances"] == 1
-
-    def test_high_risk(self):
-        eng = _engine()
-        for i in range(3):
-            inst = eng.register_instance(
-                f"i-{i}",
-                "t3.micro",
-                SpotMarket.AWS_SPOT,
-                0.01,
-                0.02,
-            )
-            eng.record_interruption(
-                inst.id,
-                "capacity",
-                120,
-            )
-        risk = eng.predict_interruption_risk("t3.micro")
-        assert risk["risk_level"] == "high"
-        assert risk["interruption_rate_pct"] == 100.0
-
-    def test_unknown_type(self):
-        eng = _engine()
-        risk = eng.predict_interruption_risk("unknown")
-        assert risk["total_instances"] == 0
-        assert risk["risk_level"] == "low"
-
-
-# ---------------------------------------------------------------------------
-# identify_optimal_markets
-# ---------------------------------------------------------------------------
-
-
-class TestIdentifyOptimalMarkets:
-    def test_ranks_by_savings(self):
-        eng = _engine()
-        eng.register_instance(
-            "i-1",
-            "m5.large",
-            SpotMarket.AWS_SPOT,
-            0.05,
-            0.10,
-        )
-        eng.register_instance(
-            "i-2",
-            "n1-std",
-            SpotMarket.GCP_PREEMPTIBLE,
-            0.02,
-            0.10,
-        )
-        ranked = eng.identify_optimal_markets()
-        assert len(ranked) == 2
-        assert ranked[0]["market"] == "gcp_preemptible"
+    def test_sorted_descending(self):
+        eng = _engine(savings_threshold=30.0)
+        eng.record_spot_instance(savings_pct=80.0)
+        eng.record_spot_instance(savings_pct=50.0)
+        results = eng.identify_high_savings_spots()
+        assert results[0]["savings_pct"] == 80.0
 
     def test_empty(self):
         eng = _engine()
-        assert eng.identify_optimal_markets() == []
+        assert eng.identify_high_savings_spots() == []
 
 
-# ---------------------------------------------------------------------------
-# generate_spot_report
-# ---------------------------------------------------------------------------
-
-
-class TestGenerateSpotReport:
-    def test_basic_report(self):
+class TestRankBySavings:
+    def test_sorted_descending(self):
         eng = _engine()
-        inst = eng.register_instance(
-            "i-1",
-            "m5.large",
-            SpotMarket.AWS_SPOT,
-            0.05,
-            0.10,
-        )
-        eng.register_instance(
-            "i-2",
-            "c5.xlarge",
-            SpotMarket.GCP_PREEMPTIBLE,
-            0.03,
-            0.08,
-        )
-        eng.record_interruption(
-            inst.id,
-            "capacity",
-            120,
-        )
-        report = eng.generate_spot_report()
-        assert report.total_instances == 2
-        assert report.total_interruptions == 1
-        assert report.total_savings > 0
-        assert report.avg_savings_pct > 0
-        assert len(report.by_market) == 2
-        assert len(report.recommendations) > 0
-        assert report.generated_at > 0
+        eng.record_spot_instance(service="batch-svc", savings_pct=75.0)
+        eng.record_spot_instance(service="api-svc", savings_pct=30.0)
+        results = eng.rank_by_savings()
+        assert results[0]["service"] == "batch-svc"
 
-    def test_empty_report(self):
+    def test_empty(self):
         eng = _engine()
-        report = eng.generate_spot_report()
-        assert report.total_instances == 0
-        assert report.total_interruptions == 0
+        assert eng.rank_by_savings() == []
 
 
-# ---------------------------------------------------------------------------
-# clear_data
-# ---------------------------------------------------------------------------
+class TestDetectSavingsTrends:
+    def test_stable(self):
+        eng = _engine()
+        for _ in range(4):
+            eng.add_analysis(analysis_score=50.0)
+        result = eng.detect_savings_trends()
+        assert result["trend"] == "stable"
+
+    def test_improving(self):
+        eng = _engine()
+        eng.add_analysis(analysis_score=10.0)
+        eng.add_analysis(analysis_score=10.0)
+        eng.add_analysis(analysis_score=90.0)
+        eng.add_analysis(analysis_score=90.0)
+        result = eng.detect_savings_trends()
+        assert result["trend"] == "improving"
+
+    def test_insufficient_data(self):
+        eng = _engine()
+        result = eng.detect_savings_trends()
+        assert result["trend"] == "insufficient_data"
+
+
+class TestGenerateReport:
+    def test_populated(self):
+        eng = _engine(savings_threshold=40.0)
+        eng.record_spot_instance(
+            spot_strategy=SpotStrategy.CAPACITY_OPTIMIZED,
+            instance_family=InstanceFamily.COMPUTE,
+            interruption_behavior=InterruptionBehavior.REBALANCE,
+            savings_pct=60.0,
+        )
+        report = eng.generate_report()
+        assert isinstance(report, SpotInstanceReport)
+        assert report.total_records == 1
+        assert report.high_savings_count == 1
+
+    def test_empty(self):
+        eng = _engine()
+        report = eng.generate_report()
+        assert report.total_records == 0
+        assert "healthy" in report.recommendations[0]
 
 
 class TestClearData:
-    def test_clears_all(self):
+    def test_clears(self):
         eng = _engine()
-        inst = eng.register_instance(
-            "i-1",
-            "m5.large",
-            SpotMarket.AWS_SPOT,
-            0.05,
-            0.10,
-        )
-        eng.record_interruption(
-            inst.id,
-            "capacity",
-            120,
-        )
-        assert len(eng._items) == 1
-        assert len(eng._interruptions) == 1
-        eng.clear_data()
-        assert len(eng._items) == 0
-        assert len(eng._interruptions) == 0
-
-
-# ---------------------------------------------------------------------------
-# get_stats
-# ---------------------------------------------------------------------------
+        eng.record_spot_instance(spot_strategy=SpotStrategy.LOWEST_PRICE)
+        eng.add_analysis(spot_strategy=SpotStrategy.LOWEST_PRICE)
+        result = eng.clear_data()
+        assert result == {"status": "cleared"}
+        assert len(eng._records) == 0
 
 
 class TestGetStats:
     def test_empty(self):
         eng = _engine()
         stats = eng.get_stats()
-        assert stats["total_instances"] == 0
-        assert stats["total_interruptions"] == 0
-        assert stats["market_distribution"] == {}
-        assert stats["status_distribution"] == {}
+        assert stats["total_records"] == 0
+        assert stats["spot_strategy_distribution"] == {}
 
     def test_populated(self):
         eng = _engine()
-        inst = eng.register_instance(
-            "i-1",
-            "m5.large",
-            SpotMarket.AWS_SPOT,
-            0.05,
-            0.10,
-        )
-        eng.record_interruption(
-            inst.id,
-            "capacity",
-            120,
+        eng.record_spot_instance(
+            spot_strategy=SpotStrategy.CAPACITY_OPTIMIZED,
+            service="batch",
+            team="data",
         )
         stats = eng.get_stats()
-        assert stats["total_instances"] == 1
-        assert stats["total_interruptions"] == 1
-        assert stats["max_instances"] == 100000
-        assert stats["min_savings_pct"] == 30.0
+        assert stats["total_records"] == 1
+        assert "capacity_optimized" in stats["spot_strategy_distribution"]

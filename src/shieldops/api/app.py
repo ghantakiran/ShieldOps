@@ -11,6 +11,7 @@ from fastapi.responses import JSONResponse, PlainTextResponse
 
 from shieldops.agents.attack_surface.runner import AttackSurfaceRunner
 from shieldops.agents.cost.runner import CostRunner
+from shieldops.agents.finops_intelligence.runner import FinOpsIntelligenceRunner
 from shieldops.agents.incident_response.runner import IncidentResponseRunner
 from shieldops.agents.investigation.runner import InvestigationRunner
 from shieldops.agents.learning.runner import LearningRunner
@@ -25,6 +26,7 @@ from shieldops.api.routes import (
     attack_surface_agent,
     batch,
     cost,
+    finops_intelligence,
     incident_response,
     investigations,
     learning,
@@ -141,6 +143,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
                 "deception",
                 "incident_response",
                 "attack_surface",
+                "finops_intelligence",
             ):
                 try:
                     await agent_registry.register(
@@ -674,6 +677,18 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     except Exception as e:
         logger.warning("ml_governance_runner_init_failed", error=str(e))
 
+    # FinOps Intelligence runner
+    finops_runner = None
+    try:
+        finops_runner = FinOpsIntelligenceRunner(
+            policy_engine=policy_engine,
+            repository=repository,
+        )
+        finops_intelligence.set_runner(finops_runner)
+        logger.info("finops_intelligence_runner_initialized")
+    except Exception as e:
+        logger.warning("finops_intelligence_runner_init_failed", error=str(e))
+
     # Supervisor — orchestrates all specialist agents
     sup_runner = SupervisorRunner(
         agent_runners={
@@ -689,6 +704,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
             "incident_response": ir_runner,
             "attack_surface": as_runner,
             "ml_governance": ml_gov_runner,
+            "finops_intelligence": finops_runner,
         },
         playbook_loader=playbook_loader,
         notification_channels=notification_channels,
@@ -13475,6 +13491,9 @@ def create_app() -> FastAPI:
         attack_surface_agent.router, prefix=settings.api_prefix, tags=["Attack Surface"]
     )
     app.include_router(ml_governance.router, prefix=settings.api_prefix, tags=["ML Governance"])
+    app.include_router(
+        finops_intelligence.router, prefix=settings.api_prefix, tags=["FinOps Intelligence"]
+    )
     app.include_router(batch.router, prefix=settings.api_prefix, tags=["Batch"])
     app.include_router(search.router, prefix=settings.api_prefix, tags=["Search"])
     app.include_router(usage.router, prefix=settings.api_prefix, tags=["API Usage"])
