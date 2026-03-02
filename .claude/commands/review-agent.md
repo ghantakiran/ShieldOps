@@ -368,6 +368,18 @@ Review ShieldOps agent code for correctness, safety, and reliability.
 - [ ] Audit remediations tracked via `AuditRemediationTracker` (`src/shieldops/audit/audit_remediation_tracker.py`)
 - [ ] Capacity forecasts validated via `CapacityForecastValidator` (`src/shieldops/analytics/capacity_forecast_validator.py`)
 - [ ] Change windows analyzed via `ChangeWindowAnalyzer` (`src/shieldops/changes/change_window_analyzer.py`)
+- [ ] Incident mitigation tracked via `IncidentMitigationTracker` (`src/shieldops/incidents/incident_mitigation_tracker.py`)
+- [ ] Service routing optimized via `ServiceRoutingOptimizer` (`src/shieldops/topology/service_routing_optimizer.py`)
+- [ ] Metric anomalies classified via `MetricAnomalyClassifier` (`src/shieldops/observability/metric_anomaly_classifier.py`)
+- [ ] Cost governance enforced via `CostGovernanceEnforcer` (`src/shieldops/billing/cost_governance_enforcer.py`)
+- [ ] Change rollout planned via `ChangeRolloutPlanner` (`src/shieldops/changes/change_rollout_planner.py`)
+- [ ] SLO thresholds optimized via `SloThresholdOptimizer` (`src/shieldops/sla/slo_threshold_optimizer.py`)
+- [ ] Operational hygiene scored via `OperationalHygieneScorer` (`src/shieldops/operations/operational_hygiene_scorer.py`)
+- [ ] Security signals correlated via `SecuritySignalCorrelator` (`src/shieldops/security/security_signal_correlator.py`)
+- [ ] Knowledge reuse tracked via `KnowledgeReuseTracker` (`src/shieldops/knowledge/knowledge_reuse_tracker.py`)
+- [ ] Audit workflows optimized via `AuditWorkflowOptimizer` (`src/shieldops/audit/audit_workflow_optimizer.py`)
+- [ ] Performance baselines tracked via `PerformanceBaselineTracker` (`src/shieldops/analytics/performance_baseline_tracker.py`)
+- [ ] Compliance controls mapped via `ComplianceControlMapper` (`src/shieldops/compliance/compliance_control_mapper.py`)
 
 ### Testing
 - [ ] Unit tests for all node functions

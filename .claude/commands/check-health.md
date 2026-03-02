@@ -28,7 +28,7 @@ Run health checks on all ShieldOps platform dependencies.
    - Integration tests: `python3 -m pytest tests/integration/ -v --tb=short`
    - Report: total tests, passed, failed, coverage
 
-5. **Platform feature health** (Phase 11–56 modules):
+5. **Platform feature health** (Phase 11–57 modules):
    - Capacity trends: `src/shieldops/analytics/capacity_trends.py` — CapacityTrendAnalyzer
    - SRE metrics: `src/shieldops/analytics/sre_metrics.py` — SREMetricsAggregator
    - Health reports: `src/shieldops/observability/health_report.py` — ServiceHealthReportGenerator
@@ -433,6 +433,18 @@ Run health checks on all ShieldOps platform dependencies.
    - Audit remediation tracker: `src/shieldops/audit/audit_remediation_tracker.py` — AuditRemediationTracker
    - Capacity forecast validator: `src/shieldops/analytics/capacity_forecast_validator.py` — CapacityForecastValidator
    - Change window analyzer: `src/shieldops/changes/change_window_analyzer.py` — ChangeWindowAnalyzer
+   - **Phase 57:** Incident mitigation tracker: `src/shieldops/incidents/incident_mitigation_tracker.py` — IncidentMitigationTracker
+   - Service routing optimizer: `src/shieldops/topology/service_routing_optimizer.py` — ServiceRoutingOptimizer
+   - Metric anomaly classifier: `src/shieldops/observability/metric_anomaly_classifier.py` — MetricAnomalyClassifier
+   - Cost governance enforcer: `src/shieldops/billing/cost_governance_enforcer.py` — CostGovernanceEnforcer
+   - Change rollout planner: `src/shieldops/changes/change_rollout_planner.py` — ChangeRolloutPlanner
+   - SLO threshold optimizer: `src/shieldops/sla/slo_threshold_optimizer.py` — SloThresholdOptimizer
+   - Operational hygiene scorer: `src/shieldops/operations/operational_hygiene_scorer.py` — OperationalHygieneScorer
+   - Security signal correlator: `src/shieldops/security/security_signal_correlator.py` — SecuritySignalCorrelator
+   - Knowledge reuse tracker: `src/shieldops/knowledge/knowledge_reuse_tracker.py` — KnowledgeReuseTracker
+   - Audit workflow optimizer: `src/shieldops/audit/audit_workflow_optimizer.py` — AuditWorkflowOptimizer
+   - Performance baseline tracker: `src/shieldops/analytics/performance_baseline_tracker.py` — PerformanceBaselineTracker
+   - Compliance control mapper: `src/shieldops/compliance/compliance_control_mapper.py` — ComplianceControlMapper
    - Verify each module initializes in `src/shieldops/api/app.py` lifespan
 
 6. **Check configuration**:

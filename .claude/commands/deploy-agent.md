@@ -194,6 +194,11 @@ Deploy ShieldOps agents to target environments.
    - Analyze threat surface via `ThreatSurfaceAnalyzer` (`src/shieldops/security/threat_surface_analyzer.py`)
    - Analyze change windows via `ChangeWindowAnalyzer` (`src/shieldops/changes/change_window_analyzer.py`)
    - Validate capacity forecasts via `CapacityForecastValidator` (`src/shieldops/analytics/capacity_forecast_validator.py`)
+   - Plan change rollout via `ChangeRolloutPlanner` (`src/shieldops/changes/change_rollout_planner.py`)
+   - Score operational hygiene via `OperationalHygieneScorer` (`src/shieldops/operations/operational_hygiene_scorer.py`)
+   - Track incident mitigation via `IncidentMitigationTracker` (`src/shieldops/incidents/incident_mitigation_tracker.py`)
+   - Optimize service routing via `ServiceRoutingOptimizer` (`src/shieldops/topology/service_routing_optimizer.py`)
+   - Track performance baselines via `PerformanceBaselineTracker` (`src/shieldops/analytics/performance_baseline_tracker.py`)
 4. **Deploy**:
    - Apply Kubernetes manifests from `infrastructure/kubernetes/`
    - For production: trigger approval workflow via Slack/Teams
