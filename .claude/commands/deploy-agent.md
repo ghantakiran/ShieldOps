@@ -199,6 +199,11 @@ Deploy ShieldOps agents to target environments.
    - Track incident mitigation via `IncidentMitigationTracker` (`src/shieldops/incidents/incident_mitigation_tracker.py`)
    - Optimize service routing via `ServiceRoutingOptimizer` (`src/shieldops/topology/service_routing_optimizer.py`)
    - Track performance baselines via `PerformanceBaselineTracker` (`src/shieldops/analytics/performance_baseline_tracker.py`)
+   - Plan change coordination via `ChangeCoordinationPlanner` (`src/shieldops/changes/change_coordination_planner.py`)
+   - Plan team capacity via `TeamCapacityPlanner` (`src/shieldops/operations/team_capacity_planner.py`)
+   - Track stakeholder impact via `StakeholderImpactTracker` (`src/shieldops/incidents/stakeholder_impact_tracker.py`)
+   - Predict service health via `ServiceHealthPredictor` (`src/shieldops/topology/service_health_predictor.py`)
+   - Score data quality via `DataQualityScorer` (`src/shieldops/analytics/data_quality_scorer.py`)
 4. **Deploy**:
    - Apply Kubernetes manifests from `infrastructure/kubernetes/`
    - For production: trigger approval workflow via Slack/Teams

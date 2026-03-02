@@ -380,6 +380,18 @@ Review ShieldOps agent code for correctness, safety, and reliability.
 - [ ] Audit workflows optimized via `AuditWorkflowOptimizer` (`src/shieldops/audit/audit_workflow_optimizer.py`)
 - [ ] Performance baselines tracked via `PerformanceBaselineTracker` (`src/shieldops/analytics/performance_baseline_tracker.py`)
 - [ ] Compliance controls mapped via `ComplianceControlMapper` (`src/shieldops/compliance/compliance_control_mapper.py`)
+- [ ] Stakeholder impact tracked via `StakeholderImpactTracker` (`src/shieldops/incidents/stakeholder_impact_tracker.py`)
+- [ ] Service health predicted via `ServiceHealthPredictor` (`src/shieldops/topology/service_health_predictor.py`)
+- [ ] Metric collection optimized via `MetricCollectionOptimizer` (`src/shieldops/observability/metric_collection_optimizer.py`)
+- [ ] Cost forecast precision measured via `CostForecastPrecision` (`src/shieldops/billing/cost_forecast_precision.py`)
+- [ ] Change coordination planned via `ChangeCoordinationPlanner` (`src/shieldops/changes/change_coordination_planner.py`)
+- [ ] SLO cross-correlation analyzed via `SLOCrossCorrelation` (`src/shieldops/sla/slo_cross_correlation.py`)
+- [ ] Team capacity planned via `TeamCapacityPlanner` (`src/shieldops/operations/team_capacity_planner.py`)
+- [ ] Security compliance scored via `SecurityComplianceScorer` (`src/shieldops/security/security_compliance_scorer.py`)
+- [ ] Knowledge impact analyzed via `KnowledgeImpactAnalyzer` (`src/shieldops/knowledge/knowledge_impact_analyzer.py`)
+- [ ] Audit scope optimized via `AuditScopeOptimizer` (`src/shieldops/audit/audit_scope_optimizer.py`)
+- [ ] Data quality scored via `DataQualityScorer` (`src/shieldops/analytics/data_quality_scorer.py`)
+- [ ] Regulatory impact tracked via `RegulatoryImpactTracker` (`src/shieldops/compliance/regulatory_impact_tracker.py`)
 
 ### Testing
 - [ ] Unit tests for all node functions
