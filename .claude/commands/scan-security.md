@@ -176,6 +176,10 @@ Run security audits on ShieldOps codebase and agent configurations.
 150. **Cost Governance Enforcement**: Enforce cost governance policies and detect violations via `CostGovernanceEnforcer` (`src/shieldops/billing/cost_governance_enforcer.py`)
 151. **Compliance Control Mapping**: Map controls to multiple compliance frameworks and identify gaps via `ComplianceControlMapper` (`src/shieldops/compliance/compliance_control_mapper.py`)
 152. **Audit Workflow Optimization**: Optimize audit workflow execution and identify bottlenecks via `AuditWorkflowOptimizer` (`src/shieldops/audit/audit_workflow_optimizer.py`)
+153. **Security Compliance Scoring**: Score security control alignment with compliance requirements via `SecurityComplianceScorer` (`src/shieldops/security/security_compliance_scorer.py`)
+154. **Regulatory Impact Tracking**: Track regulatory changes and score compliance impact via `RegulatoryImpactTracker` (`src/shieldops/compliance/regulatory_impact_tracker.py`)
+155. **Audit Scope Optimization**: Optimize audit scope by analyzing historical finding density via `AuditScopeOptimizer` (`src/shieldops/audit/audit_scope_optimizer.py`)
+156. **Cost Forecast Precision**: Measure and improve cost forecasting accuracy via `CostForecastPrecision` (`src/shieldops/billing/cost_forecast_precision.py`)
 
 ## Severity Levels
 - **CRITICAL**: Hardcoded secrets, SQL injection, unauthenticated endpoints

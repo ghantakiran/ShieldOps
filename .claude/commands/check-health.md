@@ -28,7 +28,7 @@ Run health checks on all ShieldOps platform dependencies.
    - Integration tests: `python3 -m pytest tests/integration/ -v --tb=short`
    - Report: total tests, passed, failed, coverage
 
-5. **Platform feature health** (Phase 11–57 modules):
+5. **Platform feature health** (Phase 11–58 modules):
    - Capacity trends: `src/shieldops/analytics/capacity_trends.py` — CapacityTrendAnalyzer
    - SRE metrics: `src/shieldops/analytics/sre_metrics.py` — SREMetricsAggregator
    - Health reports: `src/shieldops/observability/health_report.py` — ServiceHealthReportGenerator
@@ -445,6 +445,18 @@ Run health checks on all ShieldOps platform dependencies.
    - Audit workflow optimizer: `src/shieldops/audit/audit_workflow_optimizer.py` — AuditWorkflowOptimizer
    - Performance baseline tracker: `src/shieldops/analytics/performance_baseline_tracker.py` — PerformanceBaselineTracker
    - Compliance control mapper: `src/shieldops/compliance/compliance_control_mapper.py` — ComplianceControlMapper
+   - **Phase 58:** Stakeholder impact tracker: `src/shieldops/incidents/stakeholder_impact_tracker.py` — StakeholderImpactTracker
+   - Service health predictor: `src/shieldops/topology/service_health_predictor.py` — ServiceHealthPredictor
+   - Metric collection optimizer: `src/shieldops/observability/metric_collection_optimizer.py` — MetricCollectionOptimizer
+   - Cost forecast precision: `src/shieldops/billing/cost_forecast_precision.py` — CostForecastPrecision
+   - Change coordination planner: `src/shieldops/changes/change_coordination_planner.py` — ChangeCoordinationPlanner
+   - SLO cross-correlation: `src/shieldops/sla/slo_cross_correlation.py` — SLOCrossCorrelation
+   - Team capacity planner: `src/shieldops/operations/team_capacity_planner.py` — TeamCapacityPlanner
+   - Security compliance scorer: `src/shieldops/security/security_compliance_scorer.py` — SecurityComplianceScorer
+   - Knowledge impact analyzer: `src/shieldops/knowledge/knowledge_impact_analyzer.py` — KnowledgeImpactAnalyzer
+   - Audit scope optimizer: `src/shieldops/audit/audit_scope_optimizer.py` — AuditScopeOptimizer
+   - Data quality scorer: `src/shieldops/analytics/data_quality_scorer.py` — DataQualityScorer
+   - Regulatory impact tracker: `src/shieldops/compliance/regulatory_impact_tracker.py` — RegulatoryImpactTracker
    - Verify each module initializes in `src/shieldops/api/app.py` lifespan
 
 6. **Check configuration**:

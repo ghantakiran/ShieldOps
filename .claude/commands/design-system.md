@@ -396,6 +396,18 @@ Design new ShieldOps components, APIs, or agent workflows.
    - Optimize audit workflows via `AuditWorkflowOptimizer` (`src/shieldops/audit/audit_workflow_optimizer.py`)
    - Track performance baselines via `PerformanceBaselineTracker` (`src/shieldops/analytics/performance_baseline_tracker.py`)
    - Map compliance controls via `ComplianceControlMapper` (`src/shieldops/compliance/compliance_control_mapper.py`)
+   - Track stakeholder impact via `StakeholderImpactTracker` (`src/shieldops/incidents/stakeholder_impact_tracker.py`)
+   - Predict service health via `ServiceHealthPredictor` (`src/shieldops/topology/service_health_predictor.py`)
+   - Optimize metric collection via `MetricCollectionOptimizer` (`src/shieldops/observability/metric_collection_optimizer.py`)
+   - Measure cost forecast precision via `CostForecastPrecision` (`src/shieldops/billing/cost_forecast_precision.py`)
+   - Plan change coordination via `ChangeCoordinationPlanner` (`src/shieldops/changes/change_coordination_planner.py`)
+   - Analyze SLO cross-correlation via `SLOCrossCorrelation` (`src/shieldops/sla/slo_cross_correlation.py`)
+   - Plan team capacity via `TeamCapacityPlanner` (`src/shieldops/operations/team_capacity_planner.py`)
+   - Score security compliance via `SecurityComplianceScorer` (`src/shieldops/security/security_compliance_scorer.py`)
+   - Analyze knowledge impact via `KnowledgeImpactAnalyzer` (`src/shieldops/knowledge/knowledge_impact_analyzer.py`)
+   - Optimize audit scope via `AuditScopeOptimizer` (`src/shieldops/audit/audit_scope_optimizer.py`)
+   - Score data quality via `DataQualityScorer` (`src/shieldops/analytics/data_quality_scorer.py`)
+   - Track regulatory impact via `RegulatoryImpactTracker` (`src/shieldops/compliance/regulatory_impact_tracker.py`)
 
 5. **Documentation**:
    - Write Architecture Decision Record (ADR) in `docs/architecture/`

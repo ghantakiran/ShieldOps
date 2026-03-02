@@ -2870,6 +2870,66 @@ class Settings(BaseSettings):
     compliance_control_map_max_records: int = 200000
     compliance_control_map_coverage_gap_threshold: float = 15.0
 
+    # Phase 58: Stakeholder Impact Tracker
+    stakeholder_impact_tracker_enabled: bool = True
+    stakeholder_impact_tracker_max_records: int = 200000
+    stakeholder_impact_tracker_impact_score_threshold: float = 70.0
+
+    # Phase 58: Service Health Predictor
+    service_health_predictor_enabled: bool = True
+    service_health_predictor_max_records: int = 200000
+    service_health_predictor_prediction_confidence_threshold: float = 80.0
+
+    # Phase 58: Metric Collection Optimizer
+    metric_collection_optimizer_enabled: bool = True
+    metric_collection_optimizer_max_records: int = 200000
+    metric_collection_optimizer_collection_efficiency_threshold: float = 75.0
+
+    # Phase 58: Cost Forecast Precision
+    cost_forecast_precision_enabled: bool = True
+    cost_forecast_precision_max_records: int = 200000
+    cost_forecast_precision_precision_accuracy_threshold: float = 85.0
+
+    # Phase 58: Change Coordination Planner
+    change_coordination_planner_enabled: bool = True
+    change_coordination_planner_max_records: int = 200000
+    change_coordination_planner_coordination_risk_threshold: float = 60.0
+
+    # Phase 58: SLO Cross-Correlation
+    slo_cross_correlation_enabled: bool = True
+    slo_cross_correlation_max_records: int = 200000
+    slo_cross_correlation_correlation_strength_threshold: float = 70.0
+
+    # Phase 58: Team Capacity Planner
+    team_capacity_planner_enabled: bool = True
+    team_capacity_planner_max_records: int = 200000
+    team_capacity_planner_capacity_utilization_threshold: float = 80.0
+
+    # Phase 58: Security Compliance Scorer
+    security_compliance_scorer_enabled: bool = True
+    security_compliance_scorer_max_records: int = 200000
+    security_compliance_scorer_compliance_gap_threshold: float = 15.0
+
+    # Phase 58: Knowledge Impact Analyzer
+    knowledge_impact_analyzer_enabled: bool = True
+    knowledge_impact_analyzer_max_records: int = 200000
+    knowledge_impact_analyzer_impact_relevance_threshold: float = 65.0
+
+    # Phase 58: Audit Scope Optimizer
+    audit_scope_optimizer_enabled: bool = True
+    audit_scope_optimizer_max_records: int = 200000
+    audit_scope_optimizer_scope_efficiency_threshold: float = 70.0
+
+    # Phase 58: Data Quality Scorer
+    data_quality_scorer_enabled: bool = True
+    data_quality_scorer_max_records: int = 200000
+    data_quality_scorer_quality_score_threshold: float = 80.0
+
+    # Phase 58: Regulatory Impact Tracker
+    regulatory_impact_tracker_enabled: bool = True
+    regulatory_impact_tracker_max_records: int = 200000
+    regulatory_impact_tracker_impact_severity_threshold: float = 60.0
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",
