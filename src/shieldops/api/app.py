@@ -14,6 +14,7 @@ from shieldops.agents.cost.runner import CostRunner
 from shieldops.agents.incident_response.runner import IncidentResponseRunner
 from shieldops.agents.investigation.runner import InvestigationRunner
 from shieldops.agents.learning.runner import LearningRunner
+from shieldops.agents.ml_governance.runner import MLGovernanceRunner
 from shieldops.agents.remediation.runner import RemediationRunner
 from shieldops.agents.security.runner import SecurityRunner
 from shieldops.agents.soc_analyst.runner import SOCAnalystRunner
@@ -27,6 +28,7 @@ from shieldops.api.routes import (
     incident_response,
     investigations,
     learning,
+    ml_governance,
     remediations,
     search,
     security,
@@ -660,6 +662,18 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     except Exception as e:
         logger.warning("attack_surface_runner_init_failed", error=str(e))
 
+    # ML Governance runner
+    ml_gov_runner = None
+    try:
+        ml_gov_runner = MLGovernanceRunner(
+            policy_engine=policy_engine,
+            repository=repository,
+        )
+        ml_governance.set_runner(ml_gov_runner)
+        logger.info("ml_governance_runner_initialized")
+    except Exception as e:
+        logger.warning("ml_governance_runner_init_failed", error=str(e))
+
     # Supervisor — orchestrates all specialist agents
     sup_runner = SupervisorRunner(
         agent_runners={
@@ -674,6 +688,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
             "deception": deception_runner,
             "incident_response": ir_runner,
             "attack_surface": as_runner,
+            "ml_governance": ml_gov_runner,
         },
         playbook_loader=playbook_loader,
         notification_channels=notification_channels,
@@ -13459,6 +13474,7 @@ def create_app() -> FastAPI:
     app.include_router(
         attack_surface_agent.router, prefix=settings.api_prefix, tags=["Attack Surface"]
     )
+    app.include_router(ml_governance.router, prefix=settings.api_prefix, tags=["ML Governance"])
     app.include_router(batch.router, prefix=settings.api_prefix, tags=["Batch"])
     app.include_router(search.router, prefix=settings.api_prefix, tags=["Search"])
     app.include_router(usage.router, prefix=settings.api_prefix, tags=["API Usage"])

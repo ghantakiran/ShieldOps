@@ -21,6 +21,7 @@ class TaskType(StrEnum):
     DECEPTION = "deception"
     INCIDENT_RESPONSE = "incident_response"
     ATTACK_SURFACE = "attack_surface"
+    ML_GOVERNANCE = "ml_governance"
 
 
 class TaskStatus(StrEnum):
