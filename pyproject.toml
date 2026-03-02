@@ -698,6 +698,18 @@ module = [
     "shieldops.api.routes.audit_workflow_optimizer",
     "shieldops.api.routes.performance_baseline_tracker",
     "shieldops.api.routes.compliance_control_mapper",
+    "shieldops.api.routes.stakeholder_impact_tracker",
+    "shieldops.api.routes.service_health_predictor",
+    "shieldops.api.routes.metric_collection_optimizer",
+    "shieldops.api.routes.cost_forecast_precision",
+    "shieldops.api.routes.change_coordination_planner",
+    "shieldops.api.routes.slo_cross_correlation",
+    "shieldops.api.routes.team_capacity_planner",
+    "shieldops.api.routes.security_compliance_scorer",
+    "shieldops.api.routes.knowledge_impact_analyzer",
+    "shieldops.api.routes.audit_scope_optimizer",
+    "shieldops.api.routes.data_quality_scorer",
+    "shieldops.api.routes.regulatory_impact_tracker",
 ]
 warn_return_any = false
 disallow_untyped_defs = false

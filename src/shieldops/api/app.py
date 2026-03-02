@@ -12949,6 +12949,260 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         except Exception as e:
             logger.warning("compliance_control_mapper_init_failed", error=str(e))
 
+    # -- Phase 58 ---------------------------------------------------------------
+
+    if settings.stakeholder_impact_tracker_enabled:
+        try:
+            from shieldops.api.routes import stakeholder_impact_tracker as sit_mod
+            from shieldops.incidents.stakeholder_impact_tracker import (
+                StakeholderImpactTracker,
+            )
+
+            _sit_engine = StakeholderImpactTracker(
+                max_records=settings.stakeholder_impact_tracker_max_records,
+                impact_score_threshold=settings.stakeholder_impact_tracker_impact_score_threshold,
+            )
+            sit_mod.set_engine(_sit_engine)
+            app.include_router(
+                sit_mod.sit_route,
+                prefix=settings.api_prefix,
+                tags=["Stakeholder Impact Tracker"],
+            )
+            logger.info("stakeholder_impact_tracker_initialized")
+        except Exception as e:
+            logger.warning("stakeholder_impact_tracker_init_failed", error=str(e))
+
+    if settings.service_health_predictor_enabled:
+        try:
+            from shieldops.api.routes import service_health_predictor as shp_mod
+            from shieldops.topology.service_health_predictor import (
+                ServiceHealthPredictor,
+            )
+
+            _shp_engine = ServiceHealthPredictor(
+                max_records=settings.service_health_predictor_max_records,
+                prediction_confidence_threshold=settings.service_health_predictor_prediction_confidence_threshold,
+            )
+            shp_mod.set_engine(_shp_engine)
+            app.include_router(
+                shp_mod.shp_route,
+                prefix=settings.api_prefix,
+                tags=["Service Health Predictor"],
+            )
+            logger.info("service_health_predictor_initialized")
+        except Exception as e:
+            logger.warning("service_health_predictor_init_failed", error=str(e))
+
+    if settings.metric_collection_optimizer_enabled:
+        try:
+            from shieldops.api.routes import metric_collection_optimizer as mco_mod
+            from shieldops.observability.metric_collection_optimizer import (
+                MetricCollectionOptimizer,
+            )
+
+            _mco_engine = MetricCollectionOptimizer(
+                max_records=settings.metric_collection_optimizer_max_records,
+                collection_efficiency_threshold=settings.metric_collection_optimizer_collection_efficiency_threshold,
+            )
+            mco_mod.set_engine(_mco_engine)
+            app.include_router(
+                mco_mod.mco_route,
+                prefix=settings.api_prefix,
+                tags=["Metric Collection Optimizer"],
+            )
+            logger.info("metric_collection_optimizer_initialized")
+        except Exception as e:
+            logger.warning("metric_collection_optimizer_init_failed", error=str(e))
+
+    if settings.cost_forecast_precision_enabled:
+        try:
+            from shieldops.api.routes import cost_forecast_precision as cfp_mod
+            from shieldops.billing.cost_forecast_precision import (
+                CostForecastPrecision,
+            )
+
+            _cfp_engine = CostForecastPrecision(
+                max_records=settings.cost_forecast_precision_max_records,
+                precision_accuracy_threshold=settings.cost_forecast_precision_precision_accuracy_threshold,
+            )
+            cfp_mod.set_engine(_cfp_engine)
+            app.include_router(
+                cfp_mod.cfp_route,
+                prefix=settings.api_prefix,
+                tags=["Cost Forecast Precision"],
+            )
+            logger.info("cost_forecast_precision_initialized")
+        except Exception as e:
+            logger.warning("cost_forecast_precision_init_failed", error=str(e))
+
+    if settings.change_coordination_planner_enabled:
+        try:
+            from shieldops.api.routes import change_coordination_planner as ccp_mod
+            from shieldops.changes.change_coordination_planner import (
+                ChangeCoordinationPlanner,
+            )
+
+            _ccp_engine = ChangeCoordinationPlanner(
+                max_records=settings.change_coordination_planner_max_records,
+                coordination_risk_threshold=settings.change_coordination_planner_coordination_risk_threshold,
+            )
+            ccp_mod.set_engine(_ccp_engine)
+            app.include_router(
+                ccp_mod.ccp_route,
+                prefix=settings.api_prefix,
+                tags=["Change Coordination Planner"],
+            )
+            logger.info("change_coordination_planner_initialized")
+        except Exception as e:
+            logger.warning("change_coordination_planner_init_failed", error=str(e))
+
+    if settings.slo_cross_correlation_enabled:
+        try:
+            from shieldops.api.routes import slo_cross_correlation as sxc_mod
+            from shieldops.sla.slo_cross_correlation import (
+                SLOCrossCorrelation,
+            )
+
+            _sxc_engine = SLOCrossCorrelation(
+                max_records=settings.slo_cross_correlation_max_records,
+                correlation_strength_threshold=settings.slo_cross_correlation_correlation_strength_threshold,
+            )
+            sxc_mod.set_engine(_sxc_engine)
+            app.include_router(
+                sxc_mod.sxc_route,
+                prefix=settings.api_prefix,
+                tags=["SLO Cross-Correlation"],
+            )
+            logger.info("slo_cross_correlation_initialized")
+        except Exception as e:
+            logger.warning("slo_cross_correlation_init_failed", error=str(e))
+
+    if settings.team_capacity_planner_enabled:
+        try:
+            from shieldops.api.routes import team_capacity_planner as tcp_mod
+            from shieldops.operations.team_capacity_planner import (
+                TeamCapacityPlanner,
+            )
+
+            _tcp_engine = TeamCapacityPlanner(
+                max_records=settings.team_capacity_planner_max_records,
+                capacity_utilization_threshold=settings.team_capacity_planner_capacity_utilization_threshold,
+            )
+            tcp_mod.set_engine(_tcp_engine)
+            app.include_router(
+                tcp_mod.tcp_route,
+                prefix=settings.api_prefix,
+                tags=["Team Capacity Planner"],
+            )
+            logger.info("team_capacity_planner_initialized")
+        except Exception as e:
+            logger.warning("team_capacity_planner_init_failed", error=str(e))
+
+    if settings.security_compliance_scorer_enabled:
+        try:
+            from shieldops.api.routes import security_compliance_scorer as scs_mod
+            from shieldops.security.security_compliance_scorer import (
+                SecurityComplianceScorer,
+            )
+
+            _scs_engine = SecurityComplianceScorer(
+                max_records=settings.security_compliance_scorer_max_records,
+                compliance_gap_threshold=settings.security_compliance_scorer_compliance_gap_threshold,
+            )
+            scs_mod.set_engine(_scs_engine)
+            app.include_router(
+                scs_mod.scs_route,
+                prefix=settings.api_prefix,
+                tags=["Security Compliance Scorer"],
+            )
+            logger.info("security_compliance_scorer_initialized")
+        except Exception as e:
+            logger.warning("security_compliance_scorer_init_failed", error=str(e))
+
+    if settings.knowledge_impact_analyzer_enabled:
+        try:
+            from shieldops.api.routes import knowledge_impact_analyzer as kia_mod
+            from shieldops.knowledge.knowledge_impact_analyzer import (
+                KnowledgeImpactAnalyzer,
+            )
+
+            _kia_engine = KnowledgeImpactAnalyzer(
+                max_records=settings.knowledge_impact_analyzer_max_records,
+                impact_relevance_threshold=settings.knowledge_impact_analyzer_impact_relevance_threshold,
+            )
+            kia_mod.set_engine(_kia_engine)
+            app.include_router(
+                kia_mod.kia_route,
+                prefix=settings.api_prefix,
+                tags=["Knowledge Impact Analyzer"],
+            )
+            logger.info("knowledge_impact_analyzer_initialized")
+        except Exception as e:
+            logger.warning("knowledge_impact_analyzer_init_failed", error=str(e))
+
+    if settings.audit_scope_optimizer_enabled:
+        try:
+            from shieldops.api.routes import audit_scope_optimizer as aso_mod
+            from shieldops.audit.audit_scope_optimizer import (
+                AuditScopeOptimizer,
+            )
+
+            _aso_engine = AuditScopeOptimizer(
+                max_records=settings.audit_scope_optimizer_max_records,
+                scope_efficiency_threshold=settings.audit_scope_optimizer_scope_efficiency_threshold,
+            )
+            aso_mod.set_engine(_aso_engine)
+            app.include_router(
+                aso_mod.aso_route,
+                prefix=settings.api_prefix,
+                tags=["Audit Scope Optimizer"],
+            )
+            logger.info("audit_scope_optimizer_initialized")
+        except Exception as e:
+            logger.warning("audit_scope_optimizer_init_failed", error=str(e))
+
+    if settings.data_quality_scorer_enabled:
+        try:
+            from shieldops.analytics.data_quality_scorer import (
+                DataQualityScorer,
+            )
+            from shieldops.api.routes import data_quality_scorer as dqm_mod
+
+            _dqm_engine = DataQualityScorer(
+                max_records=settings.data_quality_scorer_max_records,
+                quality_score_threshold=settings.data_quality_scorer_quality_score_threshold,
+            )
+            dqm_mod.set_engine(_dqm_engine)
+            app.include_router(
+                dqm_mod.dqm_route,
+                prefix=settings.api_prefix,
+                tags=["Data Quality Scorer"],
+            )
+            logger.info("data_quality_scorer_initialized")
+        except Exception as e:
+            logger.warning("data_quality_scorer_init_failed", error=str(e))
+
+    if settings.regulatory_impact_tracker_enabled:
+        try:
+            from shieldops.api.routes import regulatory_impact_tracker as rci_mod
+            from shieldops.compliance.regulatory_impact_tracker import (
+                RegulatoryImpactTracker,
+            )
+
+            _rci_engine = RegulatoryImpactTracker(
+                max_records=settings.regulatory_impact_tracker_max_records,
+                impact_severity_threshold=settings.regulatory_impact_tracker_impact_severity_threshold,
+            )
+            rci_mod.set_engine(_rci_engine)
+            app.include_router(
+                rci_mod.rci_route,
+                prefix=settings.api_prefix,
+                tags=["Regulatory Impact Tracker"],
+            )
+            logger.info("regulatory_impact_tracker_initialized")
+        except Exception as e:
+            logger.warning("regulatory_impact_tracker_init_failed", error=str(e))
+
     yield
 
     logger.info("shieldops_shutting_down")
