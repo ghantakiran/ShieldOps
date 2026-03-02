@@ -14,6 +14,7 @@ from shieldops.agents.investigation.runner import InvestigationRunner
 from shieldops.agents.learning.runner import LearningRunner
 from shieldops.agents.remediation.runner import RemediationRunner
 from shieldops.agents.security.runner import SecurityRunner
+from shieldops.agents.soc_analyst.runner import SOCAnalystRunner
 from shieldops.agents.supervisor.runner import SupervisorRunner
 from shieldops.api.routes import (
     agents,
@@ -26,6 +27,7 @@ from shieldops.api.routes import (
     search,
     security,
     security_chat,
+    soc_analyst,
     supervisor,
     teams,
     usage,
@@ -118,7 +120,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
             agent_registry = AgentRegistry(session_factory)
             agents.set_registry(agent_registry)
-            # Auto-register the 6 agent types
+            # Auto-register agent types
             for atype in (
                 "investigation",
                 "remediation",
@@ -127,6 +129,10 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
                 "learning",
                 "supervisor",
                 "prediction",
+                "soc_analyst",
+                "threat_hunter",
+                "forensics",
+                "deception",
             ):
                 try:
                     await agent_registry.register(
@@ -580,6 +586,50 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         )
         logger.info("email_notifier_initialized")
 
+    # SOC Analyst runner
+    soc_runner = SOCAnalystRunner(
+        policy_engine=policy_engine,
+        repository=repository,
+    )
+    soc_analyst.set_runner(soc_runner)
+
+    # Threat Hunter runner
+    threat_hunter_runner = None
+    try:
+        from shieldops.agents.threat_hunter.runner import ThreatHunterRunner
+
+        threat_hunter_runner = ThreatHunterRunner(
+            policy_engine=policy_engine,
+            repository=repository,
+        )
+        logger.info("threat_hunter_runner_initialized")
+    except Exception as e:
+        logger.warning("threat_hunter_runner_init_failed", error=str(e))
+
+    # Forensics runner
+    forensics_runner = None
+    try:
+        from shieldops.agents.forensics.runner import ForensicsRunner
+
+        forensics_runner = ForensicsRunner(
+            repository=repository,
+        )
+        logger.info("forensics_runner_initialized")
+    except Exception as e:
+        logger.warning("forensics_runner_init_failed", error=str(e))
+
+    # Deception runner
+    deception_runner = None
+    try:
+        from shieldops.agents.deception.runner import DeceptionRunner
+
+        deception_runner = DeceptionRunner(
+            repository=repository,
+        )
+        logger.info("deception_runner_initialized")
+    except Exception as e:
+        logger.warning("deception_runner_init_failed", error=str(e))
+
     # Supervisor — orchestrates all specialist agents
     sup_runner = SupervisorRunner(
         agent_runners={
@@ -588,6 +638,10 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
             "security": sec_runner,
             "cost": cost_runner,
             "learning": learn_runner,
+            "soc_analyst": soc_runner,
+            "threat_hunter": threat_hunter_runner,
+            "forensics": forensics_runner,
+            "deception": deception_runner,
         },
         playbook_loader=playbook_loader,
         notification_channels=notification_channels,
@@ -13366,6 +13420,7 @@ def create_app() -> FastAPI:
     app.include_router(cost.router, prefix=settings.api_prefix, tags=["Cost"])
     app.include_router(learning.router, prefix=settings.api_prefix, tags=["Learning"])
     app.include_router(supervisor.router, prefix=settings.api_prefix, tags=["Supervisor"])
+    app.include_router(soc_analyst.router, prefix=settings.api_prefix, tags=["SOC Analyst"])
     app.include_router(batch.router, prefix=settings.api_prefix, tags=["Batch"])
     app.include_router(search.router, prefix=settings.api_prefix, tags=["Search"])
     app.include_router(usage.router, prefix=settings.api_prefix, tags=["API Usage"])

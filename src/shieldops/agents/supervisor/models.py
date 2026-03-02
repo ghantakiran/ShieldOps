@@ -15,6 +15,10 @@ class TaskType(StrEnum):
     SECURITY_SCAN = "security_scan"
     COST_ANALYSIS = "cost_analysis"
     LEARN = "learn"
+    SOC_ANALYSIS = "soc_analysis"
+    THREAT_HUNT = "threat_hunt"
+    FORENSICS = "forensics"
+    DECEPTION = "deception"
 
 
 class TaskStatus(StrEnum):
