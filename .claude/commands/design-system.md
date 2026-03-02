@@ -384,6 +384,18 @@ Design new ShieldOps components, APIs, or agent workflows.
    - Track audit remediations via `AuditRemediationTracker` (`src/shieldops/audit/audit_remediation_tracker.py`)
    - Validate capacity forecasts via `CapacityForecastValidator` (`src/shieldops/analytics/capacity_forecast_validator.py`)
    - Analyze change windows via `ChangeWindowAnalyzer` (`src/shieldops/changes/change_window_analyzer.py`)
+   - Track incident mitigation via `IncidentMitigationTracker` (`src/shieldops/incidents/incident_mitigation_tracker.py`)
+   - Optimize service routing via `ServiceRoutingOptimizer` (`src/shieldops/topology/service_routing_optimizer.py`)
+   - Classify metric anomalies via `MetricAnomalyClassifier` (`src/shieldops/observability/metric_anomaly_classifier.py`)
+   - Enforce cost governance via `CostGovernanceEnforcer` (`src/shieldops/billing/cost_governance_enforcer.py`)
+   - Plan change rollout via `ChangeRolloutPlanner` (`src/shieldops/changes/change_rollout_planner.py`)
+   - Optimize SLO thresholds via `SloThresholdOptimizer` (`src/shieldops/sla/slo_threshold_optimizer.py`)
+   - Score operational hygiene via `OperationalHygieneScorer` (`src/shieldops/operations/operational_hygiene_scorer.py`)
+   - Correlate security signals via `SecuritySignalCorrelator` (`src/shieldops/security/security_signal_correlator.py`)
+   - Track knowledge reuse via `KnowledgeReuseTracker` (`src/shieldops/knowledge/knowledge_reuse_tracker.py`)
+   - Optimize audit workflows via `AuditWorkflowOptimizer` (`src/shieldops/audit/audit_workflow_optimizer.py`)
+   - Track performance baselines via `PerformanceBaselineTracker` (`src/shieldops/analytics/performance_baseline_tracker.py`)
+   - Map compliance controls via `ComplianceControlMapper` (`src/shieldops/compliance/compliance_control_mapper.py`)
 
 5. **Documentation**:
    - Write Architecture Decision Record (ADR) in `docs/architecture/`

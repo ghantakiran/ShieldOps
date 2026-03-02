@@ -12695,6 +12695,260 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         except Exception as e:
             logger.warning("change_window_analyzer_init_failed", error=str(e))
 
+    # -- Phase 57 ---------------------------------------------------------------
+
+    if settings.incident_mitigation_enabled:
+        try:
+            from shieldops.api.routes import incident_mitigation_tracker as imt_mod
+            from shieldops.incidents.incident_mitigation_tracker import (
+                IncidentMitigationTracker,
+            )
+
+            _imt_engine = IncidentMitigationTracker(
+                max_records=settings.incident_mitigation_max_records,
+                effectiveness_threshold=settings.incident_mitigation_effectiveness_threshold,
+            )
+            imt_mod.set_engine(_imt_engine)
+            app.include_router(
+                imt_mod.imt_route,
+                prefix=settings.api_prefix,
+                tags=["Incident Mitigation Tracker"],
+            )
+            logger.info("incident_mitigation_tracker_initialized")
+        except Exception as e:
+            logger.warning("incident_mitigation_tracker_init_failed", error=str(e))
+
+    if settings.service_routing_opt_enabled:
+        try:
+            from shieldops.api.routes import service_routing_optimizer as sro_mod
+            from shieldops.topology.service_routing_optimizer import (
+                ServiceRoutingOptimizer,
+            )
+
+            _sro_engine = ServiceRoutingOptimizer(
+                max_records=settings.service_routing_opt_max_records,
+                latency_threshold_ms=settings.service_routing_opt_latency_threshold_ms,
+            )
+            sro_mod.set_engine(_sro_engine)
+            app.include_router(
+                sro_mod.sro_route,
+                prefix=settings.api_prefix,
+                tags=["Service Routing Optimizer"],
+            )
+            logger.info("service_routing_optimizer_initialized")
+        except Exception as e:
+            logger.warning("service_routing_optimizer_init_failed", error=str(e))
+
+    if settings.metric_anomaly_cls_enabled:
+        try:
+            from shieldops.api.routes import metric_anomaly_classifier as mac_mod
+            from shieldops.observability.metric_anomaly_classifier import (
+                MetricAnomalyClassifier,
+            )
+
+            _mac_engine = MetricAnomalyClassifier(
+                max_records=settings.metric_anomaly_cls_max_records,
+                confidence_threshold=settings.metric_anomaly_cls_confidence_threshold,
+            )
+            mac_mod.set_engine(_mac_engine)
+            app.include_router(
+                mac_mod.mac_route,
+                prefix=settings.api_prefix,
+                tags=["Metric Anomaly Classifier"],
+            )
+            logger.info("metric_anomaly_classifier_initialized")
+        except Exception as e:
+            logger.warning("metric_anomaly_classifier_init_failed", error=str(e))
+
+    if settings.cost_governance_enabled:
+        try:
+            from shieldops.api.routes import cost_governance_enforcer as cge_mod
+            from shieldops.billing.cost_governance_enforcer import (
+                CostGovernanceEnforcer,
+            )
+
+            _cge_engine = CostGovernanceEnforcer(
+                max_records=settings.cost_governance_max_records,
+                max_violation_rate=settings.cost_governance_max_violation_rate,
+            )
+            cge_mod.set_engine(_cge_engine)
+            app.include_router(
+                cge_mod.cge_route,
+                prefix=settings.api_prefix,
+                tags=["Cost Governance Enforcer"],
+            )
+            logger.info("cost_governance_enforcer_initialized")
+        except Exception as e:
+            logger.warning("cost_governance_enforcer_init_failed", error=str(e))
+
+    if settings.change_rollout_enabled:
+        try:
+            from shieldops.api.routes import change_rollout_planner as crl_mod
+            from shieldops.changes.change_rollout_planner import (
+                ChangeRolloutPlanner,
+            )
+
+            _crl_engine = ChangeRolloutPlanner(
+                max_records=settings.change_rollout_max_records,
+                risk_tolerance_threshold=settings.change_rollout_risk_tolerance_threshold,
+            )
+            crl_mod.set_engine(_crl_engine)
+            app.include_router(
+                crl_mod.crl_route,
+                prefix=settings.api_prefix,
+                tags=["Change Rollout Planner"],
+            )
+            logger.info("change_rollout_planner_initialized")
+        except Exception as e:
+            logger.warning("change_rollout_planner_init_failed", error=str(e))
+
+    if settings.slo_threshold_opt_enabled:
+        try:
+            from shieldops.api.routes import slo_threshold_optimizer as sto_mod
+            from shieldops.sla.slo_threshold_optimizer import (
+                SloThresholdOptimizer,
+            )
+
+            _sto_engine = SloThresholdOptimizer(
+                max_records=settings.slo_threshold_opt_max_records,
+                adjustment_sensitivity=settings.slo_threshold_opt_adjustment_sensitivity,
+            )
+            sto_mod.set_engine(_sto_engine)
+            app.include_router(
+                sto_mod.sto_route,
+                prefix=settings.api_prefix,
+                tags=["SLO Threshold Optimizer"],
+            )
+            logger.info("slo_threshold_optimizer_initialized")
+        except Exception as e:
+            logger.warning("slo_threshold_optimizer_init_failed", error=str(e))
+
+    if settings.operational_hygiene_enabled:
+        try:
+            from shieldops.api.routes import operational_hygiene_scorer as ohs_mod
+            from shieldops.operations.operational_hygiene_scorer import (
+                OperationalHygieneScorer,
+            )
+
+            _ohs_engine = OperationalHygieneScorer(
+                max_records=settings.operational_hygiene_max_records,
+                min_hygiene_score=settings.operational_hygiene_min_hygiene_score,
+            )
+            ohs_mod.set_engine(_ohs_engine)
+            app.include_router(
+                ohs_mod.ohs_route,
+                prefix=settings.api_prefix,
+                tags=["Operational Hygiene Scorer"],
+            )
+            logger.info("operational_hygiene_scorer_initialized")
+        except Exception as e:
+            logger.warning("operational_hygiene_scorer_init_failed", error=str(e))
+
+    if settings.security_signal_corr_enabled:
+        try:
+            from shieldops.api.routes import security_signal_correlator as ssc_mod
+            from shieldops.security.security_signal_correlator import (
+                SecuritySignalCorrelator,
+            )
+
+            _ssc_engine = SecuritySignalCorrelator(
+                max_records=settings.security_signal_corr_max_records,
+                correlation_confidence_threshold=settings.security_signal_corr_correlation_confidence_threshold,
+            )
+            ssc_mod.set_engine(_ssc_engine)
+            app.include_router(
+                ssc_mod.ssc_route,
+                prefix=settings.api_prefix,
+                tags=["Security Signal Correlator"],
+            )
+            logger.info("security_signal_correlator_initialized")
+        except Exception as e:
+            logger.warning("security_signal_correlator_init_failed", error=str(e))
+
+    if settings.knowledge_reuse_enabled:
+        try:
+            from shieldops.api.routes import knowledge_reuse_tracker as kru_mod
+            from shieldops.knowledge.knowledge_reuse_tracker import (
+                KnowledgeReuseTracker,
+            )
+
+            _kru_engine = KnowledgeReuseTracker(
+                max_records=settings.knowledge_reuse_max_records,
+                min_reuse_score=settings.knowledge_reuse_min_reuse_score,
+            )
+            kru_mod.set_engine(_kru_engine)
+            app.include_router(
+                kru_mod.kru_route,
+                prefix=settings.api_prefix,
+                tags=["Knowledge Reuse Tracker"],
+            )
+            logger.info("knowledge_reuse_tracker_initialized")
+        except Exception as e:
+            logger.warning("knowledge_reuse_tracker_init_failed", error=str(e))
+
+    if settings.audit_workflow_opt_enabled:
+        try:
+            from shieldops.api.routes import audit_workflow_optimizer as awo_mod
+            from shieldops.audit.audit_workflow_optimizer import (
+                AuditWorkflowOptimizer,
+            )
+
+            _awo_engine = AuditWorkflowOptimizer(
+                max_records=settings.audit_workflow_opt_max_records,
+                cycle_time_threshold=settings.audit_workflow_opt_cycle_time_threshold,
+            )
+            awo_mod.set_engine(_awo_engine)
+            app.include_router(
+                awo_mod.awo_route,
+                prefix=settings.api_prefix,
+                tags=["Audit Workflow Optimizer"],
+            )
+            logger.info("audit_workflow_optimizer_initialized")
+        except Exception as e:
+            logger.warning("audit_workflow_optimizer_init_failed", error=str(e))
+
+    if settings.perf_baseline_tracker_enabled:
+        try:
+            from shieldops.analytics.performance_baseline_tracker import (
+                PerformanceBaselineTracker,
+            )
+            from shieldops.api.routes import performance_baseline_tracker as pbk_mod
+
+            _pbk_engine = PerformanceBaselineTracker(
+                max_records=settings.perf_baseline_tracker_max_records,
+                deviation_threshold=settings.perf_baseline_tracker_deviation_threshold,
+            )
+            pbk_mod.set_engine(_pbk_engine)
+            app.include_router(
+                pbk_mod.pbk_route,
+                prefix=settings.api_prefix,
+                tags=["Performance Baseline Tracker"],
+            )
+            logger.info("performance_baseline_tracker_initialized")
+        except Exception as e:
+            logger.warning("performance_baseline_tracker_init_failed", error=str(e))
+
+    if settings.compliance_control_map_enabled:
+        try:
+            from shieldops.api.routes import compliance_control_mapper as ccm_mod
+            from shieldops.compliance.compliance_control_mapper import (
+                ComplianceControlMapper,
+            )
+
+            _ccm_engine = ComplianceControlMapper(
+                max_records=settings.compliance_control_map_max_records,
+                coverage_gap_threshold=settings.compliance_control_map_coverage_gap_threshold,
+            )
+            ccm_mod.set_engine(_ccm_engine)
+            app.include_router(
+                ccm_mod.ccm_route,
+                prefix=settings.api_prefix,
+                tags=["Compliance Control Mapper"],
+            )
+            logger.info("compliance_control_mapper_initialized")
+        except Exception as e:
+            logger.warning("compliance_control_mapper_init_failed", error=str(e))
+
     yield
 
     logger.info("shieldops_shutting_down")

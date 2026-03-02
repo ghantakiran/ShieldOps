@@ -2810,6 +2810,66 @@ class Settings(BaseSettings):
     change_window_analyzer_max_records: int = 200000
     change_window_analyzer_min_compliance_pct: float = 85.0
 
+    # Phase 57: Incident Mitigation Tracker
+    incident_mitigation_enabled: bool = True
+    incident_mitigation_max_records: int = 200000
+    incident_mitigation_effectiveness_threshold: float = 70.0
+
+    # Phase 57: Service Routing Optimizer
+    service_routing_opt_enabled: bool = True
+    service_routing_opt_max_records: int = 200000
+    service_routing_opt_latency_threshold_ms: float = 200.0
+
+    # Phase 57: Metric Anomaly Classifier
+    metric_anomaly_cls_enabled: bool = True
+    metric_anomaly_cls_max_records: int = 200000
+    metric_anomaly_cls_confidence_threshold: float = 75.0
+
+    # Phase 57: Cost Governance Enforcer
+    cost_governance_enabled: bool = True
+    cost_governance_max_records: int = 200000
+    cost_governance_max_violation_rate: float = 10.0
+
+    # Phase 57: Change Rollout Planner
+    change_rollout_enabled: bool = True
+    change_rollout_max_records: int = 200000
+    change_rollout_risk_tolerance_threshold: float = 30.0
+
+    # Phase 57: SLO Threshold Optimizer
+    slo_threshold_opt_enabled: bool = True
+    slo_threshold_opt_max_records: int = 200000
+    slo_threshold_opt_adjustment_sensitivity: float = 5.0
+
+    # Phase 57: Operational Hygiene Scorer
+    operational_hygiene_enabled: bool = True
+    operational_hygiene_max_records: int = 200000
+    operational_hygiene_min_hygiene_score: float = 60.0
+
+    # Phase 57: Security Signal Correlator
+    security_signal_corr_enabled: bool = True
+    security_signal_corr_max_records: int = 200000
+    security_signal_corr_correlation_confidence_threshold: float = 80.0
+
+    # Phase 57: Knowledge Reuse Tracker
+    knowledge_reuse_enabled: bool = True
+    knowledge_reuse_max_records: int = 200000
+    knowledge_reuse_min_reuse_score: float = 50.0
+
+    # Phase 57: Audit Workflow Optimizer
+    audit_workflow_opt_enabled: bool = True
+    audit_workflow_opt_max_records: int = 200000
+    audit_workflow_opt_cycle_time_threshold: float = 72.0
+
+    # Phase 57: Performance Baseline Tracker
+    perf_baseline_tracker_enabled: bool = True
+    perf_baseline_tracker_max_records: int = 200000
+    perf_baseline_tracker_deviation_threshold: float = 2.0
+
+    # Phase 57: Compliance Control Mapper
+    compliance_control_map_enabled: bool = True
+    compliance_control_map_max_records: int = 200000
+    compliance_control_map_coverage_gap_threshold: float = 15.0
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",

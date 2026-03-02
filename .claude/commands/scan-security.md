@@ -172,6 +172,10 @@ Run security audits on ShieldOps codebase and agent configurations.
 146. **Cost Allocation Validation**: Validate cost allocation accuracy and compliance via `CostAllocationValidator` (`src/shieldops/billing/cost_allocation_validator.py`)
 147. **Audit Remediation Tracking**: Track audit finding remediation progress and timelines via `AuditRemediationTracker` (`src/shieldops/audit/audit_remediation_tracker.py`)
 148. **Alert Correlation Profiling**: Profile and score alert correlation patterns via `AlertCorrelationProfiler` (`src/shieldops/observability/alert_correlation_profiler.py`)
+149. **Security Signal Correlation**: Correlate security signals across disparate sources to detect attack patterns via `SecuritySignalCorrelator` (`src/shieldops/security/security_signal_correlator.py`)
+150. **Cost Governance Enforcement**: Enforce cost governance policies and detect violations via `CostGovernanceEnforcer` (`src/shieldops/billing/cost_governance_enforcer.py`)
+151. **Compliance Control Mapping**: Map controls to multiple compliance frameworks and identify gaps via `ComplianceControlMapper` (`src/shieldops/compliance/compliance_control_mapper.py`)
+152. **Audit Workflow Optimization**: Optimize audit workflow execution and identify bottlenecks via `AuditWorkflowOptimizer` (`src/shieldops/audit/audit_workflow_optimizer.py`)
 
 ## Severity Levels
 - **CRITICAL**: Hardcoded secrets, SQL injection, unauthenticated endpoints

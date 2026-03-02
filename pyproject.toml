@@ -686,6 +686,18 @@ module = [
     "shieldops.api.routes.audit_remediation_tracker",
     "shieldops.api.routes.capacity_forecast_validator",
     "shieldops.api.routes.change_window_analyzer",
+    "shieldops.api.routes.incident_mitigation_tracker",
+    "shieldops.api.routes.service_routing_optimizer",
+    "shieldops.api.routes.metric_anomaly_classifier",
+    "shieldops.api.routes.cost_governance_enforcer",
+    "shieldops.api.routes.change_rollout_planner",
+    "shieldops.api.routes.slo_threshold_optimizer",
+    "shieldops.api.routes.operational_hygiene_scorer",
+    "shieldops.api.routes.security_signal_correlator",
+    "shieldops.api.routes.knowledge_reuse_tracker",
+    "shieldops.api.routes.audit_workflow_optimizer",
+    "shieldops.api.routes.performance_baseline_tracker",
+    "shieldops.api.routes.compliance_control_mapper",
 ]
 warn_return_any = false
 disallow_untyped_defs = false
