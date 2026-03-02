@@ -5,7 +5,7 @@ Test-run a ShieldOps agent workflow locally with mock data.
 ## Usage
 `/run-agent <agent-type> [--environment <env>] [--mock]`
 
-Agent types: `investigation`, `remediation`, `security`, `cost`, `learning`, `supervisor`
+Agent types: `investigation`, `remediation`, `security`, `cost`, `learning`, `supervisor`, `soc_analyst`, `threat_hunter`, `forensics`, `deception`
 
 ## Process
 
@@ -42,6 +42,26 @@ scan_config = {"scan_type": "full", "environment": "production", "targets": ["we
 ### Learning
 ```python
 learn_params = {"learning_type": "full", "period": "7d"}
+```
+
+### SOC Analyst
+```python
+alert_context = {"alert_id": "soc-001", "alert_name": "Suspicious Login", "severity": "high", "source": "SIEM", "environment": "production", "mitre_tactic": "Initial Access"}
+```
+
+### Threat Hunter
+```python
+hunt_params = {"hypothesis": "Lateral movement via RDP", "mitre_technique": "T1021.001", "hunt_type": "campaign", "scope": "production", "timeframe": "7d"}
+```
+
+### Forensics
+```python
+forensic_request = {"incident_id": "INC-042", "evidence_type": "memory_dump", "target_host": "web-server-3", "chain_of_custody": True, "priority": "high"}
+```
+
+### Deception
+```python
+deception_config = {"deployment_type": "honeypot", "target_network": "dmz", "emulate_service": "ssh", "alert_on_interaction": True, "profile_attacker": True}
 ```
 
 ## Tips
