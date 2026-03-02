@@ -53,6 +53,7 @@ ShieldOps is built on a four-layer stack:
 │  Investigation · Remediation · Security · Learning  │
 │  Cost · Prediction · Supervisor · Custom agents      │
 │  SOC Analyst · Threat Hunter · Forensics · Deception │
+│  Incident Response · Attack Surface                   │
 ├─────────────────────────────────────────────────────┤
 │  Layer 2: Observability Ingestion                   │
 │  OpenTelemetry · Splunk · Datadog · Prometheus      │
@@ -79,6 +80,8 @@ ShieldOps is built on a four-layer stack:
 | **Threat Hunter** | Proactive threat hunting | Hypothesis-driven hunts, MITRE ATT&CK campaigns, IOC sweeps, behavioral analysis |
 | **Forensics** | Digital forensics | Evidence preservation, integrity verification, memory/disk/network analysis, timeline reconstruction |
 | **Deception** | Honeypot/honeytoken management | Deploy deception assets, monitor interactions, profile attackers |
+| **Incident Response** | Autonomous incident response | Containment, eradication, recovery, validation workflows |
+| **Attack Surface** | Attack surface management | Asset discovery, exposure analysis, remediation prioritization |
 
 ### Safety Model (Defense in Depth)
 
@@ -176,6 +179,8 @@ ShieldOps/
 │   │   ├── threat_hunter/              # Threat Hunter agent (proactive hunting)
 │   │   ├── forensics/                  # Digital Forensics agent
 │   │   ├── deception/                  # Deception/Honeypot agent
+│   │   ├── incident_response/          # Incident Response agent
+│   │   ├── attack_surface/             # Attack Surface agent
 │   │   ├── calibration/               # Agent confidence calibration
 │   │   └── registry.py                # Agent fleet registry
 │   ├── connectors/                    # Multi-cloud abstraction layer
@@ -233,7 +238,7 @@ ShieldOps/
 ├── dashboard-ui/                      # React + TypeScript dashboard
 │
 ├── tests/
-│   ├── unit/                          # Unit tests (~31,956 tests)
+│   ├── unit/                          # Unit tests (~35,256 tests)
 │   └── integration/                   # Integration tests
 │
 ├── docs/
@@ -263,6 +268,8 @@ ShieldOps/
 | **Webhooks** | `POST /api/v1/webhooks/subscriptions`, `GET /api/v1/webhooks/subscriptions` |
 | **Plugins** | `GET /api/v1/plugins`, `POST /api/v1/plugins/install` |
 | **SOC Analyst** | `POST /api/v1/soc/analyze`, `GET /api/v1/soc/results/{id}` |
+| **Incident Response** | `POST /api/v1/incident-response/respond`, `GET /api/v1/incident-response/results/{id}` |
+| **Attack Surface** | `POST /api/v1/attack-surface/scan`, `GET /api/v1/attack-surface/results/{id}` |
 | **Analytics** | `GET /api/v1/analytics/mttr`, `GET /api/v1/analytics/resolution-rate` |
 | **Tenant Isolation** | `POST /api/v1/tenant-isolation`, `GET /api/v1/tenant-isolation/{id}` |
 | **Alert Noise** | `POST /api/v1/alert-noise/alerts`, `POST /api/v1/alert-noise/analyze` |
@@ -396,6 +403,12 @@ Default policies ship with the platform and can be customized per environment:
 | Phase 62 | Forensics & Deception Agents — Digital Forensics, Honeypots | Completed |
 | Phase 63 | Advanced Defense — Ransomware, DLP, APT, Zero-Day Detection | Completed |
 | Phase 64 | Risk & Compliance — FAIR, Privacy Impact, Vendor Risk, GRC | Completed |
+| Phase 65 | Incident Response Automation — Containment, Eradication, Recovery | Completed |
+| Phase 66 | Threat Intelligence Platform — Feed Normalization, Campaign Attribution | Completed |
+| Phase 67 | Attack Surface Management — Asset Discovery, Exposure Analysis | Completed |
+| Phase 68 | SOC Operations Intelligence — Alert Lifecycle, Detection Engineering | Completed |
+| Phase 69 | Advanced Analytics & Behavioral — UEBA, Entity Profiling, Risk Scoring | Completed |
+| Phase 70 | Compliance & Governance Automation — Policy Enforcement, Maturity Assessment | Completed |
 
 ## Documentation
 
