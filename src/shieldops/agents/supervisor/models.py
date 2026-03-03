@@ -22,6 +22,7 @@ class TaskType(StrEnum):
     INCIDENT_RESPONSE = "incident_response"
     ATTACK_SURFACE = "attack_surface"
     ML_GOVERNANCE = "ml_governance"
+    FINOPS_INTELLIGENCE = "finops_intelligence"
 
 
 class TaskStatus(StrEnum):

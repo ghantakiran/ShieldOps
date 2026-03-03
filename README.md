@@ -54,6 +54,7 @@ ShieldOps is built on a four-layer stack:
 │  Cost · Prediction · Supervisor · Custom agents      │
 │  SOC Analyst · Threat Hunter · Forensics · Deception │
 │  Incident Response · Attack Surface                   │
+│  ML Governance · FinOps Intelligence                  │
 ├─────────────────────────────────────────────────────┤
 │  Layer 2: Observability Ingestion                   │
 │  OpenTelemetry · Splunk · Datadog · Prometheus      │
@@ -82,6 +83,8 @@ ShieldOps is built on a four-layer stack:
 | **Deception** | Honeypot/honeytoken management | Deploy deception assets, monitor interactions, profile attackers |
 | **Incident Response** | Autonomous incident response | Containment, eradication, recovery, validation workflows |
 | **Attack Surface** | Attack surface management | Asset discovery, exposure analysis, remediation prioritization |
+| **ML Governance** | ML model governance | Drift detection, fairness scoring, adversarial testing, retraining pipelines |
+| **FinOps Intelligence** | Cost intelligence | Anomaly detection, root cause analysis, RI optimization, budget-aware scaling |
 
 ### Safety Model (Defense in Depth)
 
@@ -181,6 +184,8 @@ ShieldOps/
 │   │   ├── deception/                  # Deception/Honeypot agent
 │   │   ├── incident_response/          # Incident Response agent
 │   │   ├── attack_surface/             # Attack Surface agent
+│   │   ├── ml_governance/              # ML Governance agent
+│   │   ├── finops_intelligence/        # FinOps Intelligence agent
 │   │   ├── calibration/               # Agent confidence calibration
 │   │   └── registry.py                # Agent fleet registry
 │   ├── connectors/                    # Multi-cloud abstraction layer
@@ -238,7 +243,7 @@ ShieldOps/
 ├── dashboard-ui/                      # React + TypeScript dashboard
 │
 ├── tests/
-│   ├── unit/                          # Unit tests (~35,256 tests)
+│   ├── unit/                          # Unit tests (~38,562 tests)
 │   └── integration/                   # Integration tests
 │
 ├── docs/
@@ -270,6 +275,8 @@ ShieldOps/
 | **SOC Analyst** | `POST /api/v1/soc/analyze`, `GET /api/v1/soc/results/{id}` |
 | **Incident Response** | `POST /api/v1/incident-response/respond`, `GET /api/v1/incident-response/results/{id}` |
 | **Attack Surface** | `POST /api/v1/attack-surface/scan`, `GET /api/v1/attack-surface/results/{id}` |
+| **ML Governance** | `POST /api/v1/ml-governance/evaluate`, `GET /api/v1/ml-governance/results/{id}` |
+| **FinOps Intelligence** | `POST /api/v1/finops/analyze`, `GET /api/v1/finops/results/{id}` |
 | **Analytics** | `GET /api/v1/analytics/mttr`, `GET /api/v1/analytics/resolution-rate` |
 | **Tenant Isolation** | `POST /api/v1/tenant-isolation`, `GET /api/v1/tenant-isolation/{id}` |
 | **Alert Noise** | `POST /api/v1/alert-noise/alerts`, `POST /api/v1/alert-noise/analyze` |
@@ -409,6 +416,12 @@ Default policies ship with the platform and can be customized per environment:
 | Phase 68 | SOC Operations Intelligence — Alert Lifecycle, Detection Engineering | Completed |
 | Phase 69 | Advanced Analytics & Behavioral — UEBA, Entity Profiling, Risk Scoring | Completed |
 | Phase 70 | Compliance & Governance Automation — Policy Enforcement, Maturity Assessment | Completed |
+| Phase 71 | ML Model Governance & AI Safety — Drift Detection, Fairness, Adversarial Testing | Completed |
+| Phase 72 | Supply Chain Security — SBOM, Dependency Scanning, Build Verification | Completed |
+| Phase 73 | Advanced FinOps & Cost Intelligence — Anomaly Detection, RI Optimization | Completed |
+| Phase 74 | Privacy & Data Governance — PII Classification, Consent, GDPR/CCPA | Completed |
+| Phase 75 | Organizational Intelligence — Team Health, Burnout Detection, Knowledge Gaps | Completed |
+| Phase 76 | Platform Resilience & Chaos Engineering — Failure Injection, DR Testing | Completed |
 
 ## Documentation
 

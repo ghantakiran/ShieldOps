@@ -3212,6 +3212,16 @@ class Settings(BaseSettings):
     attack_surface_scan_timeout_seconds: int = 600
     attack_surface_max_concurrent_scans: int = 5
 
+    # Phase 71: ML Governance Agent
+    ml_governance_agent_enabled: bool = True
+    ml_governance_evaluation_timeout_seconds: int = 600
+    ml_governance_max_concurrent_evaluations: int = 5
+
+    # Phase 73: FinOps Intelligence Agent
+    finops_intelligence_agent_enabled: bool = True
+    finops_analysis_timeout_seconds: int = 600
+    finops_max_concurrent_analyses: int = 5
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",

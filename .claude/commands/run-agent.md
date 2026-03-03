@@ -5,7 +5,7 @@ Test-run a ShieldOps agent workflow locally with mock data.
 ## Usage
 `/run-agent <agent-type> [--environment <env>] [--mock]`
 
-Agent types: `investigation`, `remediation`, `security`, `cost`, `learning`, `supervisor`, `soc_analyst`, `threat_hunter`, `forensics`, `deception`, `incident_response`, `attack_surface`
+Agent types: `investigation`, `remediation`, `security`, `cost`, `learning`, `supervisor`, `soc_analyst`, `threat_hunter`, `forensics`, `deception`, `incident_response`, `attack_surface`, `ml_governance`, `finops_intelligence`
 
 ## Process
 
