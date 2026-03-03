@@ -85,6 +85,8 @@ ShieldOps is built on a four-layer stack:
 | **Attack Surface** | Attack surface management | Asset discovery, exposure analysis, remediation prioritization |
 | **ML Governance** | ML model governance | Drift detection, fairness scoring, adversarial testing, retraining pipelines |
 | **FinOps Intelligence** | Cost intelligence | Anomaly detection, root cause analysis, RI optimization, budget-aware scaling |
+| **Zero Trust** | Zero trust architecture | Identity verification, device posture, access evaluation, policy enforcement |
+| **Threat Automation** | Threat detection & hunting | Threat detection, behavior analysis, intel correlation, automated response |
 
 ### Safety Model (Defense in Depth)
 
@@ -277,6 +279,8 @@ ShieldOps/
 | **Attack Surface** | `POST /api/v1/attack-surface/scan`, `GET /api/v1/attack-surface/results/{id}` |
 | **ML Governance** | `POST /api/v1/ml-governance/evaluate`, `GET /api/v1/ml-governance/results/{id}` |
 | **FinOps Intelligence** | `POST /api/v1/finops/analyze`, `GET /api/v1/finops/results/{id}` |
+| **Zero Trust** | `POST /api/v1/zero-trust/assess`, `GET /api/v1/zero-trust/results/{id}` |
+| **Threat Automation** | `POST /api/v1/threat-automation/hunt`, `GET /api/v1/threat-automation/results/{id}` |
 | **Analytics** | `GET /api/v1/analytics/mttr`, `GET /api/v1/analytics/resolution-rate` |
 | **Tenant Isolation** | `POST /api/v1/tenant-isolation`, `GET /api/v1/tenant-isolation/{id}` |
 | **Alert Noise** | `POST /api/v1/alert-noise/alerts`, `POST /api/v1/alert-noise/analyze` |
@@ -422,6 +426,12 @@ Default policies ship with the platform and can be customized per environment:
 | Phase 74 | Privacy & Data Governance — PII Classification, Consent, GDPR/CCPA | Completed |
 | Phase 75 | Organizational Intelligence — Team Health, Burnout Detection, Knowledge Gaps | Completed |
 | Phase 76 | Platform Resilience & Chaos Engineering — Failure Injection, DR Testing | Completed |
+| Phase 77 | Zero Trust Architecture & Identity Security — Microsegmentation, MFA, JIT | Completed |
+| Phase 78 | Cloud Native Security & Container Defense — K8s RBAC, Admission, Runtime | Completed |
+| Phase 79 | Advanced Threat Detection & Hunting — Ransomware, C2, Lateral Movement | Completed |
+| Phase 80 | Security Operations Automation — MTTD/MTTR, Alert Quality, SOC Perf | Completed |
+| Phase 81 | Critical Asset Protection & Data Security — Crown Jewel, Encryption, DLP | Completed |
+| Phase 82 | Security Governance & Compliance — Policy Conflict, Evidence, Controls | Completed |
 
 ## Documentation
 
