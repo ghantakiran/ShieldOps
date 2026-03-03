@@ -25,6 +25,9 @@ class TaskType(StrEnum):
     FINOPS_INTELLIGENCE = "finops_intelligence"
     ZERO_TRUST = "zero_trust"
     THREAT_AUTOMATION = "threat_automation"
+    SOAR_ORCHESTRATION = "soar_orchestration"
+    ITDR = "itdr"
+    AUTO_REMEDIATION = "auto_remediation"
 
 
 class TaskStatus(StrEnum):

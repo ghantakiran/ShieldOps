@@ -10,14 +10,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, PlainTextResponse
 
 from shieldops.agents.attack_surface.runner import AttackSurfaceRunner
+from shieldops.agents.auto_remediation.runner import AutoRemediationRunner
 from shieldops.agents.cost.runner import CostRunner
 from shieldops.agents.finops_intelligence.runner import FinOpsIntelligenceRunner
 from shieldops.agents.incident_response.runner import IncidentResponseRunner
 from shieldops.agents.investigation.runner import InvestigationRunner
+from shieldops.agents.itdr.runner import ITDRRunner
 from shieldops.agents.learning.runner import LearningRunner
 from shieldops.agents.ml_governance.runner import MLGovernanceRunner
 from shieldops.agents.remediation.runner import RemediationRunner
 from shieldops.agents.security.runner import SecurityRunner
+from shieldops.agents.soar_orchestration.runner import SOAROrchestrationRunner
 from shieldops.agents.soc_analyst.runner import SOCAnalystRunner
 from shieldops.agents.supervisor.runner import SupervisorRunner
 from shieldops.agents.threat_automation.runner import ThreatAutomationRunner
@@ -26,17 +29,20 @@ from shieldops.api.routes import (
     agents,
     analytics,
     attack_surface_agent,
+    auto_remediation,
     batch,
     cost,
     finops_intelligence,
     incident_response,
     investigations,
+    itdr,
     learning,
     ml_governance,
     remediations,
     search,
     security,
     security_chat,
+    soar_orchestration,
     soc_analyst,
     supervisor,
     teams,
@@ -718,6 +724,39 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     except Exception as e:
         logger.warning("threat_automation_runner_init_failed", error=str(e))
 
+    # SOAR Orchestration runner
+    soar_runner = None
+    try:
+        soar_runner = SOAROrchestrationRunner(
+            repository=repository,
+        )
+        soar_orchestration.set_runner(soar_runner)
+        logger.info("soar_orchestration_runner_initialized")
+    except Exception as e:
+        logger.warning("soar_orchestration_runner_init_failed", error=str(e))
+
+    # ITDR runner
+    itdr_runner = None
+    try:
+        itdr_runner = ITDRRunner(
+            repository=repository,
+        )
+        itdr.set_runner(itdr_runner)
+        logger.info("itdr_runner_initialized")
+    except Exception as e:
+        logger.warning("itdr_runner_init_failed", error=str(e))
+
+    # Auto-Remediation runner
+    ar_runner = None
+    try:
+        ar_runner = AutoRemediationRunner(
+            repository=repository,
+        )
+        auto_remediation.set_runner(ar_runner)
+        logger.info("auto_remediation_runner_initialized")
+    except Exception as e:
+        logger.warning("auto_remediation_runner_init_failed", error=str(e))
+
     # Supervisor — orchestrates all specialist agents
     sup_runner = SupervisorRunner(
         agent_runners={
@@ -736,6 +775,9 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
             "finops_intelligence": finops_runner,
             "zero_trust": zt_runner,
             "threat_automation": ta_runner,
+            "soar_orchestration": soar_runner,
+            "itdr": itdr_runner,
+            "auto_remediation": ar_runner,
         },
         playbook_loader=playbook_loader,
         notification_channels=notification_channels,
@@ -13528,6 +13570,13 @@ def create_app() -> FastAPI:
     app.include_router(zero_trust.router, prefix=settings.api_prefix, tags=["Zero Trust"])
     app.include_router(
         threat_automation.router, prefix=settings.api_prefix, tags=["Threat Automation"]
+    )
+    app.include_router(
+        soar_orchestration.router, prefix=settings.api_prefix, tags=["SOAR Orchestration"]
+    )
+    app.include_router(itdr.router, prefix=settings.api_prefix, tags=["ITDR"])
+    app.include_router(
+        auto_remediation.router, prefix=settings.api_prefix, tags=["Auto-Remediation"]
     )
     app.include_router(batch.router, prefix=settings.api_prefix, tags=["Batch"])
     app.include_router(search.router, prefix=settings.api_prefix, tags=["Search"])

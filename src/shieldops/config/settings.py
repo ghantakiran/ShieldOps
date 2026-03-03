@@ -3232,6 +3232,21 @@ class Settings(BaseSettings):
     threat_automation_hunt_timeout_seconds: int = 600
     threat_automation_max_concurrent_hunts: int = 5
 
+    # Phase 83: SOAR Orchestration Agent
+    soar_orchestration_agent_enabled: bool = True
+    soar_orchestration_timeout_seconds: int = 600
+    soar_orchestration_max_concurrent: int = 5
+
+    # Phase 84: ITDR Agent
+    itdr_agent_enabled: bool = True
+    itdr_detection_timeout_seconds: int = 600
+    itdr_max_concurrent_detections: int = 5
+
+    # Phase 86: Auto-Remediation Agent
+    auto_remediation_agent_enabled: bool = True
+    auto_remediation_timeout_seconds: int = 600
+    auto_remediation_max_concurrent: int = 5
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",
