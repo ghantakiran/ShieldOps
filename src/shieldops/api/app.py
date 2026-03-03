@@ -14,16 +14,23 @@ from shieldops.agents.auto_remediation.runner import AutoRemediationRunner
 from shieldops.agents.cost.runner import CostRunner
 from shieldops.agents.finops_intelligence.runner import FinOpsIntelligenceRunner
 from shieldops.agents.incident_response.runner import IncidentResponseRunner
+from shieldops.agents.intelligent_automation.runner import (
+    IntelligentAutomationRunner,
+)
 from shieldops.agents.investigation.runner import InvestigationRunner
 from shieldops.agents.itdr.runner import ITDRRunner
 from shieldops.agents.learning.runner import LearningRunner
 from shieldops.agents.ml_governance.runner import MLGovernanceRunner
+from shieldops.agents.observability_intelligence.runner import (
+    ObservabilityIntelligenceRunner,
+)
 from shieldops.agents.remediation.runner import RemediationRunner
 from shieldops.agents.security.runner import SecurityRunner
 from shieldops.agents.soar_orchestration.runner import SOAROrchestrationRunner
 from shieldops.agents.soc_analyst.runner import SOCAnalystRunner
 from shieldops.agents.supervisor.runner import SupervisorRunner
 from shieldops.agents.threat_automation.runner import ThreatAutomationRunner
+from shieldops.agents.xdr.runner import XDRRunner
 from shieldops.agents.zero_trust.runner import ZeroTrustRunner
 from shieldops.api.routes import (
     agents,
@@ -34,10 +41,12 @@ from shieldops.api.routes import (
     cost,
     finops_intelligence,
     incident_response,
+    intelligent_automation,
     investigations,
     itdr,
     learning,
     ml_governance,
+    observability_intelligence,
     remediations,
     search,
     security,
@@ -49,6 +58,7 @@ from shieldops.api.routes import (
     threat_automation,
     usage,
     vulnerabilities,
+    xdr,
     zero_trust,
 )
 from shieldops.config import settings
@@ -757,6 +767,45 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     except Exception as e:
         logger.warning("auto_remediation_runner_init_failed", error=str(e))
 
+    # Observability Intelligence runner
+    oi_runner = None
+    try:
+        oi_runner = ObservabilityIntelligenceRunner(
+            repository=repository,
+        )
+        observability_intelligence.set_runner(oi_runner)
+        logger.info("observability_intelligence_runner_initialized")
+    except Exception as e:
+        logger.warning(
+            "observability_intelligence_runner_init_failed",
+            error=str(e),
+        )
+
+    # XDR runner
+    xdr_runner = None
+    try:
+        xdr_runner = XDRRunner(
+            repository=repository,
+        )
+        xdr.set_runner(xdr_runner)
+        logger.info("xdr_runner_initialized")
+    except Exception as e:
+        logger.warning("xdr_runner_init_failed", error=str(e))
+
+    # Intelligent Automation runner
+    ia_runner = None
+    try:
+        ia_runner = IntelligentAutomationRunner(
+            repository=repository,
+        )
+        intelligent_automation.set_runner(ia_runner)
+        logger.info("intelligent_automation_runner_initialized")
+    except Exception as e:
+        logger.warning(
+            "intelligent_automation_runner_init_failed",
+            error=str(e),
+        )
+
     # Supervisor — orchestrates all specialist agents
     sup_runner = SupervisorRunner(
         agent_runners={
@@ -778,6 +827,9 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
             "soar_orchestration": soar_runner,
             "itdr": itdr_runner,
             "auto_remediation": ar_runner,
+            "observability_intelligence": oi_runner,
+            "xdr": xdr_runner,
+            "intelligent_automation": ia_runner,
         },
         playbook_loader=playbook_loader,
         notification_channels=notification_channels,

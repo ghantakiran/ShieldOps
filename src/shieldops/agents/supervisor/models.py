@@ -28,6 +28,9 @@ class TaskType(StrEnum):
     SOAR_ORCHESTRATION = "soar_orchestration"
     ITDR = "itdr"
     AUTO_REMEDIATION = "auto_remediation"
+    OBSERVABILITY_INTELLIGENCE = "observability_intelligence"
+    XDR = "xdr"
+    INTELLIGENT_AUTOMATION = "intelligent_automation"
 
 
 class TaskStatus(StrEnum):

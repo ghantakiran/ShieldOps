@@ -50,6 +50,13 @@ class TestSupervisorWiring:
             mock_soar = stack.enter_context(patch("shieldops.api.app.SOAROrchestrationRunner"))
             mock_itdr = stack.enter_context(patch("shieldops.api.app.ITDRRunner"))
             mock_ar = stack.enter_context(patch("shieldops.api.app.AutoRemediationRunner"))
+            mock_oi = stack.enter_context(
+                patch("shieldops.api.app.ObservabilityIntelligenceRunner"),
+            )
+            mock_xdr = stack.enter_context(patch("shieldops.api.app.XDRRunner"))
+            mock_ia = stack.enter_context(
+                patch("shieldops.api.app.IntelligentAutomationRunner"),
+            )
             mock_sup_cls = stack.enter_context(patch("shieldops.api.app.SupervisorRunner"))
 
             from shieldops.api.app import create_app
@@ -80,6 +87,9 @@ class TestSupervisorWiring:
                 assert "soar_orchestration" in runners
                 assert "itdr" in runners
                 assert "auto_remediation" in runners
+                assert "observability_intelligence" in runners
+                assert "xdr" in runners
+                assert "intelligent_automation" in runners
 
                 # Each value is the return_value of the corresponding mock class
                 assert runners["investigation"] is mock_inv.return_value
@@ -97,6 +107,9 @@ class TestSupervisorWiring:
                 assert runners["soar_orchestration"] is mock_soar.return_value
                 assert runners["itdr"] is mock_itdr.return_value
                 assert runners["auto_remediation"] is mock_ar.return_value
+                assert runners["observability_intelligence"] is mock_oi.return_value
+                assert runners["xdr"] is mock_xdr.return_value
+                assert runners["intelligent_automation"] is mock_ia.return_value
 
                 # Runner injected into route module
                 assert supervisor._runner is mock_sup_cls.return_value

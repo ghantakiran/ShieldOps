@@ -3247,6 +3247,21 @@ class Settings(BaseSettings):
     auto_remediation_timeout_seconds: int = 600
     auto_remediation_max_concurrent: int = 5
 
+    # Phase 89: Observability Intelligence Agent
+    observability_intelligence_agent_enabled: bool = True
+    observability_intelligence_timeout_seconds: int = 600
+    observability_intelligence_max_concurrent: int = 5
+
+    # Phase 91: XDR Agent
+    xdr_agent_enabled: bool = True
+    xdr_timeout_seconds: int = 600
+    xdr_max_concurrent: int = 5
+
+    # Phase 93: Intelligent Automation Agent
+    intelligent_automation_agent_enabled: bool = True
+    intelligent_automation_timeout_seconds: int = 600
+    intelligent_automation_max_concurrent: int = 5
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",
