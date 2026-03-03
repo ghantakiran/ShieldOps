@@ -93,6 +93,9 @@ ShieldOps is built on a four-layer stack:
 | **Observability Intelligence** | Multi-signal observability analysis | Signal collection, correlation, insights, recommendations |
 | **XDR** | Extended detection & response | Cross-domain telemetry, threat correlation, attack stories, coordinated response |
 | **Intelligent Automation** | ML-driven automation & self-healing | Situation assessment, strategy selection, automation execution, validation |
+| **Platform Intelligence** | Platform-wide data analytics | Telemetry gathering, pattern analysis, insight computation, strategy generation |
+| **Security Convergence** | Unified security defense | Posture collection, signal unification, defense evaluation, response coordination |
+| **Autonomous Defense** | Autonomous security defense | Threat assessment, defense selection, countermeasure deployment, protection validation |
 
 ### Safety Model (Defense in Depth)
 
@@ -293,6 +296,9 @@ ShieldOps/
 | **Observability Intelligence** | `POST /api/v1/observability-intelligence/analyze`, `GET /api/v1/observability-intelligence/results/{id}` |
 | **XDR** | `POST /api/v1/xdr/investigate`, `GET /api/v1/xdr/results/{id}` |
 | **Intelligent Automation** | `POST /api/v1/intelligent-automation/execute`, `GET /api/v1/intelligent-automation/results/{id}` |
+| **Platform Intelligence** | `POST /api/v1/platform-intelligence/analyze`, `GET /api/v1/platform-intelligence/results/{id}` |
+| **Security Convergence** | `POST /api/v1/security-convergence/evaluate`, `GET /api/v1/security-convergence/results/{id}` |
+| **Autonomous Defense** | `POST /api/v1/autonomous-defense/protect`, `GET /api/v1/autonomous-defense/results/{id}` |
 | **Analytics** | `GET /api/v1/analytics/mttr`, `GET /api/v1/analytics/resolution-rate` |
 | **Tenant Isolation** | `POST /api/v1/tenant-isolation`, `GET /api/v1/tenant-isolation/{id}` |
 | **Alert Noise** | `POST /api/v1/alert-noise/alerts`, `POST /api/v1/alert-noise/analyze` |
@@ -444,6 +450,24 @@ Default policies ship with the platform and can be customized per environment:
 | Phase 80 | Security Operations Automation — MTTD/MTTR, Alert Quality, SOC Perf | Completed |
 | Phase 81 | Critical Asset Protection & Data Security — Crown Jewel, Encryption, DLP | Completed |
 | Phase 82 | Security Governance & Compliance — Policy Conflict, Evidence, Controls | Completed |
+| Phase 83 | Advanced Threat Intelligence — Campaign Attribution, Strategic Landscape | Completed |
+| Phase 84 | Attack Surface Management — External Discovery, Exposure Analysis | Completed |
+| Phase 85 | Security Alert Intelligence — Lifecycle, Tuning, Workflow Automation | Completed |
+| Phase 86 | Supply Chain Security — Credential Abuse, Lateral Movement, SBOM | Completed |
+| Phase 87 | Zero Trust Deep Defense — Microsegmentation, Identity Verification | Completed |
+| Phase 88 | Advanced Malware Defense — Ransomware, C2, Fileless Detection | Completed |
+| Phase 89 | Observability Intelligence Platform — Multi-Signal Correlation | Completed |
+| Phase 90 | Advanced Observability Engineering — eBPF, Dashboard Intelligence | Completed |
+| Phase 91 | Extended Detection & Response (XDR) — Cross-Domain Threat Correlation | Completed |
+| Phase 92 | Security Operations Optimization — SOC Workflow, Purple Team | Completed |
+| Phase 93 | Intelligent Automation & Self-Healing — ML-Driven Ops, Autonomous Healing | Completed |
+| Phase 94 | Autonomous Operations & Optimization — Fleet Management, Chaos Intelligence | Completed |
+| Phase 95 | Platform Intelligence & Data Analytics — Telemetry Lake, Signal Intelligence | Completed |
+| Phase 96 | Advanced Threat Intelligence Platform — Adversary Modeling, Dark Web Intel | Completed |
+| Phase 97 | Security Convergence & Unified Defense — Converged Detection, Mesh Security | Completed |
+| Phase 98 | Predictive Operations Intelligence — Failure Prediction, Capacity Planning | Completed |
+| Phase 99 | Autonomous Security & Defense — Self-Defending Networks, Attack Disruption | Completed |
+| Phase 100 | Platform Maturity & Optimization — Excellence Scoring, Evolution Planning | Completed |
 
 ## Documentation
 
