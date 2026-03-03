@@ -90,6 +90,9 @@ ShieldOps is built on a four-layer stack:
 | **SOAR Orchestration** | Security orchestration & response | Incident triage, playbook execution, response validation |
 | **ITDR** | Identity threat detection & response | Identity scanning, attack path analysis, credential compromise detection |
 | **Auto-Remediation** | Autonomous remediation | Issue assessment, remediation planning, fix execution, verification |
+| **Observability Intelligence** | Multi-signal observability analysis | Signal collection, correlation, insights, recommendations |
+| **XDR** | Extended detection & response | Cross-domain telemetry, threat correlation, attack stories, coordinated response |
+| **Intelligent Automation** | ML-driven automation & self-healing | Situation assessment, strategy selection, automation execution, validation |
 
 ### Safety Model (Defense in Depth)
 
@@ -287,6 +290,9 @@ ShieldOps/
 | **SOAR Orchestration** | `POST /api/v1/soar/orchestrate`, `GET /api/v1/soar/results/{id}` |
 | **ITDR** | `POST /api/v1/itdr/detect`, `GET /api/v1/itdr/results/{id}` |
 | **Auto-Remediation** | `POST /api/v1/auto-remediation/execute`, `GET /api/v1/auto-remediation/results/{id}` |
+| **Observability Intelligence** | `POST /api/v1/observability-intelligence/analyze`, `GET /api/v1/observability-intelligence/results/{id}` |
+| **XDR** | `POST /api/v1/xdr/investigate`, `GET /api/v1/xdr/results/{id}` |
+| **Intelligent Automation** | `POST /api/v1/intelligent-automation/execute`, `GET /api/v1/intelligent-automation/results/{id}` |
 | **Analytics** | `GET /api/v1/analytics/mttr`, `GET /api/v1/analytics/resolution-rate` |
 | **Tenant Isolation** | `POST /api/v1/tenant-isolation`, `GET /api/v1/tenant-isolation/{id}` |
 | **Alert Noise** | `POST /api/v1/alert-noise/alerts`, `POST /api/v1/alert-noise/analyze` |
