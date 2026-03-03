@@ -20,6 +20,8 @@ from shieldops.agents.remediation.runner import RemediationRunner
 from shieldops.agents.security.runner import SecurityRunner
 from shieldops.agents.soc_analyst.runner import SOCAnalystRunner
 from shieldops.agents.supervisor.runner import SupervisorRunner
+from shieldops.agents.threat_automation.runner import ThreatAutomationRunner
+from shieldops.agents.zero_trust.runner import ZeroTrustRunner
 from shieldops.api.routes import (
     agents,
     analytics,
@@ -38,8 +40,10 @@ from shieldops.api.routes import (
     soc_analyst,
     supervisor,
     teams,
+    threat_automation,
     usage,
     vulnerabilities,
+    zero_trust,
 )
 from shieldops.config import settings
 from shieldops.connectors.factory import create_connector_router
@@ -144,6 +148,8 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
                 "incident_response",
                 "attack_surface",
                 "finops_intelligence",
+                "zero_trust",
+                "threat_automation",
             ):
                 try:
                     await agent_registry.register(
@@ -689,6 +695,29 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     except Exception as e:
         logger.warning("finops_intelligence_runner_init_failed", error=str(e))
 
+    # Zero Trust runner
+    zt_runner = None
+    try:
+        zt_runner = ZeroTrustRunner(
+            policy_engine=policy_engine,
+            repository=repository,
+        )
+        zero_trust.set_runner(zt_runner)
+        logger.info("zero_trust_runner_initialized")
+    except Exception as e:
+        logger.warning("zero_trust_runner_init_failed", error=str(e))
+
+    # Threat Automation runner
+    ta_runner = None
+    try:
+        ta_runner = ThreatAutomationRunner(
+            repository=repository,
+        )
+        threat_automation.set_runner(ta_runner)
+        logger.info("threat_automation_runner_initialized")
+    except Exception as e:
+        logger.warning("threat_automation_runner_init_failed", error=str(e))
+
     # Supervisor — orchestrates all specialist agents
     sup_runner = SupervisorRunner(
         agent_runners={
@@ -705,6 +734,8 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
             "attack_surface": as_runner,
             "ml_governance": ml_gov_runner,
             "finops_intelligence": finops_runner,
+            "zero_trust": zt_runner,
+            "threat_automation": ta_runner,
         },
         playbook_loader=playbook_loader,
         notification_channels=notification_channels,
@@ -13493,6 +13524,10 @@ def create_app() -> FastAPI:
     app.include_router(ml_governance.router, prefix=settings.api_prefix, tags=["ML Governance"])
     app.include_router(
         finops_intelligence.router, prefix=settings.api_prefix, tags=["FinOps Intelligence"]
+    )
+    app.include_router(zero_trust.router, prefix=settings.api_prefix, tags=["Zero Trust"])
+    app.include_router(
+        threat_automation.router, prefix=settings.api_prefix, tags=["Threat Automation"]
     )
     app.include_router(batch.router, prefix=settings.api_prefix, tags=["Batch"])
     app.include_router(search.router, prefix=settings.api_prefix, tags=["Search"])

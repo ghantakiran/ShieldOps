@@ -23,6 +23,8 @@ class TaskType(StrEnum):
     ATTACK_SURFACE = "attack_surface"
     ML_GOVERNANCE = "ml_governance"
     FINOPS_INTELLIGENCE = "finops_intelligence"
+    ZERO_TRUST = "zero_trust"
+    THREAT_AUTOMATION = "threat_automation"
 
 
 class TaskStatus(StrEnum):

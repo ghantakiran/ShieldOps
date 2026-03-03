@@ -3222,6 +3222,16 @@ class Settings(BaseSettings):
     finops_analysis_timeout_seconds: int = 600
     finops_max_concurrent_analyses: int = 5
 
+    # Phase 77: Zero Trust Agent
+    zero_trust_agent_enabled: bool = True
+    zero_trust_assessment_timeout_seconds: int = 600
+    zero_trust_max_concurrent_assessments: int = 5
+
+    # Phase 79: Threat Automation Agent
+    threat_automation_agent_enabled: bool = True
+    threat_automation_hunt_timeout_seconds: int = 600
+    threat_automation_max_concurrent_hunts: int = 5
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",
