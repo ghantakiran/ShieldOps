@@ -61,7 +61,7 @@ class TestEnums:
         assert AuditPattern.BULK_OPERATION == "bulk_operation"
 
     def test_pattern_policy_bypass(self):
-        assert AuditPattern.POLICY_BYPASS == "policy_bypass"
+        assert AuditPattern.POLICY_BYPASS == "policy_bypass"  # noqa: S105
 
 
 class TestModels:

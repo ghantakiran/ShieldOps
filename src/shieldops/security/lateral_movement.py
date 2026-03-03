@@ -17,7 +17,7 @@ logger = structlog.get_logger()
 
 
 class MovementType(StrEnum):
-    CREDENTIAL_HOPPING = "credential_hopping"
+    CREDENTIAL_HOPPING = "credential_hopping"  # noqa: S105
     SERVICE_PIVOTING = "service_pivoting"
     PRIVILEGE_ESCALATION = "privilege_escalation"
     DATA_STAGING = "data_staging"

@@ -459,4 +459,4 @@ class TestRegisterExceptionHandlers:
         client = TestClient(app, raise_server_exceptions=False)
         resp = client.get("/secure")
         assert resp.status_code == 401
-        assert resp.json()["detail"] == "Token expired"
+        assert resp.json()["detail"] == "Token expired"  # noqa: S105

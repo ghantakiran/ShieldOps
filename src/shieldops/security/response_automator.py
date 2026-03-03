@@ -19,7 +19,7 @@ logger = structlog.get_logger()
 class ResponseAction(StrEnum):
     ISOLATE_HOST = "isolate_host"
     BLOCK_IP = "block_ip"
-    REVOKE_CREDENTIALS = "revoke_credentials"
+    REVOKE_CREDENTIALS = "revoke_credentials"  # noqa: S105
     QUARANTINE = "quarantine"
     ESCALATE = "escalate"
 

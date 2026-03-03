@@ -41,7 +41,7 @@ class TestEnums:
 
     # ChaosOutcome (5)
     def test_outcome_passed(self):
-        assert ChaosOutcome.PASSED == "passed"
+        assert ChaosOutcome.PASSED == "passed"  # noqa: S105
 
     def test_outcome_degraded(self):
         assert ChaosOutcome.DEGRADED == "degraded"

@@ -24,7 +24,7 @@ def _engine(**kw) -> APISecurityMonitor:
 
 class TestEnums:
     def test_threat_credential(self):
-        assert ThreatType.CREDENTIAL_STUFFING == "credential_stuffing"
+        assert ThreatType.CREDENTIAL_STUFFING == "credential_stuffing"  # noqa: S105
 
     def test_threat_rate(self):
         assert ThreatType.RATE_ABUSE == "rate_abuse"
@@ -57,7 +57,7 @@ class TestEnums:
         assert RiskLevel.CRITICAL == "critical"
 
     def test_mode_passive(self):
-        assert MonitoringMode.PASSIVE == "passive"
+        assert MonitoringMode.PASSIVE == "passive"  # noqa: S105
 
     def test_mode_active(self):
         assert MonitoringMode.ACTIVE == "active"

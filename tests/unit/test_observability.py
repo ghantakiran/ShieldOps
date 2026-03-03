@@ -113,7 +113,7 @@ class TestSplunkSource:
 
     @pytest.mark.asyncio
     async def test_query_logs_auth_header(self, splunk):
-        assert splunk._client.headers["Authorization"] == "Bearer test-token"
+        assert splunk._client.headers["Authorization"] == "Bearer test-token"  # noqa: S105
 
     @pytest.mark.asyncio
     async def test_query_logs_connection_error(self, splunk, time_range):

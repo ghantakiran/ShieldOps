@@ -10,9 +10,9 @@ from pydantic import BaseModel
 
 from shieldops.api.auth.dependencies import require_role
 from shieldops.billing.spot_instance_manager import (
-    FallbackStrategy,
-    InstanceStatus,
-    SpotMarket,
+    InstanceFamily,
+    InterruptionBehavior,
+    SpotStrategy,
 )
 
 logger = structlog.get_logger()
@@ -35,122 +35,73 @@ def _get_manager() -> Any:
     return _manager
 
 
-class RegisterInstanceRequest(BaseModel):
-    instance_id: str
-    instance_type: str
-    market: SpotMarket = SpotMarket.AWS_SPOT
-    hourly_rate: float = 0.0
-    on_demand_rate: float = 0.0
-    fallback_strategy: FallbackStrategy = FallbackStrategy.ON_DEMAND
-
-
-class RecordInterruptionRequest(BaseModel):
-    reason: str
-    warning_seconds: int = 0
-
-
-class ExecuteFallbackRequest(BaseModel):
-    strategy: FallbackStrategy
+class RecordSpotInstanceRequest(BaseModel):
+    spot_strategy: SpotStrategy = SpotStrategy.CAPACITY_OPTIMIZED
+    instance_family: InstanceFamily = InstanceFamily.GENERAL
+    interruption_behavior: InterruptionBehavior = InterruptionBehavior.TERMINATE
+    savings_pct: float = 0.0
+    on_demand_price: float = 0.0
+    spot_price: float = 0.0
+    service: str = ""
+    team: str = ""
 
 
 @sim_route.post("/instances")
-async def register_instance(
-    body: RegisterInstanceRequest,
+async def record_spot_instance(
+    body: RecordSpotInstanceRequest,
     _user: Any = Depends(require_role("operator")),  # type: ignore[arg-type]
 ) -> dict[str, Any]:
     manager = _get_manager()
-    instance = manager.register_instance(**body.model_dump())
-    return instance.model_dump()  # type: ignore[no-any-return]
+    record = manager.record_spot_instance(**body.model_dump())
+    return record.model_dump()  # type: ignore[no-any-return]
 
 
 @sim_route.get("/instances")
-async def list_instances(
-    market: SpotMarket | None = None,
-    status: InstanceStatus | None = None,
+async def list_spot_instances(
+    spot_strategy: SpotStrategy | None = None,
+    instance_family: InstanceFamily | None = None,
+    team: str | None = None,
     limit: int = 50,
     _user: Any = Depends(require_role("viewer")),  # type: ignore[arg-type]
 ) -> list[dict[str, Any]]:
     manager = _get_manager()
     return [  # type: ignore[no-any-return]
-        i.model_dump()
-        for i in manager.list_instances(
-            market=market,
-            status=status,
+        r.model_dump()
+        for r in manager.list_spot_instances(
+            spot_strategy=spot_strategy,
+            instance_family=instance_family,
+            team=team,
             limit=limit,
         )
     ]
 
 
-@sim_route.get("/instances/{spot_id}")
-async def get_instance(
-    spot_id: str,
+@sim_route.get("/instances/{record_id}")
+async def get_spot_instance(
+    record_id: str,
     _user: Any = Depends(require_role("viewer")),  # type: ignore[arg-type]
 ) -> dict[str, Any]:
     manager = _get_manager()
-    instance = manager.get_instance(spot_id)
-    if instance is None:
-        raise HTTPException(404, f"Instance '{spot_id}' not found")
-    return instance.model_dump()  # type: ignore[no-any-return]
+    record = manager.get_spot_instance(record_id)
+    if record is None:
+        raise HTTPException(404, f"Spot instance record '{record_id}' not found")
+    return record.model_dump()  # type: ignore[no-any-return]
 
 
-@sim_route.post("/instances/{spot_id}/interruption")
-async def record_interruption(
-    spot_id: str,
-    body: RecordInterruptionRequest,
-    _user: Any = Depends(require_role("operator")),  # type: ignore[arg-type]
-) -> dict[str, Any]:
-    manager = _get_manager()
-    event = manager.record_interruption(
-        spot_id,
-        body.reason,
-        body.warning_seconds,
-    )
-    if event is None:
-        raise HTTPException(404, f"Instance '{spot_id}' not found")
-    return event.model_dump()  # type: ignore[no-any-return]
-
-
-@sim_route.post("/instances/{spot_id}/fallback")
-async def execute_fallback(
-    spot_id: str,
-    body: ExecuteFallbackRequest,
-    _user: Any = Depends(require_role("operator")),  # type: ignore[arg-type]
-) -> dict[str, Any]:
-    manager = _get_manager()
-    instance = manager.execute_fallback(
-        spot_id,
-        body.strategy,
-    )
-    if instance is None:
-        raise HTTPException(404, f"Instance '{spot_id}' not found")
-    return instance.model_dump()  # type: ignore[no-any-return]
-
-
-@sim_route.get("/savings")
-async def get_savings(
-    _user: Any = Depends(require_role("viewer")),  # type: ignore[arg-type]
-) -> dict[str, Any]:
-    manager = _get_manager()
-    return manager.calculate_savings()  # type: ignore[no-any-return]
-
-
-@sim_route.get("/risk/{instance_type}")
-async def get_risk(
-    instance_type: str,
-    _user: Any = Depends(require_role("viewer")),  # type: ignore[arg-type]
-) -> dict[str, Any]:
-    manager = _get_manager()
-    return manager.predict_interruption_risk(  # type: ignore[no-any-return]
-        instance_type,
-    )
-
-
-@sim_route.get("/optimal-markets")
-async def get_optimal_markets(
+@sim_route.get("/high-savings")
+async def identify_high_savings(
     _user: Any = Depends(require_role("viewer")),  # type: ignore[arg-type]
 ) -> list[dict[str, Any]]:
     manager = _get_manager()
-    return manager.identify_optimal_markets()  # type: ignore[no-any-return]
+    return manager.identify_high_savings_spots()  # type: ignore[no-any-return]
+
+
+@sim_route.get("/rank")
+async def rank_by_savings(
+    _user: Any = Depends(require_role("viewer")),  # type: ignore[arg-type]
+) -> list[dict[str, Any]]:
+    manager = _get_manager()
+    return manager.rank_by_savings()  # type: ignore[no-any-return]
 
 
 @sim_route.get("/report")
@@ -158,7 +109,7 @@ async def get_report(
     _user: Any = Depends(require_role("viewer")),  # type: ignore[arg-type]
 ) -> dict[str, Any]:
     manager = _get_manager()
-    return manager.generate_spot_report().model_dump()  # type: ignore[no-any-return]
+    return manager.generate_report().model_dump()  # type: ignore[no-any-return]
 
 
 @sim_route.post("/clear")
@@ -166,8 +117,7 @@ async def clear_data(
     _user: Any = Depends(require_role("operator")),  # type: ignore[arg-type]
 ) -> dict[str, str]:
     manager = _get_manager()
-    manager.clear_data()
-    return {"status": "cleared"}
+    return manager.clear_data()  # type: ignore[no-any-return]
 
 
 @sim_route.get("/stats")

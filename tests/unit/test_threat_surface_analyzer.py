@@ -33,7 +33,7 @@ class TestEnums:
         assert SurfaceVector.DATA_STORE == "data_store"
 
     def test_vector_credential_store(self):
-        assert SurfaceVector.CREDENTIAL_STORE == "credential_store"
+        assert SurfaceVector.CREDENTIAL_STORE == "credential_store"  # noqa: S105
 
     def test_vector_admin_panel(self):
         assert SurfaceVector.ADMIN_PANEL == "admin_panel"

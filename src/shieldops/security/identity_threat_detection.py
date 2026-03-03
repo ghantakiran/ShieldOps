@@ -17,9 +17,9 @@ logger = structlog.get_logger()
 
 
 class IdentityThreat(StrEnum):
-    CREDENTIAL_STUFFING = "credential_stuffing"
+    CREDENTIAL_STUFFING = "credential_stuffing"  # noqa: S105
     ACCOUNT_TAKEOVER = "account_takeover"
-    MFA_BYPASS = "mfa_bypass"
+    MFA_BYPASS = "mfa_bypass"  # noqa: S105
     SESSION_HIJACK = "session_hijack"
     BRUTE_FORCE = "brute_force"
 

@@ -46,7 +46,7 @@ class TestComplianceFrameworkEnum:
 
 class TestControlStatusEnum:
     def test_passing(self) -> None:
-        assert ControlStatus.PASSING == "passing"
+        assert ControlStatus.PASSING == "passing"  # noqa: S105
 
     def test_failing(self) -> None:
         assert ControlStatus.FAILING == "failing"

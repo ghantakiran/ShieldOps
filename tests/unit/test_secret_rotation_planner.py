@@ -27,7 +27,7 @@ class TestEnums:
         assert SecretType.API_KEY == "api_key"
 
     def test_secret_type_database_credential(self):
-        assert SecretType.DATABASE_CREDENTIAL == "database_credential"
+        assert SecretType.DATABASE_CREDENTIAL == "database_credential"  # noqa: S105
 
     def test_secret_type_certificate(self):
         assert SecretType.CERTIFICATE == "certificate"

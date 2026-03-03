@@ -257,7 +257,7 @@ class TestSecurityManagementCheck:
         with patch("shieldops.compliance.hipaa.importlib.import_module") as mock_import:
             mock_import.return_value = MagicMock()
             status, details, evidence = await engine._check_security_mgmt()
-        assert status == "pass"
+        assert status == "pass"  # noqa: S105
         assert "OPA" in details
         assert evidence[0]["opa"] is True
         assert evidence[0]["security_agent"] is True
@@ -279,7 +279,7 @@ class TestSecurityOfficerCheck:
         mock_mod.UserRole = MagicMock()
         with patch("shieldops.compliance.hipaa.importlib.import_module", return_value=mock_mod):
             status, details, evidence = await engine._check_security_officer()
-        assert status == "pass"
+        assert status == "pass"  # noqa: S105
         assert evidence[0]["roles_defined"] is True
 
     @pytest.mark.asyncio
@@ -306,7 +306,7 @@ class TestWorkforceSecurityCheck:
         mock_mod.require_role = MagicMock()
         with patch("shieldops.compliance.hipaa.importlib.import_module", return_value=mock_mod):
             status, details, _ = await engine._check_workforce_security()
-        assert status == "pass"
+        assert status == "pass"  # noqa: S105
         assert "RBAC" in details
 
     @pytest.mark.asyncio
@@ -332,7 +332,7 @@ class TestAccessManagementCheck:
         with patch("shieldops.compliance.hipaa.importlib.import_module") as mock_import:
             mock_import.return_value = MagicMock()
             status, details, evidence = await engine._check_access_management()
-        assert status == "pass"
+        assert status == "pass"  # noqa: S105
         assert "permissions" in details.lower()
 
     @pytest.mark.asyncio
@@ -362,7 +362,7 @@ class TestIncidentProceduresCheck:
         with patch("shieldops.compliance.hipaa.importlib.import_module") as mock_import:
             mock_import.return_value = MagicMock()
             status, details, evidence = await engine._check_incident_procedures()
-        assert status == "pass"
+        assert status == "pass"  # noqa: S105
         assert "incident" in details.lower()
         assert evidence[0]["incident_agents"] is True
 
@@ -382,7 +382,7 @@ class TestContingencyPlanCheck:
         with patch("shieldops.compliance.hipaa.importlib.import_module") as mock_import:
             mock_import.return_value = MagicMock()
             status, details, evidence = await engine._check_contingency_plan()
-        assert status == "pass"
+        assert status == "pass"  # noqa: S105
         assert evidence[0]["rollback"] is True
         assert evidence[0]["approval"] is True
 
@@ -405,7 +405,7 @@ class TestFacilityAccessCheck:
     @pytest.mark.asyncio
     async def test_always_passes_cloud_hosted(self, engine: HIPAAEngine) -> None:
         status, details, evidence = await engine._check_facility_access()
-        assert status == "pass"
+        assert status == "pass"  # noqa: S105
         assert "cloud" in details.lower()
         assert evidence[0]["type"] == "deployment_check"
         assert evidence[0]["cloud_hosted"] is True
@@ -415,7 +415,7 @@ class TestWorkstationSecurityCheck:
     @pytest.mark.asyncio
     async def test_always_passes_api_based(self, engine: HIPAAEngine) -> None:
         status, details, evidence = await engine._check_workstation_security()
-        assert status == "pass"
+        assert status == "pass"  # noqa: S105
         assert "api" in details.lower()
         assert evidence[0]["type"] == "deployment_check"
         assert evidence[0]["api_based"] is True
@@ -433,7 +433,7 @@ class TestTechAccessControlCheck:
         mock_mod.create_token = MagicMock()
         with patch("shieldops.compliance.hipaa.importlib.import_module", return_value=mock_mod):
             status, details, evidence = await engine._check_tech_access_control()
-        assert status == "pass"
+        assert status == "pass"  # noqa: S105
         assert "JWT" in details
         assert evidence[0]["jwt_auth"] is True
 
@@ -460,7 +460,7 @@ class TestAuditControlsCheck:
         with patch("shieldops.compliance.hipaa.importlib.import_module") as mock_import:
             mock_import.return_value = MagicMock()
             status, details, evidence = await engine._check_audit_controls()
-        assert status == "pass"
+        assert status == "pass"  # noqa: S105
         assert "audit" in details.lower()
         assert evidence[0]["audit_routes"] is True
 
@@ -480,7 +480,7 @@ class TestIntegrityControlsCheck:
         with patch("shieldops.compliance.hipaa.importlib.import_module") as mock_import:
             mock_import.return_value = MagicMock()
             status, details, evidence = await engine._check_integrity_controls()
-        assert status == "pass"
+        assert status == "pass"  # noqa: S105
         assert "OPA" in details
         assert evidence[0]["policy_engine"] is True
 
@@ -500,7 +500,7 @@ class TestTransmissionSecurityCheck:
         with patch("shieldops.compliance.hipaa.importlib.import_module") as mock_import:
             mock_import.return_value = MagicMock()
             status, details, evidence = await engine._check_transmission_security()
-        assert status == "pass"
+        assert status == "pass"  # noqa: S105
         assert "HSTS" in details or "TLS" in details
         assert evidence[0]["security_headers"] is True
 
@@ -522,7 +522,7 @@ class TestEncryptionCheck:
             {"SHIELDOPS_DATABASE_URL": "postgresql://host/db?sslmode=require"},
         ):
             status, details, evidence = await engine._check_encryption()
-        assert status == "pass"
+        assert status == "pass"  # noqa: S105
         assert evidence[0]["db_encryption"] is True
 
     @pytest.mark.asyncio
@@ -532,7 +532,7 @@ class TestEncryptionCheck:
             {"SHIELDOPS_DATABASE_URL": "postgresql+asyncpg://host/db"},
         ):
             status, _, evidence = await engine._check_encryption()
-        assert status == "pass"
+        assert status == "pass"  # noqa: S105
         assert evidence[0]["db_encryption"] is True
 
     @pytest.mark.asyncio
@@ -727,7 +727,7 @@ class TestHIPAAEdgeCases:
         data = ctrl.model_dump()
         assert data["id"] == "HIPAA-TEST"
         assert data["safeguard"] == "technical"
-        assert data["status"] == "pass"
+        assert data["status"] == "pass"  # noqa: S105
 
     def test_hipaa_report_model_serialization(self) -> None:
         report = HIPAAReport(

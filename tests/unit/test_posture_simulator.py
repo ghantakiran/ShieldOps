@@ -53,7 +53,7 @@ class TestEnums:
         assert SimulationResult.UNDETECTED == "undetected"
 
     def test_result_bypassed(self):
-        assert SimulationResult.BYPASSED == "bypassed"
+        assert SimulationResult.BYPASSED == "bypassed"  # noqa: S105
 
     # PostureLevel (5)
     def test_posture_hardened(self):

@@ -73,7 +73,7 @@ class TestListCredentials:
         credentials = await store.list_credentials()
 
         assert len(credentials) == 2
-        assert credentials[0]["name"] == "db-password"
+        assert credentials[0]["name"] == "db-password"  # noqa: S105
         assert credentials[1]["name"] == "api-key"
 
     @pytest.mark.asyncio
@@ -127,7 +127,7 @@ class TestParseSecret:
         assert result["credential_id"] == secret["ARN"]
         assert result["credential_type"] == "database"
         assert result["service"] == "api"
-        assert result["name"] == "db-password"
+        assert result["name"] == "db-password"  # noqa: S105
         assert result["rotation_enabled"] is True
 
     def test_parse_with_rotation_date(self, store: AWSSecretsManagerStore) -> None:
@@ -149,8 +149,8 @@ class TestParseSecret:
         secret = {"ARN": "arn:test", "Name": "bare-secret", "Tags": []}
         result = store._parse_secret(secret)
 
-        assert result["credential_type"] == "secret"
-        assert result["service"] == "bare-secret"
+        assert result["credential_type"] == "secret"  # noqa: S105
+        assert result["service"] == "bare-secret"  # noqa: S105
 
     def test_parse_falls_back_to_name_for_credential_id(
         self, store: AWSSecretsManagerStore
@@ -158,7 +158,7 @@ class TestParseSecret:
         secret = {"Name": "my-secret", "Tags": []}
         result = store._parse_secret(secret)
 
-        assert result["credential_id"] == "my-secret"
+        assert result["credential_id"] == "my-secret"  # noqa: S105
 
 
 # ============================================================================
@@ -178,7 +178,7 @@ class TestRotateCredential:
         result = await store.rotate_credential("db-password", "database")
 
         assert result["success"] is True
-        assert result["credential_id"] == "db-password"
+        assert result["credential_id"] == "db-password"  # noqa: S105
         assert "v2-abc123" in result["message"]
         assert result["version_id"] == "v2-abc123"
 
@@ -211,7 +211,7 @@ class TestRotateCredential:
 class TestInit:
     def test_store_name(self) -> None:
         store = AWSSecretsManagerStore()
-        assert store.store_name == "aws_secrets_manager"
+        assert store.store_name == "aws_secrets_manager"  # noqa: S105
 
     def test_default_region(self) -> None:
         store = AWSSecretsManagerStore()

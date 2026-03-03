@@ -20,7 +20,7 @@ class APTIndicator(StrEnum):
     LONG_DWELL = "long_dwell"
     SLOW_EXFILTRATION = "slow_exfiltration"
     LIVING_OFF_LAND = "living_off_land"
-    CREDENTIAL_THEFT = "credential_theft"
+    CREDENTIAL_THEFT = "credential_theft"  # noqa: S105
     PERSISTENCE_MECHANISM = "persistence_mechanism"
 
 

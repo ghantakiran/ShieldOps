@@ -171,7 +171,7 @@ class TestVerifyBackup:
         assert result.passed is True
         assert result.integrity_check is True
         assert result.restore_test is False
-        assert result.details == "Verification passed"
+        assert result.details == "Verification passed"  # noqa: S105
         updated = eng.get_backup(record.id)
         assert updated.status == VerificationStatus.VERIFIED
         assert updated.verified_at is not None

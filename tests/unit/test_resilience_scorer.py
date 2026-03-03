@@ -47,7 +47,7 @@ class TestEnums:
         assert RedundancyLevel.SINGLE == "single"
 
     def test_redundancy_active_passive(self):
-        assert RedundancyLevel.ACTIVE_PASSIVE == "active_passive"
+        assert RedundancyLevel.ACTIVE_PASSIVE == "active_passive"  # noqa: S105
 
     def test_redundancy_active_active(self):
         assert RedundancyLevel.ACTIVE_ACTIVE == "active_active"

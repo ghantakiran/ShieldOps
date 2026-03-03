@@ -54,7 +54,7 @@ class TestEnums:
         assert ComplianceGrade.F == "f"
 
     def test_status_passed(self):
-        assert CheckStatus.PASSED == "passed"
+        assert CheckStatus.PASSED == "passed"  # noqa: S105
 
     def test_status_failed(self):
         assert CheckStatus.FAILED == "failed"

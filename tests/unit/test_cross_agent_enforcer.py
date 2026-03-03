@@ -69,7 +69,7 @@ class TestEnums:
         assert ViolationType.UNAUTHORIZED_ACTION == "unauthorized_action"
 
     def test_violation_policy_bypass(self):
-        assert ViolationType.POLICY_BYPASS == "policy_bypass"
+        assert ViolationType.POLICY_BYPASS == "policy_bypass"  # noqa: S105
 
 
 # -------------------------------------------------------------------

@@ -95,7 +95,7 @@ class TestAzureKeyVaultStore:
         props.content_type = "text/plain"
 
         result = store._parse_properties(props)
-        assert result["credential_id"] == "azure:my-secret"
+        assert result["credential_id"] == "azure:my-secret"  # noqa: S105
         assert result["service"] == "myapp"
         assert result["last_rotated"] is not None
 
@@ -110,8 +110,8 @@ class TestAzureKeyVaultStore:
         props.content_type = None
 
         result = store._parse_properties(props)
-        assert result["credential_type"] == "secret"
-        assert result["service"] == "bare-secret"
+        assert result["credential_type"] == "secret"  # noqa: S105
+        assert result["service"] == "bare-secret"  # noqa: S105
 
     def test_parse_properties_with_expiry(self, store):
         expiry = datetime.now(UTC) + timedelta(days=7)

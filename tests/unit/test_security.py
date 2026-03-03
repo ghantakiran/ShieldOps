@@ -484,7 +484,7 @@ class TestGraphRouting:
     def test_should_check_credentials_full_scan(self, scan_state):
         from shieldops.agents.security.graph import should_check_credentials
 
-        assert should_check_credentials(scan_state) == "check_credentials"
+        assert should_check_credentials(scan_state) == "check_credentials"  # noqa: S105
 
     def test_should_skip_credentials_cve_only(self, scan_state):
         from shieldops.agents.security.graph import should_check_credentials
@@ -786,7 +786,7 @@ class TestSecurityModels:
             status="passing",
             severity="critical",
         )
-        assert control.status == "passing"
+        assert control.status == "passing"  # noqa: S105
 
     def test_security_posture(self):
         posture = SecurityPosture(

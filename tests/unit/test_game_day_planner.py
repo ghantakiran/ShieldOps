@@ -267,7 +267,7 @@ class TestScoreScenario:
         result = eng.score_scenario(scenario.id, score=85.5, actual_outcome="Passed with delay")
         assert result is not None
         assert result.score == 85.5
-        assert result.actual_outcome == "Passed with delay"
+        assert result.actual_outcome == "Passed with delay"  # noqa: S105
 
     def test_score_nonexistent(self):
         eng = _engine()

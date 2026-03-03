@@ -41,6 +41,31 @@ class TestSupervisorWiring:
             mock_cost = stack.enter_context(patch("shieldops.api.app.CostRunner"))
             mock_learn = stack.enter_context(patch("shieldops.api.app.LearningRunner"))
             mock_soc = stack.enter_context(patch("shieldops.api.app.SOCAnalystRunner"))
+            mock_ir = stack.enter_context(patch("shieldops.api.app.IncidentResponseRunner"))
+            mock_as = stack.enter_context(patch("shieldops.api.app.AttackSurfaceRunner"))
+            mock_mg = stack.enter_context(patch("shieldops.api.app.MLGovernanceRunner"))
+            mock_fi = stack.enter_context(patch("shieldops.api.app.FinOpsIntelligenceRunner"))
+            mock_zt = stack.enter_context(patch("shieldops.api.app.ZeroTrustRunner"))
+            mock_ta = stack.enter_context(patch("shieldops.api.app.ThreatAutomationRunner"))
+            mock_soar = stack.enter_context(patch("shieldops.api.app.SOAROrchestrationRunner"))
+            mock_itdr = stack.enter_context(patch("shieldops.api.app.ITDRRunner"))
+            mock_ar = stack.enter_context(patch("shieldops.api.app.AutoRemediationRunner"))
+            mock_oi = stack.enter_context(
+                patch("shieldops.api.app.ObservabilityIntelligenceRunner"),
+            )
+            mock_xdr = stack.enter_context(patch("shieldops.api.app.XDRRunner"))
+            mock_ia = stack.enter_context(
+                patch("shieldops.api.app.IntelligentAutomationRunner"),
+            )
+            mock_pi = stack.enter_context(
+                patch("shieldops.api.app.PlatformIntelligenceRunner"),
+            )
+            mock_sc = stack.enter_context(
+                patch("shieldops.api.app.SecurityConvergenceRunner"),
+            )
+            mock_ad = stack.enter_context(
+                patch("shieldops.api.app.AutonomousDefenseRunner"),
+            )
             mock_sup_cls = stack.enter_context(patch("shieldops.api.app.SupervisorRunner"))
 
             from shieldops.api.app import create_app
@@ -62,6 +87,21 @@ class TestSupervisorWiring:
                 assert "cost" in runners
                 assert "learning" in runners
                 assert "soc_analyst" in runners
+                assert "incident_response" in runners
+                assert "attack_surface" in runners
+                assert "ml_governance" in runners
+                assert "finops_intelligence" in runners
+                assert "zero_trust" in runners
+                assert "threat_automation" in runners
+                assert "soar_orchestration" in runners
+                assert "itdr" in runners
+                assert "auto_remediation" in runners
+                assert "observability_intelligence" in runners
+                assert "xdr" in runners
+                assert "intelligent_automation" in runners
+                assert "platform_intelligence" in runners
+                assert "security_convergence" in runners
+                assert "autonomous_defense" in runners
 
                 # Each value is the return_value of the corresponding mock class
                 assert runners["investigation"] is mock_inv.return_value
@@ -70,6 +110,21 @@ class TestSupervisorWiring:
                 assert runners["cost"] is mock_cost.return_value
                 assert runners["learning"] is mock_learn.return_value
                 assert runners["soc_analyst"] is mock_soc.return_value
+                assert runners["incident_response"] is mock_ir.return_value
+                assert runners["attack_surface"] is mock_as.return_value
+                assert runners["ml_governance"] is mock_mg.return_value
+                assert runners["finops_intelligence"] is mock_fi.return_value
+                assert runners["zero_trust"] is mock_zt.return_value
+                assert runners["threat_automation"] is mock_ta.return_value
+                assert runners["soar_orchestration"] is mock_soar.return_value
+                assert runners["itdr"] is mock_itdr.return_value
+                assert runners["auto_remediation"] is mock_ar.return_value
+                assert runners["observability_intelligence"] is mock_oi.return_value
+                assert runners["xdr"] is mock_xdr.return_value
+                assert runners["intelligent_automation"] is mock_ia.return_value
+                assert runners["platform_intelligence"] is mock_pi.return_value
+                assert runners["security_convergence"] is mock_sc.return_value
+                assert runners["autonomous_defense"] is mock_ad.return_value
 
                 # Runner injected into route module
                 assert supervisor._runner is mock_sup_cls.return_value

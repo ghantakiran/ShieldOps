@@ -44,7 +44,7 @@ class TestEnums:
         assert DrillStatus.IN_PROGRESS == "in_progress"
 
     def test_drill_status_passed(self):
-        assert DrillStatus.PASSED == "passed"
+        assert DrillStatus.PASSED == "passed"  # noqa: S105
 
     def test_drill_status_failed(self):
         assert DrillStatus.FAILED == "failed"

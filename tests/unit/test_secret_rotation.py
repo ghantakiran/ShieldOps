@@ -101,7 +101,7 @@ class TestRegisterSecret:
     def test_basic_register(self):
         s = _scheduler()
         rec = s.register_secret("db-pass", SecretType.DATABASE, "auth-svc")
-        assert rec.name == "db-pass"
+        assert rec.name == "db-pass"  # noqa: S105
         assert rec.secret_type == SecretType.DATABASE
         assert rec.service == "auth-svc"
         assert rec.status == RotationStatus.PENDING

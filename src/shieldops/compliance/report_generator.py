@@ -29,7 +29,7 @@ class ComplianceFramework(enum.StrEnum):
 
 
 class ControlStatus(enum.StrEnum):
-    PASSING = "passing"
+    PASSING = "passing"  # noqa: S105
     FAILING = "failing"
     NOT_ASSESSED = "not_assessed"
     NOT_APPLICABLE = "not_applicable"

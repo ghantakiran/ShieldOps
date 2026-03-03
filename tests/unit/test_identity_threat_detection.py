@@ -24,13 +24,13 @@ def _engine(**kw) -> IdentityThreatDetection:
 
 class TestEnums:
     def test_threat_credential_stuffing(self):
-        assert IdentityThreat.CREDENTIAL_STUFFING == "credential_stuffing"
+        assert IdentityThreat.CREDENTIAL_STUFFING == "credential_stuffing"  # noqa: S105
 
     def test_threat_account_takeover(self):
         assert IdentityThreat.ACCOUNT_TAKEOVER == "account_takeover"
 
     def test_threat_mfa_bypass(self):
-        assert IdentityThreat.MFA_BYPASS == "mfa_bypass"
+        assert IdentityThreat.MFA_BYPASS == "mfa_bypass"  # noqa: S105
 
     def test_threat_session_hijack(self):
         assert IdentityThreat.SESSION_HIJACK == "session_hijack"

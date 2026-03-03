@@ -390,7 +390,7 @@ class TestComplianceAPI:
         )
         assert resp.status_code == 200
         data = resp.json()
-        assert data["status"] == "pass"
+        assert data["status"] == "pass"  # noqa: S105
         assert data["override"] is not None
 
     def test_override_invalid_status_returns_400(self, engine: SOC2ComplianceEngine) -> None:

@@ -19,6 +19,21 @@ class TaskType(StrEnum):
     THREAT_HUNT = "threat_hunt"
     FORENSICS = "forensics"
     DECEPTION = "deception"
+    INCIDENT_RESPONSE = "incident_response"
+    ATTACK_SURFACE = "attack_surface"
+    ML_GOVERNANCE = "ml_governance"
+    FINOPS_INTELLIGENCE = "finops_intelligence"
+    ZERO_TRUST = "zero_trust"
+    THREAT_AUTOMATION = "threat_automation"
+    SOAR_ORCHESTRATION = "soar_orchestration"
+    ITDR = "itdr"
+    AUTO_REMEDIATION = "auto_remediation"
+    OBSERVABILITY_INTELLIGENCE = "observability_intelligence"
+    XDR = "xdr"
+    INTELLIGENT_AUTOMATION = "intelligent_automation"
+    PLATFORM_INTELLIGENCE = "platform_intelligence"
+    SECURITY_CONVERGENCE = "security_convergence"
+    AUTONOMOUS_DEFENSE = "autonomous_defense"
 
 
 class TaskStatus(StrEnum):

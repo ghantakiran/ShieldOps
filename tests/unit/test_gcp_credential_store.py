@@ -14,7 +14,7 @@ class TestGCPSecretManagerStore:
         return GCPSecretManagerStore(project_id="test-project")
 
     def test_store_name(self, store):
-        assert store.store_name == "gcp_secret_manager"
+        assert store.store_name == "gcp_secret_manager"  # noqa: S105
 
     def test_parent(self, store):
         assert store._parent == "projects/test-project"
@@ -109,7 +109,7 @@ class TestGCPSecretManagerStore:
         store._run_sync = mock_run_sync
 
         result = await store._parse_secret(mock_secret)
-        assert result["credential_type"] == "secret"
+        assert result["credential_type"] == "secret"  # noqa: S105
         assert result["name"] == "no-labels"
 
     @pytest.mark.asyncio

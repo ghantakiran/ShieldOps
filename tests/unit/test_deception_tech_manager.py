@@ -27,7 +27,7 @@ class TestEnums:
         assert DeceptionType.HONEYPOT == "honeypot"
 
     def test_type_honeytoken(self):
-        assert DeceptionType.HONEYTOKEN == "honeytoken"
+        assert DeceptionType.HONEYTOKEN == "honeytoken"  # noqa: S105
 
     def test_type_honeycred(self):
         assert DeceptionType.HONEYCRED == "honeycred"

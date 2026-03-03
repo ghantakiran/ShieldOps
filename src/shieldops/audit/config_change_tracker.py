@@ -28,7 +28,7 @@ class ChangeApproval(StrEnum):
     AUTO_APPROVED = "auto_approved"
     PEER_REVIEWED = "peer_reviewed"
     MANAGER_APPROVED = "manager_approved"
-    EMERGENCY_BYPASS = "emergency_bypass"
+    EMERGENCY_BYPASS = "emergency_bypass"  # noqa: S105
     PENDING = "pending"
 
 

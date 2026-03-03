@@ -320,7 +320,7 @@ class TestGenerateReport:
         eng = _engine()
         report = eng.generate_report()
         assert report.total_records == 0
-        assert report.recommendations[0] == "Token optimization meets targets"
+        assert report.recommendations[0] == "Token optimization meets targets"  # noqa: S105
 
     def test_low_savings(self):
         eng = _engine()

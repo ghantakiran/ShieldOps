@@ -39,7 +39,7 @@ class TestEnums:
         assert VerificationStep.ROLLBACK_TEST == "rollback_test"
 
     def test_result_passed(self):
-        assert VerificationResult.PASSED == "passed"
+        assert VerificationResult.PASSED == "passed"  # noqa: S105
 
     def test_result_failed(self):
         assert VerificationResult.FAILED == "failed"

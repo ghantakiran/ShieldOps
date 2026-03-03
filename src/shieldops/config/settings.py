@@ -3202,6 +3202,81 @@ class Settings(BaseSettings):
     security_maturity_model_max_records: int = 200000
     security_maturity_model_maturity_threshold: float = 70.0
 
+    # Phase 65: Incident Response Agent
+    incident_response_agent_enabled: bool = True
+    incident_response_containment_timeout_seconds: int = 300
+    incident_response_max_concurrent_responses: int = 10
+
+    # Phase 67: Attack Surface Agent
+    attack_surface_agent_enabled: bool = True
+    attack_surface_scan_timeout_seconds: int = 600
+    attack_surface_max_concurrent_scans: int = 5
+
+    # Phase 71: ML Governance Agent
+    ml_governance_agent_enabled: bool = True
+    ml_governance_evaluation_timeout_seconds: int = 600
+    ml_governance_max_concurrent_evaluations: int = 5
+
+    # Phase 73: FinOps Intelligence Agent
+    finops_intelligence_agent_enabled: bool = True
+    finops_analysis_timeout_seconds: int = 600
+    finops_max_concurrent_analyses: int = 5
+
+    # Phase 77: Zero Trust Agent
+    zero_trust_agent_enabled: bool = True
+    zero_trust_assessment_timeout_seconds: int = 600
+    zero_trust_max_concurrent_assessments: int = 5
+
+    # Phase 79: Threat Automation Agent
+    threat_automation_agent_enabled: bool = True
+    threat_automation_hunt_timeout_seconds: int = 600
+    threat_automation_max_concurrent_hunts: int = 5
+
+    # Phase 83: SOAR Orchestration Agent
+    soar_orchestration_agent_enabled: bool = True
+    soar_orchestration_timeout_seconds: int = 600
+    soar_orchestration_max_concurrent: int = 5
+
+    # Phase 84: ITDR Agent
+    itdr_agent_enabled: bool = True
+    itdr_detection_timeout_seconds: int = 600
+    itdr_max_concurrent_detections: int = 5
+
+    # Phase 86: Auto-Remediation Agent
+    auto_remediation_agent_enabled: bool = True
+    auto_remediation_timeout_seconds: int = 600
+    auto_remediation_max_concurrent: int = 5
+
+    # Phase 89: Observability Intelligence Agent
+    observability_intelligence_agent_enabled: bool = True
+    observability_intelligence_timeout_seconds: int = 600
+    observability_intelligence_max_concurrent: int = 5
+
+    # Phase 91: XDR Agent
+    xdr_agent_enabled: bool = True
+    xdr_timeout_seconds: int = 600
+    xdr_max_concurrent: int = 5
+
+    # Phase 93: Intelligent Automation Agent
+    intelligent_automation_agent_enabled: bool = True
+    intelligent_automation_timeout_seconds: int = 600
+    intelligent_automation_max_concurrent: int = 5
+
+    # Phase 95: Platform Intelligence Agent
+    platform_intelligence_agent_enabled: bool = True
+    platform_intelligence_timeout_seconds: int = 600
+    platform_intelligence_max_concurrent: int = 5
+
+    # Phase 97: Security Convergence Agent
+    security_convergence_agent_enabled: bool = True
+    security_convergence_timeout_seconds: int = 600
+    security_convergence_max_concurrent: int = 5
+
+    # Phase 99: Autonomous Defense Agent
+    autonomous_defense_agent_enabled: bool = True
+    autonomous_defense_timeout_seconds: int = 600
+    autonomous_defense_max_concurrent: int = 5
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",

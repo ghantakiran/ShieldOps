@@ -254,7 +254,7 @@ class TestNetworkSecurityCheck:
         with patch("shieldops.compliance.pci_dss.importlib.import_module") as mock_import:
             mock_import.return_value = MagicMock()
             status, details, evidence = await engine._check_network_security()
-        assert status == "pass"
+        assert status == "pass"  # noqa: S105
         assert "OPA" in details
         assert len(evidence) > 0
 
@@ -274,7 +274,7 @@ class TestNetworkSegmentationCheck:
         with patch("shieldops.compliance.pci_dss.importlib.import_module") as mock_import:
             mock_import.return_value = MagicMock()
             status, details, evidence = await engine._check_network_segmentation()
-        assert status == "pass"
+        assert status == "pass"  # noqa: S105
         assert len(evidence) > 0
 
     @pytest.mark.asyncio
@@ -292,7 +292,7 @@ class TestDefaultCredentialsCheck:
     async def test_passes_when_jwt_secret_is_custom(self, engine: PCIDSSEngine) -> None:
         with patch.dict("os.environ", {"SHIELDOPS_JWT_SECRET_KEY": "my-super-secret-key-123"}):
             status, details, evidence = await engine._check_default_credentials()
-        assert status == "pass"
+        assert status == "pass"  # noqa: S105
         assert evidence[0]["default_jwt_changed"] is True
 
     @pytest.mark.asyncio
@@ -321,7 +321,7 @@ class TestEncryptionAtRestCheck:
             {"SHIELDOPS_DATABASE_URL": "postgresql://host/db?sslmode=require"},
         ):
             status, details, evidence = await engine._check_encryption_at_rest()
-        assert status == "pass"
+        assert status == "pass"  # noqa: S105
         assert evidence[0]["ssl_detected"] is True
 
     @pytest.mark.asyncio
@@ -331,7 +331,7 @@ class TestEncryptionAtRestCheck:
             {"SHIELDOPS_DATABASE_URL": "postgresql+asyncpg://host/db"},
         ):
             status, _, _ = await engine._check_encryption_at_rest()
-        assert status == "pass"
+        assert status == "pass"  # noqa: S105
 
     @pytest.mark.asyncio
     async def test_warning_when_no_ssl_in_db_url(self, engine: PCIDSSEngine) -> None:
@@ -355,7 +355,7 @@ class TestEncryptionInTransitCheck:
         with patch("shieldops.compliance.pci_dss.importlib.import_module") as mock_import:
             mock_import.return_value = MagicMock()
             status, details, evidence = await engine._check_encryption_in_transit()
-        assert status == "pass"
+        assert status == "pass"  # noqa: S105
         assert "TLS" in details
 
     @pytest.mark.asyncio
@@ -375,7 +375,7 @@ class TestAccessControlCheck:
         mock_mod.require_role = MagicMock()
         with patch("shieldops.compliance.pci_dss.importlib.import_module", return_value=mock_mod):
             status, details, evidence = await engine._check_access_control()
-        assert status == "pass"
+        assert status == "pass"  # noqa: S105
         assert "RBAC" in details
 
     @pytest.mark.asyncio
@@ -403,7 +403,7 @@ class TestUserAuthenticationCheck:
         mock_mod.decode_token = MagicMock()
         with patch("shieldops.compliance.pci_dss.importlib.import_module", return_value=mock_mod):
             status, details, _ = await engine._check_user_authentication()
-        assert status == "pass"
+        assert status == "pass"  # noqa: S105
         assert "JWT" in details
 
     @pytest.mark.asyncio
@@ -430,7 +430,7 @@ class TestAuditLoggingCheck:
         with patch("shieldops.compliance.pci_dss.importlib.import_module") as mock_import:
             mock_import.return_value = MagicMock()
             status, _, evidence = await engine._check_audit_logging()
-        assert status == "pass"
+        assert status == "pass"  # noqa: S105
         assert evidence[0]["audit_routes"] is True
 
     @pytest.mark.asyncio
@@ -620,7 +620,7 @@ class TestPCIDSSEdgeCases:
         data = ctrl.model_dump()
         assert data["id"] == "PCI-TEST"
         assert data["requirement"] == 99
-        assert data["status"] == "pass"
+        assert data["status"] == "pass"  # noqa: S105
 
     def test_pci_report_model_serialization(self) -> None:
         report = PCIDSSReport(

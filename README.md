@@ -53,6 +53,8 @@ ShieldOps is built on a four-layer stack:
 │  Investigation · Remediation · Security · Learning  │
 │  Cost · Prediction · Supervisor · Custom agents      │
 │  SOC Analyst · Threat Hunter · Forensics · Deception │
+│  Incident Response · Attack Surface                   │
+│  ML Governance · FinOps Intelligence                  │
 ├─────────────────────────────────────────────────────┤
 │  Layer 2: Observability Ingestion                   │
 │  OpenTelemetry · Splunk · Datadog · Prometheus      │
@@ -79,6 +81,21 @@ ShieldOps is built on a four-layer stack:
 | **Threat Hunter** | Proactive threat hunting | Hypothesis-driven hunts, MITRE ATT&CK campaigns, IOC sweeps, behavioral analysis |
 | **Forensics** | Digital forensics | Evidence preservation, integrity verification, memory/disk/network analysis, timeline reconstruction |
 | **Deception** | Honeypot/honeytoken management | Deploy deception assets, monitor interactions, profile attackers |
+| **Incident Response** | Autonomous incident response | Containment, eradication, recovery, validation workflows |
+| **Attack Surface** | Attack surface management | Asset discovery, exposure analysis, remediation prioritization |
+| **ML Governance** | ML model governance | Drift detection, fairness scoring, adversarial testing, retraining pipelines |
+| **FinOps Intelligence** | Cost intelligence | Anomaly detection, root cause analysis, RI optimization, budget-aware scaling |
+| **Zero Trust** | Zero trust architecture | Identity verification, device posture, access evaluation, policy enforcement |
+| **Threat Automation** | Threat detection & hunting | Threat detection, behavior analysis, intel correlation, automated response |
+| **SOAR Orchestration** | Security orchestration & response | Incident triage, playbook execution, response validation |
+| **ITDR** | Identity threat detection & response | Identity scanning, attack path analysis, credential compromise detection |
+| **Auto-Remediation** | Autonomous remediation | Issue assessment, remediation planning, fix execution, verification |
+| **Observability Intelligence** | Multi-signal observability analysis | Signal collection, correlation, insights, recommendations |
+| **XDR** | Extended detection & response | Cross-domain telemetry, threat correlation, attack stories, coordinated response |
+| **Intelligent Automation** | ML-driven automation & self-healing | Situation assessment, strategy selection, automation execution, validation |
+| **Platform Intelligence** | Platform-wide data analytics | Telemetry gathering, pattern analysis, insight computation, strategy generation |
+| **Security Convergence** | Unified security defense | Posture collection, signal unification, defense evaluation, response coordination |
+| **Autonomous Defense** | Autonomous security defense | Threat assessment, defense selection, countermeasure deployment, protection validation |
 
 ### Safety Model (Defense in Depth)
 
@@ -176,6 +193,10 @@ ShieldOps/
 │   │   ├── threat_hunter/              # Threat Hunter agent (proactive hunting)
 │   │   ├── forensics/                  # Digital Forensics agent
 │   │   ├── deception/                  # Deception/Honeypot agent
+│   │   ├── incident_response/          # Incident Response agent
+│   │   ├── attack_surface/             # Attack Surface agent
+│   │   ├── ml_governance/              # ML Governance agent
+│   │   ├── finops_intelligence/        # FinOps Intelligence agent
 │   │   ├── calibration/               # Agent confidence calibration
 │   │   └── registry.py                # Agent fleet registry
 │   ├── connectors/                    # Multi-cloud abstraction layer
@@ -233,7 +254,7 @@ ShieldOps/
 ├── dashboard-ui/                      # React + TypeScript dashboard
 │
 ├── tests/
-│   ├── unit/                          # Unit tests (~31,956 tests)
+│   ├── unit/                          # Unit tests (~38,562 tests)
 │   └── integration/                   # Integration tests
 │
 ├── docs/
@@ -263,6 +284,21 @@ ShieldOps/
 | **Webhooks** | `POST /api/v1/webhooks/subscriptions`, `GET /api/v1/webhooks/subscriptions` |
 | **Plugins** | `GET /api/v1/plugins`, `POST /api/v1/plugins/install` |
 | **SOC Analyst** | `POST /api/v1/soc/analyze`, `GET /api/v1/soc/results/{id}` |
+| **Incident Response** | `POST /api/v1/incident-response/respond`, `GET /api/v1/incident-response/results/{id}` |
+| **Attack Surface** | `POST /api/v1/attack-surface/scan`, `GET /api/v1/attack-surface/results/{id}` |
+| **ML Governance** | `POST /api/v1/ml-governance/evaluate`, `GET /api/v1/ml-governance/results/{id}` |
+| **FinOps Intelligence** | `POST /api/v1/finops/analyze`, `GET /api/v1/finops/results/{id}` |
+| **Zero Trust** | `POST /api/v1/zero-trust/assess`, `GET /api/v1/zero-trust/results/{id}` |
+| **Threat Automation** | `POST /api/v1/threat-automation/hunt`, `GET /api/v1/threat-automation/results/{id}` |
+| **SOAR Orchestration** | `POST /api/v1/soar/orchestrate`, `GET /api/v1/soar/results/{id}` |
+| **ITDR** | `POST /api/v1/itdr/detect`, `GET /api/v1/itdr/results/{id}` |
+| **Auto-Remediation** | `POST /api/v1/auto-remediation/execute`, `GET /api/v1/auto-remediation/results/{id}` |
+| **Observability Intelligence** | `POST /api/v1/observability-intelligence/analyze`, `GET /api/v1/observability-intelligence/results/{id}` |
+| **XDR** | `POST /api/v1/xdr/investigate`, `GET /api/v1/xdr/results/{id}` |
+| **Intelligent Automation** | `POST /api/v1/intelligent-automation/execute`, `GET /api/v1/intelligent-automation/results/{id}` |
+| **Platform Intelligence** | `POST /api/v1/platform-intelligence/analyze`, `GET /api/v1/platform-intelligence/results/{id}` |
+| **Security Convergence** | `POST /api/v1/security-convergence/evaluate`, `GET /api/v1/security-convergence/results/{id}` |
+| **Autonomous Defense** | `POST /api/v1/autonomous-defense/protect`, `GET /api/v1/autonomous-defense/results/{id}` |
 | **Analytics** | `GET /api/v1/analytics/mttr`, `GET /api/v1/analytics/resolution-rate` |
 | **Tenant Isolation** | `POST /api/v1/tenant-isolation`, `GET /api/v1/tenant-isolation/{id}` |
 | **Alert Noise** | `POST /api/v1/alert-noise/alerts`, `POST /api/v1/alert-noise/analyze` |
@@ -396,6 +432,42 @@ Default policies ship with the platform and can be customized per environment:
 | Phase 62 | Forensics & Deception Agents — Digital Forensics, Honeypots | Completed |
 | Phase 63 | Advanced Defense — Ransomware, DLP, APT, Zero-Day Detection | Completed |
 | Phase 64 | Risk & Compliance — FAIR, Privacy Impact, Vendor Risk, GRC | Completed |
+| Phase 65 | Incident Response Automation — Containment, Eradication, Recovery | Completed |
+| Phase 66 | Threat Intelligence Platform — Feed Normalization, Campaign Attribution | Completed |
+| Phase 67 | Attack Surface Management — Asset Discovery, Exposure Analysis | Completed |
+| Phase 68 | SOC Operations Intelligence — Alert Lifecycle, Detection Engineering | Completed |
+| Phase 69 | Advanced Analytics & Behavioral — UEBA, Entity Profiling, Risk Scoring | Completed |
+| Phase 70 | Compliance & Governance Automation — Policy Enforcement, Maturity Assessment | Completed |
+| Phase 71 | ML Model Governance & AI Safety — Drift Detection, Fairness, Adversarial Testing | Completed |
+| Phase 72 | Supply Chain Security — SBOM, Dependency Scanning, Build Verification | Completed |
+| Phase 73 | Advanced FinOps & Cost Intelligence — Anomaly Detection, RI Optimization | Completed |
+| Phase 74 | Privacy & Data Governance — PII Classification, Consent, GDPR/CCPA | Completed |
+| Phase 75 | Organizational Intelligence — Team Health, Burnout Detection, Knowledge Gaps | Completed |
+| Phase 76 | Platform Resilience & Chaos Engineering — Failure Injection, DR Testing | Completed |
+| Phase 77 | Zero Trust Architecture & Identity Security — Microsegmentation, MFA, JIT | Completed |
+| Phase 78 | Cloud Native Security & Container Defense — K8s RBAC, Admission, Runtime | Completed |
+| Phase 79 | Advanced Threat Detection & Hunting — Ransomware, C2, Lateral Movement | Completed |
+| Phase 80 | Security Operations Automation — MTTD/MTTR, Alert Quality, SOC Perf | Completed |
+| Phase 81 | Critical Asset Protection & Data Security — Crown Jewel, Encryption, DLP | Completed |
+| Phase 82 | Security Governance & Compliance — Policy Conflict, Evidence, Controls | Completed |
+| Phase 83 | Advanced Threat Intelligence — Campaign Attribution, Strategic Landscape | Completed |
+| Phase 84 | Attack Surface Management — External Discovery, Exposure Analysis | Completed |
+| Phase 85 | Security Alert Intelligence — Lifecycle, Tuning, Workflow Automation | Completed |
+| Phase 86 | Supply Chain Security — Credential Abuse, Lateral Movement, SBOM | Completed |
+| Phase 87 | Zero Trust Deep Defense — Microsegmentation, Identity Verification | Completed |
+| Phase 88 | Advanced Malware Defense — Ransomware, C2, Fileless Detection | Completed |
+| Phase 89 | Observability Intelligence Platform — Multi-Signal Correlation | Completed |
+| Phase 90 | Advanced Observability Engineering — eBPF, Dashboard Intelligence | Completed |
+| Phase 91 | Extended Detection & Response (XDR) — Cross-Domain Threat Correlation | Completed |
+| Phase 92 | Security Operations Optimization — SOC Workflow, Purple Team | Completed |
+| Phase 93 | Intelligent Automation & Self-Healing — ML-Driven Ops, Autonomous Healing | Completed |
+| Phase 94 | Autonomous Operations & Optimization — Fleet Management, Chaos Intelligence | Completed |
+| Phase 95 | Platform Intelligence & Data Analytics — Telemetry Lake, Signal Intelligence | Completed |
+| Phase 96 | Advanced Threat Intelligence Platform — Adversary Modeling, Dark Web Intel | Completed |
+| Phase 97 | Security Convergence & Unified Defense — Converged Detection, Mesh Security | Completed |
+| Phase 98 | Predictive Operations Intelligence — Failure Prediction, Capacity Planning | Completed |
+| Phase 99 | Autonomous Security & Defense — Self-Defending Networks, Attack Disruption | Completed |
+| Phase 100 | Platform Maturity & Optimization — Excellence Scoring, Evolution Planning | Completed |
 
 ## Documentation
 

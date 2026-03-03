@@ -88,7 +88,7 @@ class TestEvaluateControlAccessControl:
 
         result = await toolkit._evaluate_control({"id": "SOC2-CC6.1", "title": "x"}, None)
 
-        assert result["status"] == "passing"
+        assert result["status"] == "passing"  # noqa: S105
 
     @pytest.mark.asyncio
     async def test_failing_expired_cred(self) -> None:
@@ -120,7 +120,7 @@ class TestEvaluateControlAuthentication:
 
         result = await toolkit._evaluate_control({"id": "SOC2-CC6.2", "title": "x"}, None)
 
-        assert result["status"] == "passing"
+        assert result["status"] == "passing"  # noqa: S105
 
     @pytest.mark.asyncio
     async def test_failing_missing_rotation_metadata(self) -> None:
@@ -142,7 +142,7 @@ class TestEvaluateControlRotationPolicy:
 
         result = await toolkit._evaluate_control({"id": "PCI-DSS-8.1", "title": "x"}, None)
 
-        assert result["status"] == "passing"
+        assert result["status"] == "passing"  # noqa: S105
 
     @pytest.mark.asyncio
     async def test_failing_without_policy(self) -> None:
@@ -165,7 +165,7 @@ class TestEvaluateControlMonitoring:
 
         result = await toolkit._evaluate_control({"id": "SOC2-CC7.1", "title": "x"}, None)
 
-        assert result["status"] == "passing"
+        assert result["status"] == "passing"  # noqa: S105
 
     @pytest.mark.asyncio
     async def test_failing_connector_unreachable(self) -> None:
@@ -202,7 +202,7 @@ class TestEvaluateControlChangeManagement:
 
         result = await toolkit._evaluate_control({"id": "SOC2-CC8.1", "title": "x"}, None)
 
-        assert result["status"] == "passing"
+        assert result["status"] == "passing"  # noqa: S105
 
     @pytest.mark.asyncio
     async def test_failing_no_events(self) -> None:
@@ -225,7 +225,7 @@ class TestEvaluateControlDefaultCredentials:
 
         result = await toolkit._evaluate_control({"id": "PCI-DSS-2.1", "title": "x"}, None)
 
-        assert result["status"] == "passing"
+        assert result["status"] == "passing"  # noqa: S105
 
     @pytest.mark.asyncio
     async def test_failing_stale_credential(self) -> None:
@@ -249,7 +249,7 @@ class TestEvaluateControlPatching:
             {"id": "PCI-DSS-6.2", "title": "x"}, ["resource-1"]
         )
 
-        assert result["status"] == "passing"
+        assert result["status"] == "passing"  # noqa: S105
 
     @pytest.mark.asyncio
     async def test_failing_critical_cve(self) -> None:
@@ -275,7 +275,7 @@ class TestEvaluateControlCIS:
 
         result = await toolkit._evaluate_control({"id": "CIS-1.1", "title": "x"}, None)
 
-        assert result["status"] == "passing"
+        assert result["status"] == "passing"  # noqa: S105
 
     @pytest.mark.asyncio
     async def test_unknown_no_resources(self) -> None:
