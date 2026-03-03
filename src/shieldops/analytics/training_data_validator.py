@@ -33,7 +33,7 @@ class DataQuality(StrEnum):
 
 
 class ValidationStatus(StrEnum):
-    PASSED = "passed"
+    PASSED = "passed"  # noqa: S105
     FAILED = "failed"
     WARNING = "warning"
     SKIPPED = "skipped"

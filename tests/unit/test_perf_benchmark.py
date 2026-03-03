@@ -39,7 +39,7 @@ class TestEnums:
         assert BenchmarkType.DISK_IO == "disk_io"
 
     def test_benchmark_result_passed(self):
-        assert BenchmarkResult.PASSED == "passed"
+        assert BenchmarkResult.PASSED == "passed"  # noqa: S105
 
     def test_benchmark_result_regressed(self):
         assert BenchmarkResult.REGRESSED == "regressed"

@@ -865,7 +865,7 @@ class TestGetEvents:
         assert connector._cloudtrail_client.lookup_events.call_count == 2
         # Second call should include NextToken
         second_call = connector._cloudtrail_client.lookup_events.call_args_list[1]
-        assert second_call.kwargs["NextToken"] == "token-abc"
+        assert second_call.kwargs["NextToken"] == "token-abc"  # noqa: S105
 
     @pytest.mark.asyncio
     async def test_api_error_returns_empty(

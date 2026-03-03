@@ -34,7 +34,7 @@ class TestEnums:
         assert HealingAction.CLEAR_CACHE == "clear_cache"
 
     def test_action_rotate_creds(self):
-        assert HealingAction.ROTATE_CREDENTIALS == "rotate_credentials"
+        assert HealingAction.ROTATE_CREDENTIALS == "rotate_credentials"  # noqa: S105
 
     def test_action_failover(self):
         assert HealingAction.FAILOVER == "failover"

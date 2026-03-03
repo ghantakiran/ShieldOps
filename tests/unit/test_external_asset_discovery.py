@@ -46,7 +46,7 @@ class TestEnums:
         assert DiscoveryMethod.CLOUD_API == "cloud_api"
 
     def test_discoverymethod_val5(self):
-        assert DiscoveryMethod.PASSIVE_RECON == "passive_recon"
+        assert DiscoveryMethod.PASSIVE_RECON == "passive_recon"  # noqa: S105
 
     def test_discoverystatus_val1(self):
         assert DiscoveryStatus.DISCOVERED == "discovered"

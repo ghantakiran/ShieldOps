@@ -33,7 +33,7 @@ class TestEnums:
         assert APTIndicator.LIVING_OFF_LAND == "living_off_land"
 
     def test_aptindicator_credential_theft(self):
-        assert APTIndicator.CREDENTIAL_THEFT == "credential_theft"
+        assert APTIndicator.CREDENTIAL_THEFT == "credential_theft"  # noqa: S105
 
     def test_aptindicator_persistence_mechanism(self):
         assert APTIndicator.PERSISTENCE_MECHANISM == "persistence_mechanism"

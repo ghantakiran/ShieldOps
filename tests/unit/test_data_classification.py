@@ -63,7 +63,7 @@ class TestEnums:
         assert DataCategory.HEALTHCARE == "healthcare"
 
     def test_category_credentials(self):
-        assert DataCategory.CREDENTIALS == "credentials"
+        assert DataCategory.CREDENTIALS == "credentials"  # noqa: S105
 
     def test_category_operational(self):
         assert DataCategory.OPERATIONAL == "operational"
@@ -247,7 +247,7 @@ class TestAddRule:
         assert r.value == 75.0
         assert r.threshold == 80.0
         assert r.breached is False
-        assert r.description == "Sensitivity check passed"
+        assert r.description == "Sensitivity check passed"  # noqa: S105
 
     def test_eviction_at_max(self):
         eng = _engine(max_records=2)

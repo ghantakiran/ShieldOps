@@ -33,7 +33,7 @@ class TestEnums:
         assert EradicationType.PATCH_APPLICATION == "patch_application"
 
     def test_eradicationtype_val4(self):
-        assert EradicationType.CREDENTIAL_RESET == "credential_reset"
+        assert EradicationType.CREDENTIAL_RESET == "credential_reset"  # noqa: S105
 
     def test_eradicationtype_val5(self):
         assert EradicationType.ARTIFACT_CLEANUP == "artifact_cleanup"

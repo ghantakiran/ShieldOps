@@ -19,7 +19,7 @@ def _engine(**kw) -> CredentialAbuseDetector:
 
 class TestEnums:
     def test_abuse_credential_stuffing(self):
-        assert AbuseType.CREDENTIAL_STUFFING == "credential_stuffing"
+        assert AbuseType.CREDENTIAL_STUFFING == "credential_stuffing"  # noqa: S105
 
     def test_abuse_brute_force(self):
         assert AbuseType.BRUTE_FORCE == "brute_force"

@@ -24,7 +24,7 @@ def _engine(**kw) -> LateralMovementDetector:
 
 class TestEnums:
     def test_type_credential_hopping(self):
-        assert MovementType.CREDENTIAL_HOPPING == "credential_hopping"
+        assert MovementType.CREDENTIAL_HOPPING == "credential_hopping"  # noqa: S105
 
     def test_type_service_pivoting(self):
         assert MovementType.SERVICE_PIVOTING == "service_pivoting"

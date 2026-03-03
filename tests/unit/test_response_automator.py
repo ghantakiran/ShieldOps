@@ -31,7 +31,7 @@ class TestEnums:
         assert ResponseAction.BLOCK_IP == "block_ip"
 
     def test_action_revoke_credentials(self):
-        assert ResponseAction.REVOKE_CREDENTIALS == "revoke_credentials"
+        assert ResponseAction.REVOKE_CREDENTIALS == "revoke_credentials"  # noqa: S105
 
     def test_action_quarantine(self):
         assert ResponseAction.QUARANTINE == "quarantine"

@@ -54,7 +54,7 @@ class TestEnums:
         assert TargetResource.CONNECTIONS == "connections"
 
     def test_result_passed(self):
-        assert StressResult.PASSED == "passed"
+        assert StressResult.PASSED == "passed"  # noqa: S105
 
     def test_result_degraded(self):
         assert StressResult.DEGRADED == "degraded"

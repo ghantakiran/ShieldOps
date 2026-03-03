@@ -47,7 +47,7 @@ class TestEnums:
         assert FreezeViolation.SKIPPED_APPROVAL == "skipped_approval"
 
     def test_violation_bypass(self):
-        assert FreezeViolation.BYPASS_POLICY == "bypass_policy"
+        assert FreezeViolation.BYPASS_POLICY == "bypass_policy"  # noqa: S105
 
     def test_violation_emergency(self):
         assert FreezeViolation.EMERGENCY_OVERRIDE == "emergency_override"

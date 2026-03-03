@@ -29,7 +29,7 @@ class BehaviorPattern(StrEnum):
     PRIVILEGE_ESCALATION = "privilege_escalation"
     LATERAL_MOVEMENT = "lateral_movement"
     DATA_HOARDING = "data_hoarding"
-    POLICY_BYPASS = "policy_bypass"
+    POLICY_BYPASS = "policy_bypass"  # noqa: S105
 
 
 class MonitoringStatus(StrEnum):

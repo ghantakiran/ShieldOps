@@ -30,7 +30,7 @@ class TestEnums:
         assert ValidationCheck.PROCESS_TERMINATED == "process_terminated"
 
     def test_validationcheck_val3(self):
-        assert ValidationCheck.CREDENTIALS_ROTATED == "credentials_rotated"
+        assert ValidationCheck.CREDENTIALS_ROTATED == "credentials_rotated"  # noqa: S105
 
     def test_validationcheck_val4(self):
         assert ValidationCheck.ARTIFACTS_REMOVED == "artifacts_removed"
@@ -39,7 +39,7 @@ class TestEnums:
         assert ValidationCheck.SERVICES_HEALTHY == "services_healthy"
 
     def test_validationresult_val1(self):
-        assert ValidationResult.PASSED == "passed"
+        assert ValidationResult.PASSED == "passed"  # noqa: S105
 
     def test_validationresult_val2(self):
         assert ValidationResult.FAILED == "failed"

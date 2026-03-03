@@ -145,7 +145,7 @@ class TestSlackNotifierSend:
             await notifier.send("hello")
 
         headers = _extract_headers(mock_client)
-        assert headers["Authorization"] == "Bearer xoxb-secret"
+        assert headers["Authorization"] == "Bearer xoxb-secret"  # noqa: S105
         assert "application/json" in headers["Content-Type"]
 
     @pytest.mark.asyncio

@@ -20,7 +20,7 @@ class SurfaceVector(StrEnum):
     NETWORK_EXPOSURE = "network_exposure"
     API_ENDPOINT = "api_endpoint"
     DATA_STORE = "data_store"
-    CREDENTIAL_STORE = "credential_store"
+    CREDENTIAL_STORE = "credential_store"  # noqa: S105
     ADMIN_PANEL = "admin_panel"
 
 

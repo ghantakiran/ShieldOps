@@ -46,7 +46,7 @@ class TestEnums:
         assert BehaviorPattern.DATA_HOARDING == "data_hoarding"
 
     def test_pattern_policy_bypass(self):
-        assert BehaviorPattern.POLICY_BYPASS == "policy_bypass"
+        assert BehaviorPattern.POLICY_BYPASS == "policy_bypass"  # noqa: S105
 
     def test_status_active(self):
         assert MonitoringStatus.ACTIVE == "active"

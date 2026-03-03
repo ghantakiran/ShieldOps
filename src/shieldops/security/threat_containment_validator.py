@@ -19,13 +19,13 @@ logger = structlog.get_logger()
 class ValidationCheck(StrEnum):
     NETWORK_ISOLATED = "network_isolated"
     PROCESS_TERMINATED = "process_terminated"
-    CREDENTIALS_ROTATED = "credentials_rotated"
+    CREDENTIALS_ROTATED = "credentials_rotated"  # noqa: S105
     ARTIFACTS_REMOVED = "artifacts_removed"
     SERVICES_HEALTHY = "services_healthy"
 
 
 class ValidationResult(StrEnum):
-    PASSED = "passed"
+    PASSED = "passed"  # noqa: S105
     FAILED = "failed"
     PARTIAL = "partial"
     SKIPPED = "skipped"

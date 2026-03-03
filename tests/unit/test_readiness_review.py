@@ -33,7 +33,7 @@ class TestEnums:
     def test_review_status_values(self):
         assert ReviewStatus.DRAFT == "draft"
         assert ReviewStatus.IN_REVIEW == "in_review"
-        assert ReviewStatus.PASSED == "passed"
+        assert ReviewStatus.PASSED == "passed"  # noqa: S105
         assert ReviewStatus.FAILED == "failed"
         assert ReviewStatus.WAIVED == "waived"
 

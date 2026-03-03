@@ -25,7 +25,7 @@ class BenchmarkType(StrEnum):
 
 
 class BenchmarkResult(StrEnum):
-    PASSED = "passed"
+    PASSED = "passed"  # noqa: S105
     REGRESSED = "regressed"
     IMPROVED = "improved"
     BASELINE = "baseline"

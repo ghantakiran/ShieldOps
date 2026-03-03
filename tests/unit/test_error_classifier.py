@@ -137,7 +137,7 @@ class TestRecordError:
         )
         assert r.severity == ErrorSeverity.CRITICAL
         assert r.error_code == "AUTH_401"
-        assert r.message == "Token expired"
+        assert r.message == "Token expired"  # noqa: S105
         assert r.occurrence_count == 10
 
     def test_eviction_at_max(self):

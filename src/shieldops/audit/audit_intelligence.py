@@ -37,7 +37,7 @@ class AuditPattern(StrEnum):
     UNUSUAL_TIMING = "unusual_timing"
     PRIVILEGE_ESCALATION = "privilege_escalation"
     BULK_OPERATION = "bulk_operation"
-    POLICY_BYPASS = "policy_bypass"
+    POLICY_BYPASS = "policy_bypass"  # noqa: S105
 
 
 # --- Models ---

@@ -52,7 +52,7 @@ class TestEnums:
         assert ChangeApproval.MANAGER_APPROVED == "manager_approved"
 
     def test_approval_emergency_bypass(self):
-        assert ChangeApproval.EMERGENCY_BYPASS == "emergency_bypass"
+        assert ChangeApproval.EMERGENCY_BYPASS == "emergency_bypass"  # noqa: S105
 
     def test_approval_pending(self):
         assert ChangeApproval.PENDING == "pending"

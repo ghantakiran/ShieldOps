@@ -36,7 +36,7 @@ class DataCategory(StrEnum):
     PII = "pii"
     FINANCIAL = "financial"
     HEALTHCARE = "healthcare"
-    CREDENTIALS = "credentials"
+    CREDENTIALS = "credentials"  # noqa: S105
     OPERATIONAL = "operational"
 
 

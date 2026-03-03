@@ -27,7 +27,7 @@ class PIIType(StrEnum):
 class MaskingMethod(StrEnum):
     REDACT = "redact"
     HASH = "hash"
-    TOKENIZE = "tokenize"
+    TOKENIZE = "tokenize"  # noqa: S105
     ENCRYPT = "encrypt"
     PSEUDONYMIZE = "pseudonymize"
 

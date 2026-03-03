@@ -39,13 +39,13 @@ class TestEnums:
         assert GateType.APPROVAL == "approval"
 
     def test_result_passed(self):
-        assert GateResult.PASSED == "passed"
+        assert GateResult.PASSED == "passed"  # noqa: S105
 
     def test_result_failed(self):
         assert GateResult.FAILED == "failed"
 
     def test_result_bypassed(self):
-        assert GateResult.BYPASSED == "bypassed"
+        assert GateResult.BYPASSED == "bypassed"  # noqa: S105
 
     def test_result_pending(self):
         assert GateResult.PENDING == "pending"

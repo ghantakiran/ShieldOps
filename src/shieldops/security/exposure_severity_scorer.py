@@ -19,7 +19,7 @@ logger = structlog.get_logger()
 class ExposureType(StrEnum):
     OPEN_PORT = "open_port"
     MISCONFIGURATION = "misconfiguration"
-    WEAK_CREDENTIAL = "weak_credential"
+    WEAK_CREDENTIAL = "weak_credential"  # noqa: S105
     UNPATCHED_CVE = "unpatched_cve"
     DATA_LEAK = "data_leak"
 

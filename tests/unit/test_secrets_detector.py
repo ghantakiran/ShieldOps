@@ -158,7 +158,7 @@ class TestRecordFinding:
         assert f.severity == SecretSeverity.HIGH
         assert f.service_name == "auth-svc"
         assert f.file_path == "config.yaml"
-        assert f.description == "Hardcoded token"
+        assert f.description == "Hardcoded token"  # noqa: S105
         assert f.is_resolved is False
 
     def test_eviction_on_overflow(self):

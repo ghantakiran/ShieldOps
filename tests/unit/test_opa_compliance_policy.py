@@ -229,7 +229,7 @@ class TestComplianceViolations:
         await engine.evaluate(action, agent_id="test-agent", context={"mfa_verified": False})
 
         opa_input = _extract_input(engine)
-        assert opa_input["action"] == "rotate_credentials"
+        assert opa_input["action"] == "rotate_credentials"  # noqa: S105
         assert opa_input["context"]["mfa_verified"] is False
 
 
@@ -298,5 +298,5 @@ class TestComplianceSatisfied:
         await engine.evaluate(action, agent_id="test-agent", context={"mfa_verified": True})
 
         opa_input = _extract_input(engine)
-        assert opa_input["action"] == "rotate_credentials"
+        assert opa_input["action"] == "rotate_credentials"  # noqa: S105
         assert opa_input["context"]["mfa_verified"] is True

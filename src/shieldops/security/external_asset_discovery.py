@@ -29,7 +29,7 @@ class DiscoveryMethod(StrEnum):
     CERT_TRANSPARENCY = "cert_transparency"
     PORT_SCAN = "port_scan"
     CLOUD_API = "cloud_api"
-    PASSIVE_RECON = "passive_recon"
+    PASSIVE_RECON = "passive_recon"  # noqa: S105
 
 
 class DiscoveryStatus(StrEnum):

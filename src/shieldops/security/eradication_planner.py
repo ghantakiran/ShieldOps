@@ -20,7 +20,7 @@ class EradicationType(StrEnum):
     MALWARE_REMOVAL = "malware_removal"
     CONFIG_RESTORE = "config_restore"
     PATCH_APPLICATION = "patch_application"
-    CREDENTIAL_RESET = "credential_reset"
+    CREDENTIAL_RESET = "credential_reset"  # noqa: S105
     ARTIFACT_CLEANUP = "artifact_cleanup"
 
 

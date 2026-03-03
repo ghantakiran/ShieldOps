@@ -45,7 +45,7 @@ class TestEnums:
         assert MaskingMethod.HASH == "hash"
 
     def test_masking_tokenize(self):
-        assert MaskingMethod.TOKENIZE == "tokenize"
+        assert MaskingMethod.TOKENIZE == "tokenize"  # noqa: S105
 
     def test_masking_encrypt(self):
         assert MaskingMethod.ENCRYPT == "encrypt"

@@ -36,7 +36,7 @@ class TestEnums:
         assert ContainmentType.FIREWALL_BLOCK == "firewall_block"
 
     def test_type_credential_revocation(self):
-        assert ContainmentType.CREDENTIAL_REVOCATION == "credential_revocation"
+        assert ContainmentType.CREDENTIAL_REVOCATION == "credential_revocation"  # noqa: S105
 
     def test_status_active(self):
         assert ContainmentStatus.ACTIVE == "active"

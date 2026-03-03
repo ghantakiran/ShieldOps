@@ -18,7 +18,7 @@ logger = structlog.get_logger()
 
 class AbuseType(StrEnum):
     BRUTE_FORCE = "brute_force"
-    CREDENTIAL_STUFFING = "credential_stuffing"
+    CREDENTIAL_STUFFING = "credential_stuffing"  # noqa: S105
     PASSWORD_SPRAY = "password_spray"  # noqa: S105
     TOKEN_THEFT = "token_theft"  # noqa: S105
     SESSION_HIJACK = "session_hijack"

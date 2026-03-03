@@ -54,7 +54,7 @@ class TestEnums:
         assert DataQuality.UNACCEPTABLE == "unacceptable"
 
     def test_status_passed(self):
-        assert ValidationStatus.PASSED == "passed"
+        assert ValidationStatus.PASSED == "passed"  # noqa: S105
 
     def test_status_failed(self):
         assert ValidationStatus.FAILED == "failed"

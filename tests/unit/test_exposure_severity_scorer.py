@@ -25,7 +25,7 @@ class TestEnums:
         assert ExposureType.MISCONFIGURATION == "misconfiguration"
 
     def test_exposuretype_val3(self):
-        assert ExposureType.WEAK_CREDENTIAL == "weak_credential"
+        assert ExposureType.WEAK_CREDENTIAL == "weak_credential"  # noqa: S105
 
     def test_exposuretype_val4(self):
         assert ExposureType.UNPATCHED_CVE == "unpatched_cve"

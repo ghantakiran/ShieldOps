@@ -100,7 +100,7 @@ class TestValidationIssue:
         )
         data = issue.model_dump()
         assert data["category"] == "auth"
-        assert data["key"] == "SHIELDOPS_JWT_SECRET_KEY"
+        assert data["key"] == "SHIELDOPS_JWT_SECRET_KEY"  # noqa: S105
         assert data["severity"] == "error"
 
 

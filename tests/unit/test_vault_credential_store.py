@@ -93,7 +93,7 @@ class TestListCredentials:
         credentials = await store.list_credentials()
 
         assert len(credentials) == 2
-        assert credentials[0]["path"] == "db-password"
+        assert credentials[0]["path"] == "db-password"  # noqa: S105
         assert credentials[1]["path"] == "api-key"
 
     @pytest.mark.asyncio
@@ -107,7 +107,7 @@ class TestListCredentials:
         credentials = await store.list_credentials(environment="production")
 
         assert len(credentials) == 1
-        assert credentials[0]["path"] == "production/db-password"
+        assert credentials[0]["path"] == "production/db-password"  # noqa: S105
         # Verify LIST was called with correct path
         store._client.request.assert_called_once()
         call_args = store._client.request.call_args
@@ -193,8 +193,8 @@ class TestParseMetadata:
         }
         result = store._parse_metadata("db/password", metadata)
 
-        assert result["credential_type"] == "secret"
-        assert result["service"] == "password"  # Last path component
+        assert result["credential_type"] == "secret"  # noqa: S105
+        assert result["service"] == "password"  # Last path component  # noqa: S105
 
     def test_parse_empty_versions(self, store: VaultCredentialStore) -> None:
         metadata = {"current_version": 0, "versions": {}, "custom_metadata": {}}
@@ -207,7 +207,7 @@ class TestParseMetadata:
         metadata = {"current_version": 1, "versions": {}, "custom_metadata": {}}
         result = store._parse_metadata("production/db-pass", metadata)
 
-        assert result["credential_id"] == "vault:secret/production/db-pass"
+        assert result["credential_id"] == "vault:secret/production/db-pass"  # noqa: S105
 
 
 # ============================================================================

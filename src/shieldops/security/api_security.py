@@ -17,7 +17,7 @@ logger = structlog.get_logger()
 
 
 class ThreatType(StrEnum):
-    CREDENTIAL_STUFFING = "credential_stuffing"
+    CREDENTIAL_STUFFING = "credential_stuffing"  # noqa: S105
     RATE_ABUSE = "rate_abuse"
     DATA_EXFILTRATION = "data_exfiltration"
     INJECTION_ATTEMPT = "injection_attempt"
@@ -34,7 +34,7 @@ class RiskLevel(StrEnum):
 
 
 class MonitoringMode(StrEnum):
-    PASSIVE = "passive"
+    PASSIVE = "passive"  # noqa: S105
     ACTIVE = "active"
     BLOCKING = "blocking"
 
