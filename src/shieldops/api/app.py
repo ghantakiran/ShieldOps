@@ -11,6 +11,7 @@ from fastapi.responses import JSONResponse, PlainTextResponse
 
 from shieldops.agents.attack_surface.runner import AttackSurfaceRunner
 from shieldops.agents.auto_remediation.runner import AutoRemediationRunner
+from shieldops.agents.autonomous_defense.runner import AutonomousDefenseRunner
 from shieldops.agents.cost.runner import CostRunner
 from shieldops.agents.finops_intelligence.runner import FinOpsIntelligenceRunner
 from shieldops.agents.incident_response.runner import IncidentResponseRunner
@@ -24,8 +25,10 @@ from shieldops.agents.ml_governance.runner import MLGovernanceRunner
 from shieldops.agents.observability_intelligence.runner import (
     ObservabilityIntelligenceRunner,
 )
+from shieldops.agents.platform_intelligence.runner import PlatformIntelligenceRunner
 from shieldops.agents.remediation.runner import RemediationRunner
 from shieldops.agents.security.runner import SecurityRunner
+from shieldops.agents.security_convergence.runner import SecurityConvergenceRunner
 from shieldops.agents.soar_orchestration.runner import SOAROrchestrationRunner
 from shieldops.agents.soc_analyst.runner import SOCAnalystRunner
 from shieldops.agents.supervisor.runner import SupervisorRunner
@@ -37,6 +40,7 @@ from shieldops.api.routes import (
     analytics,
     attack_surface_agent,
     auto_remediation,
+    autonomous_defense,
     batch,
     cost,
     finops_intelligence,
@@ -47,10 +51,12 @@ from shieldops.api.routes import (
     learning,
     ml_governance,
     observability_intelligence,
+    platform_intelligence,
     remediations,
     search,
     security,
     security_chat,
+    security_convergence,
     soar_orchestration,
     soc_analyst,
     supervisor,
@@ -806,6 +812,48 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
             error=str(e),
         )
 
+    # Platform Intelligence runner
+    pi_runner = None
+    try:
+        pi_runner = PlatformIntelligenceRunner(
+            repository=repository,
+        )
+        platform_intelligence.set_runner(pi_runner)
+        logger.info("platform_intelligence_runner_initialized")
+    except Exception as e:
+        logger.warning(
+            "platform_intelligence_runner_init_failed",
+            error=str(e),
+        )
+
+    # Security Convergence runner
+    sc_runner = None
+    try:
+        sc_runner = SecurityConvergenceRunner(
+            repository=repository,
+        )
+        security_convergence.set_runner(sc_runner)
+        logger.info("security_convergence_runner_initialized")
+    except Exception as e:
+        logger.warning(
+            "security_convergence_runner_init_failed",
+            error=str(e),
+        )
+
+    # Autonomous Defense runner
+    ad_runner = None
+    try:
+        ad_runner = AutonomousDefenseRunner(
+            repository=repository,
+        )
+        autonomous_defense.set_runner(ad_runner)
+        logger.info("autonomous_defense_runner_initialized")
+    except Exception as e:
+        logger.warning(
+            "autonomous_defense_runner_init_failed",
+            error=str(e),
+        )
+
     # Supervisor — orchestrates all specialist agents
     sup_runner = SupervisorRunner(
         agent_runners={
@@ -830,6 +878,9 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
             "observability_intelligence": oi_runner,
             "xdr": xdr_runner,
             "intelligent_automation": ia_runner,
+            "platform_intelligence": pi_runner,
+            "security_convergence": sc_runner,
+            "autonomous_defense": ad_runner,
         },
         playbook_loader=playbook_loader,
         notification_channels=notification_channels,

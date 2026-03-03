@@ -3262,6 +3262,21 @@ class Settings(BaseSettings):
     intelligent_automation_timeout_seconds: int = 600
     intelligent_automation_max_concurrent: int = 5
 
+    # Phase 95: Platform Intelligence Agent
+    platform_intelligence_agent_enabled: bool = True
+    platform_intelligence_timeout_seconds: int = 600
+    platform_intelligence_max_concurrent: int = 5
+
+    # Phase 97: Security Convergence Agent
+    security_convergence_agent_enabled: bool = True
+    security_convergence_timeout_seconds: int = 600
+    security_convergence_max_concurrent: int = 5
+
+    # Phase 99: Autonomous Defense Agent
+    autonomous_defense_agent_enabled: bool = True
+    autonomous_defense_timeout_seconds: int = 600
+    autonomous_defense_max_concurrent: int = 5
+
     model_config = {
         "env_prefix": "SHIELDOPS_",
         "env_file": ".env",

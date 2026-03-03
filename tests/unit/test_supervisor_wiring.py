@@ -57,6 +57,15 @@ class TestSupervisorWiring:
             mock_ia = stack.enter_context(
                 patch("shieldops.api.app.IntelligentAutomationRunner"),
             )
+            mock_pi = stack.enter_context(
+                patch("shieldops.api.app.PlatformIntelligenceRunner"),
+            )
+            mock_sc = stack.enter_context(
+                patch("shieldops.api.app.SecurityConvergenceRunner"),
+            )
+            mock_ad = stack.enter_context(
+                patch("shieldops.api.app.AutonomousDefenseRunner"),
+            )
             mock_sup_cls = stack.enter_context(patch("shieldops.api.app.SupervisorRunner"))
 
             from shieldops.api.app import create_app
@@ -90,6 +99,9 @@ class TestSupervisorWiring:
                 assert "observability_intelligence" in runners
                 assert "xdr" in runners
                 assert "intelligent_automation" in runners
+                assert "platform_intelligence" in runners
+                assert "security_convergence" in runners
+                assert "autonomous_defense" in runners
 
                 # Each value is the return_value of the corresponding mock class
                 assert runners["investigation"] is mock_inv.return_value
@@ -110,6 +122,9 @@ class TestSupervisorWiring:
                 assert runners["observability_intelligence"] is mock_oi.return_value
                 assert runners["xdr"] is mock_xdr.return_value
                 assert runners["intelligent_automation"] is mock_ia.return_value
+                assert runners["platform_intelligence"] is mock_pi.return_value
+                assert runners["security_convergence"] is mock_sc.return_value
+                assert runners["autonomous_defense"] is mock_ad.return_value
 
                 # Runner injected into route module
                 assert supervisor._runner is mock_sup_cls.return_value

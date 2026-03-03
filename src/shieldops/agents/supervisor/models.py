@@ -31,6 +31,9 @@ class TaskType(StrEnum):
     OBSERVABILITY_INTELLIGENCE = "observability_intelligence"
     XDR = "xdr"
     INTELLIGENT_AUTOMATION = "intelligent_automation"
+    PLATFORM_INTELLIGENCE = "platform_intelligence"
+    SECURITY_CONVERGENCE = "security_convergence"
+    AUTONOMOUS_DEFENSE = "autonomous_defense"
 
 
 class TaskStatus(StrEnum):
