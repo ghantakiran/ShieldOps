@@ -87,6 +87,9 @@ ShieldOps is built on a four-layer stack:
 | **FinOps Intelligence** | Cost intelligence | Anomaly detection, root cause analysis, RI optimization, budget-aware scaling |
 | **Zero Trust** | Zero trust architecture | Identity verification, device posture, access evaluation, policy enforcement |
 | **Threat Automation** | Threat detection & hunting | Threat detection, behavior analysis, intel correlation, automated response |
+| **SOAR Orchestration** | Security orchestration & response | Incident triage, playbook execution, response validation |
+| **ITDR** | Identity threat detection & response | Identity scanning, attack path analysis, credential compromise detection |
+| **Auto-Remediation** | Autonomous remediation | Issue assessment, remediation planning, fix execution, verification |
 
 ### Safety Model (Defense in Depth)
 
@@ -281,6 +284,9 @@ ShieldOps/
 | **FinOps Intelligence** | `POST /api/v1/finops/analyze`, `GET /api/v1/finops/results/{id}` |
 | **Zero Trust** | `POST /api/v1/zero-trust/assess`, `GET /api/v1/zero-trust/results/{id}` |
 | **Threat Automation** | `POST /api/v1/threat-automation/hunt`, `GET /api/v1/threat-automation/results/{id}` |
+| **SOAR Orchestration** | `POST /api/v1/soar/orchestrate`, `GET /api/v1/soar/results/{id}` |
+| **ITDR** | `POST /api/v1/itdr/detect`, `GET /api/v1/itdr/results/{id}` |
+| **Auto-Remediation** | `POST /api/v1/auto-remediation/execute`, `GET /api/v1/auto-remediation/results/{id}` |
 | **Analytics** | `GET /api/v1/analytics/mttr`, `GET /api/v1/analytics/resolution-rate` |
 | **Tenant Isolation** | `POST /api/v1/tenant-isolation`, `GET /api/v1/tenant-isolation/{id}` |
 | **Alert Noise** | `POST /api/v1/alert-noise/alerts`, `POST /api/v1/alert-noise/analyze` |

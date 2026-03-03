@@ -41,6 +41,9 @@ ShieldOps is an enterprise SaaS platform that deploys autonomous AI agents for S
 - **FinOps Intelligence Agent:** Cost intelligence — anomaly detection, root cause analysis, RI optimization, budget-aware scaling
 - **Zero Trust Agent:** Zero trust architecture — identity verification, device posture, access evaluation, policy enforcement
 - **Threat Automation Agent:** Threat detection & hunting — automated detection, behavior analysis, intel correlation, response automation
+- **SOAR Orchestration Agent:** Adaptive SOAR 2.0 — incident triage, playbook execution, response validation, cross-platform coordination
+- **ITDR Agent:** Identity threat detection & response — identity scanning, credential compromise, attack path analysis, governance
+- **Auto-Remediation Agent:** Autonomous remediation — issue assessment, remediation planning, fix execution, verification
 
 ## Development Conventions
 
@@ -83,7 +86,7 @@ ShieldOps is an enterprise SaaS platform that deploys autonomous AI agents for S
 - OpenAPI spec auto-generated
 
 ## Key File Paths
-- `src/shieldops/agents/` — Agent implementations (investigation, remediation, security, learning, cost, prediction, supervisor, soc_analyst, threat_hunter, forensics, deception, incident_response, attack_surface, ml_governance, finops_intelligence, zero_trust, threat_automation), swarm coordinator, consensus engine, knowledge mesh, token optimizer, prompt cache, routing optimizer, telemetry analyzer, compliance auditor
+- `src/shieldops/agents/` — Agent implementations (investigation, remediation, security, learning, cost, prediction, supervisor, soc_analyst, threat_hunter, forensics, deception, incident_response, attack_surface, ml_governance, finops_intelligence, zero_trust, threat_automation, soar_orchestration, itdr, auto_remediation), swarm coordinator, consensus engine, knowledge mesh, token optimizer, prompt cache, routing optimizer, telemetry analyzer, compliance auditor
 - `src/shieldops/connectors/` — Cloud/infra connectors
 - `src/shieldops/orchestration/` — LangGraph workflow definitions
 - `src/shieldops/policy/` — OPA policies, approval logic, tenant isolation, cross-agent policy enforcer, governance dashboard, governance_scorer
