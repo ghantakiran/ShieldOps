@@ -599,6 +599,27 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         )
         logger.info("slack_notifier_initialized")
 
+    # ── Slack bot (slash commands + interactive messages) ──────────
+    if settings.slack_bot_token and settings.slack_signing_secret:
+        try:
+            from shieldops.api.routes import slack_events as slack_events_routes
+            from shieldops.integrations.slack.bot import SlackBotService
+
+            slack_bot = SlackBotService(
+                bot_token=settings.slack_bot_token,
+                signing_secret=settings.slack_signing_secret,
+                approval_channel=settings.slack_approval_channel,
+            )
+            slack_events_routes.set_bot_service(slack_bot)
+            app.include_router(
+                slack_events_routes.router,
+                prefix=settings.api_prefix,
+                tags=["Slack"],
+            )
+            logger.info("slack_bot_initialized")
+        except Exception as e:
+            logger.warning("slack_bot_init_failed", error=str(e))
+
     if settings.webhook_url:
         from shieldops.integrations.notifications.webhook import (
             WebhookNotifier,
