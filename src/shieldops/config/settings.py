@@ -123,10 +123,17 @@ class Settings(BaseSettings):
     azure_billing_enabled: bool = False
 
     # Stripe Billing (SaaS subscriptions)
-    stripe_api_key: str = ""
+    stripe_secret_key: str = ""
+    stripe_publishable_key: str = ""
     stripe_webhook_secret: str = ""
+    stripe_api_key: str = ""  # legacy alias for stripe_secret_key
     stripe_success_url: str = "http://localhost:5173/settings?billing=success"
     stripe_cancel_url: str = "http://localhost:5173/settings?billing=cancel"
+
+    # Stripe Price IDs (one per plan tier)
+    stripe_price_starter: str = ""  # $2K/month Starter plan
+    stripe_price_professional: str = ""  # $8K/month Professional plan
+    stripe_price_enterprise: str = ""  # $25K/month Enterprise plan
 
     # NVD CVE Source
     nvd_api_key: str = ""
