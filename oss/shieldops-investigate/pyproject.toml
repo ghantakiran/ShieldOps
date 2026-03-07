@@ -1,0 +1,84 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "shieldops-investigate"
+version = "0.1.0"
+description = "AI-powered root cause analysis for Kubernetes incidents. From alert to diagnosis in under 60 seconds."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.12"
+authors = [
+    { name = "ShieldOps", email = "oss@shieldops.dev" },
+]
+keywords = [
+    "kubernetes",
+    "sre",
+    "incident-response",
+    "root-cause-analysis",
+    "observability",
+    "prometheus",
+    "devops",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: System :: Monitoring",
+    "Topic :: System :: Systems Administration",
+    "Typing :: Typed",
+    "Framework :: AsyncIO",
+]
+dependencies = [
+    "httpx>=0.27,<1",
+    "pydantic>=2.0,<3",
+    "structlog>=24.0,<26",
+    "kubernetes-asyncio>=30.0,<32",
+]
+
+[project.optional-dependencies]
+ai = ["anthropic>=0.40,<1"]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.24",
+    "ruff>=0.8",
+    "mypy>=1.13",
+    "respx>=0.22",
+]
+
+[project.scripts]
+shieldops-investigate = "shieldops_investigate.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/shieldops/shieldops-investigate"
+Documentation = "https://github.com/shieldops/shieldops-investigate#readme"
+Repository = "https://github.com/shieldops/shieldops-investigate"
+Issues = "https://github.com/shieldops/shieldops-investigate/issues"
+"ShieldOps Platform" = "https://shieldops.dev"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/shieldops_investigate"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP", "ANN", "S", "B", "A", "SIM", "TCH"]
+ignore = ["ANN101", "ANN102", "ANN401", "S101"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["shieldops_investigate"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
