@@ -85,6 +85,8 @@ class Settings(BaseSettings):
 
     # PagerDuty
     pagerduty_routing_key: str = ""
+    pagerduty_api_key: str = ""  # REST API token for read/write operations
+    pagerduty_service_ids: str = ""  # Comma-separated PagerDuty service IDs
 
     # Webhooks
     webhook_url: str = ""

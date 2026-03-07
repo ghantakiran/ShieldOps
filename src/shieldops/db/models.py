@@ -568,3 +568,50 @@ class NotificationPreferenceRecord(Base):
             name="uq_user_channel_event",
         ),
     )
+
+
+class WarRoomRecord(Base):
+    """Persisted war room for incident coordination."""
+
+    __tablename__ = "war_rooms"
+
+    id: Mapped[str] = mapped_column(
+        String(64), primary_key=True, default=lambda: f"wr-{uuid4().hex[:12]}"
+    )
+    incident_id: Mapped[str] = mapped_column(String(128), index=True)
+    title: Mapped[str] = mapped_column(String(512), default="")
+    severity: Mapped[str] = mapped_column(String(16), default="P2")
+    status: Mapped[str] = mapped_column(String(32), default="active", index=True)
+    slack_channel_id: Mapped[str] = mapped_column(String(128), default="")
+    slack_channel_name: Mapped[str] = mapped_column(String(256), default="")
+    pagerduty_incident_id: Mapped[str] = mapped_column(String(128), default="")
+    escalation_level: Mapped[int] = mapped_column(Integer, default=1)
+    resolution_summary: Mapped[str] = mapped_column(Text, default="")
+    timeline: Mapped[list[dict[str, Any]]] = mapped_column(JSONB, default=list)
+    extra_data: Mapped[dict[str, Any]] = mapped_column(JSONB, default=dict)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    resolved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+    __table_args__ = (Index("ix_war_rooms_incident_status", "incident_id", "status"),)
+
+
+class WarRoomResponderRecord(Base):
+    """A responder assigned to a war room."""
+
+    __tablename__ = "war_room_responders"
+
+    id: Mapped[str] = mapped_column(
+        String(64), primary_key=True, default=lambda: f"wrr-{uuid4().hex[:12]}"
+    )
+    war_room_id: Mapped[str] = mapped_column(String(64), index=True)
+    user_name: Mapped[str] = mapped_column(String(256))
+    user_email: Mapped[str] = mapped_column(String(256), default="")
+    role: Mapped[str] = mapped_column(String(64), default="responder")
+    status: Mapped[str] = mapped_column(String(32), default="paged")
+    pagerduty_user_id: Mapped[str] = mapped_column(String(128), default="")
+    joined_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    __table_args__ = (Index("ix_wrr_room_user", "war_room_id", "user_name"),)
