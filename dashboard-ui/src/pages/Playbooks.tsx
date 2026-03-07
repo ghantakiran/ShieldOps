@@ -283,7 +283,7 @@ export default function Playbooks() {
           </p>
         </div>
         <button
-          onClick={() => navigate("/playbooks/editor")}
+          onClick={() => navigate("/app/playbooks/editor")}
           className={clsx(
             "flex items-center gap-2 rounded-lg",
             "bg-brand-600 px-4 py-2",

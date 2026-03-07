@@ -32,7 +32,7 @@ export default function Login() {
 
       const user = await get<User>("/auth/me");
       setAuth(access_token, user);
-      navigate("/", { replace: true });
+      navigate("/app", { replace: true });
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message);

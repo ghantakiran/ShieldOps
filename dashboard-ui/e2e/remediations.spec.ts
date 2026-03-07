@@ -1,19 +1,19 @@
 import { test, expect } from "./fixtures";
 
 test.describe("Remediations Page", () => {
-  test("remediations list page loads", async ({ authenticatedPage: page }) => {
-    await page.goto("/remediations");
+  test("remediations list page loads", async ({ demoPage: page }) => {
+    await page.goto("/app/remediations");
     await expect(page.getByRole("heading", { name: /remediation/i })).toBeVisible();
   });
 
-  test("remediations table renders", async ({ authenticatedPage: page }) => {
-    await page.goto("/remediations");
+  test("remediations table renders", async ({ demoPage: page }) => {
+    await page.goto("/app/remediations");
     const table = page.locator("table").first();
     await expect(table).toBeVisible();
   });
 
-  test("status badges render correctly", async ({ authenticatedPage: page }) => {
-    await page.goto("/remediations");
+  test("status badges render correctly", async ({ demoPage: page }) => {
+    await page.goto("/app/remediations");
     // Look for status badge elements (could be spans, pills, etc.)
     const statusBadges = page.locator("[class*='badge'], [class*='status'], [class*='pill']");
     if ((await statusBadges.count()) > 0) {
@@ -21,10 +21,8 @@ test.describe("Remediations Page", () => {
     }
   });
 
-  test("click row navigates to detail page with timeline", async ({
-    authenticatedPage: page,
-  }) => {
-    await page.goto("/remediations");
+  test("click row navigates to detail page with timeline", async ({ demoPage: page }) => {
+    await page.goto("/app/remediations");
     const firstRow = page.locator("table tbody tr").first();
     if (await firstRow.isVisible()) {
       await firstRow.click();

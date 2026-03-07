@@ -12,6 +12,7 @@
     "noEmit": false,
     "emitDeclarationOnly": true,
     "declaration": true,
+    "types": ["node"],
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,

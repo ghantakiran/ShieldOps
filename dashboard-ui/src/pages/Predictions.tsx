@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { TrendingUp, AlertTriangle, CheckCircle, Clock } from "lucide-react";
+import { get } from "../api/client";
 
 interface Prediction {
   id: string;
@@ -24,9 +25,14 @@ export default function Predictions() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/v1/predictions/active")
-      .then((r) => r.json())
-      .then((data) => setPredictions(data.predictions || []))
+    get<{ predictions?: Prediction[] } | Prediction[]>("/predictions/active")
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setPredictions(data);
+        } else {
+          setPredictions(data.predictions || []);
+        }
+      })
       .catch(() => setPredictions([]))
       .finally(() => setLoading(false));
   }, []);

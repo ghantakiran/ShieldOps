@@ -448,7 +448,7 @@ export default function PlaybookEditor() {
       <div className="flex items-center justify-between border-b border-gray-800 pb-4">
         <div className="flex items-center gap-3">
           <button
-            onClick={() => navigate("/playbooks")}
+            onClick={() => navigate("/app/playbooks")}
             className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-800 hover:text-gray-200"
           >
             <ArrowLeft className="h-4 w-4" />

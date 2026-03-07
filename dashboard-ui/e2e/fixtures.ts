@@ -9,6 +9,7 @@ import { test as base, expect } from "@playwright/test";
 
 type AuthFixtures = {
   authenticatedPage: ReturnType<typeof base.extend> extends infer T ? T : never;
+  demoPage: ReturnType<typeof base.extend> extends infer T ? T : never;
 };
 
 const API_URL = process.env.API_URL || "http://localhost:8000";
@@ -40,6 +41,12 @@ export const test = base.extend<AuthFixtures>({
       // Backend may not be running in some test modes — proceed without auth
     }
 
+    await use(page);
+  },
+  demoPage: async ({ page }, use) => {
+    // Enable demo mode and seed auth
+    await page.goto("/app?demo=true");
+    await page.waitForSelector("aside", { timeout: 5000 });
     await use(page);
   },
 });

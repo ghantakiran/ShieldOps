@@ -177,7 +177,7 @@ export default function Remediations() {
         columns={columns}
         data={filtered}
         keyExtractor={(row) => row.id}
-        onRowClick={(row) => navigate(`/remediations/${row.id}`)}
+        onRowClick={(row) => navigate(`/app/remediations/${row.id}`)}
         emptyMessage="No remediations match your filters."
       />
     </div>

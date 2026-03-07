@@ -312,7 +312,7 @@ export default function IncidentCorrelation() {
                     >
                       <span className="text-sm text-gray-300 font-mono">{invId}</span>
                       <a
-                        href={`/investigations/${invId}`}
+                        href={`/app/investigations/${invId}`}
                         className="text-xs text-brand-400 hover:underline"
                         onClick={(e) => e.stopPropagation()}
                       >

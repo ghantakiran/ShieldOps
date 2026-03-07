@@ -1,15 +1,12 @@
 import { test, expect } from "./fixtures";
 
 test.describe("Fleet Overview / Dashboard", () => {
-  test("dashboard loads with metric cards", async ({ authenticatedPage: page }) => {
-    await page.goto("/");
-    // Expect summary metric cards to be visible
-    await expect(page.getByText(/active investigations|total investigations/i)).toBeVisible();
-    await expect(page.getByText(/remediations|actions/i)).toBeVisible();
+  test("dashboard loads with metric cards", async ({ demoPage: page }) => {
+    await expect(page.getByText(/active investigations|total investigations/i).first()).toBeVisible();
+    await expect(page.getByText(/remediations|actions/i).first()).toBeVisible();
   });
 
-  test("agent health grid shows agent types", async ({ authenticatedPage: page }) => {
-    await page.goto("/");
+  test("agent health grid shows agent types", async ({ demoPage: page }) => {
     // The dashboard should show the 6 agent types
     const agentTypes = [
       "investigation",
@@ -26,15 +23,13 @@ test.describe("Fleet Overview / Dashboard", () => {
     }
   });
 
-  test("investigation table renders rows", async ({ authenticatedPage: page }) => {
-    await page.goto("/");
+  test("investigation table renders rows", async ({ demoPage: page }) => {
     // Look for a table or list that contains investigation data
     const table = page.locator("table").first();
     await expect(table).toBeVisible();
   });
 
-  test("click investigation row navigates to detail", async ({ authenticatedPage: page }) => {
-    await page.goto("/");
+  test("click investigation row navigates to detail", async ({ demoPage: page }) => {
     // Click the first row link in the investigations section
     const firstRow = page.locator("table tbody tr").first();
     if (await firstRow.isVisible()) {

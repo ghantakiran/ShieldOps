@@ -121,7 +121,7 @@ export default function IncidentTimeline() {
       {/* Header */}
       <div>
         <Link
-          to={`/investigations/${id}`}
+          to={`/app/investigations/${id}`}
           className="inline-flex items-center gap-1.5 text-sm text-gray-400 transition-colors hover:text-gray-100"
         >
           <ArrowLeft className="h-4 w-4" />

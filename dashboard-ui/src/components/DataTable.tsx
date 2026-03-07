@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import { useMediaQuery } from "../hooks/useMediaQuery";
 
 export interface Column<T> {
   key: string;
@@ -22,6 +23,8 @@ export default function DataTable<T>({
   keyExtractor,
   emptyMessage = "No data available",
 }: DataTableProps<T>) {
+  const isMobile = useMediaQuery("(max-width: 767px)");
+
   if (data.length === 0) {
     return (
       <div className="rounded-xl border border-gray-800 bg-gray-900 p-12 text-center">
@@ -30,6 +33,36 @@ export default function DataTable<T>({
     );
   }
 
+  // Mobile: stacked cards
+  if (isMobile) {
+    return (
+      <div className="space-y-3">
+        {data.map((row) => (
+          <div
+            key={keyExtractor(row)}
+            onClick={() => onRowClick?.(row)}
+            className={clsx(
+              "rounded-xl border border-gray-800 bg-gray-900 p-4",
+              onRowClick && "cursor-pointer hover:border-gray-700",
+            )}
+          >
+            {columns.map((col) => (
+              <div key={col.key} className="flex items-baseline justify-between py-1.5">
+                <span className="text-xs font-medium uppercase tracking-wider text-gray-500">
+                  {col.header}
+                </span>
+                <span className={clsx("text-sm text-gray-200", col.className)}>
+                  {col.render(row)}
+                </span>
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // Desktop: standard table
   return (
     <div className="overflow-hidden rounded-xl border border-gray-800">
       <table className="w-full text-sm">
