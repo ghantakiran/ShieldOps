@@ -1,0 +1,134 @@
+# ShieldOps Remediation Playbook: Pod CrashLoopBackOff
+# Triggered when: Kubernetes pod enters CrashLoopBackOff with excessive restarts
+
+name: pod-crash-loop
+version: "1.0"
+description: "Investigate and remediate pods stuck in CrashLoopBackOff state"
+severity: critical
+category: kubernetes
+tags:
+  - pod
+  - crashloop
+  - availability
+  - auto-remediation
+
+detection:
+  signals:
+    - type: metric
+      source: prometheus
+      query: "increase(kube_pod_container_status_restarts_total{namespace='{namespace}', pod='{pod_name}'}[10m]) > 5"
+      threshold: 5
+      duration: "10m"
+    - type: event
+      source: kubernetes
+      query: "kubectl get events -n {namespace} --field-selector reason=BackOff,involvedObject.name={pod_name}"
+      threshold: 1
+      duration: "5m"
+
+investigation:
+  steps:
+    - name: check_pod_status
+      action: query_k8s
+      source: kubernetes
+      query: "kubectl get pod {pod_name} -n {namespace} -o yaml"
+      timeout: 30
+      extract:
+        - restart_count
+        - last_termination_reason
+        - last_termination_exit_code
+        - container_state
+
+    - name: check_previous_logs
+      action: query_logs
+      source: kubernetes
+      query: "kubectl logs {pod_name} -n {namespace} --previous --tail=200"
+      timeout: 30
+      patterns:
+        - "OOMKilled"
+        - "Error"
+        - "Fatal"
+        - "panic"
+        - "Connection refused"
+        - "timeout"
+        - "permission denied"
+
+    - name: check_oom_events
+      action: query_k8s
+      source: kubernetes
+      query: "kubectl get events -n {namespace} --field-selector reason=OOMKilling,involvedObject.name={pod_name}"
+      timeout: 15
+
+    - name: check_liveness_probe
+      action: query_k8s
+      source: kubernetes
+      query: "kubectl get pod {pod_name} -n {namespace} -o jsonpath='{.spec.containers[*].livenessProbe}'"
+      timeout: 15
+
+    - name: check_resource_usage
+      action: query_metrics
+      source: prometheus
+      query: "container_memory_usage_bytes{pod='{pod_name}', namespace='{namespace}'}"
+      timeout: 30
+
+    - name: check_recent_deployments
+      action: query_k8s
+      source: kubernetes
+      query: "kubectl rollout history deployment/{deployment_name} -n {namespace}"
+      timeout: 15
+
+    - name: check_dependencies
+      action: query_health
+      source: kubernetes
+      query: "upstream service connectivity and configmap/secret availability"
+      timeout: 30
+
+remediation:
+  risk_level: low
+  approval_required: false
+  max_blast_radius:
+    pods: 1
+    services: 1
+  steps:
+    - name: delete_crashing_pod
+      action: restart_pod
+      parameters:
+        command: "kubectl delete pod {pod_name} -n {namespace} --grace-period=30"
+        grace_period_seconds: 30
+      timeout: 60
+      verify:
+        condition: "new pod reaches Running state"
+        timeout: 120
+
+    - name: monitor_new_pod
+      action: check_health
+      parameters:
+        query: "kube_pod_container_status_restarts_total{pod=~'{deployment_name}-.*', namespace='{namespace}'}"
+        expected_restarts: 0
+        observation_window: "5m"
+      timeout: 300
+      verify:
+        condition: "no new restarts within 5 minutes"
+        timeout: 300
+
+    - name: escalate_if_still_crashing
+      action: escalate
+      parameters:
+        condition: "pod restarts > 0 within observation window"
+        include_logs: true
+        include_events: true
+      timeout: 30
+
+rollback:
+  automatic: false
+  steps:
+    - name: no_rollback_needed
+      action: noop
+      parameters:
+        reason: "Pod restart is inherently safe; no state to roll back"
+
+escalation:
+  on_failure: page
+  channels:
+    - slack
+    - pagerduty
+  timeout: 15

@@ -1,0 +1,147 @@
+# ShieldOps Remediation Playbook: Database Connection Pool Exhaustion
+# Triggered when: Application database connection pool is fully consumed
+
+name: connection-pool-exhaustion
+version: "1.0"
+description: "Remediate database connection pool exhaustion by restarting pods and tuning pool configuration"
+severity: critical
+category: kubernetes
+tags:
+  - database
+  - connection-pool
+  - availability
+  - configmap
+
+detection:
+  signals:
+    - type: log
+      source: splunk
+      query: "index=app sourcetype=application \"connection pool exhausted\" OR \"connection timeout\" OR \"pool_size=max\""
+      threshold: 10
+      duration: "5m"
+    - type: metric
+      source: prometheus
+      query: "db_connection_pool_active{service='{service}', namespace='{namespace}'} / db_connection_pool_max{service='{service}', namespace='{namespace}'} >= 0.95"
+      threshold: 0.95
+      duration: "5m"
+
+investigation:
+  steps:
+    - name: check_active_connections
+      action: query_metrics
+      source: prometheus
+      query: "db_connection_pool_active{service='{service}', namespace='{namespace}'}"
+      timeout: 30
+
+    - name: check_connection_wait_time
+      action: query_metrics
+      source: prometheus
+      query: "db_connection_pool_wait_seconds{service='{service}', namespace='{namespace}'}"
+      timeout: 30
+
+    - name: check_slow_queries
+      action: query_metrics
+      source: prometheus
+      query: "pg_stat_activity{state='active', query_duration > 30}"
+      timeout: 30
+      extract:
+        - slow_query_count
+        - longest_query_duration
+
+    - name: check_connection_leaks
+      action: query_metrics
+      source: prometheus
+      query: "db_connection_pool_idle{service='{service}'} + db_connection_pool_active{service='{service}'}"
+      timeout: 30
+
+    - name: check_application_logs
+      action: query_logs
+      source: kubernetes
+      query: "kubectl logs -l app={deployment_name} -n {namespace} --tail=200"
+      timeout: 30
+      patterns:
+        - "connection pool exhausted"
+        - "connection timeout"
+        - "too many connections"
+        - "connection refused"
+        - "FATAL:  sorry, too many clients"
+
+    - name: check_current_pool_config
+      action: query_k8s
+      source: kubernetes
+      query: "kubectl get configmap {config_name} -n {namespace} -o yaml"
+      timeout: 15
+      extract:
+        - pool_size
+        - max_overflow
+        - pool_timeout
+
+remediation:
+  risk_level: medium
+  approval_required: false
+  max_blast_radius:
+    pods: 10
+    services: 1
+  steps:
+    - name: rolling_restart_deployment
+      action: restart_deployment
+      parameters:
+        command: "kubectl rollout restart deployment/{deployment_name} -n {namespace}"
+        reason: "Reset connection pools by restarting pods"
+      timeout: 120
+      verify:
+        condition: "rollout completed successfully"
+        timeout: 180
+
+    - name: update_pool_size_configmap
+      action: patch_configmap
+      parameters:
+        command: "kubectl patch configmap {config_name} -n {namespace} --type=merge -p='{\"data\": {\"DB_POOL_SIZE\": \"{new_pool_size}\", \"DB_MAX_OVERFLOW\": \"{new_max_overflow}\"}}'"
+        pool_size_increase: 1.5
+        max_pool_size: 50
+      timeout: 30
+      verify:
+        condition: "configmap updated with new pool settings"
+        timeout: 15
+
+    - name: trigger_config_reload
+      action: restart_deployment
+      parameters:
+        command: "kubectl rollout restart deployment/{deployment_name} -n {namespace}"
+        reason: "Apply updated connection pool configuration"
+      timeout: 120
+      verify:
+        condition: "pods restarted with new config"
+        timeout: 180
+
+    - name: monitor_connection_pool
+      action: check_health
+      parameters:
+        query: "db_connection_pool_active{service='{service}'} / db_connection_pool_max{service='{service}'}"
+        expected: "< 0.8"
+        observation_window: "5m"
+      timeout: 300
+      verify:
+        condition: "connection pool utilization below 80% for 5 minutes"
+        timeout: 300
+
+rollback:
+  automatic: true
+  steps:
+    - name: revert_configmap
+      action: patch_configmap
+      parameters:
+        command: "kubectl patch configmap {config_name} -n {namespace} --type=merge -p='{\"data\": {\"DB_POOL_SIZE\": \"{original_pool_size}\", \"DB_MAX_OVERFLOW\": \"{original_max_overflow}\"}}'"
+        reason: "Reverting pool size changes as issue persists"
+
+    - name: restart_with_original_config
+      action: restart_deployment
+      parameters:
+        command: "kubectl rollout restart deployment/{deployment_name} -n {namespace}"
+
+escalation:
+  on_failure: page
+  channels:
+    - slack
+    - pagerduty
+  timeout: 10

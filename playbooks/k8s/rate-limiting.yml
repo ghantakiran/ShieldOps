@@ -1,0 +1,148 @@
+# ShieldOps Remediation Playbook: Service Rate Limiting
+# Triggered when: Service returns excessive HTTP 429 responses
+
+name: rate-limiting
+version: "1.0"
+description: "Investigate and remediate services hitting rate limits by scaling, adjusting limits, or blocking abuse"
+severity: high
+category: kubernetes
+tags:
+  - rate-limit
+  - traffic
+  - scaling
+  - abuse
+
+detection:
+  signals:
+    - type: metric
+      source: prometheus
+      query: "rate(http_requests_total{service='{service}', status='429', namespace='{namespace}'}[5m]) > {rate_limit_threshold}"
+      threshold: 10
+      duration: "5m"
+    - type: metric
+      source: prometheus
+      query: "rate(http_requests_total{service='{service}', status='429', namespace='{namespace}'}[5m]) / rate(http_requests_total{service='{service}', namespace='{namespace}'}[5m]) > 0.05"
+      threshold: 0.05
+      duration: "5m"
+
+investigation:
+  steps:
+    - name: identify_rate_limited_sources
+      action: query_metrics
+      source: prometheus
+      query: "topk(10, rate(http_requests_total{service='{service}', status='429'}[5m]) by (source_ip, user_agent))"
+      timeout: 30
+
+    - name: check_total_request_rate
+      action: query_metrics
+      source: prometheus
+      query: "rate(http_requests_total{service='{service}'}[5m])"
+      timeout: 30
+
+    - name: compare_to_baseline
+      action: query_metrics
+      source: prometheus
+      query: "rate(http_requests_total{service='{service}'}[5m]) / avg_over_time(rate(http_requests_total{service='{service}'}[5m])[7d:1h])"
+      timeout: 30
+
+    - name: check_rate_limit_config
+      action: query_k8s
+      source: kubernetes
+      query: "kubectl get configmap {rate_limit_config} -n {namespace} -o yaml"
+      timeout: 15
+      extract:
+        - rate_limit_rps
+        - rate_limit_burst
+        - rate_limit_window
+
+    - name: check_service_health
+      action: query_metrics
+      source: prometheus
+      query: "container_cpu_usage_seconds_total{pod=~'{service}-.*', namespace='{namespace}'}"
+      timeout: 30
+
+    - name: identify_abusive_patterns
+      action: query_logs
+      source: splunk
+      query: "index=app service={service} status=429 | stats count by source_ip, user_agent | sort -count"
+      timeout: 30
+      extract:
+        - top_offending_ips
+        - top_offending_user_agents
+
+remediation:
+  risk_level: medium
+  approval_required: false
+  max_blast_radius:
+    pods: 20
+    services: 1
+  steps:
+    - name: scale_if_legitimate_traffic
+      action: scale_deployment
+      parameters:
+        condition: "traffic increase is from legitimate sources"
+        command: "kubectl scale deployment {deployment_name} -n {namespace} --replicas={scaled_replicas}"
+        scale_factor: 1.5
+        max_replicas: 30
+      timeout: 120
+      verify:
+        condition: "new replicas running and ready"
+        timeout: 120
+
+    - name: adjust_rate_limits
+      action: patch_configmap
+      parameters:
+        condition: "legitimate traffic exceeds current rate limits"
+        command: "kubectl patch configmap {rate_limit_config} -n {namespace} --type=merge -p='{\"data\": {\"RATE_LIMIT_RPS\": \"{new_rate_limit}\", \"RATE_LIMIT_BURST\": \"{new_burst_limit}\"}}'"
+        increase_factor: 1.5
+      timeout: 30
+      verify:
+        condition: "rate limit config updated"
+        timeout: 15
+
+    - name: block_abusive_sources
+      action: apply_network_policy
+      parameters:
+        condition: "abusive traffic detected from specific IPs"
+        command: "kubectl apply -f /tmp/deny-policy-{service}.yaml"
+        block_threshold: "10x normal rate from single source"
+      timeout: 60
+      verify:
+        condition: "network policy applied and blocking abusive sources"
+        timeout: 30
+
+    - name: monitor_429_rate
+      action: check_health
+      parameters:
+        query: "rate(http_requests_total{service='{service}', status='429'}[2m]) / rate(http_requests_total{service='{service}'}[2m])"
+        expected: "< 0.01"
+        observation_window: "5m"
+      timeout: 300
+      verify:
+        condition: "429 rate below 1% for 5 minutes"
+        timeout: 300
+
+rollback:
+  automatic: true
+  steps:
+    - name: revert_rate_limit_changes
+      action: patch_configmap
+      parameters:
+        command: "kubectl patch configmap {rate_limit_config} -n {namespace} --type=merge -p='{\"data\": {\"RATE_LIMIT_RPS\": \"{original_rate_limit}\", \"RATE_LIMIT_BURST\": \"{original_burst_limit}\"}}'"
+
+    - name: remove_network_policies
+      action: delete_network_policy
+      parameters:
+        command: "kubectl delete -f /tmp/deny-policy-{service}.yaml --ignore-not-found=true"
+
+    - name: scale_back_down
+      action: scale_deployment
+      parameters:
+        command: "kubectl scale deployment {deployment_name} -n {namespace} --replicas={original_replicas}"
+
+escalation:
+  on_failure: page
+  channels:
+    - slack
+    - pagerduty
+  timeout: 15

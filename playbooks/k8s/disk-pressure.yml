@@ -1,0 +1,139 @@
+# ShieldOps Remediation Playbook: Node Disk Pressure
+# Triggered when: Kubernetes node reports DiskPressure condition
+
+name: disk-pressure
+version: "1.0"
+description: "Remediate Kubernetes node disk pressure by cleaning up resources and expanding storage"
+severity: high
+category: kubernetes
+tags:
+  - node
+  - disk
+  - storage
+  - capacity
+
+detection:
+  signals:
+    - type: event
+      source: kubernetes
+      query: "kubectl get nodes -o jsonpath='{.items[*].status.conditions[?(@.type==\"DiskPressure\")]}'"
+      threshold: 1
+      duration: "1m"
+    - type: metric
+      source: prometheus
+      query: "node_filesystem_avail_bytes{mountpoint='/', instance='{node_name}'} / node_filesystem_size_bytes{mountpoint='/', instance='{node_name}'} < 0.1"
+      threshold: 0.1
+      duration: "5m"
+
+investigation:
+  steps:
+    - name: check_node_conditions
+      action: query_k8s
+      source: kubernetes
+      query: "kubectl describe node {node_name}"
+      timeout: 30
+      extract:
+        - disk_pressure_condition
+        - allocatable_ephemeral_storage
+        - capacity_ephemeral_storage
+
+    - name: check_disk_usage_by_mount
+      action: query_metrics
+      source: prometheus
+      query: "node_filesystem_avail_bytes{instance='{node_name}'} / node_filesystem_size_bytes{instance='{node_name}'}"
+      timeout: 30
+
+    - name: check_pvc_usage
+      action: query_metrics
+      source: prometheus
+      query: "kubelet_volume_stats_used_bytes{node='{node_name}'} / kubelet_volume_stats_capacity_bytes{node='{node_name}'}"
+      timeout: 30
+
+    - name: find_evicted_pods
+      action: query_k8s
+      source: kubernetes
+      query: "kubectl get pods --all-namespaces --field-selector spec.nodeName={node_name},status.phase=Failed -o wide"
+      timeout: 15
+
+    - name: check_container_log_sizes
+      action: query_metrics
+      source: prometheus
+      query: "container_fs_usage_bytes{node='{node_name}'}"
+      timeout: 30
+
+    - name: check_image_cache_size
+      action: query_metrics
+      source: prometheus
+      query: "kubelet_image_fs_used_bytes{node='{node_name}'}"
+      timeout: 15
+
+remediation:
+  risk_level: medium
+  approval_required: false
+  max_blast_radius:
+    pods: 20
+    services: 5
+  steps:
+    - name: clean_evicted_pods
+      action: cleanup_pods
+      parameters:
+        command: "kubectl get pods --all-namespaces --field-selector spec.nodeName={node_name},status.phase=Failed -o json | kubectl delete -f -"
+      timeout: 60
+      verify:
+        condition: "all evicted pods removed"
+        timeout: 30
+
+    - name: clean_unused_images
+      action: cleanup_images
+      parameters:
+        command: "kubectl node-shell {node_name} -- crictl rmi --prune"
+        min_age: "24h"
+      timeout: 120
+      verify:
+        condition: "unused container images removed"
+        timeout: 60
+
+    - name: truncate_old_container_logs
+      action: cleanup_logs
+      parameters:
+        command: "kubectl node-shell {node_name} -- find /var/log/containers -name '*.log' -mtime +3 -exec truncate -s 0 {} ;"
+        retention_days: 3
+      timeout: 120
+      verify:
+        condition: "old container logs truncated"
+        timeout: 30
+
+    - name: expand_pvc_if_possible
+      action: expand_pvc
+      parameters:
+        condition: "storage class supports volume expansion"
+        increase_factor: 1.5
+      timeout: 300
+      verify:
+        condition: "PVC expanded or skipped if not supported"
+        timeout: 300
+
+    - name: verify_disk_pressure_resolved
+      action: check_health
+      parameters:
+        query: "kubectl get node {node_name} -o jsonpath='{.status.conditions[?(@.type==\"DiskPressure\")].status}'"
+        expected: "False"
+      timeout: 300
+      verify:
+        condition: "DiskPressure condition is False"
+        timeout: 300
+
+rollback:
+  automatic: false
+  steps:
+    - name: no_rollback_needed
+      action: noop
+      parameters:
+        reason: "Cleanup operations are safe and non-destructive; no rollback required"
+
+escalation:
+  on_failure: page
+  channels:
+    - slack
+    - pagerduty
+  timeout: 15

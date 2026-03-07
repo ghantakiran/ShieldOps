@@ -1,0 +1,161 @@
+# ShieldOps Remediation Playbook: DNS Resolution Failures
+# Triggered when: Applications report DNS lookup failures in Kubernetes cluster
+
+name: dns-failure
+version: "1.0"
+description: "Diagnose and remediate DNS resolution failures by restarting CoreDNS and checking cluster DNS config"
+severity: critical
+category: kubernetes
+tags:
+  - dns
+  - coredns
+  - networking
+  - name-resolution
+
+detection:
+  signals:
+    - type: log
+      source: splunk
+      query: "index=app sourcetype=application \"dns lookup\" OR \"name resolution\" OR \"NXDOMAIN\" OR \"no such host\""
+      threshold: 20
+      duration: "5m"
+    - type: metric
+      source: prometheus
+      query: "rate(coredns_dns_responses_total{rcode='SERVFAIL'}[5m]) > 0.1"
+      threshold: 0.1
+      duration: "5m"
+    - type: metric
+      source: prometheus
+      query: "rate(coredns_dns_responses_total{rcode='NXDOMAIN'}[5m]) > 1"
+      threshold: 1
+      duration: "5m"
+
+investigation:
+  steps:
+    - name: check_coredns_pods
+      action: query_k8s
+      source: kubernetes
+      query: "kubectl get pods -n kube-system -l k8s-app=kube-dns -o wide"
+      timeout: 15
+      extract:
+        - pod_status
+        - restart_count
+        - node_placement
+
+    - name: check_coredns_logs
+      action: query_logs
+      source: kubernetes
+      query: "kubectl logs -n kube-system -l k8s-app=kube-dns --tail=200"
+      timeout: 30
+      patterns:
+        - "SERVFAIL"
+        - "REFUSED"
+        - "timeout"
+        - "connection refused"
+        - "i/o timeout"
+        - "no upstream"
+
+    - name: check_dns_service
+      action: query_k8s
+      source: kubernetes
+      query: "kubectl get svc kube-dns -n kube-system -o yaml"
+      timeout: 15
+      extract:
+        - cluster_ip
+        - endpoints_count
+
+    - name: check_dns_endpoints
+      action: query_k8s
+      source: kubernetes
+      query: "kubectl get endpoints kube-dns -n kube-system -o yaml"
+      timeout: 15
+
+    - name: check_dns_configmap
+      action: query_k8s
+      source: kubernetes
+      query: "kubectl get configmap coredns -n kube-system -o yaml"
+      timeout: 15
+
+    - name: check_node_dns_resolution
+      action: query_k8s
+      source: kubernetes
+      query: "kubectl run dns-test --image=busybox:1.36 --rm -it --restart=Never -- nslookup kubernetes.default.svc.cluster.local"
+      timeout: 30
+
+    - name: check_upstream_dns
+      action: query_k8s
+      source: kubernetes
+      query: "kubectl run dns-upstream-test --image=busybox:1.36 --rm -it --restart=Never -- nslookup google.com"
+      timeout: 30
+
+remediation:
+  risk_level: medium
+  approval_required: false
+  max_blast_radius:
+    pods: 5
+    services: 0
+  steps:
+    - name: restart_coredns_pods
+      action: restart_pods
+      parameters:
+        command: "kubectl rollout restart deployment/coredns -n kube-system"
+      timeout: 120
+      verify:
+        condition: "CoreDNS pods are running and ready"
+        timeout: 120
+
+    - name: verify_dns_resolution_internal
+      action: check_health
+      parameters:
+        command: "kubectl run dns-verify --image=busybox:1.36 --rm -it --restart=Never -- nslookup kubernetes.default.svc.cluster.local"
+        expected: "successful DNS resolution"
+      timeout: 60
+      verify:
+        condition: "internal DNS resolution succeeds"
+        timeout: 60
+
+    - name: verify_dns_resolution_external
+      action: check_health
+      parameters:
+        command: "kubectl run dns-verify-ext --image=busybox:1.36 --rm -it --restart=Never -- nslookup google.com"
+        expected: "successful DNS resolution"
+      timeout: 60
+      verify:
+        condition: "external DNS resolution succeeds"
+        timeout: 60
+
+    - name: check_upstream_dns_servers
+      action: check_health
+      parameters:
+        query: "verify upstream DNS servers in CoreDNS configmap are reachable"
+        expected: "upstream DNS responding"
+      timeout: 30
+      verify:
+        condition: "upstream DNS is healthy"
+        timeout: 30
+
+    - name: monitor_dns_error_rate
+      action: check_health
+      parameters:
+        query: "rate(coredns_dns_responses_total{rcode='SERVFAIL'}[2m])"
+        expected: "< 0.01"
+        observation_window: "5m"
+      timeout: 300
+      verify:
+        condition: "DNS SERVFAIL rate below threshold for 5 minutes"
+        timeout: 300
+
+rollback:
+  automatic: false
+  steps:
+    - name: no_rollback_needed
+      action: noop
+      parameters:
+        reason: "CoreDNS restart is safe and stateless; no rollback required"
+
+escalation:
+  on_failure: escalate
+  channels:
+    - slack
+    - pagerduty
+  timeout: 10

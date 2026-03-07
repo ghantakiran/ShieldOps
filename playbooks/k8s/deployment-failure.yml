@@ -1,0 +1,140 @@
+# ShieldOps Remediation Playbook: Failed Deployment Rollout
+# Triggered when: Kubernetes deployment fails to progress or stalls
+
+name: deployment-failure
+version: "1.0"
+description: "Automatically rollback failed Kubernetes deployments to the last known good revision"
+severity: critical
+category: kubernetes
+tags:
+  - deployment
+  - rollout
+  - rollback
+  - availability
+
+detection:
+  signals:
+    - type: event
+      source: kubernetes
+      query: "kubectl get deployment {deployment_name} -n {namespace} -o jsonpath='{.status.conditions[?(@.type==\"Progressing\")]}'"
+      threshold: 1
+      duration: "5m"
+    - type: metric
+      source: prometheus
+      query: "kube_deployment_status_condition{condition='Progressing', status='false', namespace='{namespace}', deployment='{deployment_name}'} == 1"
+      threshold: 1
+      duration: "5m"
+
+investigation:
+  steps:
+    - name: check_rollout_status
+      action: query_k8s
+      source: kubernetes
+      query: "kubectl rollout status deployment/{deployment_name} -n {namespace}"
+      timeout: 30
+      extract:
+        - rollout_status
+        - available_replicas
+        - updated_replicas
+        - unavailable_replicas
+
+    - name: check_replicaset_events
+      action: query_k8s
+      source: kubernetes
+      query: "kubectl get events -n {namespace} --field-selector involvedObject.kind=ReplicaSet --sort-by=.lastTimestamp"
+      timeout: 30
+
+    - name: check_image_pull_errors
+      action: query_k8s
+      source: kubernetes
+      query: "kubectl get pods -l app={deployment_name} -n {namespace} -o jsonpath='{.items[*].status.containerStatuses[*].state}'"
+      timeout: 15
+      patterns:
+        - "ImagePullBackOff"
+        - "ErrImagePull"
+        - "InvalidImageName"
+
+    - name: check_readiness_probe_failures
+      action: query_k8s
+      source: kubernetes
+      query: "kubectl get events -n {namespace} --field-selector reason=Unhealthy,involvedObject.name={pod_name}"
+      timeout: 15
+
+    - name: check_new_pod_logs
+      action: query_logs
+      source: kubernetes
+      query: "kubectl logs -l app={deployment_name} -n {namespace} --tail=100"
+      timeout: 30
+      patterns:
+        - "Error"
+        - "Fatal"
+        - "panic"
+        - "Connection refused"
+        - "permission denied"
+        - "config error"
+
+    - name: check_resource_quota
+      action: query_k8s
+      source: kubernetes
+      query: "kubectl describe resourcequota -n {namespace}"
+      timeout: 15
+
+remediation:
+  risk_level: high
+  approval_required: false
+  max_blast_radius:
+    pods: 50
+    services: 1
+  steps:
+    - name: rollback_to_previous_revision
+      action: rollback_deployment
+      parameters:
+        command: "kubectl rollout undo deployment/{deployment_name} -n {namespace}"
+      timeout: 60
+      verify:
+        condition: "rollback command accepted"
+        timeout: 30
+
+    - name: wait_for_rollback_completion
+      action: wait_rollout
+      parameters:
+        command: "kubectl rollout status deployment/{deployment_name} -n {namespace} --timeout=300s"
+      timeout: 300
+      verify:
+        condition: "deployment successfully rolled out"
+        timeout: 300
+
+    - name: verify_pods_healthy
+      action: check_health
+      parameters:
+        query: "kubectl get pods -l app={deployment_name} -n {namespace} -o jsonpath='{.items[*].status.phase}'"
+        expected: "all pods in Running state"
+      timeout: 120
+      verify:
+        condition: "all pods running and ready"
+        timeout: 120
+
+    - name: verify_service_health
+      action: check_health
+      parameters:
+        query: "http health check against service endpoint"
+        expected_status: 200
+      timeout: 60
+      verify:
+        condition: "service responds with 200 OK"
+        timeout: 60
+
+rollback:
+  automatic: false
+  steps:
+    - name: already_rolled_back
+      action: noop
+      parameters:
+        reason: "This playbook performs a rollback as its primary action; no further rollback needed"
+
+escalation:
+  on_failure: escalate
+  channels:
+    - slack
+    - pagerduty
+  timeout: 10

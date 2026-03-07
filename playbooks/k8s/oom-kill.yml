@@ -1,0 +1,132 @@
+# ShieldOps Remediation Playbook: OOMKilled Containers
+# Triggered when: Container is terminated due to exceeding memory limits
+
+name: oom-kill
+version: "1.0"
+description: "Remediate containers killed by OOM by adjusting memory limits and restarting"
+severity: high
+category: kubernetes
+tags:
+  - oom
+  - memory
+  - resource-limits
+  - container
+
+detection:
+  signals:
+    - type: event
+      source: kubernetes
+      query: "kubectl get events -n {namespace} --field-selector reason=OOMKilling"
+      threshold: 1
+      duration: "5m"
+    - type: metric
+      source: prometheus
+      query: "kube_pod_container_status_last_terminated_reason{reason='OOMKilled', namespace='{namespace}', pod='{pod_name}'} == 1"
+      threshold: 1
+      duration: "1m"
+
+investigation:
+  steps:
+    - name: check_memory_usage_trend
+      action: query_metrics
+      source: prometheus
+      query: "container_memory_usage_bytes{pod='{pod_name}', namespace='{namespace}'}[1h]"
+      timeout: 30
+
+    - name: check_current_limits
+      action: query_k8s
+      source: kubernetes
+      query: "kubectl get pod {pod_name} -n {namespace} -o jsonpath='{.spec.containers[*].resources}'"
+      timeout: 15
+      extract:
+        - memory_limit
+        - memory_request
+        - cpu_limit
+        - cpu_request
+
+    - name: check_memory_working_set
+      action: query_metrics
+      source: prometheus
+      query: "container_memory_working_set_bytes{pod='{pod_name}', namespace='{namespace}'}[1h]"
+      timeout: 30
+
+    - name: identify_memory_leak_pattern
+      action: correlate
+      source: prometheus
+      query: "deriv(container_memory_usage_bytes{pod=~'{deployment_name}-.*', namespace='{namespace}'}[30m]) > 0"
+      timeout: 30
+
+    - name: check_pod_events
+      action: query_k8s
+      source: kubernetes
+      query: "kubectl describe pod {pod_name} -n {namespace}"
+      timeout: 15
+      extract:
+        - last_termination_reason
+        - termination_timestamp
+        - restart_count
+
+    - name: correlate_with_deployments
+      action: query_k8s
+      source: kubernetes
+      query: "kubectl rollout history deployment/{deployment_name} -n {namespace}"
+      timeout: 15
+
+remediation:
+  risk_level: medium
+  approval_required: false
+  max_blast_radius:
+    pods: 10
+    services: 1
+  steps:
+    - name: increase_memory_limits
+      action: patch_deployment
+      parameters:
+        command: "kubectl patch deployment {deployment_name} -n {namespace} --type=json -p='[{\"op\": \"replace\", \"path\": \"/spec/template/spec/containers/0/resources/limits/memory\", \"value\": \"{new_memory_limit}\"}]'"
+        increase_factor: 1.5
+        max_memory: "8Gi"
+      timeout: 60
+      verify:
+        condition: "deployment spec updated with new memory limit"
+        timeout: 30
+
+    - name: wait_for_rollout
+      action: wait_rollout
+      parameters:
+        command: "kubectl rollout status deployment/{deployment_name} -n {namespace} --timeout=300s"
+      timeout: 300
+      verify:
+        condition: "rollout completed successfully"
+        timeout: 300
+
+    - name: monitor_memory_usage
+      action: check_health
+      parameters:
+        query: "container_memory_usage_bytes{pod=~'{deployment_name}-.*', namespace='{namespace}'} / container_spec_memory_limit_bytes < 0.8"
+        observation_window: "5m"
+      timeout: 300
+      verify:
+        condition: "memory usage below 80% of new limit for 5 minutes"
+        timeout: 300
+
+rollback:
+  automatic: true
+  steps:
+    - name: revert_memory_limits
+      action: patch_deployment
+      parameters:
+        command: "kubectl patch deployment {deployment_name} -n {namespace} --type=json -p='[{\"op\": \"replace\", \"path\": \"/spec/template/spec/containers/0/resources/limits/memory\", \"value\": \"{original_memory_limit}\"}]'"
+        reason: "Memory increase did not resolve OOM; possible memory leak"
+
+    - name: notify_engineering
+      action: notify
+      parameters:
+        channel: "#backend-team"
+        message: "OOM remediation failed for {deployment_name}. Memory leak suspected. Manual investigation required."
+
+escalation:
+  on_failure: page
+  channels:
+    - slack
+    - pagerduty
+  timeout: 10

@@ -1,0 +1,159 @@
+# ShieldOps Remediation Playbook: Memory Leak Detection
+# Triggered when: Container memory usage is monotonically increasing over 1 hour
+
+name: memory-leak
+version: "1.0"
+description: "Detect and remediate gradual memory leaks via rolling restart and memory limit enforcement"
+severity: high
+category: kubernetes
+tags:
+  - memory
+  - leak
+  - resource-limits
+  - rolling-restart
+
+detection:
+  signals:
+    - type: metric
+      source: prometheus
+      query: "deriv(container_memory_usage_bytes{pod=~'{deployment_name}-.*', namespace='{namespace}'}[1h]) > 0"
+      threshold: 0
+      duration: "1h"
+    - type: metric
+      source: prometheus
+      query: "container_memory_usage_bytes{pod=~'{deployment_name}-.*', namespace='{namespace}'} / container_spec_memory_limit_bytes > 0.85"
+      threshold: 0.85
+      duration: "15m"
+
+investigation:
+  steps:
+    - name: check_memory_trend
+      action: query_metrics
+      source: prometheus
+      query: "container_memory_usage_bytes{pod=~'{deployment_name}-.*', namespace='{namespace}'}[6h]"
+      timeout: 30
+
+    - name: calculate_memory_growth_rate
+      action: query_metrics
+      source: prometheus
+      query: "deriv(container_memory_usage_bytes{pod=~'{deployment_name}-.*', namespace='{namespace}'}[1h])"
+      timeout: 30
+      extract:
+        - growth_rate_bytes_per_second
+        - estimated_time_to_oom
+
+    - name: identify_leaking_container
+      action: query_metrics
+      source: prometheus
+      query: "topk(5, deriv(container_memory_usage_bytes{namespace='{namespace}'}[1h]) > 0) by (pod, container)"
+      timeout: 30
+
+    - name: check_current_limits
+      action: query_k8s
+      source: kubernetes
+      query: "kubectl get deployment {deployment_name} -n {namespace} -o jsonpath='{.spec.template.spec.containers[*].resources}'"
+      timeout: 15
+      extract:
+        - memory_limit
+        - memory_request
+
+    - name: correlate_with_recent_deploys
+      action: query_k8s
+      source: kubernetes
+      query: "kubectl rollout history deployment/{deployment_name} -n {namespace}"
+      timeout: 15
+
+    - name: check_gc_metrics
+      action: query_metrics
+      source: prometheus
+      query: "process_runtime_gc_pause_total_seconds{service='{service}'}"
+      timeout: 30
+
+    - name: check_heap_usage
+      action: query_metrics
+      source: prometheus
+      query: "process_resident_memory_bytes{service='{service}'}"
+      timeout: 30
+
+remediation:
+  risk_level: medium
+  approval_required: false
+  max_blast_radius:
+    pods: 20
+    services: 1
+  steps:
+    - name: scale_up_before_restart
+      action: scale_deployment
+      parameters:
+        command: "kubectl scale deployment {deployment_name} -n {namespace} --replicas={scaled_replicas}"
+        scale_factor: 1.25
+        reason: "Increase capacity to absorb traffic during rolling restart"
+      timeout: 120
+      verify:
+        condition: "additional replicas are running and ready"
+        timeout: 120
+
+    - name: rolling_restart_deployment
+      action: restart_deployment
+      parameters:
+        command: "kubectl rollout restart deployment/{deployment_name} -n {namespace}"
+        strategy: "rolling"
+      timeout: 300
+      verify:
+        condition: "all pods restarted with fresh memory"
+        timeout: 300
+
+    - name: set_memory_limits_with_threshold
+      action: patch_deployment
+      parameters:
+        command: "kubectl patch deployment {deployment_name} -n {namespace} --type=json -p='[{\"op\": \"replace\", \"path\": \"/spec/template/spec/containers/0/resources/limits/memory\", \"value\": \"{target_memory_limit}\"}]'"
+        target_limit: "120% of normal peak usage"
+        reason: "Set memory limit to force OOM restart before leak causes node pressure"
+      timeout: 60
+      verify:
+        condition: "deployment updated with new memory limits"
+        timeout: 60
+
+    - name: monitor_memory_after_restart
+      action: check_health
+      parameters:
+        query: "container_memory_usage_bytes{pod=~'{deployment_name}-.*', namespace='{namespace}'} / container_spec_memory_limit_bytes"
+        expected: "< 0.6"
+        observation_window: "10m"
+      timeout: 600
+      verify:
+        condition: "memory usage below 60% of limit after restart"
+        timeout: 600
+
+    - name: scale_back_to_normal
+      action: scale_deployment
+      parameters:
+        command: "kubectl scale deployment {deployment_name} -n {namespace} --replicas={original_replicas}"
+        condition: "only after rolling restart is fully complete"
+      timeout: 120
+      verify:
+        condition: "deployment scaled back to original replica count"
+        timeout: 120
+
+rollback:
+  automatic: true
+  steps:
+    - name: scale_up_to_compensate
+      action: scale_deployment
+      parameters:
+        command: "kubectl scale deployment {deployment_name} -n {namespace} --replicas={compensated_replicas}"
+        scale_factor: 1.5
+        reason: "If restart did not resolve leak, scale up to buy time for manual investigation"
+
+    - name: notify_engineering
+      action: notify
+      parameters:
+        channel: "#backend-team"
+        message: "Memory leak confirmed in {deployment_name}. Rolling restart did not resolve. Scaled up to {compensated_replicas} replicas. Manual code investigation required."
+
+escalation:
+  on_failure: page
+  channels:
+    - slack
+    - pagerduty
+  timeout: 15

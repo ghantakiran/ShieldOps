@@ -1,0 +1,151 @@
+# ShieldOps Remediation Playbook: TLS Certificate Expiry
+# Triggered when: TLS certificate is expiring within 7 days
+
+name: certificate-expiry
+version: "1.0"
+description: "Detect expiring TLS certificates and trigger automated renewal via cert-manager"
+severity: high
+category: kubernetes
+tags:
+  - certificate
+  - tls
+  - security
+  - cert-manager
+  - ingress
+
+detection:
+  signals:
+    - type: metric
+      source: prometheus
+      query: "certmanager_certificate_expiration_timestamp_seconds{namespace='{namespace}'} - time() < 604800"
+      threshold: 604800
+      duration: "1m"
+    - type: metric
+      source: prometheus
+      query: "(x509_cert_not_after - time()) / 86400 < 7"
+      threshold: 7
+      duration: "1m"
+
+investigation:
+  steps:
+    - name: check_certificate_details
+      action: query_k8s
+      source: kubernetes
+      query: "kubectl get certificate {cert_name} -n {namespace} -o yaml"
+      timeout: 15
+      extract:
+        - expiry_date
+        - issuer
+        - domains
+        - renewal_status
+        - ready_condition
+
+    - name: identify_certificate_source
+      action: query_k8s
+      source: kubernetes
+      query: "kubectl get certificate {cert_name} -n {namespace} -o jsonpath='{.spec.issuerRef}'"
+      timeout: 15
+      extract:
+        - issuer_kind
+        - issuer_name
+
+    - name: check_cert_manager_logs
+      action: query_logs
+      source: kubernetes
+      query: "kubectl logs -l app=cert-manager -n cert-manager --tail=200"
+      timeout: 30
+      patterns:
+        - "failed to renew"
+        - "ACME challenge failed"
+        - "rate limited"
+        - "error"
+        - "timeout"
+
+    - name: check_ingress_using_cert
+      action: query_k8s
+      source: kubernetes
+      query: "kubectl get ingress -n {namespace} -o yaml | grep {cert_secret}"
+      timeout: 15
+
+    - name: check_cert_secret_exists
+      action: query_k8s
+      source: kubernetes
+      query: "kubectl get secret {cert_secret} -n {namespace} -o jsonpath='{.metadata.creationTimestamp}'"
+      timeout: 15
+
+remediation:
+  risk_level: medium
+  approval_required: false
+  max_blast_radius:
+    pods: 5
+    services: 3
+  steps:
+    - name: backup_current_cert_secret
+      action: backup_resource
+      parameters:
+        command: "kubectl get secret {cert_secret} -n {namespace} -o yaml > /tmp/cert-backup-{cert_secret}.yaml"
+      timeout: 30
+      verify:
+        condition: "secret backup saved"
+        timeout: 15
+
+    - name: trigger_cert_renewal
+      action: trigger_renewal
+      parameters:
+        command: "kubectl delete secret {cert_secret} -n {namespace}"
+        reason: "Deleting secret triggers cert-manager to re-issue certificate"
+      timeout: 60
+      verify:
+        condition: "cert-manager begins certificate renewal"
+        timeout: 60
+
+    - name: wait_for_certificate_ready
+      action: check_health
+      parameters:
+        query: "kubectl get certificate {cert_name} -n {namespace} -o jsonpath='{.status.conditions[?(@.type==\"Ready\")].status}'"
+        expected: "True"
+        observation_window: "5m"
+      timeout: 600
+      verify:
+        condition: "certificate status is Ready"
+        timeout: 600
+
+    - name: restart_ingress_controller
+      action: restart_pods
+      parameters:
+        command: "kubectl rollout restart deployment/{ingress_controller} -n {ingress_namespace}"
+      timeout: 120
+      verify:
+        condition: "ingress controller pods are running with new cert"
+        timeout: 120
+
+    - name: verify_tls_endpoint
+      action: check_health
+      parameters:
+        query: "curl -sI https://{domain} | head -1"
+        expected_status: 200
+      timeout: 30
+      verify:
+        condition: "HTTPS endpoint responds successfully"
+        timeout: 30
+
+rollback:
+  automatic: true
+  steps:
+    - name: restore_previous_cert_secret
+      action: restore_resource
+      parameters:
+        command: "kubectl apply -f /tmp/cert-backup-{cert_secret}.yaml"
+        reason: "Renewal failed; restoring previous certificate from backup"
+
+    - name: restart_ingress_with_old_cert
+      action: restart_pods
+      parameters:
+        command: "kubectl rollout restart deployment/{ingress_controller} -n {ingress_namespace}"
+
+escalation:
+  on_failure: escalate
+  channels:
+    - slack
+    - pagerduty
+  timeout: 30

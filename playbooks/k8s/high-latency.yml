@@ -1,0 +1,130 @@
+# ShieldOps Remediation Playbook: Service High Latency
+# Triggered when: P99 latency exceeds SLO threshold for sustained period
+
+name: high-latency
+version: "1.0"
+description: "Investigate and remediate high service latency by scaling and dependency analysis"
+severity: high
+category: kubernetes
+tags:
+  - latency
+  - performance
+  - scaling
+  - slo
+
+detection:
+  signals:
+    - type: metric
+      source: prometheus
+      query: "histogram_quantile(0.99, rate(http_request_duration_seconds_bucket{service='{service}', namespace='{namespace}'}[5m])) > {slo_threshold}"
+      threshold: "2x baseline"
+      duration: "5m"
+    - type: metric
+      source: prometheus
+      query: "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{service='{service}', namespace='{namespace}'}[5m])) > {slo_threshold_p95}"
+      threshold: "1.5x baseline"
+      duration: "5m"
+
+investigation:
+  steps:
+    - name: identify_slow_endpoints
+      action: query_metrics
+      source: prometheus
+      query: "histogram_quantile(0.99, rate(http_request_duration_seconds_bucket{service='{service}'}[5m])) by (endpoint, method)"
+      timeout: 30
+
+    - name: check_cpu_memory_saturation
+      action: query_metrics
+      source: prometheus
+      query: "container_cpu_usage_seconds_total{pod=~'{service}-.*', namespace='{namespace}'}"
+      timeout: 30
+
+    - name: check_connection_pools
+      action: query_metrics
+      source: prometheus
+      query: "connection_pool_active{service='{service}'} / connection_pool_max{service='{service}'}"
+      timeout: 30
+
+    - name: check_downstream_latency
+      action: query_traces
+      source: jaeger
+      query: "traces for service {service} with duration > {slo_threshold}"
+      timeout: 30
+      extract:
+        - slowest_span_service
+        - slowest_span_operation
+        - error_spans
+
+    - name: check_request_rate_change
+      action: query_metrics
+      source: prometheus
+      query: "rate(http_requests_total{service='{service}'}[5m]) / rate(http_requests_total{service='{service}'}[1h] offset 1h)"
+      timeout: 30
+
+    - name: check_pod_count
+      action: query_k8s
+      source: kubernetes
+      query: "kubectl get deployment {deployment_name} -n {namespace} -o jsonpath='{.status.readyReplicas}'"
+      timeout: 15
+
+remediation:
+  risk_level: medium
+  approval_required: false
+  max_blast_radius:
+    pods: 30
+    services: 1
+  steps:
+    - name: scale_up_replicas
+      action: scale_deployment
+      parameters:
+        command: "kubectl scale deployment {deployment_name} -n {namespace} --replicas={scaled_replicas}"
+        scale_factor: 1.5
+        max_replicas: 30
+        min_increase: 2
+      timeout: 60
+      verify:
+        condition: "new replicas are running and ready"
+        timeout: 120
+
+    - name: wait_for_latency_improvement
+      action: check_health
+      parameters:
+        query: "histogram_quantile(0.99, rate(http_request_duration_seconds_bucket{service='{service}'}[2m]))"
+        expected: "below SLO threshold"
+        observation_window: "5m"
+      timeout: 300
+      verify:
+        condition: "P99 latency below SLO threshold for 5 minutes"
+        timeout: 300
+
+    - name: verify_error_rate_stable
+      action: check_health
+      parameters:
+        query: "rate(http_requests_total{service='{service}', status=~'5..'}[5m]) / rate(http_requests_total{service='{service}'}[5m])"
+        expected: "< 0.01"
+      timeout: 60
+      verify:
+        condition: "error rate below 1%"
+        timeout: 60
+
+rollback:
+  automatic: true
+  steps:
+    - name: scale_back_down
+      action: scale_deployment
+      parameters:
+        command: "kubectl scale deployment {deployment_name} -n {namespace} --replicas={original_replicas}"
+        reason: "Scaling did not improve latency; root cause is not load-related"
+
+    - name: notify_team
+      action: notify
+      parameters:
+        channel: "#sre-oncall"
+        message: "Scaling {deployment_name} did not reduce latency. Manual investigation needed — possible downstream dependency or code regression."
+
+escalation:
+  on_failure: page
+  channels:
+    - slack
+    - pagerduty
+  timeout: 10
