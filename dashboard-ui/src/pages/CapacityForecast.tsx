@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { HardDrive, AlertTriangle, CheckCircle, Clock } from "lucide-react";
+import { get } from "../api/client";
 
 interface CapacityRisk {
   resource: string;
@@ -14,9 +15,14 @@ export default function CapacityForecast() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/v1/capacity/risks")
-      .then((r) => r.json())
-      .then((data) => setRisks(data.risks || []))
+    get<{ risks?: CapacityRisk[] } | CapacityRisk[]>("/capacity/risks")
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setRisks(data);
+        } else {
+          setRisks(data.risks || []);
+        }
+      })
       .catch(() => setRisks([]))
       .finally(() => setLoading(false));
   }, []);

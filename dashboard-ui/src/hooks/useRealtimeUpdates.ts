@@ -11,6 +11,8 @@
 import { useEffect, useRef } from "react";
 import { useQueryClient, type QueryClient } from "@tanstack/react-query";
 import { create } from "zustand";
+import { isDemoMode } from "../demo/config";
+import { startMockWebSocket, stopMockWebSocket } from "../demo/mockWebSocket";
 
 // ── Types ────────────────────────────────────────────────────────────
 
@@ -93,7 +95,20 @@ export function useRealtimeUpdates(): void {
   const queryClientRef = useRef(queryClient);
   queryClientRef.current = queryClient;
 
+  // Demo mode: use mock event loop instead of real WebSocket
   useEffect(() => {
+    if (!isDemoMode()) return;
+    const { setStatus } = useConnectionStore.getState();
+    setStatus("connected");
+    startMockWebSocket(queryClient);
+    return () => {
+      stopMockWebSocket();
+      setStatus("disconnected");
+    };
+  }, [queryClient]);
+
+  useEffect(() => {
+    if (isDemoMode()) return; // handled by demo effect above
     mountedRef.current = true;
     const { setStatus } = useConnectionStore.getState();
 

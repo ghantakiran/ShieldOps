@@ -92,7 +92,7 @@ export default function RemediationDetail() {
       {/* Header */}
       <div>
         <Link
-          to="/remediations"
+          to="/app/remediations"
           className="inline-flex items-center gap-1.5 text-sm text-gray-400 transition-colors hover:text-gray-100"
         >
           <ArrowLeft className="h-4 w-4" />

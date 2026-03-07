@@ -190,7 +190,7 @@ export default function Investigations() {
         columns={columns}
         data={filtered}
         keyExtractor={(row) => row.id}
-        onRowClick={(row) => navigate(`/investigations/${row.id}`)}
+        onRowClick={(row) => navigate(`/app/investigations/${row.id}`)}
         emptyMessage="No investigations match your filters."
       />
     </div>

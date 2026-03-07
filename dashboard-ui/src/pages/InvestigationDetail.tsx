@@ -110,7 +110,7 @@ export default function InvestigationDetail() {
       {/* Header */}
       <div>
         <Link
-          to="/investigations"
+          to="/app/investigations"
           className="inline-flex items-center gap-1.5 text-sm text-gray-400 transition-colors hover:text-gray-100"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -121,7 +121,7 @@ export default function InvestigationDetail() {
           <StatusBadge status={inv.severity} />
           <StatusBadge status={inv.status} />
           <Link
-            to={`/investigations/${id}/timeline`}
+            to={`/app/investigations/${id}/timeline`}
             className="ml-auto inline-flex items-center gap-1.5 rounded-lg border border-gray-700 bg-gray-800 px-3 py-1.5 text-sm font-medium text-gray-300 transition-colors hover:border-brand-500 hover:text-gray-100"
           >
             <ListOrdered className="h-4 w-4" />

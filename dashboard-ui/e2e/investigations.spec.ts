@@ -1,24 +1,25 @@
 import { test, expect } from "./fixtures";
 
 test.describe("Investigations Page", () => {
-  test("investigations list page loads", async ({ authenticatedPage: page }) => {
-    await page.goto("/investigations");
+  test("investigations list page loads", async ({ demoPage: page }) => {
+    await page.goto("/app/investigations");
     await expect(page.getByRole("heading", { name: /investigation/i })).toBeVisible();
   });
 
-  test("investigations table renders with columns", async ({ authenticatedPage: page }) => {
-    await page.goto("/investigations");
+  test("investigations table renders with columns", async ({ demoPage: page }) => {
+    await page.goto("/app/investigations");
     const table = page.locator("table").first();
     await expect(table).toBeVisible();
 
-    // Check for expected column headers
-    await expect(page.getByText(/alert|id/i).first()).toBeVisible();
-    await expect(page.getByText(/status/i).first()).toBeVisible();
-    await expect(page.getByText(/severity|confidence/i).first()).toBeVisible();
+    // Check for expected column headers within the table
+    const thead = table.locator("thead");
+    await expect(thead.getByText(/alert/i)).toBeVisible();
+    await expect(thead.getByText(/status/i)).toBeVisible();
+    await expect(thead.getByText(/severity|confidence/i).first()).toBeVisible();
   });
 
-  test("search/filter input is available", async ({ authenticatedPage: page }) => {
-    await page.goto("/investigations");
+  test("search/filter input is available", async ({ demoPage: page }) => {
+    await page.goto("/app/investigations");
     const searchInput = page.getByPlaceholder(/search|filter/i);
     if (await searchInput.isVisible()) {
       await searchInput.fill("test");
@@ -27,10 +28,8 @@ test.describe("Investigations Page", () => {
     }
   });
 
-  test("click row navigates to detail page with findings", async ({
-    authenticatedPage: page,
-  }) => {
-    await page.goto("/investigations");
+  test("click row navigates to detail page with findings", async ({ demoPage: page }) => {
+    await page.goto("/app/investigations");
     const firstRow = page.locator("table tbody tr").first();
     if (await firstRow.isVisible()) {
       await firstRow.click();

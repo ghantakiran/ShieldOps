@@ -275,7 +275,7 @@ export default function Security() {
 
           {/* Quick link to full vulnerability list */}
           <button
-            onClick={() => navigate("/vulnerabilities")}
+            onClick={() => navigate("/app/vulnerabilities")}
             className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-700 py-3 text-sm text-gray-300 hover:bg-gray-800"
           >
             <Bug className="h-4 w-4" />
@@ -288,7 +288,7 @@ export default function Security() {
       {activeTab === "Vulnerabilities" && (
         <div className="space-y-4">
           <button
-            onClick={() => navigate("/vulnerabilities")}
+            onClick={() => navigate("/app/vulnerabilities")}
             className="flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2 text-sm text-white hover:bg-brand-600"
           >
             <Bug className="h-4 w-4" />

@@ -1,10 +1,14 @@
 import { useState, useEffect, useCallback } from "react";
-import { Bell, LogOut, Search } from "lucide-react";
+import { Bell, LogOut, Menu, Search } from "lucide-react";
 import { useAuthStore } from "../store/auth";
 import ConnectionStatus from "./ConnectionStatus";
 import GlobalSearch from "./GlobalSearch";
 
-export default function Header() {
+interface HeaderProps {
+  onMenuClick?: () => void;
+}
+
+export default function Header({ onMenuClick }: HeaderProps) {
   const { user, logout } = useAuthStore();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
@@ -26,20 +30,33 @@ export default function Header() {
 
   return (
     <>
-      <header className="flex h-14 items-center justify-between border-b border-gray-800 bg-gray-900 px-6">
-        {/* Search trigger */}
-        <button
-          onClick={openSearch}
-          className="flex items-center gap-2 rounded-lg border border-gray-700 bg-gray-800/50 px-3 py-1.5 text-sm text-gray-400 transition-colors hover:border-gray-600 hover:text-gray-300"
-        >
-          <Search className="h-4 w-4" />
-          <span>Search...</span>
-          <kbd className="ml-4 hidden rounded border border-gray-700 bg-gray-800 px-1.5 py-0.5 font-mono text-[10px] text-gray-500 sm:inline">
-            {navigator.platform.includes("Mac") ? "\u2318K" : "Ctrl+K"}
-          </kbd>
-        </button>
+      <header className="flex h-14 items-center justify-between border-b border-gray-800 bg-gray-900 px-4 sm:px-6">
+        <div className="flex items-center gap-3">
+          {/* Mobile hamburger */}
+          {onMenuClick && (
+            <button
+              onClick={onMenuClick}
+              className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-800 hover:text-gray-200 lg:hidden"
+              aria-label="Open menu"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+          )}
 
-        <div className="flex items-center gap-4">
+          {/* Search trigger */}
+          <button
+            onClick={openSearch}
+            className="flex items-center gap-2 rounded-lg border border-gray-700 bg-gray-800/50 px-3 py-1.5 text-sm text-gray-400 transition-colors hover:border-gray-600 hover:text-gray-300"
+          >
+            <Search className="h-4 w-4" />
+            <span className="hidden sm:inline">Search...</span>
+            <kbd className="ml-4 hidden rounded border border-gray-700 bg-gray-800 px-1.5 py-0.5 font-mono text-[10px] text-gray-500 sm:inline">
+              {navigator.platform.includes("Mac") ? "\u2318K" : "Ctrl+K"}
+            </kbd>
+          </button>
+        </div>
+
+        <div className="flex items-center gap-2 sm:gap-4">
           {/* WebSocket connection status */}
           <ConnectionStatus />
 
@@ -51,7 +68,7 @@ export default function Header() {
           {/* User */}
           {user && (
             <div className="flex items-center gap-3">
-              <div className="text-right">
+              <div className="hidden text-right sm:block">
                 <p className="text-sm font-medium">{user.name}</p>
                 <p className="text-xs text-gray-500">{user.role}</p>
               </div>

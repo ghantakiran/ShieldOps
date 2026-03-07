@@ -1,5 +1,8 @@
 /** HTTP client for the ShieldOps API. */
 
+import { isDemoMode } from "../demo/config";
+import { resolveRoute } from "../demo/routeMap";
+
 const API_BASE = "/api/v1";
 
 class ApiError extends Error {
@@ -16,6 +19,13 @@ async function request<T>(
   path: string,
   options: RequestInit = {},
 ): Promise<T> {
+  // Demo mode: resolve from fixtures instead of making real HTTP calls
+  if (isDemoMode()) {
+    await new Promise((r) => setTimeout(r, 50 + Math.random() * 150));
+    const body = options.body ? JSON.parse(options.body as string) : undefined;
+    return resolveRoute(path, body) as T;
+  }
+
   const token = localStorage.getItem("shieldops_token");
   const headers: Record<string, string> = {
     "Content-Type": "application/json",

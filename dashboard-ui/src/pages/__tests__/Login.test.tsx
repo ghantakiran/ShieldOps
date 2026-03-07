@@ -83,7 +83,7 @@ describe("Login", () => {
     await waitFor(() => {
       expect(mockSetAuth).toHaveBeenCalledWith("tok-123", expect.objectContaining({ email: "admin@test.com" }));
     });
-    expect(mockNavigate).toHaveBeenCalledWith("/", { replace: true });
+    expect(mockNavigate).toHaveBeenCalledWith("/app", { replace: true });
   });
 
   it("shows error message on failed login", async () => {

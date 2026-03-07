@@ -336,7 +336,7 @@ export default function FleetOverview() {
           columns={investigationColumns}
           data={investigations}
           keyExtractor={(row) => row.id}
-          onRowClick={(row) => navigate(`/investigations/${row.id}`)}
+          onRowClick={(row) => navigate(`/app/investigations/${row.id}`)}
           emptyMessage="No recent investigations"
         />
       </div>
@@ -353,7 +353,7 @@ export default function FleetOverview() {
           columns={remediationColumns}
           data={remediations}
           keyExtractor={(row) => row.id}
-          onRowClick={(row) => navigate(`/remediations/${row.id}`)}
+          onRowClick={(row) => navigate(`/app/remediations/${row.id}`)}
           emptyMessage="No recent remediations"
         />
       </div>
