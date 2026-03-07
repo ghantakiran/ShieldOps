@@ -499,6 +499,40 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         except Exception as e:
             logger.warning("stripe_billing_init_failed", error=str(e))
 
+    # Production Stripe billing (DB-backed, per-plan price IDs)
+    stripe_key = settings.stripe_secret_key or settings.stripe_api_key
+    if stripe_key and session_factory is not None:
+        try:
+            from shieldops.api.routes import stripe_billing as stripe_billing_routes
+            from shieldops.billing.stripe_service import StripeService
+
+            price_ids = {
+                "starter": settings.stripe_price_starter,
+                "professional": settings.stripe_price_professional,
+                "enterprise": settings.stripe_price_enterprise,
+            }
+            # Only include plans that have a price ID configured
+            price_ids = {k: v for k, v in price_ids.items() if v}
+
+            stripe_service = StripeService(
+                secret_key=stripe_key,
+                webhook_secret=settings.stripe_webhook_secret,
+                price_ids=price_ids,
+                session_factory=session_factory,
+            )
+            stripe_billing_routes.set_stripe_service(stripe_service)
+            app.include_router(
+                stripe_billing_routes.router,
+                prefix=settings.api_prefix,
+                tags=["Stripe Billing"],
+            )
+            logger.info(
+                "stripe_billing_service_initialized",
+                plans_configured=list(price_ids.keys()),
+            )
+        except Exception as e:
+            logger.warning("stripe_billing_service_init_failed", error=str(e))
+
     # ── Billing enforcement service ──────────────────────────────
     try:
         from shieldops.api.middleware.billing_enforcement import (
@@ -598,27 +632,6 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
             default_channel=settings.slack_approval_channel,
         )
         logger.info("slack_notifier_initialized")
-
-    # ── Slack bot (slash commands + interactive messages) ──────────
-    if settings.slack_bot_token and settings.slack_signing_secret:
-        try:
-            from shieldops.api.routes import slack_events as slack_events_routes
-            from shieldops.integrations.slack.bot import SlackBotService
-
-            slack_bot = SlackBotService(
-                bot_token=settings.slack_bot_token,
-                signing_secret=settings.slack_signing_secret,
-                approval_channel=settings.slack_approval_channel,
-            )
-            slack_events_routes.set_bot_service(slack_bot)
-            app.include_router(
-                slack_events_routes.router,
-                prefix=settings.api_prefix,
-                tags=["Slack"],
-            )
-            logger.info("slack_bot_initialized")
-        except Exception as e:
-            logger.warning("slack_bot_init_failed", error=str(e))
 
     if settings.webhook_url:
         from shieldops.integrations.notifications.webhook import (

@@ -426,11 +426,46 @@ class OrganizationRecord(Base):
     plan: Mapped[str] = mapped_column(String(32), default="free")  # free, pro, enterprise
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     settings: Mapped[dict[str, Any]] = mapped_column(JSONB, default=dict)
+    stripe_customer_id: Mapped[str | None] = mapped_column(String(256), nullable=True, index=True)
     rate_limit: Mapped[int] = mapped_column(Integer, default=1000)  # requests per minute
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
+
+
+class SubscriptionRecord(Base):
+    """Stripe subscription linked to an organization."""
+
+    __tablename__ = "subscriptions"
+
+    id: Mapped[str] = mapped_column(
+        String(64), primary_key=True, default=lambda: f"sub-{uuid4().hex[:12]}"
+    )
+    org_id: Mapped[str] = mapped_column(String(64), index=True, nullable=False)
+    stripe_customer_id: Mapped[str] = mapped_column(String(256), nullable=False)
+    stripe_subscription_id: Mapped[str] = mapped_column(
+        String(256), unique=True, nullable=False, index=True
+    )
+    plan: Mapped[str] = mapped_column(
+        String(32), nullable=False
+    )  # starter, professional, enterprise
+    status: Mapped[str] = mapped_column(
+        String(32), default="active", index=True
+    )  # active, past_due, canceled, incomplete
+    current_period_start: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    current_period_end: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    cancel_at_period_end: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+    __table_args__ = (Index("ix_subscriptions_org_status", "org_id", "status"),)
 
 
 class PlaybookRecord(Base):
