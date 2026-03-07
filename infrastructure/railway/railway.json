@@ -1,0 +1,99 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "project": {
+    "name": "shieldops",
+    "description": "ShieldOps - AI-Powered Autonomous SRE Platform"
+  },
+  "services": {
+    "api": {
+      "name": "shieldops-api",
+      "description": "FastAPI backend serving the ShieldOps REST API",
+      "builder": "dockerfile",
+      "dockerfilePath": "infrastructure/docker/Dockerfile",
+      "startCommand": "uvicorn shieldops.api.app:app --host 0.0.0.0 --port $PORT",
+      "healthcheckPath": "/health",
+      "healthcheckTimeout": 30,
+      "restartPolicyType": "on_failure",
+      "restartPolicyMaxRetries": 3,
+      "numReplicas": 1,
+      "envVars": {
+        "SHIELDOPS_ENVIRONMENT": "production",
+        "SHIELDOPS_DEBUG": "false",
+        "SHIELDOPS_API_HOST": "0.0.0.0",
+        "SHIELDOPS_DATABASE_URL": {
+          "reference": "neon-postgres.DATABASE_URL"
+        },
+        "SHIELDOPS_REDIS_URL": {
+          "reference": "upstash-redis.REDIS_URL"
+        },
+        "SHIELDOPS_DATABASE_POOL_SIZE": "50",
+        "SHIELDOPS_RATE_LIMIT_ENABLED": "true",
+        "SHIELDOPS_SLIDING_WINDOW_RATE_LIMIT_ENABLED": "true"
+      },
+      "networking": {
+        "port": 8000,
+        "public": true
+      }
+    },
+    "worker": {
+      "name": "shieldops-worker",
+      "description": "Background agent runner processing Kafka events and executing agent workflows",
+      "builder": "dockerfile",
+      "dockerfilePath": "infrastructure/docker/Dockerfile",
+      "startCommand": "python -m shieldops.workers.main",
+      "restartPolicyType": "on_failure",
+      "restartPolicyMaxRetries": 5,
+      "numReplicas": 1,
+      "envVars": {
+        "SHIELDOPS_ENVIRONMENT": "production",
+        "SHIELDOPS_DEBUG": "false",
+        "SHIELDOPS_DATABASE_URL": {
+          "reference": "neon-postgres.DATABASE_URL"
+        },
+        "SHIELDOPS_REDIS_URL": {
+          "reference": "upstash-redis.REDIS_URL"
+        },
+        "SHIELDOPS_DATABASE_POOL_SIZE": "20",
+        "SHIELDOPS_AGENT_GLOBAL_MAX_CONCURRENT": "50"
+      },
+      "networking": {
+        "public": false
+      }
+    },
+    "migrate": {
+      "name": "shieldops-migrate",
+      "description": "One-shot migration runner — executes Alembic migrations on deploy",
+      "builder": "dockerfile",
+      "dockerfilePath": "infrastructure/docker/Dockerfile",
+      "startCommand": "alembic upgrade head",
+      "restartPolicyType": "never",
+      "numReplicas": 1,
+      "envVars": {
+        "SHIELDOPS_DATABASE_URL": {
+          "reference": "neon-postgres.DATABASE_URL"
+        }
+      },
+      "networking": {
+        "public": false
+      },
+      "deploy": {
+        "cronSchedule": null,
+        "sleepAfterDeploy": true
+      }
+    }
+  },
+  "plugins": {
+    "neon-postgres": {
+      "type": "postgresql",
+      "provider": "neon",
+      "name": "shieldops-db",
+      "databaseName": "shieldops"
+    },
+    "upstash-redis": {
+      "type": "redis",
+      "provider": "upstash",
+      "name": "shieldops-cache",
+      "evictionPolicy": "allkeys-lru"
+    }
+  }
+}

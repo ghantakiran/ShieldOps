@@ -1,0 +1,76 @@
+name: CD — Backend (Railway)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "infrastructure/docker/Dockerfile"
+      - "alembic/**"
+      - "alembic.ini"
+      - "pyproject.toml"
+      - "railway.toml"
+
+concurrency:
+  group: cd-backend
+  cancel-in-progress: false
+
+env:
+  RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+jobs:
+  deploy:
+    name: Deploy to Railway
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Railway CLI
+        run: |
+          curl -fsSL https://railway.app/install.sh | sh
+          railway --version
+
+      - name: Run database migrations
+        run: |
+          echo "Triggering migration service..."
+          railway up --service shieldops-migrate --detach
+          echo "Waiting for migration to complete..."
+          sleep 30
+
+      - name: Deploy API service
+        run: |
+          railway up --service shieldops-api --detach
+          echo "API deployment triggered."
+
+      - name: Deploy Worker service
+        run: |
+          railway up --service shieldops-worker --detach
+          echo "Worker deployment triggered."
+
+      - name: Wait for API deployment
+        run: |
+          echo "Waiting for API service to become healthy..."
+          sleep 60
+
+      - name: Verify health check
+        env:
+          HEALTH_URL: ${{ secrets.RAILWAY_HEALTH_URL }}
+        run: |
+          echo "Polling health endpoint for up to 180s..."
+          for i in $(seq 1 36); do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${HEALTH_URL}" || true)
+            if [ "${STATUS}" = "200" ]; then
+              echo "Health check passed!"
+              exit 0
+            fi
+            echo "Attempt ${i}/36: status=${STATUS}, retrying in 5s..."
+            sleep 5
+          done
+          echo "Health check failed after 180s"
+          exit 1
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "::error::Backend deployment to Railway failed. Check service logs at https://railway.app/dashboard"
