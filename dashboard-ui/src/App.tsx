@@ -40,6 +40,8 @@ import ComplianceDashboard from "./pages/ComplianceDashboard";
 import Predictions from "./pages/Predictions";
 import CapacityForecast from "./pages/CapacityForecast";
 import InfraAsCode from "./pages/InfraAsCode";
+import SEOIndex from "./pages/SEOIndex";
+import SEOPage from "./pages/SEOPage";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuthStore();
@@ -89,6 +91,8 @@ export default function App() {
             <Route index element={<Landing />} />
             <Route path="products/:productId" element={<ProductLanding />} />
             <Route path="pricing" element={<Pricing />} />
+            <Route path="solutions" element={<SEOIndex />} />
+            <Route path="solutions/:slug" element={<SEOPage />} />
           </Route>
 
           {/* Standalone public routes */}
