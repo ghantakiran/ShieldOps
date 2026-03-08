@@ -24,6 +24,9 @@ import {
   Sparkles,
   Siren,
   Activity,
+  GitBranch,
+  Key,
+  Workflow,
   type LucideIcon,
 } from "lucide-react";
 
@@ -109,6 +112,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { to: "/app", icon: Sparkles, label: "Agent Factory" },
       { to: "/app/war-room", icon: Siren, label: "War Rooms" },
+      { to: "/app/workflows", icon: Workflow, label: "Workflows" },
       { to: "/app/agent-history", icon: Activity, label: "Agent History" },
     ],
   },
@@ -121,6 +125,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/app/fleet", icon: LayoutDashboard, label: "Fleet Overview" },
       { to: "/app/investigations", icon: Search, label: "Investigations" },
       { to: "/app/remediations", icon: Wrench, label: "Remediations" },
+      { to: "/app/pipeline", icon: GitBranch, label: "Pipeline" },
       { to: "/app/analytics", icon: BarChart3, label: "Analytics" },
       { to: "/app/agent-performance", icon: Gauge, label: "Agent Perf" },
       { to: "/app/predictions", icon: TrendingUp, label: "Predictions" },
@@ -169,6 +174,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/app/marketplace", icon: Store, label: "Marketplace" },
       { to: "/app/onboarding", icon: Rocket, label: "Onboarding" },
       { to: "/app/infra-as-code", icon: Code, label: "Infra as Code" },
+      { to: "/app/api-keys", icon: Key, label: "API Keys" },
       { to: "/app/settings", icon: Settings, label: "Settings" },
       { to: "/app/users", icon: Users, label: "Users" },
     ],
