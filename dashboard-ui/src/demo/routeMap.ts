@@ -5,6 +5,9 @@
  */
 import { DEMO_USER } from "./config";
 import * as fixtures from "./fixtures";
+import { DEMO_PIPELINE_RUNS } from "./pipelineData";
+import { DEMO_WORKFLOW_RUNS } from "./workflowData";
+import { DEMO_API_KEYS } from "./apiKeyData";
 
 type RouteHandler = (params: Record<string, string>, body?: unknown) => unknown;
 
@@ -306,6 +309,86 @@ const routes: Route[] = [
   {
     pattern: /^\/capacity/,
     handler: () => fixtures.getCapacityRisks(),
+  },
+
+  // ── Agent Tasks ─────────────────────────────────────────────────
+  {
+    pattern: /^\/agent-tasks\/([^/?]+)\/steps\/([^/?]+)\/approve$/,
+    handler: () => ({ approved: true, step_status: "running", task_status: "running" }),
+  },
+  {
+    pattern: /^\/agent-tasks\/([^/?]+)\/cancel$/,
+    handler: () => ({ task_id: "demo", status: "cancelled", cancelled: true }),
+  },
+  {
+    pattern: /^\/agent-tasks\/([^/?]+)$/,
+    handler: (p) => {
+      const run = DEMO_PIPELINE_RUNS.find((r) => r.id === p[1]);
+      return run ?? { task_id: p[1], status: "not_found" };
+    },
+  },
+  {
+    pattern: /^\/agent-tasks/,
+    handler: (_p, body) => {
+      if (body && typeof body === "object" && "prompt" in body) {
+        return { task_id: `task-${Date.now()}`, status: "pending" };
+      }
+      return DEMO_PIPELINE_RUNS.map((r) => ({
+        task_id: r.id,
+        workflow_name: r.alert_name,
+        status: r.status,
+        created_at: r.started_at,
+        step_count: r.timeline.length,
+      }));
+    },
+  },
+
+  // ── War Rooms ──────────────────────────────────────────────────
+  {
+    pattern: /^\/war-rooms\/([^/?]+)\/timeline$/,
+    handler: () => ({ entry: { id: "demo", event_type: "human_note", content: "Added (demo)" } }),
+  },
+  {
+    pattern: /^\/war-rooms\/([^/?]+)\/responders$/,
+    handler: () => ({ responder: { user_id: "demo", name: "Demo User", role: "observer" } }),
+  },
+  {
+    pattern: /^\/war-rooms\/([^/?]+)\/resolve$/,
+    handler: () => ({ war_room: { status: "resolved" } }),
+  },
+  {
+    pattern: /^\/war-rooms\/([^/?]+)$/,
+    handler: () => ({ war_room: { id: "wr-demo-1", title: "Demo War Room", status: "active", timeline: [], responders: [] } }),
+  },
+  {
+    pattern: /^\/war-rooms/,
+    handler: (_p, body) => {
+      if (body && typeof body === "object" && "title" in body) {
+        return { war_room: { id: `wr-${Date.now()}`, status: "active", ...(body as Record<string, unknown>) } };
+      }
+      return { war_rooms: [], total: 0 };
+    },
+  },
+
+  // ── Workflows ──────────────────────────────────────────────────
+  {
+    pattern: /^\/workflows/,
+    handler: () => DEMO_WORKFLOW_RUNS,
+  },
+
+  // ── API Keys ───────────────────────────────────────────────────
+  {
+    pattern: /^\/api-keys\/([^/?]+)\/revoke$/,
+    handler: () => ({ status: "revoked" }),
+  },
+  {
+    pattern: /^\/api-keys/,
+    handler: (_p, body) => {
+      if (body && typeof body === "object" && "name" in body) {
+        return { key_id: `key_${Date.now()}`, raw_key: `sk_demo_${Date.now()}`, status: "active" };
+      }
+      return DEMO_API_KEYS;
+    },
   },
 
   // ── Chat ──────────────────────────────────────────────────────────
