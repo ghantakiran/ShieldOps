@@ -199,10 +199,27 @@ class TestConnectionManagerProperties:
 # ---------------------------------------------------------------------------
 
 
+def _patch_notify():
+    """Context manager that patches both broadcast and the structlog logger."""
+    return patch.multiple(
+        "shieldops.api.routes.agent_ws",
+        manager=AsyncMock(spec=ConnectionManager, broadcast=AsyncMock()),
+    )
+
+
+def _patched_broadcast():
+    """Patch manager.broadcast and suppress logger to avoid structlog 'event' clash."""
+    return (
+        patch.object(manager, "broadcast", new_callable=AsyncMock),
+        patch("shieldops.api.routes.agent_ws.logger"),
+    )
+
+
 class TestNotifyStepUpdate:
     @pytest.mark.asyncio
     async def test_step_update_event_type(self) -> None:
-        with patch.object(manager, "broadcast", new_callable=AsyncMock) as mock_bc:
+        bc_patch, log_patch = _patched_broadcast()
+        with bc_patch as mock_bc, log_patch:
             await notify_step_update(
                 task_id="t1",
                 step_id="s1",
@@ -217,7 +234,8 @@ class TestNotifyStepUpdate:
 
     @pytest.mark.asyncio
     async def test_complete_event_type(self) -> None:
-        with patch.object(manager, "broadcast", new_callable=AsyncMock) as mock_bc:
+        bc_patch, log_patch = _patched_broadcast()
+        with bc_patch as mock_bc, log_patch:
             await notify_step_update(
                 task_id="t1",
                 step_id="s1",
@@ -228,7 +246,8 @@ class TestNotifyStepUpdate:
 
     @pytest.mark.asyncio
     async def test_approval_required_event_type(self) -> None:
-        with patch.object(manager, "broadcast", new_callable=AsyncMock) as mock_bc:
+        bc_patch, log_patch = _patched_broadcast()
+        with bc_patch as mock_bc, log_patch:
             await notify_step_update(
                 task_id="t1",
                 step_id="s1",
@@ -239,7 +258,8 @@ class TestNotifyStepUpdate:
 
     @pytest.mark.asyncio
     async def test_error_event_type(self) -> None:
-        with patch.object(manager, "broadcast", new_callable=AsyncMock) as mock_bc:
+        bc_patch, log_patch = _patched_broadcast()
+        with bc_patch as mock_bc, log_patch:
             await notify_step_update(
                 task_id="t1",
                 step_id="s1",
@@ -252,7 +272,8 @@ class TestNotifyStepUpdate:
 
     @pytest.mark.asyncio
     async def test_unknown_status_defaults_to_step_update(self) -> None:
-        with patch.object(manager, "broadcast", new_callable=AsyncMock) as mock_bc:
+        bc_patch, log_patch = _patched_broadcast()
+        with bc_patch as mock_bc, log_patch:
             await notify_step_update(
                 task_id="t1",
                 step_id="s1",
@@ -263,7 +284,8 @@ class TestNotifyStepUpdate:
 
     @pytest.mark.asyncio
     async def test_result_included_when_provided(self) -> None:
-        with patch.object(manager, "broadcast", new_callable=AsyncMock) as mock_bc:
+        bc_patch, log_patch = _patched_broadcast()
+        with bc_patch as mock_bc, log_patch:
             await notify_step_update(
                 task_id="t1",
                 step_id="s1",
@@ -275,7 +297,8 @@ class TestNotifyStepUpdate:
 
     @pytest.mark.asyncio
     async def test_result_omitted_when_none(self) -> None:
-        with patch.object(manager, "broadcast", new_callable=AsyncMock) as mock_bc:
+        bc_patch, log_patch = _patched_broadcast()
+        with bc_patch as mock_bc, log_patch:
             await notify_step_update(
                 task_id="t1",
                 step_id="s1",
@@ -286,7 +309,8 @@ class TestNotifyStepUpdate:
 
     @pytest.mark.asyncio
     async def test_error_omitted_when_none(self) -> None:
-        with patch.object(manager, "broadcast", new_callable=AsyncMock) as mock_bc:
+        bc_patch, log_patch = _patched_broadcast()
+        with bc_patch as mock_bc, log_patch:
             await notify_step_update(
                 task_id="t1",
                 step_id="s1",
@@ -297,7 +321,8 @@ class TestNotifyStepUpdate:
 
     @pytest.mark.asyncio
     async def test_broadcasts_to_correct_task_id(self) -> None:
-        with patch.object(manager, "broadcast", new_callable=AsyncMock) as mock_bc:
+        bc_patch, log_patch = _patched_broadcast()
+        with bc_patch as mock_bc, log_patch:
             await notify_step_update(
                 task_id="my-task-123",
                 step_id="s1",
