@@ -466,6 +466,95 @@ export interface AgentPerformanceResponse {
   hourly_heatmap: HeatmapCell[];
 }
 
+// ── Agent Tasks ──────────────────────────────────────────────────────
+
+export type AgentTaskStatus =
+  | "pending"
+  | "running"
+  | "completed"
+  | "failed"
+  | "cancelled"
+  | "approval_required";
+
+export interface AgentTaskStep {
+  step_id: string;
+  agent_type: string;
+  action: string;
+  status: AgentTaskStatus;
+  started_at: string | null;
+  completed_at: string | null;
+  result: Record<string, unknown> | null;
+  error: string | null;
+}
+
+export interface AgentTask {
+  task_id: string;
+  prompt: string;
+  persona: string | null;
+  workflow_type: string | null;
+  status: AgentTaskStatus;
+  steps: AgentTaskStep[];
+  created_at: string;
+  completed_at: string | null;
+}
+
+export interface AgentTaskSubmit {
+  prompt: string;
+  persona?: string;
+  workflow_type?: string;
+  context?: Record<string, unknown>;
+}
+
+export interface AgentTaskCreated {
+  task_id: string;
+  status: string;
+}
+
+// ── War Rooms ────────────────────────────────────────────────────────
+
+export type WarRoomStatus = "active" | "resolved" | "escalated";
+
+export interface WarRoom {
+  room_id: string;
+  title: string;
+  severity: string;
+  status: WarRoomStatus;
+  description: string;
+  incident_id: string | null;
+  created_at: string;
+  resolved_at: string | null;
+  timeline: WarRoomTimelineEntry[];
+  responders: WarRoomResponder[];
+}
+
+export interface WarRoomTimelineEntry {
+  id: string;
+  event_type: string;
+  actor: string;
+  content: string;
+  timestamp: string;
+  metadata: Record<string, unknown>;
+}
+
+export interface WarRoomResponder {
+  user_id: string;
+  name: string;
+  role: string;
+  status: "active" | "paged" | "acknowledged" | "offline";
+  joined_at: string;
+}
+
+// ── Agent Task WebSocket Events ──────────────────────────────────────
+
+export interface AgentTaskWsEvent {
+  event: "step_update" | "task_complete" | "approval_required" | "error";
+  step_id?: string;
+  status?: string;
+  result?: Record<string, unknown>;
+  error?: string;
+  timestamp: string;
+}
+
 // ── Shared ────────────────────────────────────────────────────────────
 
 export interface TimelineEvent {
