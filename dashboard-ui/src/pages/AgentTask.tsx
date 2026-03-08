@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
@@ -19,8 +19,12 @@ import {
   GitPullRequest,
   MessageSquare,
   Zap,
+  Wifi,
+  WifiOff,
 } from "lucide-react";
 import clsx from "clsx";
+import { useAgentTaskStream } from "../hooks/useAgentTaskStream";
+import { isDemoMode } from "../demo/config";
 
 // ── Types ───────────────────────────────────────────────────────────────
 type StepStatus = "pending" | "running" | "completed" | "failed" | "approval-required";
@@ -299,6 +303,29 @@ export default function AgentTask() {
   const [elapsedTime, setElapsedTime] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  const [taskId] = useState<string | null>(() => searchParams.get("run") ?? (isDemoMode() ? `task-demo-${Date.now()}` : null));
+
+  // WebSocket streaming for real-time step updates
+  const handleWsEvent = useCallback((wsEvent: import("../api/types").AgentTaskWsEvent) => {
+    if (wsEvent.event === "step_update" && wsEvent.step_id) {
+      setSteps((prev) =>
+        prev.map((s) =>
+          s.id === wsEvent.step_id
+            ? { ...s, status: (wsEvent.status ?? s.status) as StepStatus }
+            : s,
+        ),
+      );
+    }
+    if (wsEvent.event === "task_complete") {
+      setMessages((prev) => [
+        ...prev,
+        { id: `m-done-${Date.now()}`, role: "system", content: "Task completed.", timestamp: new Date().toLocaleTimeString() },
+      ]);
+    }
+  }, []);
+
+  const { connected } = useAgentTaskStream(taskId, handleWsEvent);
+
   // Initialize steps
   useEffect(() => {
     setSteps(generateSteps(prompt));
@@ -317,6 +344,43 @@ export default function AgentTask() {
       },
     ]);
   }, [prompt]);
+
+  // Demo mode: auto-progress steps to simulate agent execution
+  useEffect(() => {
+    if (!isDemoMode()) return;
+    const timer = setInterval(() => {
+      setSteps((prev) => {
+        const runningIdx = prev.findIndex((s) => s.status === "running");
+        if (runningIdx === -1) return prev;
+        const next = [...prev];
+        const current = { ...next[runningIdx] };
+        // Progress substeps first
+        if (current.substeps) {
+          const unfinished = current.substeps.findIndex((sub) => !sub.done);
+          if (unfinished !== -1) {
+            current.substeps = current.substeps.map((sub, i) =>
+              i === unfinished ? { ...sub, done: true } : sub,
+            );
+            next[runningIdx] = current;
+            return next;
+          }
+        }
+        // Complete current step
+        current.status = "completed";
+        current.duration = current.duration ?? `${Math.floor(Math.random() * 20 + 5)}s`;
+        next[runningIdx] = current;
+        // Advance next pending step
+        const nextPending = next.findIndex((s, i) => i > runningIdx && s.status === "pending");
+        if (nextPending !== -1) {
+          const upcoming = { ...next[nextPending] };
+          upcoming.status = upcoming.requiresApproval ? "approval-required" : "running";
+          next[nextPending] = upcoming;
+        }
+        return next;
+      });
+    }, 3000);
+    return () => clearInterval(timer);
+  }, []);
 
   // Timer
   useEffect(() => {
@@ -446,6 +510,12 @@ export default function AgentTask() {
                   <span className="text-xs text-brand-400 flex items-center gap-1">
                     <Zap className="h-3 w-3 animate-pulse" />
                     {runningStep.title}
+                  </span>
+                )}
+                {taskId && (
+                  <span className={clsx("text-xs flex items-center gap-1", connected ? "text-emerald-500" : "text-gray-600")}>
+                    {connected ? <Wifi className="h-3 w-3" /> : <WifiOff className="h-3 w-3" />}
+                    {connected ? "Live" : "Offline"}
                   </span>
                 )}
               </div>
