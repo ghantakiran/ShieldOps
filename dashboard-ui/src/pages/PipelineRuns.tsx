@@ -3,147 +3,7 @@ import { Play, ChevronDown, ChevronRight, CheckCircle, XCircle, Clock, Activity 
 import { formatDistanceToNow } from "date-fns";
 import MetricCard from "../components/MetricCard";
 import StatusBadge from "../components/StatusBadge";
-
-// --- Types ---
-
-interface TimelineEntry {
-  timestamp: string;
-  event: string;
-  details?: string;
-}
-
-interface Recommendation {
-  id: string;
-  action: string;
-  target: string;
-  risk_level: string;
-  description: string;
-}
-
-interface PipelineRun {
-  id: string;
-  alert_name: string;
-  namespace: string;
-  service: string;
-  status: string;
-  started_at: string;
-  duration_seconds: number | null;
-  timeline: TimelineEntry[];
-  recommendations: Recommendation[];
-}
-
-// --- Mock Data ---
-
-const MOCK_RUNS: PipelineRun[] = [
-  {
-    id: "run-001",
-    alert_name: "HighErrorRate",
-    namespace: "production",
-    service: "api-gateway",
-    status: "completed",
-    started_at: "2026-03-07T09:12:00Z",
-    duration_seconds: 342,
-    timeline: [
-      { timestamp: "2026-03-07T09:12:00Z", event: "Pipeline started", details: "Triggered by alert HighErrorRate" },
-      { timestamp: "2026-03-07T09:12:15Z", event: "Investigation started" },
-      { timestamp: "2026-03-07T09:14:30Z", event: "Root cause identified", details: "Upstream dependency timeout causing 503s" },
-      { timestamp: "2026-03-07T09:15:00Z", event: "Recommendations generated" },
-      { timestamp: "2026-03-07T09:15:45Z", event: "Auto-approved (low risk)" },
-      { timestamp: "2026-03-07T09:16:10Z", event: "Remediation executed" },
-      { timestamp: "2026-03-07T09:17:42Z", event: "Verification passed", details: "Error rate returned to baseline" },
-    ],
-    recommendations: [
-      { id: "rec-001a", action: "restart", target: "api-gateway-pod-3", risk_level: "low", description: "Restart unhealthy pod to clear stale connections" },
-      { id: "rec-001b", action: "scale", target: "api-gateway", risk_level: "low", description: "Scale replicas from 3 to 5 to absorb traffic" },
-    ],
-  },
-  {
-    id: "run-002",
-    alert_name: "MemoryPressure",
-    namespace: "production",
-    service: "order-processor",
-    status: "awaiting_approval",
-    started_at: "2026-03-07T10:45:00Z",
-    duration_seconds: null,
-    timeline: [
-      { timestamp: "2026-03-07T10:45:00Z", event: "Pipeline started", details: "Triggered by alert MemoryPressure" },
-      { timestamp: "2026-03-07T10:45:20Z", event: "Investigation started" },
-      { timestamp: "2026-03-07T10:48:10Z", event: "Root cause identified", details: "Memory leak in order-processor v2.3.1" },
-      { timestamp: "2026-03-07T10:48:30Z", event: "Recommendations generated" },
-      { timestamp: "2026-03-07T10:48:31Z", event: "Awaiting human approval", details: "High-risk action requires manual approval" },
-    ],
-    recommendations: [
-      { id: "rec-002a", action: "rollback", target: "order-processor", risk_level: "high", description: "Rollback to v2.3.0 (last stable release)" },
-      { id: "rec-002b", action: "restart", target: "order-processor-pod-*", risk_level: "medium", description: "Rolling restart all pods to reclaim memory" },
-    ],
-  },
-  {
-    id: "run-003",
-    alert_name: "CertificateExpiring",
-    namespace: "staging",
-    service: "ingress-controller",
-    status: "investigating",
-    started_at: "2026-03-07T11:30:00Z",
-    duration_seconds: null,
-    timeline: [
-      { timestamp: "2026-03-07T11:30:00Z", event: "Pipeline started", details: "Triggered by alert CertificateExpiring" },
-      { timestamp: "2026-03-07T11:30:12Z", event: "Investigation started", details: "Analyzing certificate chain and renewal status" },
-    ],
-    recommendations: [],
-  },
-  {
-    id: "run-004",
-    alert_name: "DiskSpaceLow",
-    namespace: "production",
-    service: "postgres-primary",
-    status: "failed",
-    started_at: "2026-03-07T08:00:00Z",
-    duration_seconds: 120,
-    timeline: [
-      { timestamp: "2026-03-07T08:00:00Z", event: "Pipeline started", details: "Triggered by alert DiskSpaceLow" },
-      { timestamp: "2026-03-07T08:00:15Z", event: "Investigation started" },
-      { timestamp: "2026-03-07T08:01:30Z", event: "Root cause identified", details: "WAL logs consuming 89% of disk" },
-      { timestamp: "2026-03-07T08:01:45Z", event: "Recommendations generated" },
-      { timestamp: "2026-03-07T08:02:00Z", event: "Pipeline failed", details: "Policy violation: cannot modify database storage without DBA approval" },
-    ],
-    recommendations: [
-      { id: "rec-004a", action: "cleanup", target: "postgres-primary:/var/lib/postgresql/wal", risk_level: "critical", description: "Archive and remove old WAL segments" },
-    ],
-  },
-  {
-    id: "run-005",
-    alert_name: "LatencySpike",
-    namespace: "production",
-    service: "search-service",
-    status: "pending",
-    started_at: "2026-03-07T11:55:00Z",
-    duration_seconds: null,
-    timeline: [
-      { timestamp: "2026-03-07T11:55:00Z", event: "Pipeline queued", details: "Waiting for available agent capacity" },
-    ],
-    recommendations: [],
-  },
-  {
-    id: "run-006",
-    alert_name: "PodCrashLoop",
-    namespace: "staging",
-    service: "notification-worker",
-    status: "remediating",
-    started_at: "2026-03-07T11:20:00Z",
-    duration_seconds: null,
-    timeline: [
-      { timestamp: "2026-03-07T11:20:00Z", event: "Pipeline started" },
-      { timestamp: "2026-03-07T11:20:10Z", event: "Investigation started" },
-      { timestamp: "2026-03-07T11:22:00Z", event: "Root cause identified", details: "Missing config map after recent deploy" },
-      { timestamp: "2026-03-07T11:22:15Z", event: "Recommendations generated" },
-      { timestamp: "2026-03-07T11:22:30Z", event: "Auto-approved (staging environment)" },
-      { timestamp: "2026-03-07T11:22:45Z", event: "Remediation in progress", details: "Restoring config map from last known good state" },
-    ],
-    recommendations: [
-      { id: "rec-006a", action: "restore", target: "notification-worker-config", risk_level: "low", description: "Restore config map from backup" },
-    ],
-  },
-];
+import { DEMO_PIPELINE_RUNS, type PipelineRun } from "../demo/pipelineData";
 
 // --- Helpers ---
 
@@ -174,7 +34,7 @@ export default function PipelineRuns() {
   const [sortField, setSortField] = useState<"status" | "started_at">("started_at");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
 
-  const runs = MOCK_RUNS;
+  const runs = DEMO_PIPELINE_RUNS;
 
   // Stats
   const stats = useMemo(() => {

@@ -12,19 +12,7 @@ import {
 import { formatDistanceToNow } from "date-fns";
 import clsx from "clsx";
 
-// ── Types ────────────────────────────────────────────────
-
-interface APIKey {
-  key_id: string;
-  name: string;
-  prefix: string;
-  scopes: string[];
-  status: "active" | "revoked" | "expired";
-  rate_limit_per_minute: number;
-  created_at: string;
-  expires_at: string | null;
-  last_used_at: string | null;
-}
+import { DEMO_API_KEYS, type APIKey } from "../demo/apiKeyData";
 
 const SCOPES = [
   { value: "read", label: "Read", description: "Read access to all resources" },
@@ -43,55 +31,6 @@ const EXPIRY_OPTIONS = [
   { value: "1y", label: "1 year" },
   { value: "never", label: "Never" },
 ] as const;
-
-// ── Mock Data ────────────────────────────────────────────
-
-const MOCK_KEYS: APIKey[] = [
-  {
-    key_id: "key_01",
-    name: "Production CI/CD",
-    prefix: "sk_prod_8",
-    scopes: ["read", "write", "agent_execute"],
-    status: "active",
-    rate_limit_per_minute: 1000,
-    created_at: "2026-02-15T10:30:00Z",
-    expires_at: "2026-05-15T10:30:00Z",
-    last_used_at: "2026-03-07T08:12:00Z",
-  },
-  {
-    key_id: "key_02",
-    name: "Staging Dashboard",
-    prefix: "sk_stag_3",
-    scopes: ["read"],
-    status: "active",
-    rate_limit_per_minute: 500,
-    created_at: "2026-01-20T14:00:00Z",
-    expires_at: "2026-04-20T14:00:00Z",
-    last_used_at: "2026-03-06T22:45:00Z",
-  },
-  {
-    key_id: "key_03",
-    name: "Old Integration Key",
-    prefix: "sk_int_9f",
-    scopes: ["read", "write"],
-    status: "revoked",
-    rate_limit_per_minute: 200,
-    created_at: "2025-11-01T09:00:00Z",
-    expires_at: "2026-02-01T09:00:00Z",
-    last_used_at: "2026-01-15T16:30:00Z",
-  },
-  {
-    key_id: "key_04",
-    name: "Temp Testing Key",
-    prefix: "sk_test_a",
-    scopes: ["read", "admin"],
-    status: "expired",
-    rate_limit_per_minute: 100,
-    created_at: "2025-10-01T12:00:00Z",
-    expires_at: "2025-12-31T12:00:00Z",
-    last_used_at: "2025-12-20T11:00:00Z",
-  },
-];
 
 // ── Status Badge ─────────────────────────────────────────
 
@@ -416,7 +355,7 @@ function KeyCreatedModal({
 // ── Main Page ────────────────────────────────────────────
 
 export default function APIKeys() {
-  const [keys, setKeys] = useState<APIKey[]>(MOCK_KEYS);
+  const [keys, setKeys] = useState<APIKey[]>(DEMO_API_KEYS);
   const [showCreate, setShowCreate] = useState(false);
   const [createdRawKey, setCreatedRawKey] = useState<string | null>(null);
   const [revokeTarget, setRevokeTarget] = useState<APIKey | null>(null);

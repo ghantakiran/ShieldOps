@@ -20,32 +20,14 @@ import { formatDistanceToNow } from "date-fns";
 import clsx from "clsx";
 import StatusBadge from "../components/StatusBadge";
 
-// ── Types ────────────────────────────────────────────────────────────
-
-type WorkflowType = "incident_response" | "security_scan" | "proactive_check";
-type WorkflowStatus = "pending" | "running" | "paused" | "completed" | "failed" | "cancelled";
-type StepStatus = "pending" | "running" | "completed" | "failed" | "skipped";
-
-interface WorkflowStep {
-  id: string;
-  agent_type: string;
-  action: string;
-  status: StepStatus;
-  started_at: string | null;
-  completed_at: string | null;
-  result: string | null;
-  error: string | null;
-}
-
-interface WorkflowRun {
-  id: string;
-  workflow_type: WorkflowType;
-  trigger_type: string;
-  status: WorkflowStatus;
-  started_at: string;
-  completed_at: string | null;
-  steps: WorkflowStep[];
-}
+import {
+  DEMO_WORKFLOW_RUNS,
+  type WorkflowRun,
+  type WorkflowType,
+  type WorkflowStatus,
+  type StepStatus,
+  type WorkflowStep,
+} from "../demo/workflowData";
 
 interface EscalationPolicy {
   severity: string;
@@ -54,282 +36,7 @@ interface EscalationPolicy {
   page_oncall: boolean;
 }
 
-// ── Mock Data ────────────────────────────────────────────────────────
-
-const MOCK_RUNS: WorkflowRun[] = [
-  {
-    id: "wfr-001",
-    workflow_type: "incident_response",
-    trigger_type: "alert",
-    status: "running",
-    started_at: new Date(Date.now() - 4 * 60 * 1000).toISOString(),
-    completed_at: null,
-    steps: [
-      {
-        id: "s1",
-        agent_type: "investigation",
-        action: "analyze_alert",
-        status: "completed",
-        started_at: new Date(Date.now() - 4 * 60 * 1000).toISOString(),
-        completed_at: new Date(Date.now() - 3 * 60 * 1000).toISOString(),
-        result: "Root cause: memory leak in payment-service pod",
-        error: null,
-      },
-      {
-        id: "s2",
-        agent_type: "security",
-        action: "check_policy",
-        status: "completed",
-        started_at: new Date(Date.now() - 3 * 60 * 1000).toISOString(),
-        completed_at: new Date(Date.now() - 2.5 * 60 * 1000).toISOString(),
-        result: "Policy check passed — auto-remediation allowed",
-        error: null,
-      },
-      {
-        id: "s3",
-        agent_type: "remediation",
-        action: "restart_pod",
-        status: "running",
-        started_at: new Date(Date.now() - 2 * 60 * 1000).toISOString(),
-        completed_at: null,
-        result: null,
-        error: null,
-      },
-      {
-        id: "s4",
-        agent_type: "learning",
-        action: "update_playbook",
-        status: "pending",
-        started_at: null,
-        completed_at: null,
-        result: null,
-        error: null,
-      },
-    ],
-  },
-  {
-    id: "wfr-002",
-    workflow_type: "security_scan",
-    trigger_type: "scheduled",
-    status: "running",
-    started_at: new Date(Date.now() - 12 * 60 * 1000).toISOString(),
-    completed_at: null,
-    steps: [
-      {
-        id: "s1",
-        agent_type: "security",
-        action: "scan_vulnerabilities",
-        status: "completed",
-        started_at: new Date(Date.now() - 12 * 60 * 1000).toISOString(),
-        completed_at: new Date(Date.now() - 8 * 60 * 1000).toISOString(),
-        result: "Found 3 CVEs (1 critical, 2 high)",
-        error: null,
-      },
-      {
-        id: "s2",
-        agent_type: "security",
-        action: "prioritize_findings",
-        status: "completed",
-        started_at: new Date(Date.now() - 8 * 60 * 1000).toISOString(),
-        completed_at: new Date(Date.now() - 6 * 60 * 1000).toISOString(),
-        result: "CVE-2025-1234 prioritized for immediate patching",
-        error: null,
-      },
-      {
-        id: "s3",
-        agent_type: "remediation",
-        action: "apply_patches",
-        status: "running",
-        started_at: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
-        completed_at: null,
-        result: null,
-        error: null,
-      },
-    ],
-  },
-  {
-    id: "wfr-003",
-    workflow_type: "proactive_check",
-    trigger_type: "scheduled",
-    status: "paused",
-    started_at: new Date(Date.now() - 20 * 60 * 1000).toISOString(),
-    completed_at: null,
-    steps: [
-      {
-        id: "s1",
-        agent_type: "investigation",
-        action: "collect_metrics",
-        status: "completed",
-        started_at: new Date(Date.now() - 20 * 60 * 1000).toISOString(),
-        completed_at: new Date(Date.now() - 18 * 60 * 1000).toISOString(),
-        result: "Metrics collected from 12 services",
-        error: null,
-      },
-      {
-        id: "s2",
-        agent_type: "investigation",
-        action: "detect_anomalies",
-        status: "completed",
-        started_at: new Date(Date.now() - 18 * 60 * 1000).toISOString(),
-        completed_at: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
-        result: "Disk usage anomaly detected on db-replica-3",
-        error: null,
-      },
-      {
-        id: "s3",
-        agent_type: "remediation",
-        action: "expand_volume",
-        status: "pending",
-        started_at: null,
-        completed_at: null,
-        result: null,
-        error: null,
-      },
-    ],
-  },
-  {
-    id: "wfr-004",
-    workflow_type: "incident_response",
-    trigger_type: "alert",
-    status: "completed",
-    started_at: new Date(Date.now() - 45 * 60 * 1000).toISOString(),
-    completed_at: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-    steps: [
-      {
-        id: "s1",
-        agent_type: "investigation",
-        action: "analyze_alert",
-        status: "completed",
-        started_at: new Date(Date.now() - 45 * 60 * 1000).toISOString(),
-        completed_at: new Date(Date.now() - 42 * 60 * 1000).toISOString(),
-        result: "CPU spike caused by inefficient query in orders-api",
-        error: null,
-      },
-      {
-        id: "s2",
-        agent_type: "security",
-        action: "check_policy",
-        status: "completed",
-        started_at: new Date(Date.now() - 42 * 60 * 1000).toISOString(),
-        completed_at: new Date(Date.now() - 41 * 60 * 1000).toISOString(),
-        result: "Policy check passed",
-        error: null,
-      },
-      {
-        id: "s3",
-        agent_type: "remediation",
-        action: "scale_replicas",
-        status: "completed",
-        started_at: new Date(Date.now() - 41 * 60 * 1000).toISOString(),
-        completed_at: new Date(Date.now() - 35 * 60 * 1000).toISOString(),
-        result: "Scaled orders-api from 3 to 6 replicas",
-        error: null,
-      },
-      {
-        id: "s4",
-        agent_type: "learning",
-        action: "update_playbook",
-        status: "completed",
-        started_at: new Date(Date.now() - 35 * 60 * 1000).toISOString(),
-        completed_at: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-        result: "Added auto-scale rule for CPU > 80%",
-        error: null,
-      },
-    ],
-  },
-  {
-    id: "wfr-005",
-    workflow_type: "security_scan",
-    trigger_type: "manual",
-    status: "failed",
-    started_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-    completed_at: new Date(Date.now() - 1.5 * 60 * 60 * 1000).toISOString(),
-    steps: [
-      {
-        id: "s1",
-        agent_type: "security",
-        action: "scan_vulnerabilities",
-        status: "completed",
-        started_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-        completed_at: new Date(Date.now() - 1.8 * 60 * 60 * 1000).toISOString(),
-        result: "Scan completed with 5 findings",
-        error: null,
-      },
-      {
-        id: "s2",
-        agent_type: "remediation",
-        action: "apply_patches",
-        status: "failed",
-        started_at: new Date(Date.now() - 1.8 * 60 * 60 * 1000).toISOString(),
-        completed_at: new Date(Date.now() - 1.5 * 60 * 60 * 1000).toISOString(),
-        result: null,
-        error: "Patch failed: incompatible dependency version in auth-service",
-      },
-    ],
-  },
-  {
-    id: "wfr-006",
-    workflow_type: "proactive_check",
-    trigger_type: "scheduled",
-    status: "completed",
-    started_at: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
-    completed_at: new Date(Date.now() - 2.8 * 60 * 60 * 1000).toISOString(),
-    steps: [
-      {
-        id: "s1",
-        agent_type: "investigation",
-        action: "collect_metrics",
-        status: "completed",
-        started_at: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
-        completed_at: new Date(Date.now() - 2.9 * 60 * 60 * 1000).toISOString(),
-        result: "All metrics within normal thresholds",
-        error: null,
-      },
-      {
-        id: "s2",
-        agent_type: "investigation",
-        action: "detect_anomalies",
-        status: "completed",
-        started_at: new Date(Date.now() - 2.9 * 60 * 60 * 1000).toISOString(),
-        completed_at: new Date(Date.now() - 2.8 * 60 * 60 * 1000).toISOString(),
-        result: "No anomalies detected",
-        error: null,
-      },
-    ],
-  },
-  {
-    id: "wfr-007",
-    workflow_type: "incident_response",
-    trigger_type: "alert",
-    status: "cancelled",
-    started_at: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
-    completed_at: new Date(Date.now() - 4.5 * 60 * 60 * 1000).toISOString(),
-    steps: [
-      {
-        id: "s1",
-        agent_type: "investigation",
-        action: "analyze_alert",
-        status: "completed",
-        started_at: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
-        completed_at: new Date(Date.now() - 4.8 * 60 * 60 * 1000).toISOString(),
-        result: "False positive — alert triggered by deployment rollout",
-        error: null,
-      },
-      {
-        id: "s2",
-        agent_type: "security",
-        action: "check_policy",
-        status: "skipped",
-        started_at: null,
-        completed_at: null,
-        result: null,
-        error: null,
-      },
-    ],
-  },
-];
-
-const MOCK_POLICIES: EscalationPolicy[] = [
+const ESCALATION_POLICIES: EscalationPolicy[] = [
   {
     severity: "critical",
     auto_remediate: true,
@@ -620,7 +327,7 @@ function ExpandableRunRow({ run }: { run: WorkflowRun }) {
 // ── Main Component ───────────────────────────────────────────────────
 
 export default function Workflows() {
-  const [runs, setRuns] = useState<WorkflowRun[]>(MOCK_RUNS);
+  const [runs, setRuns] = useState<WorkflowRun[]>(DEMO_WORKFLOW_RUNS);
   const [statusFilter, setStatusFilter] = useState("all");
 
   const activeRuns = useMemo(
@@ -792,7 +499,7 @@ export default function Workflows() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-800 bg-gray-950">
-              {MOCK_POLICIES.map((policy) => (
+              {ESCALATION_POLICIES.map((policy) => (
                 <tr key={policy.severity}>
                   <td className="px-4 py-3">
                     <StatusBadge status={policy.severity} />
