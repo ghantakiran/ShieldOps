@@ -55,6 +55,7 @@ from shieldops.api.routes import (
     observability_intelligence,
     platform_intelligence,
     remediations,
+    scheduled_tasks,
     search,
     security,
     security_chat,
@@ -13723,6 +13724,7 @@ def create_app() -> FastAPI:
     app.include_router(usage.router, prefix=settings.api_prefix, tags=["API Usage"])
     app.include_router(agent_tasks.router, prefix=settings.api_prefix, tags=["Agent Tasks"])
     app.include_router(war_rooms.router, prefix=settings.api_prefix, tags=["War Rooms"])
+    app.include_router(scheduled_tasks.router, prefix=settings.api_prefix, tags=["Scheduled Tasks"])
 
     # Database migration management
     from shieldops.api.routes.migrations import router as migrations_router

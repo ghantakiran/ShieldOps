@@ -391,6 +391,25 @@ const routes: Route[] = [
     },
   },
 
+  // ── Scheduled Tasks ───────────────────────────────────────────────
+  {
+    pattern: /^\/scheduled-tasks\/([^/?]+)\\/trigger$/,
+    handler: () => ({ status: "triggered", task_id: "demo" }),
+  },
+  {
+    pattern: /^\/scheduled-tasks\/([^/?]+)$/,
+    handler: () => ({ id: "sched-demo", name: "Demo Schedule", enabled: true }),
+  },
+  {
+    pattern: /^\/scheduled-tasks/,
+    handler: (_p, body) => {
+      if (body && typeof body === "object" && "name" in body) {
+        return { id: `sched_${Date.now()}`, status: "created" };
+      }
+      return { items: [], total: 0 };
+    },
+  },
+
   // ── Chat ──────────────────────────────────────────────────────────
   {
     pattern: /^\/security\/chat/,

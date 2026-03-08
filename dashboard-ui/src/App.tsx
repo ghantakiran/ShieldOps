@@ -45,6 +45,7 @@ import SEOPage from "./pages/SEOPage";
 import PipelineRuns from "./pages/PipelineRuns";
 import APIKeys from "./pages/APIKeys";
 import Workflows from "./pages/Workflows";
+import ScheduledTasks from "./pages/ScheduledTasks";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuthStore();
@@ -115,6 +116,7 @@ export default function App() {
             <Route path="agent-task" element={<AgentTask />} />
             <Route path="war-room" element={<WarRoom />} />
             <Route path="agent-history" element={<AgentHistory />} />
+            <Route path="schedules" element={<ScheduledTasks />} />
             <Route path="fleet" element={<FleetOverview />} />
             <Route path="investigations" element={<Investigations />} />
             <Route path="investigations/:id" element={<InvestigationDetail />} />

@@ -27,6 +27,7 @@ import {
   GitBranch,
   Key,
   Workflow,
+  CalendarClock,
   type LucideIcon,
 } from "lucide-react";
 
@@ -114,6 +115,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/app/war-room", icon: Siren, label: "War Rooms" },
       { to: "/app/workflows", icon: Workflow, label: "Workflows" },
       { to: "/app/agent-history", icon: Activity, label: "Agent History" },
+      { to: "/app/schedules", icon: CalendarClock, label: "Schedules" },
     ],
   },
   {
