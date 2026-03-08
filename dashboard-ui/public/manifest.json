@@ -1,0 +1,19 @@
+{
+  "name": "ShieldOps — Autonomous SRE Platform",
+  "short_name": "ShieldOps",
+  "description": "AI agents that investigate, diagnose, and fix infrastructure issues autonomously.",
+  "start_url": "/app?source=pwa",
+  "display": "standalone",
+  "background_color": "#030712",
+  "theme_color": "#6366f1",
+  "orientation": "portrait-primary",
+  "categories": ["business", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
