@@ -56,11 +56,14 @@ export default function KeyboardShortcuts() {
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Keyboard shortcuts"
       onClick={(e) => {
         if (e.target === e.currentTarget) setIsOpen(false);
       }}
     >
-      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" />
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" aria-hidden="true" />
       <div className="relative z-10 w-full max-w-md overflow-hidden rounded-xl border border-gray-700 bg-gray-900 shadow-2xl">
         <div className="flex items-center justify-between border-b border-gray-800 px-5 py-3">
           <h2 className="text-sm font-semibold text-gray-100">
@@ -68,7 +71,8 @@ export default function KeyboardShortcuts() {
           </h2>
           <button
             onClick={() => setIsOpen(false)}
-            className="rounded p-1 text-gray-500 hover:bg-gray-800 hover:text-gray-300"
+            className="rounded p-1 text-gray-500 hover:bg-gray-800 hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500/50"
+            aria-label="Close keyboard shortcuts"
           >
             <X className="h-4 w-4" />
           </button>

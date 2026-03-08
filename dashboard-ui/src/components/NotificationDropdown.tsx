@@ -137,8 +137,10 @@ export default function NotificationDropdown() {
       {/* Bell button */}
       <button
         onClick={() => setOpen(!open)}
-        className="relative rounded-lg p-1.5 text-gray-400 hover:bg-gray-800 hover:text-gray-200 transition-colors"
-        aria-label="Notifications"
+        className="relative rounded-lg p-1.5 text-gray-400 hover:bg-gray-800 hover:text-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500/50"
+        aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ""}`}
+        aria-expanded={open}
+        aria-haspopup="true"
       >
         <Bell className="h-4 w-4" />
         {unreadCount > 0 && (
@@ -150,7 +152,7 @@ export default function NotificationDropdown() {
 
       {/* Dropdown panel */}
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-96 rounded-xl border border-gray-700 bg-gray-900 shadow-xl z-50">
+        <div className="absolute right-0 top-full mt-2 w-[calc(100vw-2rem)] max-w-96 rounded-xl border border-gray-700 bg-gray-900 shadow-xl z-50" role="region" aria-label="Notifications">
           {/* Header */}
           <div className="flex items-center justify-between border-b border-gray-800 px-4 py-3">
             <h3 className="text-sm font-semibold text-gray-200">Notifications</h3>
@@ -202,8 +204,8 @@ export default function NotificationDropdown() {
                     </div>
                     <button
                       onClick={(e) => dismissNotification(e, n.id)}
-                      className="mt-0.5 rounded p-1 text-gray-600 hover:bg-gray-700 hover:text-gray-400 transition-colors"
-                      aria-label="Dismiss"
+                      className="mt-0.5 rounded p-1 text-gray-600 hover:bg-gray-700 hover:text-gray-400 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500/50"
+                      aria-label={`Dismiss ${n.title}`}
                     >
                       <X className="h-3 w-3" />
                     </button>

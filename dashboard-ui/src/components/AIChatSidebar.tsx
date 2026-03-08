@@ -61,6 +61,16 @@ export default function AIChatSidebar() {
     }
   }, [isOpen]);
 
+  // Close on Escape
+  useEffect(() => {
+    if (!isOpen) return;
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setIsOpen(false);
+    }
+    document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
+  }, [isOpen]);
+
   const sendMessage = useCallback(
     async (content: string) => {
       if (!content.trim() || isLoading) return;
@@ -163,7 +173,8 @@ export default function AIChatSidebar() {
             {messages.length > 0 && (
               <button
                 onClick={handleClear}
-                className="rounded p-1.5 text-gray-500 hover:bg-gray-800 hover:text-gray-300"
+                className="rounded p-1.5 text-gray-500 hover:bg-gray-800 hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500/50"
+                aria-label="Clear chat"
                 title="Clear chat"
               >
                 <RotateCcw className="h-3.5 w-3.5" />
@@ -171,7 +182,8 @@ export default function AIChatSidebar() {
             )}
             <button
               onClick={() => setIsOpen(false)}
-              className="rounded p-1.5 text-gray-500 hover:bg-gray-800 hover:text-gray-300"
+              className="rounded p-1.5 text-gray-500 hover:bg-gray-800 hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500/50"
+              aria-label="Close AI assistant"
             >
               <X className="h-4 w-4" />
             </button>
@@ -268,11 +280,12 @@ export default function AIChatSidebar() {
               onClick={() => sendMessage(input)}
               disabled={!input.trim() || isLoading}
               className={clsx(
-                "shrink-0 rounded-md p-1.5 transition-colors",
+                "shrink-0 rounded-md p-1.5 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500/50",
                 input.trim() && !isLoading
                   ? "bg-brand-500 text-white hover:bg-brand-600"
                   : "text-gray-600",
               )}
+              aria-label="Send message"
             >
               <Send className="h-4 w-4" />
             </button>

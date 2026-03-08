@@ -421,8 +421,8 @@ export default function ScheduledTasks() {
           </p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-gray-800">
-          <table className="w-full text-sm">
+        <div className="overflow-x-auto rounded-xl border border-gray-800">
+          <table className="w-full min-w-[800px] text-sm">
             <thead>
               <tr className="border-b border-gray-800 bg-gray-900">
                 <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
@@ -478,7 +478,8 @@ export default function ScheduledTasks() {
                       <button
                         type="button"
                         onClick={() => handleToggle(task)}
-                        className="group flex items-center gap-1.5"
+                        className="group flex items-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-brand-500/50 rounded"
+                        aria-label={`${task.enabled ? "Disable" : "Enable"} ${task.name}`}
                       >
                         {task.enabled ? (
                           <>
@@ -523,24 +524,27 @@ export default function ScheduledTasks() {
                         <button
                           type="button"
                           onClick={() => openEdit(task)}
+                          aria-label={`Edit ${task.name}`}
                           title="Edit"
-                          className="rounded p-1.5 text-gray-500 transition-colors hover:bg-gray-800 hover:text-gray-300"
+                          className="rounded p-1.5 text-gray-500 transition-colors hover:bg-gray-800 hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500/50"
                         >
                           <Pencil className="h-3.5 w-3.5" />
                         </button>
                         <button
                           type="button"
                           onClick={() => handleTrigger(task)}
+                          aria-label={`Trigger ${task.name} now`}
                           title="Trigger Now"
-                          className="rounded p-1.5 text-gray-500 transition-colors hover:bg-brand-500/10 hover:text-brand-400"
+                          className="rounded p-1.5 text-gray-500 transition-colors hover:bg-brand-500/10 hover:text-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-500/50"
                         >
                           <Play className="h-3.5 w-3.5" />
                         </button>
                         <button
                           type="button"
                           onClick={() => handleDelete(task)}
+                          aria-label={`Delete ${task.name}`}
                           title="Delete"
-                          className="rounded p-1.5 text-gray-500 transition-colors hover:bg-red-500/10 hover:text-red-400"
+                          className="rounded p-1.5 text-gray-500 transition-colors hover:bg-red-500/10 hover:text-red-400 focus:outline-none focus:ring-2 focus:ring-brand-500/50"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </button>
@@ -556,7 +560,7 @@ export default function ScheduledTasks() {
 
       {/* Create / Edit Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" role="dialog" aria-modal="true" aria-label={editingTask ? "Edit schedule" : "Create schedule"}>
           <div className="w-full max-w-lg rounded-xl border border-gray-800 bg-gray-900 shadow-xl">
             <div className="flex items-center justify-between border-b border-gray-800 px-6 py-4">
               <h2 className="text-lg font-semibold text-gray-100">
@@ -565,7 +569,8 @@ export default function ScheduledTasks() {
               <button
                 type="button"
                 onClick={closeModal}
-                className="rounded p-1 text-gray-500 transition-colors hover:text-gray-300"
+                className="rounded p-1 text-gray-500 transition-colors hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500/50"
+                aria-label="Close dialog"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -573,8 +578,9 @@ export default function ScheduledTasks() {
             <div className="space-y-4 px-6 py-5">
               {/* Name */}
               <div>
-                <label className="mb-1 block text-xs font-medium text-gray-400">Name</label>
+                <label htmlFor="sched-name" className="mb-1 block text-xs font-medium text-gray-400">Name</label>
                 <input
+                  id="sched-name"
                   type="text"
                   value={form.name}
                   onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
@@ -585,10 +591,11 @@ export default function ScheduledTasks() {
 
               {/* Prompt */}
               <div>
-                <label className="mb-1 block text-xs font-medium text-gray-400">
+                <label htmlFor="sched-prompt" className="mb-1 block text-xs font-medium text-gray-400">
                   Agent Prompt
                 </label>
                 <textarea
+                  id="sched-prompt"
                   value={form.prompt}
                   onChange={(e) => setForm((f) => ({ ...f, prompt: e.target.value }))}
                   placeholder="Describe what the agent should do..."
@@ -599,10 +606,11 @@ export default function ScheduledTasks() {
 
               {/* Workflow type */}
               <div>
-                <label className="mb-1 block text-xs font-medium text-gray-400">
+                <label htmlFor="sched-workflow" className="mb-1 block text-xs font-medium text-gray-400">
                   Workflow Type
                 </label>
                 <select
+                  id="sched-workflow"
                   value={form.workflow_type}
                   onChange={(e) => setForm((f) => ({ ...f, workflow_type: e.target.value }))}
                   disabled={!!editingTask}
@@ -618,8 +626,9 @@ export default function ScheduledTasks() {
 
               {/* Frequency */}
               <div>
-                <label className="mb-1 block text-xs font-medium text-gray-400">Frequency</label>
+                <label htmlFor="sched-frequency" className="mb-1 block text-xs font-medium text-gray-400">Frequency</label>
                 <select
+                  id="sched-frequency"
                   value={form.frequency}
                   onChange={(e) =>
                     setForm((f) => ({ ...f, frequency: e.target.value as ScheduleFrequency }))
@@ -637,10 +646,11 @@ export default function ScheduledTasks() {
               {/* Cron expression (conditional) */}
               {form.frequency === "cron" && (
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-gray-400">
+                  <label htmlFor="sched-cron" className="mb-1 block text-xs font-medium text-gray-400">
                     Cron Expression
                   </label>
                   <input
+                    id="sched-cron"
                     type="text"
                     value={form.cron_expression}
                     onChange={(e) => setForm((f) => ({ ...f, cron_expression: e.target.value }))}

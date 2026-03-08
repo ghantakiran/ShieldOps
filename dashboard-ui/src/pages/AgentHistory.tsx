@@ -88,7 +88,8 @@ export default function AgentHistory() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search agent runs..."
-            className="w-full rounded-xl border border-gray-700 bg-gray-800/50 pl-10 pr-4 py-2.5 text-sm text-gray-200 placeholder-gray-500 focus:border-brand-500/50 focus:outline-none"
+            aria-label="Search agent runs"
+            className="w-full rounded-xl border border-gray-700 bg-gray-800/50 pl-10 pr-4 py-2.5 text-sm text-gray-200 placeholder-gray-500 focus:border-brand-500/50 focus:outline-none focus:ring-2 focus:ring-brand-500/50"
           />
         </div>
         <div className="flex items-center gap-2">
@@ -97,8 +98,9 @@ export default function AgentHistory() {
             <button
               key={status}
               onClick={() => setFilterStatus(status)}
+              aria-pressed={filterStatus === status}
               className={clsx(
-                "rounded-lg px-3 py-1.5 text-xs font-medium transition-colors",
+                "rounded-lg px-3 py-1.5 text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500/50",
                 filterStatus === status
                   ? "bg-brand-600/20 text-brand-400"
                   : "text-gray-500 hover:bg-gray-800 hover:text-gray-300",
@@ -116,6 +118,7 @@ export default function AgentHistory() {
           const status = STATUS_STYLES[run.status];
           const trigger = TRIGGER_STYLES[run.trigger];
           const StatusIcon = status.icon;
+          const RunIcon = resolveIcon(run.icon);
 
           return (
             <button
@@ -123,11 +126,11 @@ export default function AgentHistory() {
               onClick={() =>
                 navigate(`/app/agent-task?prompt=${encodeURIComponent(run.prompt)}&run=${run.id}`)
               }
-              className="flex w-full items-center gap-4 rounded-xl border border-gray-800/50 bg-gray-900/40 px-5 py-4 text-left transition-all hover:border-gray-700 hover:bg-gray-800/40"
+              className="flex w-full items-center gap-4 rounded-xl border border-gray-800/50 bg-gray-900/40 px-5 py-4 text-left transition-all hover:border-gray-700 hover:bg-gray-800/40 focus:outline-none focus:ring-2 focus:ring-brand-500/50"
             >
               {/* Icon */}
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gray-800/60">
-                {(() => { const Icon = resolveIcon(run.icon); return <Icon className={clsx("h-5 w-5", run.iconColor)} />; })()}
+                <RunIcon className={clsx("h-5 w-5", run.iconColor)} />
               </div>
 
               {/* Content */}

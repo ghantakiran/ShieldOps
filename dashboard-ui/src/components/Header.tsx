@@ -73,7 +73,8 @@ export default function Header({ onMenuClick }: HeaderProps) {
               </div>
               <button
                 onClick={logout}
-                className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-800 hover:text-red-400"
+                className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-800 hover:text-red-400 focus:outline-none focus:ring-2 focus:ring-brand-500/50"
+                aria-label="Sign out"
                 title="Sign out"
               >
                 <LogOut className="h-4 w-4" />

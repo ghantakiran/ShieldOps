@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import {
   ShieldAlert,
   Bug,
@@ -446,24 +446,25 @@ export default function AgentFactory() {
               <Activity className="h-4 w-4 text-gray-500" />
               <h2 className="text-sm font-semibold text-gray-300">Recent Agent Runs</h2>
             </div>
-            <button
-              onClick={() => navigate("/app/agent-history")}
+            <Link
+              to="/app/agent-history"
               className="text-xs text-gray-500 hover:text-brand-400 transition-colors"
             >
               View all
-            </button>
+            </Link>
           </div>
 
           <div className="space-y-2">
             {DEMO_RECENT_RUNS.map((run) => {
               const status = STATUS_STYLES[run.status];
+              const RunIcon = resolveIcon(run.icon);
               return (
                 <button
                   key={run.id}
                   onClick={() => handleRunClick(run)}
-                  className="flex w-full items-center gap-4 rounded-xl border border-gray-800/50 bg-gray-900/40 px-4 py-3 text-left transition-all hover:border-gray-700 hover:bg-gray-800/40"
+                  className="flex w-full items-center gap-4 rounded-xl border border-gray-800/50 bg-gray-900/40 px-4 py-3 text-left transition-all hover:border-gray-700 hover:bg-gray-800/40 focus:outline-none focus:ring-2 focus:ring-brand-500/50"
                 >
-                  {(() => { const Icon = resolveIcon(run.icon); return <Icon className={`h-4 w-4 shrink-0 ${run.iconColor}`} />; })()}
+                  <RunIcon className={`h-4 w-4 shrink-0 ${run.iconColor}`} />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-gray-300 truncate">{run.title}</p>
                     <div className="flex items-center gap-3 mt-0.5">

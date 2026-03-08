@@ -44,11 +44,12 @@ export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 lg:hidden">
+    <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label="Mobile navigation">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         onClick={onClose}
+        aria-hidden="true"
       />
 
       {/* Drawer */}
@@ -61,14 +62,15 @@ export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
           </div>
           <button
             onClick={onClose}
-            className="rounded p-1 text-gray-500 hover:bg-gray-800 hover:text-gray-300"
+            className="rounded p-1 text-gray-500 hover:bg-gray-800 hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500/50"
+            aria-label="Close navigation"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto px-3 py-1">
+        <nav aria-label="Main navigation" className="flex-1 overflow-y-auto px-3 py-1">
           {NAV_GROUPS.map((group) => {
             const isExpanded = expandedGroups.has(group.id);
             const isGroupActive = group.items.some(
@@ -82,11 +84,13 @@ export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
                 <button
                   onClick={() => toggleGroup(group.id)}
                   className={clsx(
-                    "flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-xs font-semibold uppercase tracking-wider transition-colors",
+                    "flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-xs font-semibold uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500/50",
                     isGroupActive
                       ? `${group.color} bg-gray-800/50`
                       : "text-gray-500 hover:text-gray-400",
                   )}
+                  aria-expanded={isExpanded}
+                  aria-label={`${group.label} section`}
                 >
                   <ChevronRight
                     className={clsx(
@@ -106,7 +110,7 @@ export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
                       end={to === "/app"}
                       className={({ isActive }) =>
                         clsx(
-                          "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                          "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500/50",
                           isActive
                             ? "bg-brand-600/20 text-brand-400"
                             : "text-gray-400 hover:bg-gray-800 hover:text-gray-200",

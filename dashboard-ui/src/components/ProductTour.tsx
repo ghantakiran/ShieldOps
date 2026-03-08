@@ -146,9 +146,9 @@ export default function ProductTour() {
   const progress = ((step + 1) / TOUR_STEPS.length) * 100;
 
   return (
-    <div className="fixed inset-0 z-[60]">
+    <div className="fixed inset-0 z-[60]" role="dialog" aria-modal="true" aria-label="Product tour">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" aria-hidden="true" />
 
       {/* Tour card */}
       <div
@@ -182,7 +182,8 @@ export default function ProductTour() {
               </div>
               <button
                 onClick={dismiss}
-                className="rounded p-1 text-gray-500 hover:bg-gray-800 hover:text-gray-300"
+                className="rounded p-1 text-gray-500 hover:bg-gray-800 hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500/50"
+                aria-label="Dismiss tour"
               >
                 <X className="h-4 w-4" />
               </button>
