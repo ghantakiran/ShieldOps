@@ -12,7 +12,7 @@ from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field
 
 logger = structlog.get_logger()
-router = APIRouter(prefix="/api/v1/war-rooms", tags=["war-rooms"])
+router = APIRouter(prefix="/war-rooms", tags=["war-rooms"])
 
 # ---------------------------------------------------------------------------
 # Enums

@@ -36,6 +36,8 @@ from shieldops.agents.threat_automation.runner import ThreatAutomationRunner
 from shieldops.agents.xdr.runner import XDRRunner
 from shieldops.agents.zero_trust.runner import ZeroTrustRunner
 from shieldops.api.routes import (
+    agent_tasks,
+    agent_ws,
     agents,
     analytics,
     attack_surface_agent,
@@ -64,6 +66,7 @@ from shieldops.api.routes import (
     threat_automation,
     usage,
     vulnerabilities,
+    war_rooms,
     xdr,
     zero_trust,
 )
@@ -13718,6 +13721,8 @@ def create_app() -> FastAPI:
     app.include_router(batch.router, prefix=settings.api_prefix, tags=["Batch"])
     app.include_router(search.router, prefix=settings.api_prefix, tags=["Search"])
     app.include_router(usage.router, prefix=settings.api_prefix, tags=["API Usage"])
+    app.include_router(agent_tasks.router, prefix=settings.api_prefix, tags=["Agent Tasks"])
+    app.include_router(war_rooms.router, prefix=settings.api_prefix, tags=["War Rooms"])
 
     # Database migration management
     from shieldops.api.routes.migrations import router as migrations_router
@@ -13738,6 +13743,7 @@ def create_app() -> FastAPI:
     from shieldops.api.ws.routes import router as ws_router
 
     app.include_router(ws_router, tags=["WebSocket"])
+    app.include_router(agent_ws.router, tags=["Agent WebSocket"])
 
     @app.get("/health")
     async def health_check() -> dict[str, str]:

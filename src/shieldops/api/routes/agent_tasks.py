@@ -25,7 +25,7 @@ from shieldops.orchestration.workflow_engine import WorkflowEngine
 
 logger = structlog.get_logger()
 
-router = APIRouter(prefix="/api/v1/agent-tasks", tags=["agent-tasks"])
+router = APIRouter(prefix="/agent-tasks", tags=["agent-tasks"])
 
 # ---------------------------------------------------------------------------
 # In-memory task store (until full DB integration)
