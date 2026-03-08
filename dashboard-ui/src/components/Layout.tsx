@@ -8,6 +8,7 @@ import ErrorBoundary from "./ErrorBoundary";
 import AIChatSidebar from "./AIChatSidebar";
 import Breadcrumbs from "./Breadcrumbs";
 import KeyboardShortcuts from "./KeyboardShortcuts";
+import ProductTour from "./ProductTour";
 import { useRealtimeUpdates } from "../hooks/useRealtimeUpdates";
 import { isDemoMode } from "../demo/config";
 
@@ -47,6 +48,9 @@ export default function Layout() {
 
       {/* Keyboard shortcuts overlay (press ?) */}
       <KeyboardShortcuts />
+
+      {/* Interactive product tour for demo visitors */}
+      <ProductTour />
     </div>
   );
 }
