@@ -25,12 +25,13 @@ import {
   ChevronDown,
   ChevronUp,
   Zap,
-  type LucideIcon,
 } from "lucide-react";
 import AgentPromptInput from "../components/AgentPromptInput";
 import TaskCard, { type TaskTemplate } from "../components/TaskCard";
 import PersonaSwitcher from "../components/PersonaSwitcher";
 import MetricsBar from "../components/MetricsBar";
+import { DEMO_RECENT_RUNS, type RecentRun } from "../demo/agentHistoryData";
+import { resolveIcon } from "../demo/iconMap";
 
 // ── Task templates ──────────────────────────────────────────────────────
 const ALL_TASKS: TaskTemplate[] = [
@@ -328,55 +329,7 @@ const PERSONA_TASKS: Record<string, string[]> = {
   ],
 };
 
-// ── Recent agent runs (mock) ────────────────────────────────────────────
-interface RecentRun {
-  id: string;
-  title: string;
-  status: "completed" | "running" | "failed" | "awaiting-approval";
-  startedAt: string;
-  duration: string;
-  icon: LucideIcon;
-  iconColor: string;
-}
-
-const RECENT_RUNS: RecentRun[] = [
-  {
-    id: "run-1",
-    title: "Investigated Splunk 500 errors in payment-service",
-    status: "completed",
-    startedAt: "12 min ago",
-    duration: "3m 22s",
-    icon: Search,
-    iconColor: "text-green-400",
-  },
-  {
-    id: "run-2",
-    title: "Auto-remediated high CPU on k8s-prod-cluster-03",
-    status: "completed",
-    startedAt: "28 min ago",
-    duration: "1m 47s",
-    icon: Wrench,
-    iconColor: "text-brand-400",
-  },
-  {
-    id: "run-3",
-    title: "Scanning CVEs in auth-service dependencies",
-    status: "running",
-    startedAt: "2 min ago",
-    duration: "2m 10s",
-    icon: ShieldAlert,
-    iconColor: "text-amber-400",
-  },
-  {
-    id: "run-4",
-    title: "War room for payment gateway outage",
-    status: "awaiting-approval",
-    startedAt: "5 min ago",
-    duration: "—",
-    icon: Users,
-    iconColor: "text-red-400",
-  },
-];
+// ── Recent agent runs (from centralized demo data) ──────────────────────
 
 const STATUS_STYLES: Record<string, { bg: string; text: string; label: string }> = {
   completed: { bg: "bg-emerald-500/10", text: "text-emerald-400", label: "Completed" },
@@ -502,7 +455,7 @@ export default function AgentFactory() {
           </div>
 
           <div className="space-y-2">
-            {RECENT_RUNS.map((run) => {
+            {DEMO_RECENT_RUNS.map((run) => {
               const status = STATUS_STYLES[run.status];
               return (
                 <button
@@ -510,7 +463,7 @@ export default function AgentFactory() {
                   onClick={() => handleRunClick(run)}
                   className="flex w-full items-center gap-4 rounded-xl border border-gray-800/50 bg-gray-900/40 px-4 py-3 text-left transition-all hover:border-gray-700 hover:bg-gray-800/40"
                 >
-                  <run.icon className={`h-4 w-4 shrink-0 ${run.iconColor}`} />
+                  {(() => { const Icon = resolveIcon(run.icon); return <Icon className={`h-4 w-4 shrink-0 ${run.iconColor}`} />; })()}
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-gray-300 truncate">{run.title}</p>
                     <div className="flex items-center gap-3 mt-0.5">

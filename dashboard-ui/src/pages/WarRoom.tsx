@@ -18,99 +18,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import clsx from "clsx";
-
-// ── Types ───────────────────────────────────────────────────────────────
-interface WarRoomIncident {
-  id: string;
-  title: string;
-  severity: "P1" | "P2" | "P3";
-  status: "active" | "mitigating" | "resolved" | "monitoring";
-  startedAt: string;
-  duration: string;
-  affectedServices: string[];
-  responders: Responder[];
-  timeline: TimelineEvent[];
-  agents: AgentActivity[];
-}
-
-interface Responder {
-  name: string;
-  role: string;
-  team: string;
-  status: "active" | "paged" | "acknowledged" | "offline";
-  avatar?: string;
-}
-
-interface TimelineEvent {
-  time: string;
-  content: string;
-  type: "alert" | "action" | "agent" | "human" | "resolved";
-}
-
-interface AgentActivity {
-  name: string;
-  task: string;
-  status: "running" | "completed" | "waiting";
-  progress?: number;
-}
-
-// ── Mock Data ───────────────────────────────────────────────────────────
-const ACTIVE_WAR_ROOMS: WarRoomIncident[] = [
-  {
-    id: "wr-1",
-    title: "Payment Gateway Outage - US East",
-    severity: "P1",
-    status: "mitigating",
-    startedAt: "14:23 UTC",
-    duration: "42m",
-    affectedServices: ["payment-service", "checkout-api", "order-processor"],
-    responders: [
-      { name: "Sarah Chen", role: "Incident Commander", team: "Payments", status: "active" },
-      { name: "Mike Ross", role: "On-Call SRE", team: "Platform", status: "active" },
-      { name: "Priya Patel", role: "Backend Lead", team: "Orders", status: "acknowledged" },
-      { name: "James Liu", role: "DBA", team: "Data", status: "paged" },
-    ],
-    timeline: [
-      { time: "14:23", content: "PagerDuty alert: payment-service latency > 5s", type: "alert" },
-      { time: "14:24", content: "Investigation Agent started root cause analysis", type: "agent" },
-      { time: "14:25", content: "Agent identified DB connection pool exhaustion", type: "agent" },
-      { time: "14:26", content: "War room created, teams paged automatically", type: "action" },
-      { time: "14:28", content: "Sarah Chen acknowledged and joined", type: "human" },
-      { time: "14:30", content: "Agent correlated with deploy v2.4.1 config change", type: "agent" },
-      { time: "14:32", content: "Mike Ross confirmed: pool_size changed 50->20 in config", type: "human" },
-      { time: "14:35", content: "Remediation Agent: Preparing config rollback", type: "agent" },
-      { time: "14:38", content: "Config rollback deployed to canary (10% traffic)", type: "action" },
-      { time: "14:42", content: "Canary healthy, expanding to 50%...", type: "action" },
-    ],
-    agents: [
-      { name: "Investigation Agent", task: "Monitoring recovery metrics", status: "running", progress: 80 },
-      { name: "Remediation Agent", task: "Rolling out config fix to all pods", status: "running", progress: 55 },
-      { name: "Learning Agent", task: "Capturing incident pattern for playbook", status: "waiting" },
-    ],
-  },
-  {
-    id: "wr-2",
-    title: "SSL Certificate Expiry - eu-west-1",
-    severity: "P2",
-    status: "active",
-    startedAt: "13:45 UTC",
-    duration: "1h 20m",
-    affectedServices: ["api-gateway-eu", "cdn-eu"],
-    responders: [
-      { name: "Alex Kim", role: "On-Call SRE", team: "Infra", status: "active" },
-      { name: "Nina Volkov", role: "Security", team: "SecOps", status: "acknowledged" },
-    ],
-    timeline: [
-      { time: "13:45", content: "Certificate expiry warning: api-gateway-eu (24h remaining)", type: "alert" },
-      { time: "13:46", content: "Security Agent started certificate audit", type: "agent" },
-      { time: "13:48", content: "Found 3 additional certificates expiring within 7 days", type: "agent" },
-      { time: "13:50", content: "Auto-renewal initiated for all 4 certificates", type: "action" },
-    ],
-    agents: [
-      { name: "Security Agent", task: "Renewing certificates via Let's Encrypt", status: "running", progress: 60 },
-    ],
-  },
-];
+import { DEMO_WAR_ROOMS } from "../demo/warRoomData";
 
 const SEVERITY_STYLES = {
   P1: { bg: "bg-red-500/10", text: "text-red-400", border: "border-red-500/30", dot: "bg-red-400" },
@@ -143,9 +51,9 @@ const TIMELINE_ICONS = {
 // ── Component ───────────────────────────────────────────────────────────
 export default function WarRoom() {
   const navigate = useNavigate();
-  const [selectedRoom, setSelectedRoom] = useState<string>(ACTIVE_WAR_ROOMS[0].id);
+  const [selectedRoom, setSelectedRoom] = useState<string>(DEMO_WAR_ROOMS[0].id);
 
-  const room = ACTIVE_WAR_ROOMS.find((r) => r.id === selectedRoom) ?? ACTIVE_WAR_ROOMS[0];
+  const room = DEMO_WAR_ROOMS.find((r) => r.id === selectedRoom) ?? DEMO_WAR_ROOMS[0];
   const severity = SEVERITY_STYLES[room.severity];
   const status = STATUS_STYLES[room.status];
 
@@ -175,7 +83,7 @@ export default function WarRoom() {
         </div>
 
         <div className="flex-1 overflow-y-auto p-2 space-y-2">
-          {ACTIVE_WAR_ROOMS.map((wr) => {
+          {DEMO_WAR_ROOMS.map((wr) => {
             const sev = SEVERITY_STYLES[wr.severity];
             const st = STATUS_STYLES[wr.status];
             return (

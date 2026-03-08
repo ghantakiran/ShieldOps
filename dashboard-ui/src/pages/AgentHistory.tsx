@@ -3,12 +3,6 @@ import { useNavigate } from "react-router-dom";
 import {
   Activity,
   Search,
-  ShieldAlert,
-  Wrench,
-  Bug,
-  Users,
-  Workflow,
-  Terminal,
   Clock,
   CheckCircle2,
   XCircle,
@@ -18,147 +12,8 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import clsx from "clsx";
-
-// ── Types ───────────────────────────────────────────────────────────────
-interface AgentRun {
-  id: string;
-  title: string;
-  prompt: string;
-  status: "completed" | "running" | "failed" | "awaiting-approval";
-  persona: string;
-  startedAt: string;
-  duration: string;
-  stepsCompleted: number;
-  totalSteps: number;
-  icon: LucideIcon;
-  iconColor: string;
-  trigger: "manual" | "scheduled" | "alert" | "slack";
-  artifacts: number;
-}
-
-// ── Mock Data ───────────────────────────────────────────────────────────
-const RUNS: AgentRun[] = [
-  {
-    id: "run-001",
-    title: "Investigated Splunk 500 errors in payment-service",
-    prompt: "Investigate the recurring 500 errors in payment-service from Splunk",
-    status: "completed",
-    persona: "SRE Engineer",
-    startedAt: "12 min ago",
-    duration: "3m 22s",
-    stepsCompleted: 5,
-    totalSteps: 5,
-    icon: Search,
-    iconColor: "text-green-400",
-    trigger: "alert",
-    artifacts: 3,
-  },
-  {
-    id: "run-002",
-    title: "Auto-remediated high CPU on k8s-prod-cluster-03",
-    prompt: "Fix the high CPU issue on k8s-prod-cluster-03",
-    status: "completed",
-    persona: "SRE Engineer",
-    startedAt: "28 min ago",
-    duration: "1m 47s",
-    stepsCompleted: 4,
-    totalSteps: 4,
-    icon: Wrench,
-    iconColor: "text-brand-400",
-    trigger: "alert",
-    artifacts: 2,
-  },
-  {
-    id: "run-003",
-    title: "Scanning CVEs in auth-service dependencies",
-    prompt: "Run a full security scan on auth-service",
-    status: "running",
-    persona: "Security Analyst",
-    startedAt: "2 min ago",
-    duration: "2m 10s",
-    stepsCompleted: 3,
-    totalSteps: 5,
-    icon: ShieldAlert,
-    iconColor: "text-amber-400",
-    trigger: "manual",
-    artifacts: 0,
-  },
-  {
-    id: "run-004",
-    title: "War room for payment gateway outage",
-    prompt: "Create a war room for the current payment gateway outage",
-    status: "awaiting-approval",
-    persona: "SRE Engineer",
-    startedAt: "5 min ago",
-    duration: "4m 32s",
-    stepsCompleted: 3,
-    totalSteps: 5,
-    icon: Users,
-    iconColor: "text-red-400",
-    trigger: "manual",
-    artifacts: 1,
-  },
-  {
-    id: "run-005",
-    title: "Fixed bug #2341 reported in #eng-bugs",
-    prompt: "Fix bug #2341 from Slack channel #eng-bugs",
-    status: "completed",
-    persona: "DevOps Engineer",
-    startedAt: "1h ago",
-    duration: "7m 15s",
-    stepsCompleted: 6,
-    totalSteps: 6,
-    icon: Bug,
-    iconColor: "text-purple-400",
-    trigger: "slack",
-    artifacts: 2,
-  },
-  {
-    id: "run-006",
-    title: "Created CI/CD pipeline for user-service",
-    prompt: "Create a production-grade CI/CD pipeline for user-service repository",
-    status: "completed",
-    persona: "DevOps Engineer",
-    startedAt: "2h ago",
-    duration: "4m 50s",
-    stepsCompleted: 5,
-    totalSteps: 5,
-    icon: Workflow,
-    iconColor: "text-sky-400",
-    trigger: "manual",
-    artifacts: 4,
-  },
-  {
-    id: "run-007",
-    title: "Nightly security scan - all repositories",
-    prompt: "Run nightly security scan across all repositories",
-    status: "failed",
-    persona: "Security Analyst",
-    startedAt: "6h ago",
-    duration: "12m 03s",
-    stepsCompleted: 3,
-    totalSteps: 5,
-    icon: ShieldAlert,
-    iconColor: "text-red-400",
-    trigger: "scheduled",
-    artifacts: 1,
-  },
-  {
-    id: "run-008",
-    title: "Generated runbooks from Q4 incidents",
-    prompt: "Analyze all Q4 incidents and generate runbooks for recurring patterns",
-    status: "completed",
-    persona: "SRE Engineer",
-    startedAt: "1d ago",
-    duration: "8m 40s",
-    stepsCompleted: 4,
-    totalSteps: 4,
-    icon: Terminal,
-    iconColor: "text-violet-400",
-    trigger: "manual",
-    artifacts: 8,
-  },
-];
+import { DEMO_AGENT_RUNS } from "../demo/agentHistoryData";
+import { resolveIcon } from "../demo/iconMap";
 
 const STATUS_STYLES: Record<string, { bg: string; text: string; label: string; icon: LucideIcon }> = {
   completed: { bg: "bg-emerald-500/10", text: "text-emerald-400", label: "Completed", icon: CheckCircle2 },
@@ -180,17 +35,17 @@ export default function AgentHistory() {
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredRuns = RUNS.filter((run) => {
+  const filteredRuns = DEMO_AGENT_RUNS.filter((run) => {
     if (filterStatus !== "all" && run.status !== filterStatus) return false;
     if (searchQuery && !run.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
     return true;
   });
 
   const stats = {
-    total: RUNS.length,
-    completed: RUNS.filter((r) => r.status === "completed").length,
-    running: RUNS.filter((r) => r.status === "running").length,
-    failed: RUNS.filter((r) => r.status === "failed").length,
+    total: DEMO_AGENT_RUNS.length,
+    completed: DEMO_AGENT_RUNS.filter((r) => r.status === "completed").length,
+    running: DEMO_AGENT_RUNS.filter((r) => r.status === "running").length,
+    failed: DEMO_AGENT_RUNS.filter((r) => r.status === "failed").length,
   };
 
   return (
@@ -272,7 +127,7 @@ export default function AgentHistory() {
             >
               {/* Icon */}
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gray-800/60">
-                <run.icon className={clsx("h-5 w-5", run.iconColor)} />
+                {(() => { const Icon = resolveIcon(run.icon); return <Icon className={clsx("h-5 w-5", run.iconColor)} />; })()}
               </div>
 
               {/* Content */}
