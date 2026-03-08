@@ -42,6 +42,9 @@ import CapacityForecast from "./pages/CapacityForecast";
 import InfraAsCode from "./pages/InfraAsCode";
 import SEOIndex from "./pages/SEOIndex";
 import SEOPage from "./pages/SEOPage";
+import PipelineRuns from "./pages/PipelineRuns";
+import APIKeys from "./pages/APIKeys";
+import Workflows from "./pages/Workflows";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuthStore();
@@ -140,6 +143,9 @@ export default function App() {
             <Route path="capacity" element={<CapacityForecast />} />
             <Route path="infra-as-code" element={<InfraAsCode />} />
             <Route path="onboarding" element={<OnboardingWizard />} />
+            <Route path="pipeline" element={<PipelineRuns />} />
+            <Route path="api-keys" element={<APIKeys />} />
+            <Route path="workflows" element={<Workflows />} />
           </Route>
 
           {/* Catch-all */}
