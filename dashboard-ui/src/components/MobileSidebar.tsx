@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { Shield, ChevronRight, X } from "lucide-react";
+import { ChevronRight, X } from "lucide-react";
+import Logo from "./Logo";
 import clsx from "clsx";
 import { NAV_GROUPS } from "../config/products";
 import { useSidebarStore } from "../store/sidebar";
@@ -56,10 +57,7 @@ export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
       <aside className="absolute left-0 top-0 h-full w-72 animate-slide-in-left border-r border-gray-800 bg-gray-900">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-5">
-          <div className="flex items-center gap-2">
-            <Shield className="h-7 w-7 text-brand-500" />
-            <span className="text-lg font-semibold tracking-tight">ShieldOps</span>
-          </div>
+          <Logo />
           <button
             onClick={onClose}
             className="rounded p-1 text-gray-500 hover:bg-gray-800 hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500/50"

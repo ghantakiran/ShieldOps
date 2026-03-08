@@ -23,7 +23,7 @@ describe("Sidebar", () => {
 
   it("renders the ShieldOps logo", () => {
     renderSidebar();
-    expect(screen.getByText("ShieldOps")).toBeInTheDocument();
+    expect(screen.getByText("Ops")).toBeInTheDocument();
   });
 
   it("renders all nav group labels", () => {
@@ -62,11 +62,11 @@ describe("Sidebar", () => {
     renderSidebar();
 
     // Find the collapse toggle button
-    const collapseButton = screen.getByTitle("Collapse sidebar");
+    const collapseButton = screen.getByLabelText("Collapse sidebar");
     fireEvent.click(collapseButton);
 
     // Logo text should be hidden in collapsed mode
-    expect(screen.queryByText("ShieldOps")).not.toBeInTheDocument();
+    expect(screen.queryByText(/Ops/)).not.toBeInTheDocument();
   });
 
   it("highlights active group based on current path", () => {

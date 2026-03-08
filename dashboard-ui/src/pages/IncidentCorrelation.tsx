@@ -60,7 +60,7 @@ const statusIcons: Record<string, React.ReactNode> = {
   open: <AlertTriangle className="w-4 h-4 text-yellow-400" />,
   investigating: <Activity className="w-4 h-4 text-blue-400" />,
   resolved: <CheckCircle className="w-4 h-4 text-green-400" />,
-  merged: <GitMerge className="w-4 h-4 text-purple-400" />,
+  merged: <GitMerge className="w-4 h-4 text-brand-400" />,
 };
 
 export default function IncidentCorrelation() {
@@ -176,8 +176,8 @@ export default function IncidentCorrelation() {
       </div>
 
       {mergeSource && (
-        <div className="rounded-lg border border-purple-500/30 bg-purple-500/10 p-3 flex items-center justify-between">
-          <span className="text-sm text-purple-300">
+        <div className="rounded-lg border border-brand-500/30 bg-brand-500/10 p-3 flex items-center justify-between">
+          <span className="text-sm text-brand-300">
             <GitMerge className="w-4 h-4 inline mr-2" />
             Select target incident to merge <strong>{mergeSource}</strong> into
           </span>
@@ -198,7 +198,7 @@ export default function IncidentCorrelation() {
             className={clsx(
               'rounded-xl border bg-gray-800/50 overflow-hidden transition-all',
               mergeSource && mergeSource !== incident.id
-                ? 'border-purple-500/30 cursor-pointer hover:bg-purple-500/5'
+                ? 'border-brand-500/30 cursor-pointer hover:bg-brand-500/5'
                 : 'border-gray-700'
             )}
             onClick={() => {
@@ -252,7 +252,7 @@ export default function IncidentCorrelation() {
                           e.stopPropagation();
                           setMergeSource(incident.id);
                         }}
-                        className="p-1 rounded hover:bg-gray-700 text-gray-400 hover:text-purple-400"
+                        className="p-1 rounded hover:bg-gray-700 text-gray-400 hover:text-brand-400"
                         title="Merge into another incident"
                       >
                         <GitMerge className="w-3.5 h-3.5" />

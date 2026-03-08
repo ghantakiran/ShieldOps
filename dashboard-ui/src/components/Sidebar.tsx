@@ -1,5 +1,6 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Shield, ChevronRight, PanelLeftClose, PanelLeft } from "lucide-react";
+import { ChevronRight, PanelLeftClose, PanelLeft } from "lucide-react";
+import Logo from "./Logo";
 import clsx from "clsx";
 import { useEffect } from "react";
 import { NAV_GROUPS } from "../config/products";
@@ -38,12 +39,7 @@ export default function Sidebar() {
     >
       {/* Logo */}
       <div className="flex items-center justify-between px-4 py-5">
-        <div className="flex items-center gap-2">
-          <Shield className="h-7 w-7 shrink-0 text-brand-500" />
-          {!collapsed && (
-            <span className="text-lg font-semibold tracking-tight">ShieldOps</span>
-          )}
-        </div>
+        <Logo size={collapsed ? "sm" : "md"} showText={!collapsed} />
         <button
           onClick={toggleCollapsed}
           className="rounded p-1 text-gray-500 hover:bg-gray-800 hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500/50"

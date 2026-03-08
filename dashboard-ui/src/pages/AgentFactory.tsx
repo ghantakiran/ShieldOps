@@ -70,8 +70,8 @@ const ALL_TASKS: TaskTemplate[] = [
     description:
       "Monitor a Slack channel for bug reports. Investigate the codebase, identify the issue, and submit a PR with the fix.",
     icon: Bug,
-    iconBg: "bg-purple-500/10",
-    iconColor: "text-purple-400",
+    iconBg: "bg-sky-500/10",
+    iconColor: "text-sky-400",
     category: "suggested",
     prompt:
       "Connect to #bugs Slack channel. For each unresolved bug report, investigate the relevant codebase, identify the root cause, write a fix, and open a PR.",
@@ -216,8 +216,8 @@ const ALL_TASKS: TaskTemplate[] = [
     description:
       "Analyze past incidents and remediations to auto-generate runbooks for recurring patterns.",
     icon: Brain,
-    iconBg: "bg-violet-500/10",
-    iconColor: "text-violet-400",
+    iconBg: "bg-amber-500/10",
+    iconColor: "text-amber-400",
     category: "automation",
     prompt:
       "Analyze the last 90 days of incidents and remediations. Identify recurring patterns and generate executable runbooks for the top 10 most common issues.",
@@ -374,7 +374,7 @@ export default function AgentFactory() {
       {/* Hero section */}
       <div className="relative overflow-hidden">
         {/* Subtle gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-b from-brand-600/5 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-b from-brand-950/30 via-transparent to-transparent" />
 
         <div className="relative px-4 pt-8 pb-6 sm:px-6 lg:px-8">
           {/* Top row: persona + metrics */}

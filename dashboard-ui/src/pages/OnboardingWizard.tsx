@@ -91,7 +91,7 @@ const OBSERVABILITY_INTEGRATIONS = [
     name: "Datadog",
     description: "Cloud monitoring and analytics",
     icon: BarChart3,
-    color: "text-purple-400",
+    color: "text-brand-400",
     fields: [
       { key: "api_key", label: "API Key", placeholder: "dd-api-...", type: "password" },
       { key: "app_key", label: "Application Key", placeholder: "dd-app-...", type: "password" },
@@ -162,7 +162,7 @@ const ALERTING_INTEGRATIONS = [
     name: "Slack Alerts",
     description: "Send alerts to Slack channels",
     icon: Hash,
-    color: "text-purple-400",
+    color: "text-brand-400",
     fields: [
       { key: "webhook_url", label: "Webhook URL", placeholder: "https://hooks.slack.com/...", type: "text" },
       { key: "channel", label: "Channel", placeholder: "#ops-alerts", type: "text" },
@@ -840,7 +840,7 @@ function IntegrationStep({
                       {integration.oauthButton && (
                         <button
                           onClick={() => handleSave(integration)}
-                          className="inline-flex items-center gap-2 rounded-lg bg-purple-500/20 px-4 py-2 text-sm font-medium text-purple-400 transition-colors hover:bg-purple-500/30"
+                          className="inline-flex items-center gap-2 rounded-lg bg-brand-500/20 px-4 py-2 text-sm font-medium text-brand-400 transition-colors hover:bg-brand-500/30"
                         >
                           <Link2 className="h-4 w-4" />
                           Connect with OAuth

@@ -83,7 +83,7 @@ const CATEGORY_CONFIG: Record<
   },
   processing_integrity: {
     label: "Processing Integrity",
-    color: "bg-purple-500/20 text-purple-400 border-purple-500/30",
+    color: "bg-brand-500/20 text-brand-400 border-brand-500/30",
     icon: FileCheck,
   },
   confidentiality: {
@@ -326,7 +326,7 @@ function ControlRow({ control }: { control: ComplianceControl }) {
         </span>
         <StatusBadge status={control.status} />
         {control.override && (
-          <span className="rounded bg-indigo-500/20 px-1.5 py-0.5 text-xs text-indigo-400">
+          <span className="rounded bg-brand-500/20 px-1.5 py-0.5 text-xs text-brand-400">
             Override
           </span>
         )}
@@ -341,8 +341,8 @@ function ControlRow({ control }: { control: ComplianceControl }) {
             </p>
           )}
           {control.override && (
-            <div className="mt-2 rounded-lg border border-indigo-500/30 bg-indigo-500/10 p-3">
-              <p className="text-xs font-medium text-indigo-400">
+            <div className="mt-2 rounded-lg border border-brand-500/30 bg-brand-500/10 p-3">
+              <p className="text-xs font-medium text-brand-400">
                 Admin Override
               </p>
               <p className="mt-1 text-xs text-gray-400">

@@ -26,7 +26,7 @@ const TRIGGER_STYLES: Record<string, { label: string; color: string }> = {
   manual: { label: "Manual", color: "text-gray-400" },
   scheduled: { label: "Scheduled", color: "text-blue-400" },
   alert: { label: "Alert", color: "text-red-400" },
-  slack: { label: "Slack", color: "text-purple-400" },
+  slack: { label: "Slack", color: "text-sky-400" },
 };
 
 // ── Component ───────────────────────────────────────────────────────────

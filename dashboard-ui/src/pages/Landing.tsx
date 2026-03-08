@@ -7,29 +7,18 @@ import BenefitsSection from "../components/landing/BenefitsSection";
 import IntegrationsSection from "../components/landing/IntegrationsSection";
 import SafetySection from "../components/landing/SafetySection";
 import CTASection from "../components/landing/CTASection";
-import AnimatedSection from "../components/landing/AnimatedSection";
 
 export default function Landing() {
   return (
     <div className="pt-20">
       <HeroSection />
       <ProblemSection />
-      <AnimatedSection>
-        <SolutionSection />
-      </AnimatedSection>
-      <AnimatedSection>
-        <HowItWorks />
-      </AnimatedSection>
+      <SolutionSection />
+      <HowItWorks />
       <ProductsSection />
-      <AnimatedSection>
-        <BenefitsSection />
-      </AnimatedSection>
-      <AnimatedSection>
-        <IntegrationsSection />
-      </AnimatedSection>
-      <AnimatedSection>
-        <SafetySection />
-      </AnimatedSection>
+      <BenefitsSection />
+      <IntegrationsSection />
+      <SafetySection />
       <CTASection />
     </div>
   );

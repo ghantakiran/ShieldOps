@@ -286,7 +286,7 @@ function ActivityHeatmap({ heatmap }: { heatmap: HeatmapCell[] }) {
     return (
       <div className="rounded-xl border border-gray-800 bg-gray-900 p-5">
         <div className="mb-4 flex items-center gap-2">
-          <Clock className="h-5 w-5 text-violet-400" />
+          <Clock className="h-5 w-5 text-sky-400" />
           <h2 className="text-lg font-semibold text-gray-100">
             Hourly Activity
           </h2>
@@ -301,7 +301,7 @@ function ActivityHeatmap({ heatmap }: { heatmap: HeatmapCell[] }) {
   return (
     <div className="rounded-xl border border-gray-800 bg-gray-900 p-5">
       <div className="mb-4 flex items-center gap-2">
-        <Clock className="h-5 w-5 text-violet-400" />
+        <Clock className="h-5 w-5 text-sky-400" />
         <h2 className="text-lg font-semibold text-gray-100">
           Hourly Activity
         </h2>

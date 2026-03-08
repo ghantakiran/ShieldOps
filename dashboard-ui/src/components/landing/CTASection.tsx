@@ -4,7 +4,7 @@ import { Play, ArrowRight } from "lucide-react";
 export default function CTASection() {
   return (
     <section className="px-6 py-20">
-      <div className="mx-auto max-w-3xl rounded-2xl border border-brand-500/30 bg-gradient-to-br from-brand-950/60 to-gray-900 p-12 text-center">
+      <div className="mx-auto max-w-3xl rounded-2xl border border-gray-800 bg-gray-900 p-12 text-center">
         <h2 className="text-3xl font-bold text-gray-50">
           See ShieldOps on your incidents
         </h2>
@@ -15,7 +15,7 @@ export default function CTASection() {
         <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
           <Link
             to="/app?demo=true"
-            className="inline-flex items-center gap-2 rounded-lg bg-brand-500 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-600"
+            className="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-brand-500"
           >
             <Play className="h-4 w-4" />
             Try the Live Demo
@@ -24,7 +24,7 @@ export default function CTASection() {
             href="mailto:founders@shieldops.io"
             className="inline-flex items-center gap-2 text-sm font-medium text-gray-400 transition-colors hover:text-white"
           >
-            Book a personalized demo
+            Contact Sales
             <ArrowRight className="h-4 w-4" />
           </a>
         </div>

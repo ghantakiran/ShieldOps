@@ -6,8 +6,8 @@ const CAPABILITIES = [
     title: "Investigate",
     description:
       "AI agents correlate logs, metrics, and traces across your entire stack. Root cause identified in minutes, not hours.",
-    color: "text-blue-400",
-    bg: "bg-blue-500/10",
+    color: "text-brand-400",
+    bg: "bg-brand-500/10",
   },
   {
     icon: Wrench,
@@ -22,8 +22,8 @@ const CAPABILITIES = [
     title: "Learn",
     description:
       "Every incident makes the system smarter. Agents update playbooks, refine thresholds, and build institutional knowledge.",
-    color: "text-violet-400",
-    bg: "bg-violet-500/10",
+    color: "text-amber-400",
+    bg: "bg-amber-500/10",
   },
 ];
 
@@ -33,7 +33,7 @@ export default function SolutionSection() {
       <div className="mx-auto max-w-6xl">
         <div className="text-center">
           <h2 className="text-3xl font-bold text-gray-50">
-            An AI SRE that actually takes action
+            An SRE platform that actually takes action
           </h2>
           <p className="mt-3 text-gray-400">
             Not just monitoring. Not just alerting. Autonomous resolution.
@@ -43,11 +43,9 @@ export default function SolutionSection() {
           {CAPABILITIES.map((cap) => (
             <div
               key={cap.title}
-              className="rounded-xl border border-gray-800 bg-gray-900/50 p-8"
+              className="rounded-xl border border-gray-800 bg-gray-900/50 p-8 transition-colors hover:border-gray-700"
             >
-              <div
-                className={`inline-flex rounded-lg p-3 ${cap.bg}`}
-              >
+              <div className={`inline-flex rounded-lg p-3 ${cap.bg}`}>
                 <cap.icon className={`h-6 w-6 ${cap.color}`} />
               </div>
               <h3 className="mt-5 text-xl font-semibold text-gray-100">

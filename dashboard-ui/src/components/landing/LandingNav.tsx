@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Shield, ChevronDown, Menu, X } from "lucide-react";
+import { ChevronDown, Menu, X } from "lucide-react";
 import clsx from "clsx";
 import { PRODUCTS } from "../../config/products";
+import Logo from "../Logo";
 
 const productEntries = Object.values(PRODUCTS);
 
@@ -11,7 +12,6 @@ export default function LandingNav() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Close products dropdown on outside click
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
@@ -23,20 +23,21 @@ export default function LandingNav() {
   }, []);
 
   return (
-    <nav className="fixed top-0 z-50 w-full border-b border-gray-800/50 bg-gray-950/80 backdrop-blur-lg">
+    <nav className="fixed top-0 z-50 w-full border-b border-gray-800/50 bg-gray-950/90 backdrop-blur-md">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
         <Link to="/" className="flex items-center gap-2">
-          <Shield className="h-7 w-7 text-brand-500" />
-          <span className="text-lg font-bold tracking-tight">ShieldOps</span>
+          <Logo />
         </Link>
 
         {/* Desktop nav */}
-        <div className="hidden items-center gap-6 md:flex">
+        <div className="hidden items-center gap-8 md:flex">
           {/* Products dropdown */}
           <div ref={dropdownRef} className="relative">
             <button
               onClick={() => setProductsOpen(!productsOpen)}
               className="flex items-center gap-1 text-sm text-gray-400 transition-colors hover:text-white"
+              aria-expanded={productsOpen}
+              aria-haspopup="true"
             >
               Products
               <ChevronDown
@@ -48,7 +49,7 @@ export default function LandingNav() {
             </button>
 
             {productsOpen && (
-              <div className="absolute left-1/2 top-full mt-2 w-72 -translate-x-1/2 rounded-xl border border-gray-800 bg-gray-900 p-2 shadow-xl">
+              <div className="absolute left-1/2 top-full mt-3 w-72 -translate-x-1/2 rounded-xl border border-gray-800 bg-gray-900 p-2 shadow-xl">
                 {productEntries.map((product) => {
                   const Icon = product.icon;
                   return (
@@ -79,7 +80,7 @@ export default function LandingNav() {
 
           <Link
             to="/app?demo=true"
-            className="rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-600"
+            className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-500"
           >
             Try Live Demo
           </Link>
@@ -87,14 +88,14 @@ export default function LandingNav() {
             href="mailto:founders@shieldops.io"
             className="rounded-lg border border-gray-700 px-4 py-2 text-sm font-medium text-gray-300 transition-colors hover:border-gray-500 hover:text-white"
           >
-            Book a Demo
+            Contact Sales
           </a>
         </div>
 
         {/* Mobile hamburger */}
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="rounded-lg p-1.5 text-gray-400 hover:text-white md:hidden"
+          className="rounded-lg p-1.5 text-gray-400 hover:text-white md:hidden focus:outline-none focus:ring-2 focus:ring-brand-500/50"
           aria-label="Toggle menu"
         >
           {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -133,7 +134,7 @@ export default function LandingNav() {
             <Link
               to="/app?demo=true"
               onClick={() => setMobileOpen(false)}
-              className="rounded-lg bg-brand-500 px-4 py-2 text-center text-sm font-medium text-white"
+              className="rounded-lg bg-brand-600 px-4 py-2 text-center text-sm font-medium text-white"
             >
               Try Live Demo
             </Link>

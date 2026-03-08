@@ -5,7 +5,7 @@
   "start_url": "/app?source=pwa",
   "display": "standalone",
   "background_color": "#030712",
-  "theme_color": "#6366f1",
+  "theme_color": "#0891b2",
   "orientation": "portrait-primary",
   "categories": ["business", "productivity", "utilities"],
   "icons": [

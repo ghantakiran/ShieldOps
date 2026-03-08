@@ -9,10 +9,10 @@ interface AgentPromptInputProps {
 }
 
 const QUICK_CONTEXTS = [
-  { label: "Slack", icon: "#", color: "text-purple-400" },
+  { label: "Slack", icon: "#", color: "text-brand-400" },
   { label: "PagerDuty", icon: "P", color: "text-emerald-400" },
   { label: "Splunk", icon: "S", color: "text-green-400" },
-  { label: "Datadog", icon: "D", color: "text-violet-400" },
+  { label: "Datadog", icon: "D", color: "text-sky-400" },
   { label: "Jira", icon: "J", color: "text-blue-400" },
   { label: "GitHub", icon: "G", color: "text-gray-300" },
   { label: "AWS", icon: "A", color: "text-amber-400" },

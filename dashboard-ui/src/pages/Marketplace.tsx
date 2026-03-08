@@ -93,7 +93,7 @@ const CATEGORY_CONFIG: Record<
   },
   investigation: {
     label: "Investigation",
-    color: "bg-purple-500/20 text-purple-400 border-purple-500/30",
+    color: "bg-brand-500/20 text-brand-400 border-brand-500/30",
     icon: Search,
   },
 };
@@ -102,7 +102,7 @@ const CLOUD_CONFIG: Record<string, { label: string; color: string }> = {
   aws: { label: "AWS", color: "bg-orange-500/20 text-orange-400" },
   gcp: { label: "GCP", color: "bg-blue-500/20 text-blue-400" },
   azure: { label: "Azure", color: "bg-sky-500/20 text-sky-400" },
-  kubernetes: { label: "K8s", color: "bg-indigo-500/20 text-indigo-400" },
+  kubernetes: { label: "K8s", color: "bg-brand-500/20 text-brand-400" },
   linux: { label: "Linux", color: "bg-gray-500/20 text-gray-400" },
 };
 

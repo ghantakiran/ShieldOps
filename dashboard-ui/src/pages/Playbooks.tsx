@@ -46,7 +46,7 @@ function alertTypeBadgeColor(alertType: string): string {
     high_cpu: "bg-red-500/20 text-red-400",
     high_memory: "bg-orange-500/20 text-orange-400",
     disk_full: "bg-yellow-500/20 text-yellow-400",
-    pod_crash_loop: "bg-purple-500/20 text-purple-400",
+    pod_crash_loop: "bg-brand-500/20 text-brand-400",
     service_down: "bg-red-500/20 text-red-400",
     high_latency: "bg-amber-500/20 text-amber-400",
   };

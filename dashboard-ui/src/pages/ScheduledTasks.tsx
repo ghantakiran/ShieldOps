@@ -150,7 +150,7 @@ const FREQUENCY_BADGE: Record<ScheduleFrequency, { bg: string; text: string }> =
   hourly: { bg: "bg-blue-500/10 ring-blue-500/20", text: "text-blue-400" },
   daily: { bg: "bg-green-500/10 ring-green-500/20", text: "text-green-400" },
   weekly: { bg: "bg-amber-500/10 ring-amber-500/20", text: "text-amber-400" },
-  monthly: { bg: "bg-purple-500/10 ring-purple-500/20", text: "text-purple-400" },
+  monthly: { bg: "bg-brand-500/10 ring-brand-500/20", text: "text-brand-400" },
   cron: { bg: "bg-gray-500/10 ring-gray-500/20", text: "text-gray-400" },
 };
 
