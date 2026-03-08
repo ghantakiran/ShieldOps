@@ -1,0 +1,50 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+.mypy_cache
+.ruff_cache
+.pytest_cache
+htmlcov
+.coverage
+*.egg-info
+dist
+build
+.venv
+venv
+
+# Node / Dashboard
+node_modules
+dashboard-ui/node_modules
+dashboard-ui/dist
+dashboard-ui/.vite
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docs & tests (not needed in production image)
+docs
+tests
+*.md
+!README.md
+
+# Infrastructure (not needed in app image)
+infrastructure
+.github
+.pre-commit-config.yaml
+
+# Environment files
+.env
+.env.*
+!.env.example

@@ -5,6 +5,7 @@ import Header from "./Header";
 import MobileSidebar from "./MobileSidebar";
 import DemoBanner from "./DemoBanner";
 import ErrorBoundary from "./ErrorBoundary";
+import AIChatSidebar from "./AIChatSidebar";
 import { useRealtimeUpdates } from "../hooks/useRealtimeUpdates";
 import { isDemoMode } from "../demo/config";
 
@@ -37,6 +38,9 @@ export default function Layout() {
           </main>
         </div>
       </div>
+
+      {/* AI Chat assistant */}
+      <AIChatSidebar />
     </div>
   );
 }
