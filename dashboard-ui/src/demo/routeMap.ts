@@ -393,7 +393,7 @@ const routes: Route[] = [
 
   // ── Scheduled Tasks ───────────────────────────────────────────────
   {
-    pattern: /^\/scheduled-tasks\/([^/?]+)\\/trigger$/,
+    pattern: /^\/scheduled-tasks\/([^/?]+)\/trigger$/,
     handler: () => ({ status: "triggered", task_id: "demo" }),
   },
   {
