@@ -13,9 +13,7 @@ export default function Landing() {
   return (
     <div className="pt-20">
       <HeroSection />
-      <AnimatedSection>
-        <ProblemSection />
-      </AnimatedSection>
+      <ProblemSection />
       <AnimatedSection>
         <SolutionSection />
       </AnimatedSection>
@@ -32,9 +30,7 @@ export default function Landing() {
       <AnimatedSection>
         <SafetySection />
       </AnimatedSection>
-      <AnimatedSection>
-        <CTASection />
-      </AnimatedSection>
+      <CTASection />
     </div>
   );
 }
