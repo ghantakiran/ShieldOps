@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
-import { Bell, LogOut, Menu, Search } from "lucide-react";
+import { LogOut, Menu, Search } from "lucide-react";
 import { useAuthStore } from "../store/auth";
 import ConnectionStatus from "./ConnectionStatus";
 import GlobalSearch from "./GlobalSearch";
+import NotificationDropdown from "./NotificationDropdown";
 
 interface HeaderProps {
   onMenuClick?: () => void;
@@ -61,9 +62,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
           <ConnectionStatus />
 
           {/* Notifications */}
-          <button className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-800 hover:text-gray-200">
-            <Bell className="h-4 w-4" />
-          </button>
+          <NotificationDropdown />
 
           {/* User */}
           {user && (
