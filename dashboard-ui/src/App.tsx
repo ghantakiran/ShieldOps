@@ -12,6 +12,8 @@ import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import AgentFactory from "./pages/AgentFactory";
 
+import NotFound from "./pages/NotFound";
+
 // ── Lazy-loaded pages ──────────────────────────────────────────────
 const ProductLanding = lazy(() => import("./pages/ProductLanding"));
 const Pricing = lazy(() => import("./pages/Pricing"));
@@ -167,7 +169,7 @@ export default function App() {
             </Route>
 
             {/* Catch-all */}
-            <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
       </DemoDetector>
