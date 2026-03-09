@@ -522,7 +522,48 @@ Run health checks on all ShieldOps platform dependencies.
    - Deception tech manager: `src/shieldops/operations/deception_tech_manager.py` — DeceptionTechManager
    - Verify each module initializes in `src/shieldops/api/app.py` lifespan
 
-6. **Check configuration**:
+   - **Phase 101–103 (Enterprise & Automation):**
+   - ChatOps agent: `src/shieldops/agents/chatops/` — ChatOps Agent health, Slack/Teams webhook connectivity
+   - Enterprise integration agent: `src/shieldops/agents/enterprise_integration/` — Enterprise Integration Agent health
+   - Automation orchestrator agent: `src/shieldops/agents/automation_orchestrator/` — Automation Orchestrator Agent health
+   - ChatOps routes: `src/shieldops/api/routes/chatops.py` — ChatOps API endpoint availability
+   - Enterprise integration routes: `src/shieldops/api/routes/enterprise_integrations.py` — Integration API health
+   - Automation rules routes: `src/shieldops/api/routes/automation_rules.py` — Automation Rules API health
+   - Verify each module initializes in `src/shieldops/api/app.py` lifespan
+
+6. **Enterprise integration health**:
+   - Check all registered enterprise integrations status (ITSM, SIEM, CMDB)
+   - Verify webhook endpoint reachability for each configured integration
+   - Test bidirectional connectivity (inbound webhook reception, outbound event delivery)
+   - Validate integration credentials and API key freshness
+   - Check dead-letter queue depth for failed integration events
+   - Verify circuit breaker states for each integration endpoint
+
+7. **ChatOps connectivity verification**:
+   - Slack webhook health: verify Slack app token validity and webhook URL reachability
+   - Microsoft Teams webhook health: verify Teams connector URL and bot registration
+   - Test message send/receive round-trip for each configured channel
+   - Validate ChatOps command routing table completeness
+   - Check ChatOps approval workflow button/action registration
+
+8. **Automation rules health**:
+   - Validate all automation rule trigger conditions parse correctly
+   - Check policy gate evaluation for each active automation rule
+   - Verify approval workflow configuration for high-impact rules
+   - Report stale/disabled automation rules with no recent execution
+   - Check rule execution queue depth and processing latency
+   - Validate rule dependency chains (no circular dependencies)
+
+9. **Observability 2.0 pipeline health**:
+   - Telemetry pipeline: verify OpenTelemetry collector ingestion rates
+   - Metric federation: check cross-cluster metric federation endpoints
+   - Multi-signal correlation: verify correlation engine processing lag
+   - Streaming telemetry: check streaming telemetry processor throughput
+   - Adaptive sampling: verify sampling engine decision rates
+   - Context propagation: check trace context propagation completeness across services
+   - OTel pipeline optimizer: verify pipeline optimization rules are active
+
+10. **Check configuration**:
    - Verify `.env` file exists (warn if missing)
    - Check required env vars are set (DATABASE_URL, REDIS_URL, etc.)
    - Validate OPA policies: check `playbooks/policies/` for syntax

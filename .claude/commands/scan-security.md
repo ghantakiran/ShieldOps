@@ -181,6 +181,18 @@ Run security audits on ShieldOps codebase and agent configurations.
 155. **Audit Scope Optimization**: Optimize audit scope by analyzing historical finding density via `AuditScopeOptimizer` (`src/shieldops/audit/audit_scope_optimizer.py`)
 156. **Cost Forecast Precision**: Measure and improve cost forecasting accuracy via `CostForecastPrecision` (`src/shieldops/billing/cost_forecast_precision.py`)
 
+### Phase 103: Security Automation & Zero Trust (Items 157–170)
+157. **Zero Trust Policy Enforcement**: Validate zero trust policies across all access paths via `ZeroTrustPolicyEnforcer` (`src/shieldops/security/zero_trust_policy_enforcer.py`)
+158. **Compliance-as-Code Validation**: Validate compliance policies defined as code via `ComplianceAsCodeValidator` (`src/shieldops/compliance/compliance_as_code_validator.py`)
+159. **DevSecOps Pipeline Gate**: Scan CI/CD pipeline security gates and enforce policy via `DevSecOpsPipelineGate` (`src/shieldops/security/devsecops_pipeline_gate.py`)
+160. **Security Chaos Engineering**: Recommend and validate security chaos experiments via `SecurityChaosEngineer` (`src/shieldops/security/security_chaos_engineer.py`)
+161. **Automation Rule Security Audit**: Audit automation rules for security policy compliance via `AutomationRuleSecurityAuditor` (`src/shieldops/security/automation_rule_auditor.py`)
+162. **ChatOps Security Validation**: Validate ChatOps command permissions and audit trails via `ChatOpsSecurityValidator` (`src/shieldops/security/chatops_security_validator.py`)
+163. **Enterprise Integration Security**: Scan enterprise integration webhook endpoints and credentials via `IntegrationSecurityScanner` (`src/shieldops/security/integration_security_scanner.py`)
+164. **Cross-Agent Policy Enforcement**: Verify cross-agent policy enforcement consistency via `CrossAgentPolicyValidator` (`src/shieldops/policy/cross_agent_policy_validator.py`)
+165. **Webhook Endpoint Security**: Scan webhook endpoints for authentication and authorization via `WebhookSecurityScanner` (`src/shieldops/security/webhook_security_scanner.py`)
+166. **Approval Workflow Integrity**: Verify approval workflow integrity and bypass detection via `ApprovalWorkflowAuditor` (`src/shieldops/security/approval_workflow_auditor.py`)
+
 ## Severity Levels
 - **CRITICAL**: Hardcoded secrets, SQL injection, unauthenticated endpoints
 - **HIGH**: Missing OPA policies, overly permissive agent actions
