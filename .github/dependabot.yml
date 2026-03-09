@@ -1,0 +1,84 @@
+version: 2
+updates:
+  # Python dependencies
+  - package-ecosystem: pip
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "python"
+    reviewers:
+      - "ghantakiran"
+    commit-message:
+      prefix: "chore(deps):"
+
+  # npm dependencies (dashboard-ui)
+  - package-ecosystem: npm
+    directory: "/dashboard-ui"
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "javascript"
+    reviewers:
+      - "ghantakiran"
+    commit-message:
+      prefix: "chore(deps):"
+
+  # GitHub Actions
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+    labels:
+      - "dependencies"
+      - "ci"
+    commit-message:
+      prefix: "chore(ci):"
+
+  # Terraform modules
+  - package-ecosystem: terraform
+    directory: "/infrastructure/terraform/aws"
+    schedule:
+      interval: monthly
+    labels:
+      - "dependencies"
+      - "terraform"
+    commit-message:
+      prefix: "chore(infra):"
+
+  - package-ecosystem: terraform
+    directory: "/infrastructure/terraform/gcp"
+    schedule:
+      interval: monthly
+    labels:
+      - "dependencies"
+      - "terraform"
+    commit-message:
+      prefix: "chore(infra):"
+
+  - package-ecosystem: terraform
+    directory: "/infrastructure/terraform/azure"
+    schedule:
+      interval: monthly
+    labels:
+      - "dependencies"
+      - "terraform"
+    commit-message:
+      prefix: "chore(infra):"
+
+  # Docker
+  - package-ecosystem: docker
+    directory: "/dashboard-ui"
+    schedule:
+      interval: monthly
+    labels:
+      - "dependencies"
+      - "docker"
+    commit-message:
+      prefix: "chore(docker):"

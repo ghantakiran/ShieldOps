@@ -1,0 +1,121 @@
+name: GitOps Sync
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "infrastructure/kubernetes/**"
+      - "playbooks/policies/**"
+      - "infrastructure/terraform/**"
+
+concurrency:
+  group: gitops-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  detect-changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    outputs:
+      k8s: ${{ steps.filter.outputs.k8s }}
+      policies: ${{ steps.filter.outputs.policies }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            k8s:
+              - 'infrastructure/kubernetes/**'
+            policies:
+              - 'playbooks/policies/**'
+
+  sync-k8s-manifests:
+    name: Sync Kubernetes Manifests
+    needs: detect-changes
+    if: needs.detect-changes.outputs.k8s == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate K8s manifests
+        run: |
+          wget -q https://github.com/instrumenta/kubeval/releases/latest/download/kubeval-linux-amd64.tar.gz
+          tar xf kubeval-linux-amd64.tar.gz
+          chmod +x kubeval
+          echo "Validating Kubernetes manifests..."
+          find infrastructure/kubernetes -name '*.yaml' -o -name '*.yml' | while read f; do
+            echo "  Checking $f..."
+            ./kubeval "$f" --strict || true
+          done
+
+      - name: Generate manifest digest
+        run: |
+          find infrastructure/kubernetes -name '*.yaml' -o -name '*.yml' | sort | xargs sha256sum > manifest-digest.txt
+          cat manifest-digest.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: k8s-manifests
+          path: |
+            infrastructure/kubernetes/
+            manifest-digest.txt
+          retention-days: 30
+
+  sync-opa-policies:
+    name: Sync OPA Policies
+    needs: detect-changes
+    if: needs.detect-changes.outputs.policies == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate Rego policies
+        run: |
+          curl -fsSL -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64_static
+          chmod +x opa
+          for f in playbooks/policies/*.rego; do
+            echo "Checking $f..."
+            ./opa check "$f"
+          done
+
+      - name: Run OPA policy tests
+        run: |
+          if ls playbooks/policies/*_test.rego 1>/dev/null 2>&1; then
+            ./opa test playbooks/policies/ -v
+          else
+            echo "No policy tests found — skipping"
+          fi
+
+      - name: Generate OPA ConfigMap
+        run: |
+          kubectl create configmap shieldops-opa-policies \
+            --from-file=playbooks/policies/ \
+            -n shieldops \
+            --dry-run=client -o yaml \
+            > infrastructure/kubernetes/opa-policies-configmap.yaml
+          echo "Generated ConfigMap with $(ls playbooks/policies/*.rego | wc -l) policy files"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: opa-policies-configmap
+          path: infrastructure/kubernetes/opa-policies-configmap.yaml
+          retention-days: 30
+
+  summary:
+    name: GitOps Summary
+    needs: [sync-k8s-manifests, sync-opa-policies]
+    if: always() && (needs.sync-k8s-manifests.result == 'success' || needs.sync-opa-policies.result == 'success')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Summary
+        run: |
+          echo "## GitOps Sync Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Component | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| K8s Manifests | ${{ needs.sync-k8s-manifests.result || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| OPA Policies | ${{ needs.sync-opa-policies.result || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY

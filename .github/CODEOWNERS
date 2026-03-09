@@ -1,0 +1,19 @@
+# Default owners
+* @ghantakiran
+
+# Dashboard UI
+/dashboard-ui/ @ghantakiran
+
+# Infrastructure
+/infrastructure/ @ghantakiran
+
+# Agent implementations
+/src/shieldops/agents/ @ghantakiran
+
+# Security-sensitive files
+/src/shieldops/policy/ @ghantakiran
+/src/shieldops/security/ @ghantakiran
+/playbooks/policies/ @ghantakiran
+
+# CI/CD
+/.github/ @ghantakiran

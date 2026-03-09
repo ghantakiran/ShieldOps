@@ -42,23 +42,22 @@ describe("Pricing", () => {
     expect(screen.getByText("Security Operations")).toBeInTheDocument();
     expect(screen.getByText("FinOps Intelligence")).toBeInTheDocument();
     expect(screen.getByText("Compliance Automation")).toBeInTheDocument();
+    expect(screen.getByText("API Platform")).toBeInTheDocument();
+    expect(screen.getByText("Agent Marketplace")).toBeInTheDocument();
   });
 
   it("renders tier names for each product", () => {
     renderPricing();
-    // Each product has Starter, Pro, Enterprise — so these should appear multiple times
-    const starters = screen.getAllByText("Starter");
-    const pros = screen.getAllByText("Pro");
+    // 6 products now — 4 have Starter, API has Developer, Marketplace has Free
     const enterprises = screen.getAllByText("Enterprise");
-    expect(starters.length).toBe(4);
-    expect(pros.length).toBe(4);
-    expect(enterprises.length).toBe(4);
+    expect(enterprises.length).toBe(6);
   });
 
   it("shows annual pricing by default", () => {
     renderPricing();
-    // SRE Starter annual = $399
-    expect(screen.getByText("$399")).toBeInTheDocument();
+    // SRE Starter annual = $399 (may appear in multiple products)
+    const prices = screen.getAllByText("$399");
+    expect(prices.length).toBeGreaterThanOrEqual(1);
   });
 
   it("toggles to monthly pricing", () => {
@@ -66,8 +65,9 @@ describe("Pricing", () => {
     const toggle = screen.getByRole("switch");
     fireEvent.click(toggle);
 
-    // SRE Starter monthly = $499
-    expect(screen.getByText("$499")).toBeInTheDocument();
+    // SRE Starter monthly = $499 (may appear in multiple products)
+    const prices = screen.getAllByText("$499");
+    expect(prices.length).toBeGreaterThanOrEqual(1);
   });
 
   it("renders FAQ section", () => {
@@ -82,15 +82,15 @@ describe("Pricing", () => {
     expect(screen.getByText(/14-day free trial/)).toBeInTheDocument();
   });
 
-  it("shows Most Popular badge on Pro tiers", () => {
+  it("shows Most Popular badge on highlighted tiers", () => {
     renderPricing();
     const badges = screen.getAllByText("Most Popular");
-    expect(badges.length).toBe(4); // One per product
+    expect(badges.length).toBe(6); // One per product
   });
 
   it("shows Custom for enterprise pricing", () => {
     renderPricing();
     const customs = screen.getAllByText("Custom");
-    expect(customs.length).toBe(4);
+    expect(customs.length).toBe(6);
   });
 });

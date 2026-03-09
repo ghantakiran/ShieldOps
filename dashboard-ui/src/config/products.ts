@@ -28,10 +28,11 @@ import {
   Key,
   Workflow,
   CalendarClock,
+  Server,
   type LucideIcon,
 } from "lucide-react";
 
-export type ProductId = "sre" | "soc" | "finops" | "compliance" | "platform";
+export type ProductId = "sre" | "soc" | "finops" | "compliance" | "platform" | "api" | "marketplace";
 
 export interface Product {
   id: ProductId;
@@ -88,6 +89,28 @@ export const PRODUCTS: Record<Exclude<ProductId, "platform">, Product> = {
     color: "text-amber-400",
     bgGradient: "from-amber-600/20 to-amber-800/20",
     demoPath: "/app/compliance?demo=true",
+  },
+  api: {
+    id: "api",
+    name: "API Platform",
+    tagline: "Developer-first agent APIs",
+    description:
+      "Expose ShieldOps capabilities as metered APIs — investigations, remediations, analytics, and more — for integration into your own tools and portals.",
+    icon: Code,
+    color: "text-sky-400",
+    bgGradient: "from-sky-600/20 to-sky-800/20",
+    demoPath: "/app/api-keys?demo=true",
+  },
+  marketplace: {
+    id: "marketplace",
+    name: "Agent Marketplace",
+    tagline: "Extensible agent ecosystem",
+    description:
+      "Discover and deploy community-built agents, connectors, and playbooks. Publish your own and earn revenue through the marketplace.",
+    icon: Store,
+    color: "text-orange-400",
+    bgGradient: "from-orange-600/20 to-orange-800/20",
+    demoPath: "/app/marketplace?demo=true",
   },
 };
 
@@ -177,6 +200,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/app/onboarding", icon: Rocket, label: "Onboarding" },
       { to: "/app/infra-as-code", icon: Code, label: "Infra as Code" },
       { to: "/app/api-keys", icon: Key, label: "API Keys" },
+      { to: "/app/mcp-servers", icon: Server, label: "MCP Servers" },
       { to: "/app/settings", icon: Settings, label: "Settings" },
       { to: "/app/users", icon: Users, label: "Users" },
     ],

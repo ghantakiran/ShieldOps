@@ -53,6 +53,7 @@ const PipelineRuns = lazy(() => import("./pages/PipelineRuns"));
 const APIKeys = lazy(() => import("./pages/APIKeys"));
 const Workflows = lazy(() => import("./pages/Workflows"));
 const ScheduledTasks = lazy(() => import("./pages/ScheduledTasks"));
+const MCPServers = lazy(() => import("./pages/MCPServers"));
 
 // ── Suspense fallback ──────────────────────────────────────────────
 
@@ -166,6 +167,7 @@ export default function App() {
               <Route path="pipeline" element={<PipelineRuns />} />
               <Route path="api-keys" element={<APIKeys />} />
               <Route path="workflows" element={<Workflows />} />
+              <Route path="mcp-servers" element={<MCPServers />} />
             </Route>
 
             {/* Catch-all */}

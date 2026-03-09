@@ -220,4 +220,104 @@ export const PRODUCT_CONTENT: Record<Exclude<ProductId, "platform">, ProductCont
       "Jira",
     ],
   },
+  api: {
+    hero: "Embed ShieldOps intelligence into your own tools. Metered APIs for investigations, remediations, cost analysis, and security operations — with full OpenAPI documentation.",
+    features: [
+      {
+        title: "RESTful Agent APIs",
+        description:
+          "Trigger investigations, remediations, and scans programmatically with versioned REST endpoints.",
+      },
+      {
+        title: "Metered Usage",
+        description:
+          "Pay-per-execution pricing — per investigation, per remediation, per 1K analytics queries.",
+      },
+      {
+        title: "Webhook Events",
+        description:
+          "Real-time webhook delivery for agent completions, alerts, and status changes.",
+      },
+      {
+        title: "SDK Libraries",
+        description:
+          "Official Python, TypeScript, and Go SDKs with type-safe clients and retry logic.",
+      },
+      {
+        title: "Rate Limiting & Auth",
+        description:
+          "JWT authentication, API key management, and configurable rate limits per tenant.",
+      },
+      {
+        title: "OpenAPI Documentation",
+        description:
+          "Auto-generated interactive API docs with request/response examples and testing sandbox.",
+      },
+    ],
+    metrics: [
+      { label: "API Uptime", value: "99.95%" },
+      { label: "Avg Latency", value: "< 200ms" },
+      { label: "Endpoints", value: "120+" },
+      { label: "SDKs", value: "3 languages" },
+    ],
+    integrations: [
+      "REST API",
+      "GraphQL",
+      "Webhooks",
+      "Python SDK",
+      "TypeScript SDK",
+      "Go SDK",
+      "Terraform Provider",
+      "GitHub Actions",
+    ],
+  },
+  marketplace: {
+    hero: "The app store for SRE, SOC, and FinOps agents. Discover community-built agents, connectors, and industry-specific playbooks — or publish your own.",
+    features: [
+      {
+        title: "Agent Registry",
+        description:
+          "Browse and deploy pre-built agents for specific use cases — SAP monitoring, SIEM integration, compliance frameworks.",
+      },
+      {
+        title: "Connector Hub",
+        description:
+          "Community connectors for niche monitoring tools, ticketing systems, and cloud services.",
+      },
+      {
+        title: "Playbook Library",
+        description:
+          "Industry-specific playbooks for FinServ, Healthcare, Gaming, and regulated industries.",
+      },
+      {
+        title: "Revenue Sharing",
+        description:
+          "Publish paid plugins and earn revenue. Enterprise customers get private marketplace governance.",
+      },
+      {
+        title: "Version Management",
+        description:
+          "Semantic versioning, automatic updates, and rollback support for all marketplace items.",
+      },
+      {
+        title: "Security Scanning",
+        description:
+          "Every marketplace submission undergoes automated security scanning and manual review.",
+      },
+    ],
+    metrics: [
+      { label: "Published Agents", value: "200+" },
+      { label: "Connectors", value: "85+" },
+      { label: "Playbooks", value: "150+" },
+      { label: "Contributors", value: "500+" },
+    ],
+    integrations: [
+      "GitHub",
+      "GitLab",
+      "npm Registry",
+      "PyPI",
+      "Docker Hub",
+      "Helm Charts",
+    ],
+  },
 };
