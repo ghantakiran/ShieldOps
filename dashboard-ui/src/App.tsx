@@ -54,6 +54,9 @@ const APIKeys = lazy(() => import("./pages/APIKeys"));
 const Workflows = lazy(() => import("./pages/Workflows"));
 const ScheduledTasks = lazy(() => import("./pages/ScheduledTasks"));
 const MCPServers = lazy(() => import("./pages/MCPServers"));
+const ChatOps = lazy(() => import("./pages/ChatOps"));
+const EnterpriseIntegrations = lazy(() => import("./pages/EnterpriseIntegrations"));
+const AutomationRules = lazy(() => import("./pages/AutomationRules"));
 
 // ── Suspense fallback ──────────────────────────────────────────────
 
@@ -168,6 +171,9 @@ export default function App() {
               <Route path="api-keys" element={<APIKeys />} />
               <Route path="workflows" element={<Workflows />} />
               <Route path="mcp-servers" element={<MCPServers />} />
+              <Route path="chatops" element={<ChatOps />} />
+              <Route path="integrations" element={<EnterpriseIntegrations />} />
+              <Route path="automation" element={<AutomationRules />} />
             </Route>
 
             {/* Catch-all */}

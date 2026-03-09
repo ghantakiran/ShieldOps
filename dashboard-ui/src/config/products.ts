@@ -29,6 +29,9 @@ import {
   Workflow,
   CalendarClock,
   Server,
+  MessageSquare,
+  Plug,
+  Zap,
   type LucideIcon,
 } from "lucide-react";
 
@@ -189,6 +192,16 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { to: "/app/compliance", icon: ShieldCheck, label: "Compliance" },
       { to: "/app/audit-log", icon: FileText, label: "Audit Log" },
+    ],
+  },
+  {
+    id: "enterprise",
+    label: "Enterprise",
+    color: "text-sky-400",
+    items: [
+      { to: "/app/chatops", icon: MessageSquare, label: "ChatOps" },
+      { to: "/app/integrations", icon: Plug, label: "Integrations" },
+      { to: "/app/automation", icon: Zap, label: "Automation Rules" },
     ],
   },
   {
