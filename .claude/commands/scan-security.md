@@ -193,6 +193,32 @@ Run security audits on ShieldOps codebase and agent configurations.
 165. **Webhook Endpoint Security**: Scan webhook endpoints for authentication and authorization via `WebhookSecurityScanner` (`src/shieldops/security/webhook_security_scanner.py`)
 166. **Approval Workflow Integrity**: Verify approval workflow integrity and bypass detection via `ApprovalWorkflowAuditor` (`src/shieldops/security/approval_workflow_auditor.py`)
 
+### Phase 104-106: Advanced Observability, Security Ops & GitOps (Items 167–190)
+167. **eBPF Network Flow Analysis**: Analyze eBPF network flows for anomalies via `EbpfNetworkFlowAnalyzer` (`src/shieldops/observability/ebpf_network_flow_analyzer.py`)
+168. **ML Anomaly Detection**: Multi-variate anomaly detection with isolation forest scoring via `MlAnomalyDetectionEngine` (`src/shieldops/observability/ml_anomaly_detection_engine.py`)
+169. **Alert Grouping Intelligence**: ML-based alert clustering and deduplication via `IntelligentAlertGrouping` (`src/shieldops/observability/intelligent_alert_grouping.py`)
+170. **Metric Cardinality Governance**: Cardinality explosion prevention and label policy enforcement via `MetricCardinalityGovernor` (`src/shieldops/observability/metric_cardinality_governor.py`)
+171. **Trace Bottleneck Analysis**: Critical path analysis and latency attribution via `TraceBottleneckAnalyzer` (`src/shieldops/observability/trace_bottleneck_analyzer.py`)
+172. **Purple Team Campaign Tracking**: Purple team exercise coverage and detection validation via `PurpleTeamCampaignEngine` (`src/shieldops/security/purple_team_campaign_engine.py`)
+173. **Detection Engineering Pipeline**: Detection rule lifecycle and effectiveness scoring via `DetectionEngineeringPipelineV2` (`src/shieldops/security/detection_engineering_pipeline_v2.py`)
+174. **SOAR Workflow Intelligence**: Playbook effectiveness and bottleneck detection via `SoarWorkflowIntelligence` (`src/shieldops/security/soar_workflow_intelligence.py`)
+175. **Threat Exposure Management**: External exposure mapping and remediation prioritization via `ThreatExposureManagement` (`src/shieldops/security/threat_exposure_management.py`)
+176. **Security Data Lake**: Security data ingestion and retention tier management via `SecurityDataLakeEngine` (`src/shieldops/security/security_data_lake_engine.py`)
+177. **Identity Analytics**: Identity behavior profiling and privilege anomaly detection via `IdentityAnalyticsEngine` (`src/shieldops/security/identity_analytics_engine.py`)
+178. **Cloud Workload Protection**: Runtime security and micro-segmentation assessment via `CloudWorkloadProtection` (`src/shieldops/security/cloud_workload_protection.py`)
+179. **Security Orchestration Hub**: Cross-tool workflow orchestration and routing via `SecurityOrchestrationHub` (`src/shieldops/security/security_orchestration_hub.py`)
+180. **Security SLA Tracking**: MTTD/MTTR and security SLA compliance via `SecuritySlaTracker` (`src/shieldops/operations/security_sla_tracker.py`)
+181. **Continuous Audit**: Automated control testing and finding management via `ContinuousAuditEngine` (`src/shieldops/compliance/continuous_audit_engine.py`)
+182. **Regulatory Intelligence**: Regulatory change tracking and impact assessment via `RegulatoryIntelligenceEngine` (`src/shieldops/compliance/regulatory_intelligence_engine.py`)
+183. **GitOps Reconciliation**: Git-to-cluster state drift detection via `GitOpsReconciliationEngine` (`src/shieldops/changes/gitops_reconciliation_engine.py`)
+184. **IaC Validation**: Terraform/OpenTofu blast radius and policy compliance via `IacValidationEngine` (`src/shieldops/changes/iac_validation_engine.py`)
+185. **Deployment Intelligence**: Rollback risk prediction and success pattern analysis via `DeploymentIntelligenceEngine` (`src/shieldops/changes/deployment_intelligence_engine.py`)
+186. **Infrastructure Drift Intelligence**: Advanced drift root cause classification via `InfrastructureDriftIntelligenceV2` (`src/shieldops/changes/infrastructure_drift_intelligence.py`)
+187. **Environment Parity**: Cross-environment comparison and deviation alerting via `EnvironmentParityEngine` (`src/shieldops/operations/environment_parity_engine.py`)
+188. **Disaster Recovery Intelligence**: RTO/RPO compliance and readiness scoring via `DisasterRecoveryIntelligence` (`src/shieldops/operations/disaster_recovery_intelligence.py`)
+189. **DORA Metrics Intelligence**: Deployment frequency, lead time, MTTR classification via `DeploymentAnalyticsEngine` (`src/shieldops/analytics/deployment_analytics_engine.py`)
+190. **Operational Risk Intelligence**: Composite risk scoring and heat map generation via `OperationalRiskIntelligence` (`src/shieldops/analytics/operational_risk_intelligence.py`)
+
 ## Severity Levels
 - **CRITICAL**: Hardcoded secrets, SQL injection, unauthenticated endpoints
 - **HIGH**: Missing OPA policies, overly permissive agent actions

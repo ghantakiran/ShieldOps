@@ -70,6 +70,31 @@ src/shieldops/agents/{type}/
   - Support async approval via webhook callbacks
 - Register webhook endpoints in `src/shieldops/api/routes/webhooks.py`
 
+## Observability & Security Module Patterns
+
+### Observability Engine Module (non-agent)
+Use this pattern for standalone analytics/intelligence engines:
+```
+src/shieldops/{package}/{module_name}.py
+```
+- Pydantic models with StrEnum enums
+- Engine class with: `add_record`, `process`, `generate_report`, `get_stats`, `clear_data`
+- Ring-buffer storage with `max_records` eviction
+- structlog logging, uuid/time defaults
+- Examples: `ebpf_network_flow_analyzer.py`, `ml_anomaly_detection_engine.py`
+
+### GitOps & Infrastructure Intelligence
+- GitOps reconciliation: `src/shieldops/changes/gitops_reconciliation_engine.py`
+- IaC validation: `src/shieldops/changes/iac_validation_engine.py`
+- DORA metrics: `src/shieldops/analytics/deployment_analytics_engine.py`
+- DR intelligence: `src/shieldops/operations/disaster_recovery_intelligence.py`
+
+### Security Operations Automation
+- Purple team campaigns: `src/shieldops/security/purple_team_campaign_engine.py`
+- Detection engineering: `src/shieldops/security/detection_engineering_pipeline_v2.py`
+- SOAR workflow intelligence: `src/shieldops/security/soar_workflow_intelligence.py`
+- Identity analytics: `src/shieldops/security/identity_analytics_engine.py`
+
 ## Safety Requirements
 - ALL infrastructure-modifying actions MUST pass OPA policy evaluation
 - Implement rollback capability for every remediation action
