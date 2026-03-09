@@ -23,7 +23,7 @@ jobs:
       k8s: ${{ steps.filter.outputs.k8s }}
       policies: ${{ steps.filter.outputs.policies }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: dorny/paths-filter@v3
         id: filter
         with:
@@ -39,7 +39,7 @@ jobs:
     if: needs.detect-changes.outputs.k8s == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Validate K8s manifests
         run: |
@@ -71,7 +71,7 @@ jobs:
     if: needs.detect-changes.outputs.policies == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Validate Rego policies
         run: |
