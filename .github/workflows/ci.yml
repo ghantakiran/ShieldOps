@@ -93,7 +93,7 @@ jobs:
           check_name: Test Results
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         if: github.event_name == 'push'
         with:
           file: coverage.xml
