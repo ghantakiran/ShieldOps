@@ -26,7 +26,7 @@ export default function HowItWorks() {
           {STEPS.map((step, idx) => (
             <div key={step.label} className="flex items-center">
               <div className="flex flex-col items-center text-center">
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-gray-700 bg-gray-800/80">
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-gray-700 bg-gray-800/80 transition-all hover:border-brand-500/40 hover:shadow-lg hover:shadow-brand-900/20">
                   <step.icon className="h-7 w-7 text-brand-400" />
                 </div>
                 <h3 className="mt-3 text-sm font-semibold text-gray-100">

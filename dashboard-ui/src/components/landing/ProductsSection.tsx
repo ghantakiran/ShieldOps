@@ -11,14 +11,14 @@ export default function ProductsSection() {
       <div className="mx-auto max-w-5xl">
         <div className="text-center">
           <h2 className="text-3xl font-bold tracking-tight text-gray-50 sm:text-4xl">
-            One platform, four products
+            One platform, six products
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-gray-400">
             Choose the modules that fit your needs — or deploy the full platform for unified operations.
           </p>
         </div>
 
-        <div className="mt-12 grid gap-6 sm:grid-cols-2">
+        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {products.map((product) => {
             const Icon = product.icon;
             return (

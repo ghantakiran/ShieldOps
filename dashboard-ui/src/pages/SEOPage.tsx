@@ -217,7 +217,7 @@ export default function SEOPage() {
                 <div className="flex flex-col gap-3 sm:flex-row">
                   <Link
                     to="/login"
-                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-500 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-600"
+                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-500"
                   >
                     Start Free Trial
                     <ArrowRight className="h-4 w-4" />
@@ -291,7 +291,7 @@ export default function SEOPage() {
             <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link
                 to="/login"
-                className="inline-flex items-center gap-2 rounded-lg bg-brand-500 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-600"
+                className="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-500"
               >
                 Start Free Trial
                 <ArrowRight className="h-4 w-4" />

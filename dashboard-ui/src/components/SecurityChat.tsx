@@ -195,7 +195,7 @@ export default function SecurityChat({ isOpen, onClose }: SecurityChatProps) {
           <button
             onClick={handleSend}
             disabled={!input.trim() || isTyping}
-            className="rounded-lg bg-brand-500 px-3 py-2 text-white hover:bg-brand-600 disabled:opacity-50"
+            className="rounded-lg bg-brand-600 px-3 py-2 text-white hover:bg-brand-500 disabled:opacity-50"
           >
             {isTyping ? (
               <Loader2 className="h-4 w-4 animate-spin" />

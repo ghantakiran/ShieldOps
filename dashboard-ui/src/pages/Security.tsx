@@ -142,7 +142,7 @@ export default function Security() {
         <button
           onClick={() => runScan.mutate()}
           disabled={runScan.isPending}
-          className="flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:bg-brand-600 disabled:opacity-60"
+          className="flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-500 disabled:opacity-60"
         >
           {runScan.isPending ? (
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -289,7 +289,7 @@ export default function Security() {
         <div className="space-y-4">
           <button
             onClick={() => navigate("/app/vulnerabilities")}
-            className="flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2 text-sm text-white hover:bg-brand-600"
+            className="flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2 text-sm text-white hover:bg-brand-500"
           >
             <Bug className="h-4 w-4" />
             Open Vulnerability Manager

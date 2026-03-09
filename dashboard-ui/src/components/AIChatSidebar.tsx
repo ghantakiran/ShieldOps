@@ -142,7 +142,7 @@ export default function AIChatSidebar() {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-brand-500 text-white shadow-lg transition-all hover:bg-brand-600 hover:shadow-xl"
+          className="fixed bottom-6 right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-brand-600 text-white shadow-lg transition-all hover:bg-brand-500 hover:shadow-xl"
           aria-label="Open AI assistant"
         >
           <MessageSquare className="h-5 w-5" />
@@ -282,7 +282,7 @@ export default function AIChatSidebar() {
               className={clsx(
                 "shrink-0 rounded-md p-1.5 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500/50",
                 input.trim() && !isLoading
-                  ? "bg-brand-500 text-white hover:bg-brand-600"
+                  ? "bg-brand-600 text-white hover:bg-brand-500"
                   : "text-gray-600",
               )}
               aria-label="Send message"

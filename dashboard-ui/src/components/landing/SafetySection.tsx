@@ -37,7 +37,7 @@ export default function SafetySection() {
           {PILLARS.map((pillar) => (
             <div
               key={pillar.title}
-              className="rounded-xl border border-gray-800 bg-gray-900/50 p-8"
+              className="rounded-xl border border-gray-800 bg-gray-900/50 p-8 transition-all hover:border-emerald-500/30 hover:shadow-lg hover:shadow-gray-900/50"
             >
               <pillar.icon className="h-8 w-8 text-emerald-400" />
               <h3 className="mt-5 text-lg font-semibold text-gray-100">

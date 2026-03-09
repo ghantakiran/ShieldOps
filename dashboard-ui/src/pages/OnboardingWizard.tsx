@@ -500,7 +500,7 @@ export default function OnboardingWizard() {
               className={clsx(
                 "inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium transition-colors",
                 isStepValid(activeStep)
-                  ? "bg-brand-500 text-white hover:bg-brand-600"
+                  ? "bg-brand-600 text-white hover:bg-brand-500"
                   : "cursor-not-allowed bg-gray-800 text-gray-500",
               )}
             >
@@ -877,7 +877,7 @@ function IntegrationStep({
                       )}
                       <button
                         onClick={() => handleSave(integration)}
-                        className="inline-flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-1.5 text-xs font-medium text-white transition-colors hover:bg-brand-600"
+                        className="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-1.5 text-xs font-medium text-white transition-colors hover:bg-brand-500"
                       >
                         <Check className="h-3.5 w-3.5" />
                         Save & Connect
@@ -1193,7 +1193,7 @@ function ReviewStep({
       <div className="text-center">
         <button
           onClick={onLaunch}
-          className="inline-flex items-center gap-2 rounded-lg bg-brand-500 px-8 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-500/20 transition-all hover:bg-brand-600 hover:shadow-brand-500/30"
+          className="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-8 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-900/30 transition-all hover:bg-brand-500 hover:shadow-brand-900/50"
         >
           <Rocket className="h-5 w-5" />
           Launch ShieldOps

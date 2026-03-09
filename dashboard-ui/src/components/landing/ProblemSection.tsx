@@ -39,7 +39,7 @@ export default function ProblemSection() {
           {PAIN_POINTS.map((point) => (
             <div
               key={point.title}
-              className="rounded-xl border border-gray-800 bg-gray-900/50 p-6 transition-colors hover:border-gray-700"
+              className="rounded-xl border border-gray-800 bg-gray-900/50 p-6 transition-all hover:border-red-500/30 hover:shadow-lg hover:shadow-gray-900/50"
             >
               <point.icon className="h-8 w-8 text-red-400" />
               <h3 className="mt-4 text-lg font-semibold text-gray-100">

@@ -43,7 +43,7 @@ export default function BenefitsSection() {
           {BENEFITS.map((b) => (
             <div
               key={b.label}
-              className="rounded-xl border border-gray-800 bg-gray-900/50 p-6 text-center"
+              className="rounded-xl border border-gray-800 bg-gray-900/50 p-6 text-center transition-all hover:border-gray-600 hover:shadow-lg hover:shadow-gray-900/50"
             >
               <b.icon className="mx-auto h-8 w-8 text-brand-400" />
               <p className="mt-4 text-3xl font-bold text-brand-400">

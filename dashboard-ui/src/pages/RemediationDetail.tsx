@@ -236,7 +236,7 @@ export default function RemediationDetail() {
                 setShowRollbackConfirm(true);
               }}
               disabled={rollbackMutation.isPending}
-              className="rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-600 disabled:opacity-50"
+              className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-500 disabled:opacity-50"
             >
               Rollback
             </button>

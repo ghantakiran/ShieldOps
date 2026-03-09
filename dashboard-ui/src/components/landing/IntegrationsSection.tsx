@@ -31,7 +31,7 @@ export default function IntegrationsSection() {
           {INTEGRATIONS.map((name) => (
             <span
               key={name}
-              className="rounded-lg border border-gray-700 bg-gray-800/50 px-4 py-2 text-sm font-medium text-gray-300"
+              className="rounded-lg border border-gray-700 bg-gray-800/50 px-4 py-2 text-sm font-medium text-gray-300 transition-colors hover:border-gray-500 hover:text-white"
             >
               {name}
             </span>
