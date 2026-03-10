@@ -114,6 +114,40 @@ src/shieldops/{package}/{module_name}.py
 - Fault propagation: `src/shieldops/topology/fault_propagation_engine.py`
 - Resilience debt: `src/shieldops/analytics/resilience_debt_engine.py`
 
+### Next-Gen Observability & Telemetry Intelligence
+- Edge telemetry processing: `src/shieldops/observability/edge_telemetry_processor.py`
+- Observability ROI optimization: `src/shieldops/observability/observability_roi_optimizer.py`
+- Distributed query acceleration: `src/shieldops/observability/distributed_query_accelerator.py`
+- Telemetry compliance: `src/shieldops/observability/telemetry_compliance_engine.py`
+- Hybrid cloud telemetry: `src/shieldops/observability/hybrid_cloud_telemetry_bridge.py`
+- Intelligent sampling: `src/shieldops/observability/intelligent_sampling_coordinator.py`
+- Real-time SLI calculation: `src/shieldops/observability/realtime_sli_calculator.py`
+- Service level intelligence: `src/shieldops/observability/service_level_intelligence.py`
+- Multi-tenant observability: `src/shieldops/observability/multi_tenant_observability_engine.py`
+
+### Security Intelligence & Threat Automation
+- Threat prediction: `src/shieldops/security/threat_prediction_engine.py`
+- Adversary emulation: `src/shieldops/security/adversary_emulation_engine.py`
+- Security knowledge graph: `src/shieldops/security/security_knowledge_graph_engine.py`
+- Incident classification: `src/shieldops/security/automated_incident_classifier.py`
+- Exploit prediction: `src/shieldops/security/vulnerability_exploit_predictor.py`
+- Cross-domain threat fusion: `src/shieldops/security/cross_domain_threat_fusion.py`
+- Attack narratives: `src/shieldops/security/attack_narrative_engine.py`
+- Runtime threat analysis: `src/shieldops/security/runtime_threat_analyzer.py`
+- Security debt quantification: `src/shieldops/security/security_debt_quantifier.py`
+
+### Autonomous Operations & Intelligent Automation
+- Autonomous incident command: `src/shieldops/operations/autonomous_incident_commander.py`
+- Predictive maintenance: `src/shieldops/operations/predictive_maintenance_planner_v2.py`
+- Workflow intelligence: `src/shieldops/operations/workflow_intelligence_engine.py`
+- Autonomous capacity: `src/shieldops/operations/autonomous_capacity_optimizer.py`
+- Automation effectiveness: `src/shieldops/analytics/automation_effectiveness_engine.py`
+- Root cause ranking: `src/shieldops/analytics/intelligent_root_cause_ranker.py`
+- Autonomous triage: `src/shieldops/incidents/autonomous_triage_engine.py`
+- Autonomous compliance: `src/shieldops/compliance/autonomous_compliance_engine.py`
+- Policy drift intelligence: `src/shieldops/compliance/policy_drift_intelligence.py`
+- Intelligent audit planning: `src/shieldops/audit/intelligent_audit_planner.py`
+
 ## Safety Requirements
 - ALL infrastructure-modifying actions MUST pass OPA policy evaluation
 - Implement rollback capability for every remediation action
