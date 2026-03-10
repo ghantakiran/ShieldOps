@@ -95,6 +95,25 @@ src/shieldops/{package}/{module_name}.py
 - SOAR workflow intelligence: `src/shieldops/security/soar_workflow_intelligence.py`
 - Identity analytics: `src/shieldops/security/identity_analytics_engine.py`
 
+### AIOps & Cognitive Automation
+- ML root cause analysis: `src/shieldops/analytics/aiops_root_cause_engine.py`
+- Causal inference: `src/shieldops/analytics/causal_inference_engine.py`
+- Self-learning anomaly detection: `src/shieldops/observability/anomaly_self_learning_engine.py`
+- Adaptive thresholds: `src/shieldops/observability/adaptive_threshold_engine.py`
+- Cognitive triage: `src/shieldops/incidents/cognitive_incident_triage_engine.py`
+
+### Developer Experience & Platform Engineering
+- Service catalog: `src/shieldops/topology/service_catalog_intelligence_engine.py`
+- API lifecycle: `src/shieldops/topology/api_lifecycle_engine.py`
+- Service readiness: `src/shieldops/changes/service_readiness_engine.py`
+- Developer portal: `src/shieldops/topology/internal_developer_portal_engine.py`
+
+### Resilience Engineering & Chaos Intelligence
+- Chaos experiments: `src/shieldops/operations/resilience_experiment_engine.py`
+- Game days: `src/shieldops/operations/chaos_game_day_engine.py`
+- Fault propagation: `src/shieldops/topology/fault_propagation_engine.py`
+- Resilience debt: `src/shieldops/analytics/resilience_debt_engine.py`
+
 ## Safety Requirements
 - ALL infrastructure-modifying actions MUST pass OPA policy evaluation
 - Implement rollback capability for every remediation action
