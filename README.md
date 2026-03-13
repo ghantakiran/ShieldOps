@@ -254,7 +254,7 @@ ShieldOps/
 ├── dashboard-ui/                      # React + TypeScript dashboard
 │
 ├── tests/
-│   ├── unit/                          # Unit tests (~59,400+ tests)
+│   ├── unit/                          # Unit tests (~59,740+ tests)
 │   └── integration/                   # Integration tests
 │
 ├── docs/
@@ -495,6 +495,9 @@ Default policies ship with the platform and can be customized per environment:
 | Phase 125 | Cognitive Agent Self-Optimization & Reinforcement Learning — Reward Engineering, Curriculum Learning, Transfer Learning | Completed |
 | Phase 126 | Advanced Distributed Tracing & Telemetry Analytics — Trace Anomaly Detection, Span Criticality, Root Cause Analysis | Completed |
 | Phase 127 | Behavioral Risk Analytics & Advanced Threat Scoring — Insider Threat, Lateral Movement, Multi-Vector Correlation | Completed |
+| Phase 128 | Self-Evolving Agent Intelligence (Dr. Zero) — Proposer-Solver Co-Evolution, Difficulty Rewards, Curriculum Progression | Completed |
+| Phase 129 | Multi-Hop Investigation & Reasoning Intelligence — Root Cause Chains, Bridge Entities, Reasoning Decomposition | Completed |
+| Phase 130 | Policy Optimization & Format Intelligence (HRPO) — Grouped Policy Optimization, Advantage Estimation, Format Rewards | Completed |
 
 ## Documentation
 

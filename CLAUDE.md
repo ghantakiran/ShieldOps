@@ -66,7 +66,7 @@ policy.py     # OPA policy integration (optional)
 There are 29 LangGraph agents: investigation, remediation, security, learning, supervisor, soc_analyst, threat_hunter, forensics, deception, incident_response, attack_surface, ml_governance, finops_intelligence, zero_trust, threat_automation, soar_orchestration, itdr, auto_remediation, observability_intelligence, xdr, intelligent_automation, platform_intelligence, security_convergence, autonomous_defense, chatops, enterprise_integration, automation_orchestrator, cost, prediction.
 
 ### Engine Module Pattern
-The bulk of the codebase (~1,376+ modules) are analytics/intelligence engines across 13 packages. Each follows a strict pattern:
+The bulk of the codebase (~1,412+ modules) are analytics/intelligence engines across 13 packages. Each follows a strict pattern:
 ```python
 # 3 StrEnum classes, 3 Pydantic models (Record, Analysis, Report)
 # Engine class with: add_record()/record_item(), process(key),
@@ -79,10 +79,10 @@ The bulk of the codebase (~1,376+ modules) are analytics/intelligence engines ac
 ### Key Packages
 | Package | Purpose | Count |
 |---------|---------|-------|
-| `observability/` | Alert intelligence, telemetry, SLI/SLO, sampling, eBPF, OTel, distributed tracing | 162+ |
-| `security/` | Threat detection, SOAR, zero trust, XDR, behavioral risk analytics | 322+ |
+| `observability/` | Alert intelligence, telemetry, SLI/SLO, OTel, tracing, multi-hop investigation | 174+ |
+| `security/` | Threat detection, SOAR, zero trust, XDR, behavioral risk, HRPO policy optimization | 334+ |
 | `operations/` | Runbooks, automation, chaos, capacity, resource budgets | 128+ |
-| `analytics/` | DORA, AIOps, root cause, auto-learning, FinOps, agent self-optimization | 174+ |
+| `analytics/` | DORA, AIOps, root cause, auto-learning, self-evolving agents (Dr. Zero) | 186+ |
 | `incidents/` | Triage, escalation, postmortem, on-call burden, notification | 85+ |
 | `compliance/` | Evidence, audit, regulatory, policy enforcement, cost governance | 99+ |
 | `billing/` | FinOps, cost optimization, RI planning, waste classification | 84+ |
