@@ -6,10 +6,7 @@ from datetime import UTC, datetime
 from typing import Any
 
 import structlog
-from shieldops_investigate.models import (  # type: ignore[import-not-found]
-    Hypothesis,
-    InvestigationResult,
-)
+from pydantic import BaseModel
 
 from shieldops.pipeline.models import (
     PipelineRun,
@@ -25,6 +22,26 @@ from shieldops.remediation.models import (
 from shieldops.remediation.policy_gate import PolicyGate
 
 logger = structlog.get_logger()
+
+
+class Hypothesis(BaseModel):
+    """A single investigation hypothesis."""
+
+    title: str = ""
+    description: str = ""
+    confidence: float = 0.0
+    suggested_action: str = ""
+
+
+class InvestigationResult(BaseModel):
+    """Result produced by the investigation stage."""
+
+    alert_name: str = ""
+    namespace: str = ""
+    service: str = ""
+    hypotheses: list[Hypothesis] = []
+    summary: str = ""
+    duration_seconds: float = 0.0
 
 
 class PipelineOrchestrator:

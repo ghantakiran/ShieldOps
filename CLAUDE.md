@@ -66,7 +66,7 @@ policy.py     # OPA policy integration (optional)
 There are 29 LangGraph agents: investigation, remediation, security, learning, supervisor, soc_analyst, threat_hunter, forensics, deception, incident_response, attack_surface, ml_governance, finops_intelligence, zero_trust, threat_automation, soar_orchestration, itdr, auto_remediation, observability_intelligence, xdr, intelligent_automation, platform_intelligence, security_convergence, autonomous_defense, chatops, enterprise_integration, automation_orchestrator, cost, prediction.
 
 ### Engine Module Pattern
-The bulk of the codebase (~850+ modules) are analytics/intelligence engines across 13 packages. Each follows a strict pattern:
+The bulk of the codebase (~1,200+ modules) are analytics/intelligence engines across 13 packages. Each follows a strict pattern:
 ```python
 # 3 StrEnum classes, 3 Pydantic models (Record, Analysis, Report)
 # Engine class with: add_record()/record_item(), process(key),
@@ -79,19 +79,19 @@ The bulk of the codebase (~850+ modules) are analytics/intelligence engines acro
 ### Key Packages
 | Package | Purpose | Count |
 |---------|---------|-------|
-| `observability/` | Alert intelligence, telemetry, SLI/SLO, sampling, eBPF, OTel pipelines | 140+ |
-| `security/` | Threat detection, SOAR, zero trust, XDR, risk-based alerting | 210+ |
-| `operations/` | Runbooks, automation, chaos, capacity, resource budgets | 135+ |
-| `analytics/` | DORA, AIOps, root cause, auto-learning, agent optimization | 140+ |
-| `incidents/` | Triage, escalation, postmortem, noise reduction, risk correlation | 75+ |
-| `compliance/` | Evidence, audit, regulatory, policy enforcement, risk bridge | 95+ |
-| `billing/` | FinOps, cost optimization, RI planning, telemetry cost attribution | 70+ |
-| `topology/` | Service mesh, dependencies, API lifecycle, OTel service graph | 55+ |
-| `sla/` | SLO tracking, error budgets, reliability, resilience | 45+ |
-| `knowledge/` | Knowledge base, onboarding, feedback, agent knowledge distillation | 25+ |
-| `audit/` | Audit trails, evidence, compliance mapping, governance | 28+ |
-| `changes/` | GitOps, IaC validation, deployment intelligence, canary | 55+ |
-| `config/` | Feature flags, drift analysis, validation | 6 |
+| `observability/` | Alert intelligence, telemetry, SLI/SLO, sampling, eBPF, OTel pipelines | 145+ |
+| `security/` | Threat detection, SOAR, zero trust, XDR, risk-based alerting | 310+ |
+| `operations/` | Runbooks, automation, chaos, capacity, resource budgets | 124+ |
+| `analytics/` | DORA, AIOps, root cause, auto-learning, agent optimization | 156+ |
+| `incidents/` | Triage, escalation, postmortem, noise reduction, risk correlation | 82+ |
+| `compliance/` | Evidence, audit, regulatory, policy enforcement, risk bridge | 98+ |
+| `billing/` | FinOps, cost optimization, RI planning, telemetry cost attribution | 76+ |
+| `topology/` | Service mesh, dependencies, API lifecycle, OTel service graph | 56+ |
+| `sla/` | SLO tracking, error budgets, reliability, resilience | 51+ |
+| `knowledge/` | Knowledge base, onboarding, feedback, agent knowledge distillation | 26+ |
+| `audit/` | Audit trails, evidence, compliance mapping, governance | 30+ |
+| `changes/` | GitOps, IaC validation, deployment intelligence, canary | 58+ |
+| `config/` | Feature flags, drift analysis, validation | 11 |
 
 ### API & Dashboard
 - FastAPI at `src/shieldops/api/` — RESTful, versioned `/api/v1/`, JWT auth, OpenAPI auto-gen
