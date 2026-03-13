@@ -66,7 +66,7 @@ policy.py     # OPA policy integration (optional)
 There are 29 LangGraph agents: investigation, remediation, security, learning, supervisor, soc_analyst, threat_hunter, forensics, deception, incident_response, attack_surface, ml_governance, finops_intelligence, zero_trust, threat_automation, soar_orchestration, itdr, auto_remediation, observability_intelligence, xdr, intelligent_automation, platform_intelligence, security_convergence, autonomous_defense, chatops, enterprise_integration, automation_orchestrator, cost, prediction.
 
 ### Engine Module Pattern
-The bulk of the codebase (~1,200+ modules) are analytics/intelligence engines across 13 packages. Each follows a strict pattern:
+The bulk of the codebase (~1,300+ modules) are analytics/intelligence engines across 13 packages. Each follows a strict pattern:
 ```python
 # 3 StrEnum classes, 3 Pydantic models (Record, Analysis, Report)
 # Engine class with: add_record()/record_item(), process(key),
@@ -79,15 +79,15 @@ The bulk of the codebase (~1,200+ modules) are analytics/intelligence engines ac
 ### Key Packages
 | Package | Purpose | Count |
 |---------|---------|-------|
-| `observability/` | Alert intelligence, telemetry, SLI/SLO, sampling, eBPF, OTel pipelines | 145+ |
+| `observability/` | Alert intelligence, telemetry, SLI/SLO, sampling, eBPF, OTel pipelines | 150+ |
 | `security/` | Threat detection, SOAR, zero trust, XDR, risk-based alerting | 310+ |
-| `operations/` | Runbooks, automation, chaos, capacity, resource budgets | 124+ |
-| `analytics/` | DORA, AIOps, root cause, auto-learning, agent optimization | 156+ |
-| `incidents/` | Triage, escalation, postmortem, noise reduction, risk correlation | 82+ |
-| `compliance/` | Evidence, audit, regulatory, policy enforcement, risk bridge | 98+ |
-| `billing/` | FinOps, cost optimization, RI planning, telemetry cost attribution | 76+ |
-| `topology/` | Service mesh, dependencies, API lifecycle, OTel service graph | 56+ |
-| `sla/` | SLO tracking, error budgets, reliability, resilience | 51+ |
+| `operations/` | Runbooks, automation, chaos, capacity, resource budgets | 128+ |
+| `analytics/` | DORA, AIOps, root cause, auto-learning, FinOps, mesh intelligence | 162+ |
+| `incidents/` | Triage, escalation, postmortem, on-call burden, notification | 85+ |
+| `compliance/` | Evidence, audit, regulatory, policy enforcement, cost governance | 99+ |
+| `billing/` | FinOps, cost optimization, RI planning, waste classification | 84+ |
+| `topology/` | Service mesh, dependencies, API lifecycle, traffic patterns | 63+ |
+| `sla/` | SLO tracking, error budgets, reliability, API SLA compliance | 52+ |
 | `knowledge/` | Knowledge base, onboarding, feedback, agent knowledge distillation | 26+ |
 | `audit/` | Audit trails, evidence, compliance mapping, governance | 30+ |
 | `changes/` | GitOps, IaC validation, deployment intelligence, canary | 58+ |

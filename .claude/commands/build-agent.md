@@ -223,6 +223,42 @@ src/shieldops/{package}/{module_name}.py
 - Resource saturation: `src/shieldops/operations/resource_saturation_predictor.py`
 - Deployment reliability impact: `src/shieldops/changes/deployment_reliability_impact_engine.py`
 
+### Intelligent Alerting & Notification Intelligence
+- Notification fatigue detection: `src/shieldops/observability/notification_fatigue_detector.py`
+- Alert deduplication: `src/shieldops/observability/alert_dedup_intelligence.py`
+- Alert quality scoring: `src/shieldops/observability/alert_quality_lifecycle_scorer.py`
+- Alert suppression: `src/shieldops/observability/alert_suppression_intelligence.py`
+- Alert cascade correlation: `src/shieldops/observability/alert_correlation_cascade_engine.py`
+- Escalation optimization: `src/shieldops/incidents/escalation_path_optimizer.py`
+- On-call burden analysis: `src/shieldops/incidents/oncall_burden_analyzer.py`
+- Smart alert routing: `src/shieldops/operations/smart_alert_routing_planner.py`
+- Responder effectiveness: `src/shieldops/analytics/responder_effectiveness_scorer.py`
+- Alert lifecycle: `src/shieldops/analytics/alert_lifecycle_intelligence.py`
+
+### Cloud Cost Intelligence & FinOps Automation
+- Cloud spend forecasting: `src/shieldops/billing/cloud_spend_forecaster.py`
+- Reservation yield optimization: `src/shieldops/billing/reservation_yield_optimizer.py`
+- Waste classification: `src/shieldops/billing/intelligent_waste_classifier.py`
+- Cost anomaly root cause: `src/shieldops/billing/cost_anomaly_root_cause_engine.py`
+- Showback/chargeback: `src/shieldops/billing/showback_chargeback_automator.py`
+- Commitment utilization: `src/shieldops/billing/commitment_utilization_tracker.py`
+- Multi-cloud normalization: `src/shieldops/billing/multi_cloud_cost_normalizer.py`
+- Cloud contract optimization: `src/shieldops/billing/cloud_contract_optimizer.py`
+- Cost governance policies: `src/shieldops/compliance/cost_governance_policy_engine.py`
+- Resource rightsizing: `src/shieldops/operations/resource_rightsizing_intelligence.py`
+
+### Service Mesh & API Intelligence
+- API health scoring: `src/shieldops/topology/api_health_composite_scorer.py`
+- Service dependency risk: `src/shieldops/topology/service_dependency_risk_engine.py`
+- Traffic pattern analysis: `src/shieldops/topology/traffic_pattern_intelligence.py`
+- Circuit breaker intelligence: `src/shieldops/topology/circuit_breaker_intelligence_engine.py`
+- API versioning lifecycle: `src/shieldops/topology/api_versioning_lifecycle_engine.py`
+- API consumer impact: `src/shieldops/topology/api_consumer_impact_analyzer.py`
+- API rate limits: `src/shieldops/topology/api_rate_limit_intelligence.py`
+- Mesh control plane: `src/shieldops/observability/mesh_control_plane_observer.py`
+- Mesh security posture: `src/shieldops/observability/mesh_security_posture_analyzer.py`
+- API SLA compliance: `src/shieldops/sla/api_sla_compliance_tracker.py`
+
 ## Safety Requirements
 - ALL infrastructure-modifying actions MUST pass OPA policy evaluation
 - Implement rollback capability for every remediation action
