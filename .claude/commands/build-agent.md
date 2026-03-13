@@ -182,6 +182,47 @@ src/shieldops/{package}/{module_name}.py
 - Risk response automation: `src/shieldops/security/risk_response_automator.py`
 - Detection risk calibration: `src/shieldops/security/detection_risk_calibrator.py`
 
+### Intelligent Incident Lifecycle & Recovery
+- Incident lifecycle state: `src/shieldops/incidents/incident_lifecycle_state_engine.py`
+- Recovery verification: `src/shieldops/incidents/recovery_verification_engine.py`
+- Blast radius containment: `src/shieldops/incidents/blast_radius_containment_engine.py`
+- Postmortem insights: `src/shieldops/incidents/postmortem_insight_extractor.py`
+- Incident recurrence: `src/shieldops/incidents/incident_recurrence_pattern_engine.py`
+- Cascade failure analysis: `src/shieldops/incidents/cascade_failure_analyzer.py`
+- Incident cost attribution: `src/shieldops/incidents/incident_cost_attribution_engine.py`
+- Mitigation efficacy: `src/shieldops/incidents/mitigation_efficacy_tracker.py`
+- Recovery runbook effectiveness: `src/shieldops/operations/recovery_runbook_effectiveness_engine.py`
+- Recovery dependency mapping: `src/shieldops/operations/recovery_dependency_mapper.py`
+- Incident knowledge graph: `src/shieldops/knowledge/incident_knowledge_graph_engine.py`
+
+### Advanced Compliance Intelligence & Audit Automation
+- Evidence freshness: `src/shieldops/compliance/continuous_evidence_freshness_engine.py`
+- Regulatory change velocity: `src/shieldops/compliance/regulatory_change_velocity_tracker.py`
+- Cross-framework mapping: `src/shieldops/compliance/cross_framework_control_mapper.py`
+- Compliance posture drift: `src/shieldops/compliance/compliance_posture_drift_engine.py`
+- Evidence chain integrity: `src/shieldops/compliance/evidence_chain_integrity_engine.py`
+- Automation gap analysis: `src/shieldops/compliance/compliance_automation_gap_analyzer.py`
+- Regulatory obligations: `src/shieldops/compliance/regulatory_obligation_tracker.py`
+- Policy effectiveness: `src/shieldops/compliance/policy_effectiveness_scorer.py`
+- Audit finding remediation: `src/shieldops/audit/audit_finding_remediation_engine.py`
+- Audit scope coverage: `src/shieldops/audit/audit_scope_coverage_engine.py`
+- Audit timeline optimization: `src/shieldops/audit/audit_timeline_optimizer.py`
+- Evidence correlation: `src/shieldops/audit/compliance_evidence_correlation_engine.py`
+
+### Platform Reliability & Performance Intelligence
+- Service reliability scoring: `src/shieldops/sla/service_reliability_scorer.py`
+- Error budget burn: `src/shieldops/sla/error_budget_burn_intelligence.py`
+- Availability patterns: `src/shieldops/sla/availability_pattern_engine.py`
+- Reliability improvement: `src/shieldops/sla/reliability_improvement_tracker.py`
+- Perf regression detection: `src/shieldops/analytics/perf_regression_detector.py`
+- Capacity demand forecasting: `src/shieldops/analytics/capacity_demand_forecaster.py`
+- SRE golden signals: `src/shieldops/analytics/sre_golden_signal_engine.py`
+- Latency distribution: `src/shieldops/analytics/latency_distribution_analyzer.py`
+- Toil reduction: `src/shieldops/analytics/toil_reduction_intelligence.py`
+- Capacity-performance correlation: `src/shieldops/analytics/performance_capacity_correlation_engine.py`
+- Resource saturation: `src/shieldops/operations/resource_saturation_predictor.py`
+- Deployment reliability impact: `src/shieldops/changes/deployment_reliability_impact_engine.py`
+
 ## Safety Requirements
 - ALL infrastructure-modifying actions MUST pass OPA policy evaluation
 - Implement rollback capability for every remediation action
