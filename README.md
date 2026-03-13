@@ -254,7 +254,7 @@ ShieldOps/
 ├── dashboard-ui/                      # React + TypeScript dashboard
 │
 ├── tests/
-│   ├── unit/                          # Unit tests (~58,000+ tests)
+│   ├── unit/                          # Unit tests (~59,000+ tests)
 │   └── integration/                   # Integration tests
 │
 ├── docs/
@@ -489,6 +489,9 @@ Default policies ship with the platform and can be customized per environment:
 | Phase 119 | Intelligent Alerting & Notification Intelligence — Fatigue Detection, Smart Routing, On-Call Burden | Completed |
 | Phase 120 | Cloud Cost Intelligence & FinOps Automation — Spend Forecasting, Waste Classification, Chargeback | Completed |
 | Phase 121 | Service Mesh & API Intelligence — API Health, Circuit Breaker, Traffic Patterns, Rate Limits | Completed |
+| Phase 122 | Event-Driven Architecture & Message Intelligence — Schema Registry, Queue Health, DLQ Forensics | Completed |
+| Phase 123 | Infrastructure-as-Code Intelligence & Policy Automation — Terraform Analysis, Drift Remediation | Completed |
+| Phase 124 | Team Intelligence & Organizational Analytics — Velocity, Knowledge Silos, Cognitive Load | Completed |
 
 ## Documentation
 
