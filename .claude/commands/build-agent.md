@@ -148,6 +148,40 @@ src/shieldops/{package}/{module_name}.py
 - Policy drift intelligence: `src/shieldops/compliance/policy_drift_intelligence.py`
 - Intelligent audit planning: `src/shieldops/audit/intelligent_audit_planner.py`
 
+### Auto-Learning & Intelligent Agent Optimization (autoresearch-inspired)
+- Agent experiment loops: `src/shieldops/analytics/agent_experiment_engine.py`
+- Model self-tuning: `src/shieldops/analytics/model_self_tuning_engine.py`
+- Lightweight training: `src/shieldops/analytics/lightweight_training_engine.py`
+- Knowledge distillation: `src/shieldops/knowledge/agent_knowledge_distiller.py`
+- Experiment replay: `src/shieldops/analytics/experiment_replay_engine.py`
+- Hypothesis generation: `src/shieldops/analytics/hypothesis_generator_engine.py`
+- Agent fitness scoring: `src/shieldops/analytics/agent_fitness_scorer.py`
+- Agent evolution tracking: `src/shieldops/analytics/agent_evolution_tracker.py`
+- Resource budget management: `src/shieldops/operations/resource_budget_manager.py`
+- Metric convergence: `src/shieldops/analytics/metric_convergence_tracker.py`
+
+### OpenTelemetry Tooling & Pipeline Intelligence (Splunk OTel-inspired)
+- Kafka telemetry pipeline: `src/shieldops/observability/kafka_telemetry_pipeline.py`
+- OTel collector orchestration: `src/shieldops/observability/otel_collector_orchestrator.py`
+- Auto-instrumentation: `src/shieldops/observability/auto_instrumentation_manager.py`
+- Exporter management: `src/shieldops/observability/telemetry_exporter_manager.py`
+- Signal routing: `src/shieldops/observability/signal_routing_engine.py`
+- Collector config validation: `src/shieldops/observability/collector_config_validator.py`
+- Schema evolution: `src/shieldops/observability/telemetry_schema_evolution.py`
+- OTel service graph: `src/shieldops/topology/otel_service_graph_engine.py`
+- Trace context propagation: `src/shieldops/observability/trace_context_propagation.py`
+
+### Risk-Based Security Alerting (Splunk RBA-inspired)
+- Entity risk scoring: `src/shieldops/security/entity_risk_scoring_engine.py`
+- Risk factor aggregation: `src/shieldops/security/risk_factor_aggregator.py`
+- MITRE ATT&CK risk mapping: `src/shieldops/security/mitre_risk_mapper_engine.py`
+- Alert risk enrichment: `src/shieldops/security/alert_risk_enrichment_engine.py`
+- Risk-based prioritization: `src/shieldops/security/risk_based_prioritizer.py`
+- Risk observation consolidation: `src/shieldops/security/risk_observation_engine.py`
+- Entity behavior risk: `src/shieldops/security/entity_behavior_risk_engine.py`
+- Risk response automation: `src/shieldops/security/risk_response_automator.py`
+- Detection risk calibration: `src/shieldops/security/detection_risk_calibrator.py`
+
 ## Safety Requirements
 - ALL infrastructure-modifying actions MUST pass OPA policy evaluation
 - Implement rollback capability for every remediation action

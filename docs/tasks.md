@@ -1,6 +1,99 @@
 # ShieldOps — Master Task Tracker
 
-## Current Phase: 110-112 — Observability 2.0, Security Intelligence & Autonomous Ops
+## Current Phase: 113-115 — Auto-Learning, OTel Tooling & Risk-Based Security
+
+### Overview
+
+| Metric | Value |
+|--------|-------|
+| **Phases** | 113, 114, 115 |
+| **Theme** | Auto-Learning & Agent Optimization (autoresearch), OpenTelemetry Pipeline Intelligence (Splunk OTel), Risk-Based Security Alerting (Splunk RBA) |
+| **Feature Modules** | 36 (12 per phase) |
+| **New Tests** | 36 test files |
+| **Total Tests (platform)** | ~56,000+ |
+| **Branch** | `main` |
+
+### Phase Summary
+
+| Phase | Theme | Modules | Tests | Status |
+|-------|-------|---------|-------|--------|
+| 113 | Auto-Learning & Intelligent Agent Optimization | 12 (experiment engine, self-tuning, lightweight training, knowledge distiller, hypothesis generator, fitness scorer, evolution tracker, etc.) | TBD | Done |
+| 114 | OpenTelemetry Tooling & Pipeline Intelligence | 12 (Kafka telemetry pipeline, collector orchestrator, auto-instrumentation, exporter manager, signal routing, schema evolution, service graph, etc.) | TBD | Done |
+| 115 | Risk-Based Security Alerting & Automation | 12 (entity risk scoring, risk factor aggregation, MITRE mapping, alert enrichment, risk prioritization, observation engine, behavior risk, response automator, etc.) | TBD | Done |
+
+---
+
+### Phase 113 — Auto-Learning & Intelligent Agent Optimization (Done)
+
+Inspired by [autoresearch](https://github.com/karpathy/autoresearch): lightweight experiment loops, single-metric evaluation, resource-managed iterations, hypothesis→experiment→evaluate→iterate cycles.
+
+| # | Module | Class | Package | Status |
+|---|--------|-------|---------|--------|
+| 1 | `agent_experiment_engine.py` | AgentExperimentEngine | analytics | Done |
+| 2 | `model_self_tuning_engine.py` | ModelSelfTuningEngine | analytics | Done |
+| 3 | `lightweight_training_engine.py` | LightweightTrainingEngine | analytics | Done |
+| 4 | `agent_knowledge_distiller.py` | AgentKnowledgeDistiller | knowledge | Done |
+| 5 | `experiment_replay_engine.py` | ExperimentReplayEngine | analytics | Done |
+| 6 | `resource_budget_manager.py` | ResourceBudgetManager | operations | Done |
+| 7 | `hypothesis_generator_engine.py` | HypothesisGeneratorEngine | analytics | Done |
+| 8 | `agent_fitness_scorer.py` | AgentFitnessScorer | analytics | Done |
+| 9 | `iteration_scheduler_engine.py` | IterationSchedulerEngine | operations | Done |
+| 10 | `metric_convergence_tracker.py` | MetricConvergenceTracker | analytics | Done |
+| 11 | `learning_feedback_loop_engine.py` | LearningFeedbackLoopEngine | knowledge | Done |
+| 12 | `agent_evolution_tracker.py` | AgentEvolutionTracker | analytics | Done |
+
+### Phase 114 — OpenTelemetry Tooling & Pipeline Intelligence (Done)
+
+Inspired by [splunk-otel-collector-for-kafka](https://github.com/splunk/splunk-opentelemetry-collector-for-kafka), [splunk-otel-collector-chart](https://github.com/signalfx/splunk-otel-collector-chart), [splunk-otel-python](https://github.com/signalfx/splunk-otel-python): Kafka-OTel pipelines, collector orchestration, auto-instrumentation, schema management.
+
+| # | Module | Class | Package | Status |
+|---|--------|-------|---------|--------|
+| 1 | `kafka_telemetry_pipeline.py` | KafkaTelemetryPipeline | observability | Done |
+| 2 | `otel_collector_orchestrator.py` | OtelCollectorOrchestrator | observability | Done |
+| 3 | `auto_instrumentation_manager.py` | AutoInstrumentationManager | observability | Done |
+| 4 | `telemetry_exporter_manager.py` | TelemetryExporterManager | observability | Done |
+| 5 | `signal_routing_engine.py` | SignalRoutingEngine | observability | Done |
+| 6 | `collector_config_validator.py` | CollectorConfigValidator | observability | Done |
+| 7 | `telemetry_schema_evolution.py` | TelemetrySchemaEvolution | observability | Done |
+| 8 | `otel_service_graph_engine.py` | OtelServiceGraphEngine | topology | Done |
+| 9 | `resource_detection_engine.py` | ResourceDetectionEngine | observability | Done |
+| 10 | `telemetry_cost_attribution.py` | TelemetryCostAttribution | billing | Done |
+| 11 | `processor_chain_optimizer.py` | ProcessorChainOptimizer | observability | Done |
+| 12 | `trace_context_propagation.py` | TraceContextPropagation | observability | Done |
+
+### Phase 115 — Risk-Based Security Alerting & Automation (Done)
+
+Inspired by [Splunk RBA](https://github.com/splunk/rba): entity risk scoring, MITRE ATT&CK mapping, low-fidelity→high-fidelity alert conversion, risk aggregation, detection-to-risk pipelines.
+
+| # | Module | Class | Package | Status |
+|---|--------|-------|---------|--------|
+| 1 | `entity_risk_scoring_engine.py` | EntityRiskScoringEngine | security | Done |
+| 2 | `risk_factor_aggregator.py` | RiskFactorAggregator | security | Done |
+| 3 | `mitre_risk_mapper_engine.py` | MitreRiskMapperEngine | security | Done |
+| 4 | `alert_risk_enrichment_engine.py` | AlertRiskEnrichmentEngine | security | Done |
+| 5 | `risk_based_prioritizer.py` | RiskBasedPrioritizer | security | Done |
+| 6 | `risk_observation_engine.py` | RiskObservationEngine | security | Done |
+| 7 | `risk_alert_correlation_engine.py` | RiskAlertCorrelationEngine | incidents | Done |
+| 8 | `detection_risk_calibrator.py` | DetectionRiskCalibrator | security | Done |
+| 9 | `risk_trend_intelligence.py` | RiskTrendIntelligence | analytics | Done |
+| 10 | `entity_behavior_risk_engine.py` | EntityBehaviorRiskEngine | security | Done |
+| 11 | `risk_compliance_bridge.py` | RiskComplianceBridge | compliance | Done |
+| 12 | `risk_response_automator.py` | RiskResponseAutomator | security | Done |
+
+---
+
+### Documentation Updates (Phase 113-115)
+
+| Document | Change | Status |
+|----------|--------|--------|
+| `docs/tasks.md` | Added Phase 113-115 tracking | Done |
+| `CLAUDE.md` | Updated module paths for all packages | Done |
+| `.claude/commands/build-agent.md` | Updated with auto-learning, OTel, RBA patterns | Done |
+| `.claude/commands/scan-security.md` | Added Phase 113-115 scan items | Done |
+
+---
+
+## Phases 110-112 — Observability 2.0, Security Intelligence & Autonomous Ops (Done)
 
 ### Overview
 
