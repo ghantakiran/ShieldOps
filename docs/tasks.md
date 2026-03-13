@@ -17,9 +17,9 @@
 
 | Phase | Theme | Modules | Tests | Status |
 |-------|-------|---------|-------|--------|
-| 113 | Auto-Learning & Intelligent Agent Optimization | 12 (experiment engine, self-tuning, lightweight training, knowledge distiller, hypothesis generator, fitness scorer, evolution tracker, etc.) | TBD | Done |
-| 114 | OpenTelemetry Tooling & Pipeline Intelligence | 12 (Kafka telemetry pipeline, collector orchestrator, auto-instrumentation, exporter manager, signal routing, schema evolution, service graph, etc.) | TBD | Done |
-| 115 | Risk-Based Security Alerting & Automation | 12 (entity risk scoring, risk factor aggregation, MITRE mapping, alert enrichment, risk prioritization, observation engine, behavior risk, response automator, etc.) | TBD | Done |
+| 113 | Auto-Learning & Intelligent Agent Optimization | 12 (experiment engine, self-tuning, lightweight training, knowledge distiller, hypothesis generator, fitness scorer, evolution tracker, etc.) | ~216 | Done |
+| 114 | OpenTelemetry Tooling & Pipeline Intelligence | 12 (Kafka telemetry pipeline, collector orchestrator, auto-instrumentation, exporter manager, signal routing, schema evolution, service graph, etc.) | ~216 | Done |
+| 115 | Risk-Based Security Alerting & Automation | 12 (entity risk scoring, risk factor aggregation, MITRE mapping, alert enrichment, risk prioritization, observation engine, behavior risk, response automator, etc.) | ~216 | Done |
 
 ---
 
@@ -110,9 +110,9 @@ Inspired by [Splunk RBA](https://github.com/splunk/rba): entity risk scoring, MI
 
 | Phase | Theme | Modules | Tests | Status |
 |-------|-------|---------|-------|--------|
-| 110 | Next-Gen Observability & Telemetry Intelligence | 12 (edge telemetry, ROI optimizer, query accelerator, compliance, hybrid cloud, sampling, SLI, forensics, multi-tenant, automation, service level) | TBD | Done |
-| 111 | Security Intelligence & Threat Automation | 12 (threat prediction, adversary emulation, knowledge graph, incident classifier, exploit predictor, posture trends, threat fusion, compliance predictor, attack narrative, runtime analyzer, security debt, hunt playbooks) | TBD | Done |
-| 112 | Autonomous Operations & Intelligent Automation | 12 (incident commander, maintenance planner, workflow intelligence, capacity optimizer, automation effectiveness, root cause ranker, complexity scorer, autonomous triage, learning synthesizer, autonomous compliance, policy drift, audit planner) | TBD | Done |
+| 110 | Next-Gen Observability & Telemetry Intelligence | 12 (edge telemetry, ROI optimizer, query accelerator, compliance, hybrid cloud, sampling, SLI, forensics, multi-tenant, automation, service level) | ~207 | Done |
+| 111 | Security Intelligence & Threat Automation | 12 (threat prediction, adversary emulation, knowledge graph, incident classifier, exploit predictor, posture trends, threat fusion, compliance predictor, attack narrative, runtime analyzer, security debt, hunt playbooks) | ~327 | Done |
+| 112 | Autonomous Operations & Intelligent Automation | 12 (incident commander, maintenance planner, workflow intelligence, capacity optimizer, automation effectiveness, root cause ranker, complexity scorer, autonomous triage, learning synthesizer, autonomous compliance, policy drift, audit planner) | ~216 | Done |
 
 ---
 
