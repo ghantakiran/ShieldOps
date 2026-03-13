@@ -254,7 +254,7 @@ ShieldOps/
 ├── dashboard-ui/                      # React + TypeScript dashboard
 │
 ├── tests/
-│   ├── unit/                          # Unit tests (~59,000+ tests)
+│   ├── unit/                          # Unit tests (~59,400+ tests)
 │   └── integration/                   # Integration tests
 │
 ├── docs/
@@ -492,6 +492,9 @@ Default policies ship with the platform and can be customized per environment:
 | Phase 122 | Event-Driven Architecture & Message Intelligence — Schema Registry, Queue Health, DLQ Forensics | Completed |
 | Phase 123 | Infrastructure-as-Code Intelligence & Policy Automation — Terraform Analysis, Drift Remediation | Completed |
 | Phase 124 | Team Intelligence & Organizational Analytics — Velocity, Knowledge Silos, Cognitive Load | Completed |
+| Phase 125 | Cognitive Agent Self-Optimization & Reinforcement Learning — Reward Engineering, Curriculum Learning, Transfer Learning | Completed |
+| Phase 126 | Advanced Distributed Tracing & Telemetry Analytics — Trace Anomaly Detection, Span Criticality, Root Cause Analysis | Completed |
+| Phase 127 | Behavioral Risk Analytics & Advanced Threat Scoring — Insider Threat, Lateral Movement, Multi-Vector Correlation | Completed |
 
 ## Documentation
 
